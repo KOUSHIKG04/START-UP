@@ -1,0 +1,41 @@
+{
+  "name": "startup",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Startup platform monorepo",
+  "license": "ISC",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:patient": "pnpm --filter patient-mobile start",
+    "dev:patient:tunnel": "pnpm --filter patient-mobile start -- --tunnel",
+    "dev:doctor": "pnpm --filter doctor-mobile start",
+    "dev:doctor:tunnel": "pnpm --filter doctor-mobile start -- --tunnel",
+    "dev:driver": "pnpm --filter driver-mobile start",
+    "dev:driver:tunnel": "pnpm --filter driver-mobile start -- --tunnel",
+    "patient:tunnel": "pnpm --filter patient-mobile start -- --tunnel",
+    "doctor:tunnel": "pnpm --filter doctor-mobile start -- --tunnel",
+    "driver:tunnel": "pnpm --filter driver-mobile start -- --tunnel",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "prettier --write .",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.3.4",
+      "onFail": "download"
+    }
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1"
+  }
+}

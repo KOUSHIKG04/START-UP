@@ -1,0 +1,14 @@
+node_modules
+
+.env
+.env.*
+
+!.env.example
+
+.turbo
+
+.next
+
+.expo
+
+dist

@@ -1,0 +1,40 @@
+@theme {
+  /* Patient App */
+  --color-patient-primary: #008877;
+  --color-patient-primary-dark: #087F78;
+  --color-patient-accent: #0A9E96;
+  --color-patient-surface: #E6F5F4;
+  --color-patient-text: #0C2434;
+  --color-patient-bg: #F9FAFB;
+
+  /* SOS Flow (inside Patient App) */
+  --color-sos-primary: #EF3B43;
+  --color-sos-dark: #C0392B;
+  --color-sos-surface: #FDF2F2;
+  --color-sos-header: #3A0508;
+  --color-sos-safe: #07595D;
+
+  /* Doctor App */
+  --color-doctor-primary: #008877;
+  --color-doctor-dark: #097F78;
+  --color-doctor-accent: #008F83;
+  --color-doctor-header: #0B4145;
+  --color-doctor-chart: #D9F2EF;
+
+  /* Driver App */
+  --color-driver-primary: #087F8C;
+  --color-driver-dark: #173B4A;
+  --color-driver-surface: #EAF8F7;
+  --color-driver-ready: #36B37E;
+
+  /* Admin Web App */
+  --color-admin-primary: #008877;
+  --color-admin-surface: #E6F5F4;
+  --color-admin-text: #0C2434;
+  --color-admin-bg: #F9FAFB;
+  --color-admin-border: #E0E5EB;
+
+  /* Banner Gradients (0% #0A4A47 -> 100% #087F78) */
+  --background-image-gradient-patient: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
+  --background-image-gradient-admin: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
+}

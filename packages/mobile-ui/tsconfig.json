@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022"],
+    "baseUrl": ".",
+    "paths": {
+      "@startup/design-tokens": ["../design-tokens/src/index.ts"],
+      "react-native": ["./node_modules/react-native/types/index.d.ts"],
+      "react-native-safe-area-context": ["./node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

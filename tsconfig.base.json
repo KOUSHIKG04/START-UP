@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "paths": {
+      "@startup/design-tokens": ["./packages/design-tokens/src/index.ts"],
+      "@startup/web-ui": ["./packages/web-ui/src/index.ts"],
+      "@startup/mobile-ui": ["./packages/mobile-ui/src/index.ts"]
+    }
+  }
+}
