@@ -1,21 +1,40 @@
-import React from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Screen, Banner, AppText } from "@startup/mobile-ui";
+import { Screen, BottomNavBar, type NavItem } from "@startup/mobile-ui";
+import { Home, Calendar, FileText, User } from "lucide-react-native";
 import { colors, spacing, radius } from "@startup/design-tokens";
 
-export default function App() {
-  return (
-    <Screen style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-       
-        <Banner
-          variant="patient"
-          title="Patient Portal"
-          subtitle="MedCab Booking, Consultations & Records"
-        />
+const patientNavItems: NavItem[] = [
+  { key: "home", label: "Home", icon: Home },
+  { key: "appointments", label: "Appointments", icon: Calendar },
+  { key: "records", label: "Records", icon: FileText },
+  { key: "profile", label: "Profile", icon: User },
+];
 
-      </ScrollView>
+export default function App() {
+  const [activeTab, setActiveTab] = useState("home");
+
+  return (
+    <Screen edges={["top"]} style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.scrollContent}></ScrollView>
+
+      <BottomNavBar
+        items={patientNavItems}
+        activeTab={activeTab}
+        onTabChange={(key) => setActiveTab(key)}
+        showSOS
+        onSOSPress={() => {
+          setActiveTab("sos");
+        }}
+      />
+
       <StatusBar style="dark" />
     </Screen>
   );
@@ -29,74 +48,53 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.lg,
     paddingTop: spacing.xxxl,
-    gap: spacing.lg,
+    paddingBottom: 110,
   },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+  homeCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
     padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    gap: spacing.xs,
   },
-  cardTitle: {
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
     color: colors.patient.text,
   },
-  cardSubtitle: {
+  subtitle: {
+    fontSize: 14,
     color: colors.patient.textSecondary,
-    marginBottom: spacing.sm,
+    marginTop: spacing.xs,
   },
-  primaryButton: {
-    backgroundColor: colors.patient.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
+  emergencyCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    borderWidth: 1.5,
+    borderColor: colors.patient.sos.primary,
     alignItems: "center",
   },
-  buttonText: {
-    color: colors.white,
-    fontWeight: "700",
-  },
-  statusCard: {
-    backgroundColor: colors.driver.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.driver.primary,
-  },
-  statusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statusLabel: {
-    color: colors.driver.dark,
-    fontWeight: "600",
-  },
-  statusPill: {
-    backgroundColor: colors.driver.statusReady,
-    borderRadius: radius.pill,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  statusPillText: {
-    color: colors.white,
-    fontSize: 11,
-    fontWeight: "800",
-  },
-  sosButton: {
-    backgroundColor: colors.patient.sos.primary,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.lg,
-    alignItems: "center",
-    shadowColor: colors.patient.sos.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  sosButtonText: {
-    color: colors.white,
-    fontSize: 16,
+  emergencyTitle: {
+    fontSize: 22,
     fontWeight: "900",
-    letterSpacing: 0.5,
+    color: colors.patient.sos.primary,
+  },
+  emergencySubtitle: {
+    fontSize: 14,
+    color: colors.patient.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xl,
+  },
+  backBtn: {
+    backgroundColor: "#F3F4F6",
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
+  },
+  backBtnText: {
+    color: colors.patient.textSecondary,
+    fontSize: 13,
+    fontWeight: "700",
   },
 });

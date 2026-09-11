@@ -5,3 +5,4 @@ export {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 export * from "./components";
+export * from "./utils/notchedBarPath";

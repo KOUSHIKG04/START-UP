@@ -14,12 +14,15 @@
   "dependencies": {
     "@startup/design-tokens": "workspace:*",
     "cn": "^0.2.6",
-    "react-native-safe-area-context": "^5.7.0"
+    "lucide-react-native": "^1.44.0",
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-svg": "15.15.4"
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-native": ">=0.80.0",
-    "react-native-safe-area-context": ">=5.0.0"
+    "react-native-safe-area-context": ">=5.0.0",
+    "react-native-svg": ">=15.0.0"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
