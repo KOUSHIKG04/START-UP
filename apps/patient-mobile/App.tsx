@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Screen, BottomNavBar, type NavItem } from "@startup/mobile-ui";
+import { Screen, Header, BottomNavBar, type NavItem } from "@startup/mobile-ui";
 import { Home, Calendar, FileText, User } from "lucide-react-native";
 import { colors, spacing, radius } from "@startup/design-tokens";
 
@@ -18,11 +12,26 @@ const patientNavItems: NavItem[] = [
   { key: "profile", label: "Profile", icon: User },
 ];
 
+const patientScreenTitles: Record<string, string> = {
+  appointments: "Appointments",
+  records: "Records",
+  profile: "Profile",
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
+  const screenTitle = patientScreenTitles[activeTab];
 
   return (
-    <Screen edges={["top"]} style={styles.screen}>
+    <Screen edges={screenTitle ? [] : ["top"]} style={styles.screen}>
+      {screenTitle ? (
+        <Header
+          title={screenTitle}
+          app="patient"
+          onBackPress={() => setActiveTab("home")}
+        />
+      ) : null}
+
       <ScrollView contentContainerStyle={styles.scrollContent}></ScrollView>
 
       <BottomNavBar
@@ -35,7 +44,7 @@ export default function App() {
         }}
       />
 
-      <StatusBar style="dark" />
+      <StatusBar style={screenTitle ? "light" : "dark"} />
     </Screen>
   );
 }

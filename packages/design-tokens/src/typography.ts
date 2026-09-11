@@ -34,6 +34,10 @@ export const typography = {
     lineHeight: 24,
     fontWeight: "600",
   },
+  headerText:{
+    fontSize: 21,
+    fontWeight: "500",
+  }
 } as const;
 
 export type Typography = typeof typography;

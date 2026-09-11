@@ -14,6 +14,7 @@
   "dependencies": {
     "@startup/design-tokens": "workspace:*",
     "cn": "^0.2.6",
+    "expo-linear-gradient": "~57.0.2",
     "lucide-react-native": "^1.44.0",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-svg": "15.15.4"

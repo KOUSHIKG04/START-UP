@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { colors } from "@startup/design-tokens";
+import { getSOSButtonDimensions } from "../utils/sosButtonDimensions";
 
 export type SOSButtonProps = {
   onLongPress?: () => void;
@@ -27,9 +28,8 @@ export function SOSButton({
   const [internalFullRed, setInternalFullRed] = useState(false);
   const isRed = controlledFullRed ?? internalFullRed;
 
-  const radius = size / 2;
-  const innerRingSize = size - 8;
-  const innerRingRadius = innerRingSize / 2;
+  const { radius, innerRingSize, innerRingRadius } =
+    getSOSButtonDimensions(size);
 
   const handleLongPress = () => {
     setInternalFullRed(true);
@@ -57,7 +57,6 @@ export function SOSButton({
         style,
       ]}
     >
-      {/* Concentric Inner Ring Accent */}
       <View
         style={[
           styles.innerRing,
@@ -72,7 +71,6 @@ export function SOSButton({
         ]}
       />
 
-      {/* Center SOS Typography */}
       <Text style={isRed ? styles.textWhite : styles.textRed}>SOS</Text>
     </Pressable>
   );
@@ -90,27 +88,23 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  /* Light Red Idle State */
   buttonLightRed: {
-    backgroundColor: "#FFEAEB", // Soft pastel light red disc
+    backgroundColor: "#FFEAEB",
     borderWidth: 2,
-    borderColor: "#FFA4AC", // Crisp light red outer ring
+    borderColor: "#FFA4AC",
   },
 
-  /* Full Red Active State */
   buttonFullRed: {
-    backgroundColor: colors.patient.sos.primary, // Solid full red (#EF3B43)
+    backgroundColor: colors.patient.sos.primary,
     borderWidth: 2,
     borderColor: "#D62D35",
   },
 
-  /* Concentric inner ring */
   innerRing: {
     position: "absolute",
     borderWidth: 1.2,
   },
 
-  /* Main SOS Typography */
   textRed: {
     color: colors.patient.sos.primary,
     fontSize: 14,

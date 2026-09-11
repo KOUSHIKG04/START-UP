@@ -61,48 +61,6 @@ export function BottomNavBar({
   const leftItems = items.slice(0, half);
   const rightItems = items.slice(half);
 
-  const renderTab = (item: NavItem) => {
-    const isActive = activeTab === item.key;
-    const Icon = item.icon;
-
-    return (
-      <TouchableOpacity
-        key={item.key}
-        style={styles.tabButton}
-        activeOpacity={0.7}
-        onPress={() => onTabChange?.(item.key)}
-      >
-        <View
-          style={[styles.iconWrapper, isActive && styles.activeIconWrapper]}
-        >
-          {Icon && (
-            <Icon
-              size={20}
-              color={isActive ? colors.brand : styles.inactiveText.color}
-              strokeWidth={isActive ? 2.3 : 1.8}
-            />
-          )}
-          {item.badge !== undefined && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item.badge}</Text>
-            </View>
-          )}
-        </View>
-
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={[
-            styles.label,
-            isActive ? styles.activeLabel : styles.inactiveText,
-          ]}
-        >
-          {item.label}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <View
       style={[
@@ -135,12 +93,33 @@ export function BottomNavBar({
         <View style={styles.tabsRow}>
           {hasCenterAction ? (
             <>
-              {leftItems.map(renderTab)}
+              {leftItems.map((item) => (
+                <TabButton
+                  key={item.key}
+                  item={item}
+                  isActive={activeTab === item.key}
+                  onPress={() => onTabChange?.(item.key)}
+                />
+              ))}
               <View style={styles.centerSpacer} pointerEvents="none" />
-              {rightItems.map(renderTab)}
+              {rightItems.map((item) => (
+                <TabButton
+                  key={item.key}
+                  item={item}
+                  isActive={activeTab === item.key}
+                  onPress={() => onTabChange?.(item.key)}
+                />
+              ))}
             </>
           ) : (
-            items.map(renderTab)
+            items.map((item) => (
+              <TabButton
+                key={item.key}
+                item={item}
+                isActive={activeTab === item.key}
+                onPress={() => onTabChange?.(item.key)}
+              />
+            ))
           )}
         </View>
 
@@ -164,6 +143,50 @@ export function BottomNavBar({
         )}
       </View>
     </View>
+  );
+}
+
+type TabButtonProps = {
+  item: NavItem;
+  isActive: boolean;
+  onPress: () => void;
+};
+
+function TabButton({ item, isActive, onPress }: TabButtonProps) {
+  const Icon = item.icon;
+
+  return (
+    <TouchableOpacity
+      style={styles.tabButton}
+      activeOpacity={0.7}
+      onPress={onPress}
+    >
+      <View style={[styles.iconWrapper, isActive && styles.activeIconWrapper]}>
+        {Icon && (
+          <Icon
+            size={20}
+            color={isActive ? colors.brand : styles.inactiveText.color}
+            strokeWidth={isActive ? 2.3 : 1.8}
+          />
+        )}
+        {item.badge !== undefined && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{item.badge}</Text>
+          </View>
+        )}
+      </View>
+
+      <Text
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={[
+          styles.label,
+          isActive ? styles.activeLabel : styles.inactiveText,
+        ]}
+      >
+        {item.label}
+      </Text>
+    </TouchableOpacity>
   );
 }
 
