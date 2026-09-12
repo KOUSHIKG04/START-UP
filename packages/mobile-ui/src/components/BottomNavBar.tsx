@@ -9,10 +9,20 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, radius, spacing } from "@startup/design-tokens";
+import { colors, radius } from "@startup/design-tokens";
 import type { LucideIcon } from "lucide-react-native";
 import { SOSButton } from "./SOSButton";
 import { getNotchedBarPath } from "../utils/notchedBarPath";
+import {
+  BOTTOM_NAV_BAR_DEFAULT_WIDTH,
+  BOTTOM_NAV_BAR_HEIGHT,
+  BOTTOM_NAV_BAR_MAX_WIDTH,
+  BOTTOM_NAV_BAR_MIN_BOTTOM_PADDING,
+  BOTTOM_NAV_BAR_SHADOW,
+  BOTTOM_NAV_BAR_SOS_SIZE,
+  BOTTOM_NAV_BAR_WIDTH_TOLERANCE,
+  splitBottomNavItems,
+} from "../utils/bottomNavBarConfig";
 
 export type NavItem = {
   key: string;
@@ -41,31 +51,35 @@ export function BottomNavBar({
   style,
 }: BottomNavBarProps) {
   const insets = useSafeAreaInsets();
-  const [barWidth, setBarWidth] = useState(360);
+  const [barWidth, setBarWidth] = useState(BOTTOM_NAV_BAR_DEFAULT_WIDTH);
 
   const handleLayout = (e: LayoutChangeEvent) => {
     const { width } = e.nativeEvent.layout;
-    if (width > 0 && Math.abs(width - barWidth) > 1) {
+    if (
+      width > 0 &&
+      Math.abs(width - barWidth) > BOTTOM_NAV_BAR_WIDTH_TOLERANCE
+    ) {
       setBarWidth(width);
     }
   };
 
-  const barHeight = 72;
   const hasCenterAction = showSOS || Boolean(renderCenterButton);
   const pathData = hasCenterAction
-    ? getNotchedBarPath(barWidth, barHeight)
+    ? getNotchedBarPath(barWidth, BOTTOM_NAV_BAR_HEIGHT)
     : "";
 
-  // Center-action layouts split tabs around the notch.
-  const half = Math.ceil(items.length / 2);
-  const leftItems = items.slice(0, half);
-  const rightItems = items.slice(half);
+  const { leftItems, rightItems } = splitBottomNavItems(items);
 
   return (
     <View
       style={[
         styles.wrapper,
-        { paddingBottom: Math.max(insets.bottom, spacing.xs) },
+        {
+          paddingBottom: Math.max(
+            insets.bottom,
+            BOTTOM_NAV_BAR_MIN_BOTTOM_PADDING
+          ),
+        },
       ]}
       pointerEvents="box-none"
     >
@@ -79,7 +93,7 @@ export function BottomNavBar({
       >
         {hasCenterAction && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Svg width={barWidth} height={barHeight}>
+            <Svg width={barWidth} height={BOTTOM_NAV_BAR_HEIGHT}>
               <Path
                 d={pathData}
                 fill={colors.white}
@@ -129,7 +143,7 @@ export function BottomNavBar({
               renderCenterButton()
             ) : (
               <SOSButton
-                size={64}
+                size={BOTTOM_NAV_BAR_SOS_SIZE}
                 onLongPress={() => {
                   onSOSPress?.();
                   onTabChange("sos");
@@ -201,8 +215,8 @@ const styles = StyleSheet.create({
   },
   floatingBar: {
     width: "100%",
-    maxWidth: 390,
-    height: 72,
+    maxWidth: BOTTOM_NAV_BAR_MAX_WIDTH,
+    height: BOTTOM_NAV_BAR_HEIGHT,
     position: "relative",
     backgroundColor: "transparent",
   },
@@ -214,11 +228,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#E2E8F0",
     borderRadius: 32,
-    shadowColor: "#0C2434",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
+    ...BOTTOM_NAV_BAR_SHADOW,
   },
   tabsRow: {
     position: "absolute",

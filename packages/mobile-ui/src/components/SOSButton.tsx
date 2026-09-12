@@ -28,8 +28,7 @@ export function SOSButton({
   const [internalFullRed, setInternalFullRed] = useState(false);
   const isRed = controlledFullRed ?? internalFullRed;
 
-  const { radius, innerRingSize, innerRingRadius } =
-    getSOSButtonDimensions(size);
+  const { radius, innerRingSize, innerRingRadius } = getSOSButtonDimensions(size);
 
   const handleLongPress = () => {
     setInternalFullRed(true);
