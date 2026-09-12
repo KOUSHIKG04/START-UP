@@ -2,14 +2,13 @@ import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Pressable,
-  StyleSheet,
   Text,
   View,
   type TextStyle,
   type ViewProps,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
-import { colors, typography } from "@startup/design-tokens";
+import { colors } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 
 export type { HeaderApp } from "../utils/headerBackground";
@@ -23,6 +22,7 @@ export type HeaderProps = ViewProps & {
   titleStyle?: TextStyle;
   backAccessibilityLabel?: string;
   safeAreaEdges?: readonly Edge[];
+  className?: string;
 };
 
 export function Header({
@@ -35,6 +35,7 @@ export function Header({
   style,
   backAccessibilityLabel = "Go back",
   safeAreaEdges = ["top"],
+  className,
   ...props
 }: HeaderProps) {
   const appBackground = appBackgrounds[app];
@@ -48,6 +49,7 @@ export function Header({
     <View
       accessibilityRole="header"
       {...props}
+      className={className}
       style={[{ backgroundColor: resolvedBackgroundColor }, style]}
     >
       {!backgroundColor && appBackground.type === "gradient" ? (
@@ -56,28 +58,26 @@ export function Header({
           colors={appBackground.colors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
+          style={{ position: "absolute", inset: 0 }}
         />
       ) : null}
 
       <SafeAreaView edges={safeAreaEdges}>
-        <View style={styles.container}>
+        <View className="min-h-[76px] -translate-y-[3px] flex-row items-center px-5">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={backAccessibilityLabel}
             hitSlop={12}
             onPress={onBackPress}
-            style={({ pressed }) => [
-              styles.backButton,
-              pressed && styles.backButtonPressed,
-            ]}
+            className="mt-0.5 mr-4 h-11 w-8 items-center justify-center active:opacity-70"
           >
             <ChevronLeft color={foregroundColor} size={30} strokeWidth={2.5} />
           </Pressable>
 
           <Text
             numberOfLines={1}
-            style={[styles.title, { color: foregroundColor }, titleStyle]}
+            className="text-app-header flex-1"
+            style={[{ color: foregroundColor }, titleStyle]}
           >
             {title}
           </Text>
@@ -86,28 +86,3 @@ export function Header({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    minHeight: 76,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    transform: [{ translateY: -3 }],
-  },
-  backButton: {
-    width: 32,
-    height: 44,
-    marginRight: 16,
-    marginTop: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backButtonPressed: {
-    opacity: 0.7,
-  },
-  title: {
-    ...typography.headerText,
-    flex: 1,
-  },
-});

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   TouchableOpacity,
@@ -9,10 +8,20 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, radius, spacing } from "@startup/design-tokens";
+import { colors } from "@startup/design-tokens";
 import type { LucideIcon } from "lucide-react-native";
+import { cn } from "cn";
 import { SOSButton } from "./SOSButton";
 import { getNotchedBarPath } from "../utils/notchedBarPath";
+import {
+  BOTTOM_NAV_BAR_DEFAULT_WIDTH,
+  BOTTOM_NAV_BAR_HEIGHT,
+  BOTTOM_NAV_BAR_MIN_BOTTOM_PADDING,
+  BOTTOM_NAV_BAR_SHADOW,
+  BOTTOM_NAV_BAR_SOS_SIZE,
+  BOTTOM_NAV_BAR_WIDTH_TOLERANCE,
+  splitBottomNavItems,
+} from "../utils/bottomNavBarConfig";
 
 export type NavItem = {
   key: string;
@@ -41,56 +50,63 @@ export function BottomNavBar({
   style,
 }: BottomNavBarProps) {
   const insets = useSafeAreaInsets();
-  const [barWidth, setBarWidth] = useState(360);
+  const [barWidth, setBarWidth] = useState(BOTTOM_NAV_BAR_DEFAULT_WIDTH);
 
   const handleLayout = (e: LayoutChangeEvent) => {
     const { width } = e.nativeEvent.layout;
-    if (width > 0 && Math.abs(width - barWidth) > 1) {
+    if (
+      width > 0 &&
+      Math.abs(width - barWidth) > BOTTOM_NAV_BAR_WIDTH_TOLERANCE
+    ) {
       setBarWidth(width);
     }
   };
 
-  const barHeight = 72;
   const hasCenterAction = showSOS || Boolean(renderCenterButton);
   const pathData = hasCenterAction
-    ? getNotchedBarPath(barWidth, barHeight)
+    ? getNotchedBarPath(barWidth, BOTTOM_NAV_BAR_HEIGHT)
     : "";
 
-  // Center-action layouts split tabs around the notch.
-  const half = Math.ceil(items.length / 2);
-  const leftItems = items.slice(0, half);
-  const rightItems = items.slice(half);
+  const { leftItems, rightItems } = splitBottomNavItems(items);
 
   return (
     <View
-      style={[
-        styles.wrapper,
-        { paddingBottom: Math.max(insets.bottom, spacing.xs) },
-      ]}
+      className="absolute right-0 bottom-2.5 left-0 items-center px-1"
+      style={{
+        paddingBottom: Math.max(
+          insets.bottom,
+          BOTTOM_NAV_BAR_MIN_BOTTOM_PADDING
+        ),
+      }}
       pointerEvents="box-none"
     >
       <View
         onLayout={hasCenterAction ? handleLayout : undefined}
+        className={cn(
+          "relative w-full max-w-[390px]",
+          !hasCenterAction &&
+            "border-navigation-border bg-surface rounded-[32px] border-[1.5px]"
+        )}
         style={[
-          styles.floatingBar,
-          hasCenterAction ? styles.notchedBar : styles.plainBar,
+          { height: BOTTOM_NAV_BAR_HEIGHT },
+          !hasCenterAction && BOTTOM_NAV_BAR_SHADOW,
           style,
         ]}
       >
         {hasCenterAction && (
-          <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Svg width={barWidth} height={barHeight}>
+          <View className="absolute inset-0" pointerEvents="none">
+            <Svg width={barWidth} height={BOTTOM_NAV_BAR_HEIGHT}>
               <Path
                 d={pathData}
                 fill={colors.white}
-                stroke="#E2E8F0"
+                stroke={colors.navigation.border}
                 strokeWidth={1.5}
               />
             </Svg>
           </View>
         )}
 
-        <View style={styles.tabsRow}>
+        <View className="absolute inset-0 z-20 flex-row items-center justify-between rounded-[32px] px-2.5">
           {hasCenterAction ? (
             <>
               {leftItems.map((item) => (
@@ -101,7 +117,7 @@ export function BottomNavBar({
                   onPress={() => onTabChange?.(item.key)}
                 />
               ))}
-              <View style={styles.centerSpacer} pointerEvents="none" />
+              <View className="h-full flex-[0.8]" pointerEvents="none" />
               {rightItems.map((item) => (
                 <TabButton
                   key={item.key}
@@ -124,12 +140,15 @@ export function BottomNavBar({
         </View>
 
         {hasCenterAction && (
-          <View style={styles.elevatedCenterWrapper} pointerEvents="box-none">
+          <View
+            className="absolute -top-[22px] right-0 left-0 z-50 items-center justify-center"
+            pointerEvents="box-none"
+          >
             {renderCenterButton ? (
               renderCenterButton()
             ) : (
               <SOSButton
-                size={64}
+                size={BOTTOM_NAV_BAR_SOS_SIZE}
                 onLongPress={() => {
                   onSOSPress?.();
                   onTabChange("sos");
@@ -157,21 +176,28 @@ function TabButton({ item, isActive, onPress }: TabButtonProps) {
 
   return (
     <TouchableOpacity
-      style={styles.tabButton}
+      className="h-full min-w-0 flex-1 items-center justify-center px-0.5"
       activeOpacity={0.7}
       onPress={onPress}
     >
-      <View style={[styles.iconWrapper, isActive && styles.activeIconWrapper]}>
+      <View
+        className={cn(
+          "relative items-center justify-center rounded-[14px] px-3 py-1",
+          isActive && "bg-patient-surface"
+        )}
+      >
         {Icon && (
           <Icon
             size={20}
-            color={isActive ? colors.brand : styles.inactiveText.color}
+            color={isActive ? colors.brand : colors.navigation.inactive}
             strokeWidth={isActive ? 2.3 : 1.8}
           />
         )}
         {item.badge !== undefined && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item.badge}</Text>
+          <View className="bg-sos-primary absolute -top-0.5 right-0.5 h-3.5 min-w-[14px] items-center justify-center rounded-[7px] px-[3px]">
+            <Text className="text-on-primary text-[9px] font-extrabold">
+              {item.badge}
+            </Text>
           </View>
         )}
       </View>
@@ -179,122 +205,15 @@ function TabButton({ item, isActive, onPress }: TabButtonProps) {
       <Text
         numberOfLines={1}
         ellipsizeMode="tail"
-        style={[
-          styles.label,
-          isActive ? styles.activeLabel : styles.inactiveText,
-        ]}
+        className={cn(
+          "mt-1 text-center text-[10px] tracking-[0px]",
+          isActive
+            ? "text-brand font-bold"
+            : "text-navigation-inactive font-medium"
+        )}
       >
         {item.label}
       </Text>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    paddingHorizontal: 4,
-  },
-  floatingBar: {
-    width: "100%",
-    maxWidth: 390,
-    height: 72,
-    position: "relative",
-    backgroundColor: "transparent",
-  },
-  notchedBar: {
-    backgroundColor: "transparent",
-  },
-  plainBar: {
-    backgroundColor: colors.white,
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    borderRadius: 32,
-    shadowColor: "#0C2434",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  tabsRow: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    zIndex: 20,
-    borderRadius: 32,
-  },
-  tabButton: {
-    flex: 1,
-    minWidth: 0,
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 2,
-  },
-  centerSpacer: {
-    flex: 0.8,
-    height: "100%",
-  },
-  iconWrapper: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  activeIconWrapper: {
-    backgroundColor: colors.patient.surface,
-    borderRadius: radius.md,
-  },
-  label: {
-    fontSize: 10,
-    marginTop: 4,
-    letterSpacing: 0,
-    textAlign: "center",
-  },
-  activeLabel: {
-    color: colors.brand,
-    fontWeight: "700",
-  },
-  inactiveText: {
-    color: "#8E9BAE",
-    fontWeight: "500",
-  },
-  elevatedCenterWrapper: {
-    position: "absolute",
-    top: -22,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 50,
-  },
-  badge: {
-    position: "absolute",
-    top: -2,
-    right: 2,
-    minWidth: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: colors.patient.sos.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 3,
-  },
-  badgeText: {
-    color: colors.white,
-    fontSize: 9,
-    fontWeight: "800",
-  },
-});

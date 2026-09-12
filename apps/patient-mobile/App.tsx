@@ -1,9 +1,9 @@
+import "./global.css";
 import React, { useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Screen, Header, BottomNavBar, type NavItem } from "@startup/mobile-ui";
 import { Home, Calendar, FileText, User } from "lucide-react-native";
-import { colors, spacing, radius } from "@startup/design-tokens";
 
 const patientNavItems: NavItem[] = [
   { key: "home", label: "Home", icon: Home },
@@ -23,7 +23,10 @@ export default function App() {
   const screenTitle = patientScreenTitles[activeTab];
 
   return (
-    <Screen edges={screenTitle ? [] : ["top"]} style={styles.screen}>
+    <Screen
+      edges={screenTitle ? [] : ["top"]}
+      className="bg-patient-background p-0"
+    >
       {screenTitle ? (
         <Header
           title={screenTitle}
@@ -32,7 +35,10 @@ export default function App() {
         />
       ) : null}
 
-      <ScrollView contentContainerStyle={styles.scrollContent}></ScrollView>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-lg pt-3xl pb-bottom-nav-clearance"
+      />
 
       <BottomNavBar
         items={patientNavItems}
@@ -48,62 +54,3 @@ export default function App() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    padding: 0,
-    backgroundColor: colors.patient.background,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingTop: spacing.xxxl,
-    paddingBottom: 110,
-  },
-  homeCard: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: colors.patient.text,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.patient.textSecondary,
-    marginTop: spacing.xs,
-  },
-  emergencyCard: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    borderWidth: 1.5,
-    borderColor: colors.patient.sos.primary,
-    alignItems: "center",
-  },
-  emergencyTitle: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: colors.patient.sos.primary,
-  },
-  emergencySubtitle: {
-    fontSize: 14,
-    color: colors.patient.textSecondary,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xl,
-  },
-  backBtn: {
-    backgroundColor: "#F3F4F6",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.md,
-  },
-  backBtnText: {
-    color: colors.patient.textSecondary,
-    fontSize: 13,
-    fontWeight: "700",
-  },
-});

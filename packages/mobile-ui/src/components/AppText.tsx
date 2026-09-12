@@ -1,6 +1,12 @@
-import { StyleSheet, Text, type TextProps } from "react-native";
-import { colors, typography } from "@startup/design-tokens";
+import { Text, type TextProps } from "react-native";
 import { cn } from "cn";
+
+const variantClassNames = {
+  title: "text-app-title text-content",
+  heading: "text-app-heading text-content",
+  body: "text-app-body text-content",
+  caption: "text-app-caption text-content-secondary",
+} as const;
 
 export type AppTextProps = TextProps & {
   variant?: "title" | "heading" | "body" | "caption";
@@ -16,21 +22,8 @@ export function AppText({
   return (
     <Text
       {...props}
-      {...(className ? { className: cn(className) } : {})}
-      style={[styles.base, styles[variant], style]}
+      className={cn(variantClassNames[variant], className)}
+      style={style}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    color: colors.textPrimary,
-  },
-  title: typography.title,
-  heading: typography.heading,
-  body: typography.body,
-  caption: {
-    ...typography.caption,
-    color: colors.textSecondary,
-  },
-});

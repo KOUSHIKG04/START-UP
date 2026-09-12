@@ -14,6 +14,11 @@ export const colors = {
     sos: {
       primary: "#EF3B43",
       dark: "#C0392B",
+      light: "#FFEAEB",
+      border: "#FFA4AC",
+      borderDark: "#D62D35",
+      ring: "rgba(239, 59, 67, 0.25)",
+      ringOnPrimary: "rgba(255, 255, 255, 0.45)",
       surface: "#FDF2F2",
       header: "#3A0508",
       safe: "#07595D",
@@ -68,6 +73,11 @@ export const colors = {
   border: "#E0E5EB",
   success: "#36B37E",
   danger: "#EF3B43",
+  navigation: {
+    inactive: "#8E9BAE",
+    border: "#E2E8F0",
+    shadow: "#0C2434",
+  },
 } as const;
 
 // Convenient direct shortcuts

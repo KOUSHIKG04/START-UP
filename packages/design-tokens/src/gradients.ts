@@ -1,7 +1,3 @@
-/**
- * Startup Design System - Gradients
- */
-
 export const gradients = {
   // Linear gradient for Patient App banner and Admin Web banner (Stop 0%: #0A4A47, Stop 100%: #087F78)
   patientBanner: {
