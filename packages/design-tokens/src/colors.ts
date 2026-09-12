@@ -5,6 +5,7 @@ export const colors = {
     primaryDark: "#087F78",
     accent: "#0A9E96",
     surface: "#E6F5F4",
+    surfaceBorder: "#C8E8E7",
     text: "#0C2434",
     textSecondary: "#374151",
     muted: "#9CA3AF",
@@ -66,6 +67,10 @@ export const colors = {
   textPrimary: "#0C2434",
   textSecondary: "#374151",
   border: "#E0E5EB",
+  borderDefault: "#D7E3E5",
+  disabledBackground: "#EEF4F5",
+  disabledText: "#9CA3AF",
+  successSoft: "#D1FAE5",
   success: "#36B37E",
   danger: "#EF3B43",
 } as const;
