@@ -6,7 +6,7 @@ import {
   type StyleProp,
   type TextStyle,
 } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type ChipProps = Omit<
   PressableProps,
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.textPrimary,
+    fontFamily: fontFamilies.regular,
     fontSize: 12,
     fontWeight: "400",
     lineHeight: 16,

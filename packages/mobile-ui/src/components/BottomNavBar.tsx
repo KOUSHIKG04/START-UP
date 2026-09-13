@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import type { LucideIcon } from "lucide-react-native";
 import { SOSButton } from "./SOSButton";
 import { getNotchedBarPath } from "../utils/notchedBarPath";
@@ -268,6 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   label: {
+    fontFamily: fontFamilies.regular,
     fontSize: 10,
     marginTop: 4,
     letterSpacing: 0,
@@ -275,10 +276,12 @@ const styles = StyleSheet.create({
   },
   activeLabel: {
     color: colors.brand,
+    fontFamily: fontFamilies.bold,
     fontWeight: "700",
   },
   inactiveText: {
     color: "#8E9BAE",
+    fontFamily: fontFamilies.medium,
     fontWeight: "500",
   },
   elevatedCenterWrapper: {
@@ -304,6 +307,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: colors.white,
+    fontFamily: fontFamilies.bold,
     fontSize: 9,
     fontWeight: "800",
   },

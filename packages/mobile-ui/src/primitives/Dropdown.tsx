@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import {
   appThemeColors,
   type AppTheme,
@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 4,
     color: colors.textPrimary,
+    fontFamily: fontFamilies.semibold,
     fontSize: 11,
     fontWeight: "600",
     lineHeight: 14,
@@ -266,6 +267,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flex: 1,
     color: colors.textPrimary,
+    fontFamily: fontFamilies.regular,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -281,6 +283,7 @@ const styles = StyleSheet.create({
   error: {
     marginTop: 6,
     color: colors.danger,
+    fontFamily: fontFamilies.regular,
     fontSize: 12,
     lineHeight: 16,
   },
@@ -319,6 +322,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flex: 1,
     color: colors.textPrimary,
+    fontFamily: fontFamilies.regular,
     fontSize: 14,
     lineHeight: 20,
   },

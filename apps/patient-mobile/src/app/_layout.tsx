@@ -1,9 +1,26 @@
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@startup/design-tokens";
-import { SafeAreaProvider } from "@startup/mobile-ui";
+import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
+
+void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts(albertSansFonts);
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
       <View style={styles.root}>

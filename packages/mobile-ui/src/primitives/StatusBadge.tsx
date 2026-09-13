@@ -7,7 +7,7 @@ import {
   type ViewProps,
   type ViewStyle,
 } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type StatusBadgeProps = ViewProps & {
   status: string;
@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: colors.textPrimary,
+    fontFamily: fontFamilies.semibold,
     fontSize: 10,
     fontWeight: "600",
     lineHeight: 13,

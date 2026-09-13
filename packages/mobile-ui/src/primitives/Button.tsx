@@ -7,7 +7,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import {
   appThemeColors,
   type AppTheme,
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   label: {
+    fontFamily: fontFamilies.semibold,
     fontSize: 14,
     fontWeight: "600",
     lineHeight: 18,

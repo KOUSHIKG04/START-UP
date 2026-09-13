@@ -9,7 +9,8 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
+import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
 export type IconLabelIconProps = {
   color: string;
@@ -19,12 +20,14 @@ export type IconLabelIconProps = {
 export type IconLabelProps = Omit<PressableProps, "children"> & {
   icon: ReactNode | ((props: IconLabelIconProps) => ReactNode);
   label: string;
+  theme?: AppTheme;
   backgroundColor?: string;
   borderColor?: string;
   borderWidth?: number;
   iconColor?: string;
   iconSize?: number;
   surfaceSize?: number;
+  surfaceRadius?: number;
   labelWidth?: number;
   gap?: number;
   iconContainerStyle?: StyleProp<ViewStyle>;
@@ -35,13 +38,15 @@ export type IconLabelProps = Omit<PressableProps, "children"> & {
 export function IconLabel({
   icon,
   label,
-  backgroundColor = colors.patient.surface,
-  borderColor = colors.patient.surfaceBorder,
-  borderWidth = 1,
-  iconColor = colors.patient.primary,
+  theme = "patient",
+  backgroundColor,
+  borderColor = colors.borderDefault,
+  borderWidth = 0,
+  iconColor,
   iconSize = 28,
   surfaceSize = 56,
-  labelWidth = 74,
+  surfaceRadius = 16,
+  labelWidth = 94,
   gap = 8,
   iconContainerStyle,
   labelStyle,
@@ -53,9 +58,12 @@ export function IconLabel({
   style,
   ...props
 }: IconLabelProps) {
+  const themeColors = appThemeColors[theme];
+  const resolvedBackgroundColor = backgroundColor ?? themeColors.soft;
+  const resolvedIconColor = iconColor ?? themeColors.primary;
   const renderedIcon =
     typeof icon === "function"
-      ? icon({ color: iconColor, size: iconSize })
+      ? icon({ color: resolvedIconColor, size: iconSize })
       : icon;
 
   return (
@@ -79,8 +87,8 @@ export function IconLabel({
           {
             width: surfaceSize,
             height: surfaceSize,
-            borderRadius: surfaceSize / 2,
-            backgroundColor,
+            borderRadius: surfaceRadius,
+            backgroundColor: resolvedBackgroundColor,
             borderColor,
             borderWidth,
           },
@@ -94,7 +102,11 @@ export function IconLabel({
 
       <Text
         numberOfLines={labelNumberOfLines}
-        style={[styles.label, { width: labelWidth }, labelStyle]}
+        style={[
+          styles.label,
+          { width: labelWidth, color: themeColors.primaryText },
+          labelStyle,
+        ]}
       >
         {label}
       </Text>
@@ -109,12 +121,17 @@ const styles = StyleSheet.create({
   iconSurface: {
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   label: {
-    color: colors.patient.textSecondary,
-    fontSize: 11,
-    fontWeight: "500",
-    lineHeight: 13,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 15,
     textAlign: "center",
   },
   pressed: {

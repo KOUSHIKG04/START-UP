@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Search } from "lucide-react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type SearchInputProps = Omit<TextInputProps, "style"> & {
   disabled?: boolean;
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 0,
     color: colors.textPrimary,
+    fontFamily: fontFamilies.regular,
     fontSize: 14,
     lineHeight: 20,
   },

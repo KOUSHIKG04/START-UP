@@ -6,7 +6,7 @@ import {
   Pressable,
   type ViewStyle,
 } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import { getSOSButtonDimensions } from "../utils/sosButtonDimensions";
 
 export type SOSButtonProps = {
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
 
   textRed: {
     color: colors.patient.sos.primary,
+    fontFamily: fontFamilies.bold,
     fontSize: 14,
     fontWeight: "900",
     letterSpacing: 0.8,
@@ -114,6 +115,7 @@ const styles = StyleSheet.create({
   },
   textWhite: {
     color: colors.white,
+    fontFamily: fontFamilies.bold,
     fontSize: 14,
     fontWeight: "900",
     letterSpacing: 0.8,

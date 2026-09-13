@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Tabs, usePathname } from "expo-router";
+import { Tabs, router, type Href } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Calendar, FileText, Home, User } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
@@ -12,9 +12,14 @@ const patientNavItems: NavItem[] = [
   { key: "profile", label: "Profile", icon: User },
 ];
 
-export default function TabsLayout() {
-  const pathname = usePathname();
+const patientTabRoutes: Record<string, Href> = {
+  index: "/",
+  appointments: "/appointments",
+  records: "/records",
+  profile: "/profile",
+};
 
+export default function TabsLayout() {
   return (
     <>
       <Tabs
@@ -26,22 +31,27 @@ export default function TabsLayout() {
           lazy: false,
           sceneStyle: styles.scene,
         }}
-        tabBar={({ state, navigation }) => (
+        tabBar={({ state }) => (
           <BottomNavBar
             items={patientNavItems}
-            activeTab={state.routes[state.index]?.name ?? "index"}
-            onTabChange={(routeName) => navigation.navigate(routeName)}
+            activeTab={
+              state.routes[state.index]?.name.split("/")[0] ?? "index"
+            }
+            onTabChange={(routeName) => {
+              const href = patientTabRoutes[routeName];
+              if (href) router.navigate(href);
+            }}
             showSOS
           />
         )}
       >
         <Tabs.Screen name="index" />
-        <Tabs.Screen name="appointments" />
-        <Tabs.Screen name="records" />
-        <Tabs.Screen name="profile" />
+        <Tabs.Screen name="appointments/index" />
+        <Tabs.Screen name="records/index" />
+        <Tabs.Screen name="profile/index" />
       </Tabs>
 
-      <StatusBar style={pathname === "/" ? "dark" : "light"} />
+      <StatusBar style="light" />
     </>
   );
 }
