@@ -19,6 +19,18 @@ const patientTabRoutes: Record<string, Href> = {
   profile: "/profile",
 };
 
+const parentTabByRoute: Record<string, string> = {
+  "find-doctor": "index",
+  "doctor-results": "index",
+  "doctor-profile": "index",
+  "booking-status": "appointments",
+};
+
+function getActiveTab(routeName?: string) {
+  const route = routeName?.split("/")[0] ?? "index";
+  return parentTabByRoute[route] ?? route;
+}
+
 export default function TabsLayout() {
   return (
     <>
@@ -34,13 +46,7 @@ export default function TabsLayout() {
         tabBar={({ state }) => (
           <BottomNavBar
             items={patientNavItems}
-            activeTab={
-              ["find-doctor", "doctor-results"].includes(
-                state.routes[state.index]?.name.split("/")[0] ?? ""
-              )
-                ? "index"
-                : (state.routes[state.index]?.name.split("/")[0] ?? "index")
-            }
+            activeTab={getActiveTab(state.routes[state.index]?.name)}
             onTabChange={(routeName) => {
               const href = patientTabRoutes[routeName];
               if (href) router.navigate(href);
@@ -55,6 +61,8 @@ export default function TabsLayout() {
         <Tabs.Screen name="profile/index" />
         <Tabs.Screen name="find-doctor/index" options={{ href: null }} />
         <Tabs.Screen name="doctor-results/index" options={{ href: null }} />
+        <Tabs.Screen name="doctor-profile/index" options={{ href: null }} />
+        <Tabs.Screen name="booking-status/index" options={{ href: null }} />
       </Tabs>
 
       <StatusBar style="light" />

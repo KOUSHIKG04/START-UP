@@ -1,0 +1,34 @@
+import type { Appointment } from "../types/appointment";
+
+export const appointments: readonly Appointment[] = [
+  {
+    id: "#APT20260820",
+    doctorName: "Dr. Ananya Sharma",
+    qualification: "MBBS, MD (General Medicine)",
+    specialty: "General Physician",
+    consultationType: "Home Visit",
+    date: "18 Jun 2025",
+    time: "11:00 AM – 11:30 AM",
+    hospital: "Apollo Hospitals",
+    location: "Jayanagar, Bengaluru",
+    experience: "8+ years experience",
+    rating: "4.8 (120+ reviews)",
+    fee: "₹500",
+    status: "approved",
+  },
+  {
+    id: "#APT20260821",
+    doctorName: "Dr. Harini Rao",
+    qualification: "MBBS, MD (Internal Medicine)",
+    specialty: "General Physician",
+    consultationType: "Home Visit",
+    date: "02 Aug 2026",
+    time: "8:30 PM – 9:00 PM",
+    hospital: "Apollo Hospitals",
+    location: "Koramangala, Bengaluru",
+    experience: "10+ years experience",
+    rating: "4.9 (164 reviews)",
+    fee: "₹600",
+    status: "approved",
+  },
+] as const;

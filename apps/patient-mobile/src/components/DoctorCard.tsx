@@ -24,6 +24,8 @@ export type DoctorCardProps = {
   rating: string;
   fee: string;
   onPress?: () => void;
+  showChevron?: boolean;
+  contextLabel?: string;
 };
 
 export default function DoctorCard({
@@ -34,6 +36,8 @@ export default function DoctorCard({
   rating,
   fee,
   onPress,
+  showChevron = Boolean(onPress),
+  contextLabel,
 }: DoctorCardProps) {
   return (
     <Card
@@ -61,6 +65,11 @@ export default function DoctorCard({
           <Text numberOfLines={1} style={styles.specialty}>
             {specialty}
           </Text>
+          {contextLabel ? (
+            <Text numberOfLines={1} style={styles.contextLabel}>
+              ({contextLabel})
+            </Text>
+          ) : null}
         </CardContent>
 
         <CardAction style={styles.feeSection}>
@@ -68,9 +77,11 @@ export default function DoctorCard({
           <Text numberOfLines={1} style={styles.fee}>
             {fee}
           </Text>
-          <View style={styles.chevron}>
-            <ChevronRight color={colors.white} size={17} strokeWidth={2.4} />
-          </View>
+          {showChevron ? (
+            <View style={styles.chevron}>
+              <ChevronRight color={colors.white} size={17} strokeWidth={2.4} />
+            </View>
+          ) : null}
         </CardAction>
       </CardHeader>
 
@@ -136,6 +147,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "500",
     lineHeight: 14,
+  },
+  contextLabel: {
+    color: colors.patient.accent,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 10,
+    fontWeight: "600",
+    lineHeight: 13,
   },
   feeSection: {
     width: 78,

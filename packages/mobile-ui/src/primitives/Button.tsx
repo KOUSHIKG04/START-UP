@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -30,6 +31,7 @@ export type ButtonProps = Omit<
   disabled?: boolean;
   style?: PressableProps["style"];
   labelStyle?: StyleProp<TextStyle>;
+  leftIcon?: ReactNode;
 };
 
 type ButtonPalette = {
@@ -44,6 +46,7 @@ export function Button({
   disabled = false,
   style,
   labelStyle,
+  leftIcon,
   accessibilityLabel = label,
   accessibilityState,
   ...props
@@ -66,6 +69,7 @@ export function Button({
         typeof style === "function" ? style(state) : style,
       ]}
     >
+      {leftIcon}
       <Text
         numberOfLines={1}
         style={[

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { router, type Href } from "expo-router";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import { Dropdown, Header, type DropdownOption } from "@startup/mobile-ui";
 import DoctorCard, { type DoctorCardProps } from "../../components/DoctorCard";
@@ -76,6 +77,20 @@ const doctors: DoctorResult[] = [
   },
 ];
 
+function getDoctorProfileRoute(doctor: DoctorResult) {
+  return {
+    pathname: "/doctor-profile",
+    params: {
+      name: doctor.name,
+      qualification: doctor.qualification,
+      specialty: doctor.specialty,
+      experience: doctor.experience,
+      rating: doctor.rating,
+      fee: doctor.fee,
+    },
+  } as unknown as Href;
+}
+
 export function DoctorResultsScreen({
   symptom,
   onBackPress,
@@ -130,7 +145,11 @@ export function DoctorResultsScreen({
 
         <View style={styles.list}>
           {sortedDoctors.map((doctor) => (
-            <DoctorCard key={doctor.name} {...doctor} />
+            <DoctorCard
+              key={doctor.name}
+              {...doctor}
+              onPress={() => router.push(getDoctorProfileRoute(doctor))}
+            />
           ))}
         </View>
       </ScrollView>

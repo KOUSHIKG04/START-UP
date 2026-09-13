@@ -76,40 +76,45 @@ export function IconLabel({
       style={(state) => [
         styles.container,
         { gap },
-        state.pressed && onPress ? styles.pressed : undefined,
         disabled ? styles.disabled : undefined,
         typeof style === "function" ? style(state) : style,
       ]}
     >
-      <View
-        style={[
-          styles.iconSurface,
-          {
-            width: surfaceSize,
-            height: surfaceSize,
-            borderRadius: surfaceRadius,
-            backgroundColor: resolvedBackgroundColor,
-            borderColor,
-            borderWidth,
-          },
-          iconContainerStyle,
-        ]}
-      >
-        <View style={{ width: iconSize, height: iconSize }}>
-          {renderedIcon}
-        </View>
-      </View>
+      {({ pressed }) => (
+        <>
+          <View
+            style={[
+              styles.iconSurface,
+              {
+                width: surfaceSize,
+                height: surfaceSize,
+                borderRadius: surfaceRadius,
+                backgroundColor: resolvedBackgroundColor,
+                borderColor,
+                borderWidth,
+              },
+              iconContainerStyle,
+              pressed && onPress ? styles.pressedSurface : undefined,
+            ]}
+          >
+            <View style={{ width: iconSize, height: iconSize }}>
+              {renderedIcon}
+            </View>
+          </View>
 
-      <Text
-        numberOfLines={labelNumberOfLines}
-        style={[
-          styles.label,
-          { width: labelWidth, color: themeColors.primaryText },
-          labelStyle,
-        ]}
-      >
-        {label}
-      </Text>
+          <Text
+            numberOfLines={labelNumberOfLines}
+            style={[
+              styles.label,
+              { width: labelWidth, color: themeColors.primaryText },
+              labelStyle,
+              pressed && onPress ? styles.pressedLabel : undefined,
+            ]}
+          >
+            {label}
+          </Text>
+        </>
+      )}
     </Pressable>
   );
 }
@@ -130,8 +135,12 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     textAlign: "center",
   },
-  pressed: {
-    opacity: 0.75,
+  pressedSurface: {
+    opacity: 0.62,
+    transform: [{ scale: 0.95 }],
+  },
+  pressedLabel: {
+    opacity: 0.72,
   },
   disabled: {
     opacity: 0.5,
