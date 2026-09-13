@@ -1,15 +1,25 @@
+import type { ReactNode } from "react";
 import {
   House,
   MessageCircle,
   Microscope,
   Stethoscope,
 } from "lucide-react-native";
-import { type IconLabelIconProps } from "@startup/mobile-ui";
+import type { IconLabelIconProps } from "@startup/mobile-ui";
+import type { ConsultationType } from "../types/appointment";
 
-export const homeActions = [
+export type HomeAction = {
+  key: "doctor" | "home" | "lab" | "consultation";
+  label: string;
+  icon: (props: IconLabelIconProps) => ReactNode;
+  consultationType?: ConsultationType;
+};
+
+export const homeActions: readonly HomeAction[] = [
   {
     key: "doctor",
     label: "Doctor\nAppointment",
+    consultationType: "Clinic Visit",
     icon: ({ color, size }: IconLabelIconProps) => (
       <Stethoscope color={color} size={size} strokeWidth={1.8} />
     ),
@@ -17,6 +27,7 @@ export const homeActions = [
   {
     key: "home",
     label: "Home\nAppointment",
+    consultationType: "Home Visit",
     icon: ({ color, size }: IconLabelIconProps) => (
       <House color={color} size={size} strokeWidth={1.8} />
     ),
@@ -31,8 +42,9 @@ export const homeActions = [
   {
     key: "consultation",
     label: "Online\nConsultation",
+    consultationType: "Online",
     icon: ({ color, size }: IconLabelIconProps) => (
       <MessageCircle color={color} size={size} strokeWidth={1.8} />
     ),
   },
-] as const;
+];

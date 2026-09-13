@@ -1,13 +1,21 @@
 import { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { Dropdown, Header, type DropdownOption } from "@startup/mobile-ui";
+import {
+  Dropdown,
+  FadedScrollView,
+  Header,
+  type DropdownOption,
+} from "@startup/mobile-ui";
 import DoctorCard, { type DoctorCardProps } from "../../components/DoctorCard";
+import type { ConsultationType } from "../../types/appointment";
+import { consultationFlows } from "../../utils/consultationFlow";
 import type { PatientScreenProps } from "../types";
 
 type DoctorResultsScreenProps = PatientScreenProps & {
   symptom: string;
+  consultationType: ConsultationType;
 };
 
 type DoctorResult = DoctorCardProps & {
@@ -77,7 +85,10 @@ const doctors: DoctorResult[] = [
   },
 ];
 
-function getDoctorProfileRoute(doctor: DoctorResult) {
+function getDoctorProfileRoute(
+  doctor: DoctorResult,
+  consultationType: ConsultationType
+) {
   return {
     pathname: "/doctor-profile",
     params: {
@@ -87,12 +98,14 @@ function getDoctorProfileRoute(doctor: DoctorResult) {
       experience: doctor.experience,
       rating: doctor.rating,
       fee: doctor.fee,
+      consultationType,
     },
   } as unknown as Href;
 }
 
 export function DoctorResultsScreen({
   symptom,
+  consultationType,
   onBackPress,
 }: DoctorResultsScreenProps) {
   const [filter, setFilter] = useState<DoctorFilter>("distance");
@@ -121,7 +134,7 @@ export function DoctorResultsScreen({
         titleStyle={styles.headerTitle}
       />
 
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -129,7 +142,7 @@ export function DoctorResultsScreen({
           <View style={styles.headingCopy}>
             <Text style={styles.title}>Doctors available for your care</Text>
             <Text style={styles.subtitle}>
-              Choose a specialist based on experience and patient ratings.
+              {consultationFlows[consultationType].resultsDescription}
             </Text>
           </View>
           <Dropdown
@@ -148,11 +161,14 @@ export function DoctorResultsScreen({
             <DoctorCard
               key={doctor.name}
               {...doctor}
-              onPress={() => router.push(getDoctorProfileRoute(doctor))}
+              contextLabel={consultationFlows[consultationType].profileContext}
+              onPress={() =>
+                router.push(getDoctorProfileRoute(doctor, consultationType))
+              }
             />
           ))}
         </View>
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }

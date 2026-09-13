@@ -24,6 +24,9 @@ const parentTabByRoute: Record<string, string> = {
   "doctor-results": "index",
   "doctor-profile": "index",
   "booking-status": "appointments",
+  "visit-session": "appointments",
+  prescription: "records",
+  medicines: "records",
 };
 
 function getActiveTab(routeName?: string) {
@@ -43,17 +46,27 @@ export default function TabsLayout() {
           lazy: false,
           sceneStyle: styles.scene,
         }}
-        tabBar={({ state }) => (
-          <BottomNavBar
-            items={patientNavItems}
-            activeTab={getActiveTab(state.routes[state.index]?.name)}
-            onTabChange={(routeName) => {
-              const href = patientTabRoutes[routeName];
-              if (href) router.navigate(href);
-            }}
-            showSOS
-          />
-        )}
+        tabBar={({ state }) => {
+          const activeRoute = state.routes[state.index];
+          const mode = (activeRoute?.params as { mode?: string } | undefined)?.mode;
+          const isOnlineSession =
+            activeRoute?.name === "visit-session/index" &&
+            (mode === "online-chat" || mode === "online-video");
+
+          if (isOnlineSession) return null;
+
+          return (
+            <BottomNavBar
+              items={patientNavItems}
+              activeTab={getActiveTab(activeRoute?.name)}
+              onTabChange={(routeName) => {
+                const href = patientTabRoutes[routeName];
+                if (href) router.navigate(href);
+              }}
+              showSOS
+            />
+          );
+        }}
       >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="appointments/index" />
@@ -63,6 +76,9 @@ export default function TabsLayout() {
         <Tabs.Screen name="doctor-results/index" options={{ href: null }} />
         <Tabs.Screen name="doctor-profile/index" options={{ href: null }} />
         <Tabs.Screen name="booking-status/index" options={{ href: null }} />
+        <Tabs.Screen name="visit-session/index" options={{ href: null }} />
+        <Tabs.Screen name="prescription/index" options={{ href: null }} />
+        <Tabs.Screen name="medicines/index" options={{ href: null }} />
       </Tabs>
 
       <StatusBar style="light" />

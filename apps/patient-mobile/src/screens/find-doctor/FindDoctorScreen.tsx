@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { router, type Href } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import {
   Activity,
   Baby,
@@ -27,7 +27,15 @@ import {
   shadows,
   spacing,
 } from "@startup/design-tokens";
-import { Chip, Header, IconLabel, SearchInput } from "@startup/mobile-ui";
+import {
+  Chip,
+  FadedScrollView,
+  Header,
+  IconLabel,
+  SearchInput,
+} from "@startup/mobile-ui";
+import type { ConsultationType } from "../../types/appointment";
+import { consultationFlows } from "../../utils/consultationFlow";
 import type { PatientScreenProps } from "../types";
 
 const symptoms = [
@@ -41,11 +49,14 @@ const symptoms = [
   "Dizziness",
 ] as const;
 
-function getDoctorResultsRoute(symptom: string) {
+function getDoctorResultsRoute(
+  symptom: string,
+  consultationType: ConsultationType
+) {
   return {
     pathname: "/doctor-results",
-    params: { symptom },
-  } as Href;
+    params: { symptom, consultationType },
+  } as unknown as Href;
 }
 
 type DoctorCategory = {
@@ -73,14 +84,22 @@ const categories: DoctorCategory[] = [
   { key: "children", label: "Children's\nHealth", icon: Baby },
 ];
 
-export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
+type FindDoctorScreenProps = PatientScreenProps & {
+  consultationType: ConsultationType;
+};
+
+export function FindDoctorScreen({
+  consultationType,
+  onBackPress,
+}: FindDoctorScreenProps) {
   const [selectedSymptom, setSelectedSymptom] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState("common");
+  const flow = consultationFlows[consultationType];
 
   return (
     <View style={styles.screen}>
       <Header
-        title="Find Your Doctor"
+        title={flow.findDoctorTitle}
         app="patient"
         onBackPress={onBackPress}
         style={styles.header}
@@ -103,7 +122,7 @@ export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
         />
       </View>
 
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -119,7 +138,9 @@ export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
                   label={symptom}
                   onPress={() => {
                     setSelectedSymptom(symptom);
-                    router.push(getDoctorResultsRoute(symptom));
+                    router.push(
+                      getDoctorResultsRoute(symptom, consultationType)
+                    );
                   }}
                   style={[
                     styles.chip,
@@ -153,7 +174,15 @@ export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
                     />
                   )}
                   label={category.label}
-                  onPress={() => setSelectedCategory(category.key)}
+                  onPress={() => {
+                    setSelectedCategory(category.key);
+                    router.push(
+                      getDoctorResultsRoute(
+                        category.label.replace("\n", " "),
+                        consultationType
+                      )
+                    );
+                  }}
                   backgroundColor={
                     selected ? colors.patient.surface : colors.white
                   }
@@ -178,7 +207,7 @@ export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
             })}
           </View>
         </View>
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }

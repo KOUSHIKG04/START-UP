@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type Href } from "expo-router";
 import { Bell, ChevronDown, ChevronRight, MapPin } from "lucide-react-native";
@@ -9,13 +9,23 @@ import {
   shadows,
   spacing,
 } from "@startup/design-tokens";
-import { IconLabel, SafeAreaView, SearchInput } from "@startup/mobile-ui";
+import {
+  FadedScrollView,
+  IconLabel,
+  SafeAreaView,
+  SearchInput,
+} from "@startup/mobile-ui";
 import { homeActions } from "../../utils/HomeActions";
 import AmbulanceBanner from "../../components/AmbulanceBanner";
 import UpcomingAppointmentCard from "../../components/UpcomingAppointmentCard";
 import PopularServices from "../../components/PopularServices";
 
-const findDoctorRoute = "/find-doctor" as Href;
+function getFindDoctorRoute(consultationType: string) {
+  return {
+    pathname: "/find-doctor",
+    params: { consultationType },
+  } as unknown as Href;
+}
 
 export function HomeScreen() {
   return (
@@ -65,8 +75,9 @@ export function HomeScreen() {
         />
       </View>
 
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
+        edgeColor={colors.white}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.actionsRow}>
@@ -75,11 +86,9 @@ export function HomeScreen() {
               key={action.key}
               icon={action.icon}
               label={action.label}
-              onPress={
-                action.key === "doctor"
-                  ? () => router.push(findDoctorRoute)
-                  : undefined
-              }
+              onPress={action.consultationType
+                ? () => router.push(getFindDoctorRoute(action.consultationType!))
+                : undefined}
               surfaceSize={52}
               surfaceRadius={16}
               iconSize={24}
@@ -112,7 +121,7 @@ export function HomeScreen() {
         </View>
 
         <PopularServices />
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }

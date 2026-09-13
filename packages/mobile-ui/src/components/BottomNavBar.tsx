@@ -8,6 +8,7 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import type { LucideIcon } from "lucide-react-native";
@@ -83,6 +84,11 @@ export function BottomNavBar({
       ]}
       pointerEvents="box-none"
     >
+      <LinearGradient
+        colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.96)"]}
+        pointerEvents="none"
+        style={styles.navFade}
+      />
       <View
         onLayout={hasCenterAction ? handleLayout : undefined}
         style={[
@@ -212,6 +218,13 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
     paddingHorizontal: 4,
+  },
+  navFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: -10,
+    height: 118,
   },
   floatingBar: {
     width: "100%",

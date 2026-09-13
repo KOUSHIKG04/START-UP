@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { Chip, Header } from "@startup/mobile-ui";
+import { Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import BookingCard from "../../components/BookingCard";
 import type { Appointment } from "../../types/appointment";
 import { appointments } from "../../utils/appointments";
@@ -38,7 +38,7 @@ export function AppointmentsScreen({ onBackPress }: PatientScreenProps) {
   return (
     <View style={styles.screen}>
       <Header title="My Bookings" app="patient" onBackPress={onBackPress} />
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -83,7 +83,7 @@ export function AppointmentsScreen({ onBackPress }: PatientScreenProps) {
             </Text>
           </View>
         )}
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }

@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { MapPin, Video } from "lucide-react-native";
+import { MapPin, Navigation, Video } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
@@ -24,17 +24,21 @@ import {
   CardContent,
   CardSeparator,
   Chip,
+  FadedScrollView,
   Header,
   Input,
   TimeSlot,
 } from "@startup/mobile-ui";
 import DoctorCard, { type DoctorCardProps } from "../../components/DoctorCard";
+import type { ConsultationType } from "../../types/appointment";
+import { consultationFlows } from "../../utils/consultationFlow";
 import type { PatientScreenProps } from "../types";
 
 type ProfileTab = "about" | "slots";
 
 type DoctorProfileScreenProps = PatientScreenProps & {
   doctor: DoctorCardProps;
+  consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
 };
 
@@ -43,7 +47,8 @@ export type BookingSelection = {
   time: string;
   patient: string;
   reason: string;
-  consultationType: "Clinic Visit" | "Online";
+  consultationType: ConsultationType;
+  address?: string;
 };
 
 const dates = [
@@ -73,13 +78,18 @@ const timeSlots = [
 
 export function DoctorProfileScreen({
   doctor,
+  consultationType: initialConsultationType,
   onBackPress,
   onBookAppointment,
 }: DoctorProfileScreenProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("about");
-  const [consultationType, setConsultationType] = useState<
-    "Clinic Visit" | "Online"
-  >("Clinic Visit");
+  const [consultationType, setConsultationType] = useState<ConsultationType>(
+    initialConsultationType
+  );
+  const [addressDraft, setAddressDraft] = useState(
+    "2nd Main Road, Jayanagar, Bengaluru"
+  );
+  const [homeAddress, setHomeAddress] = useState(addressDraft);
   const [pageHeights, setPageHeights] = useState<Record<ProfileTab, number>>({
     about: 0,
     slots: 0,
@@ -87,6 +97,7 @@ export function DoctorProfileScreen({
   const pagerRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
   const pageWidth = width - spacing.lg * 2;
+  const flow = consultationFlows[consultationType];
 
   const changeTab = (tab: ProfileTab) => {
     setActiveTab(tab);
@@ -119,13 +130,21 @@ export function DoctorProfileScreen({
   return (
     <View style={styles.screen}>
       <Header
-        title="Doctor Details"
+        title={
+          consultationType === "Online"
+            ? "Doctor Details (Online Consultation)"
+            : "Doctor Details"
+        }
         app="patient"
         onBackPress={onBackPress}
-        titleStyle={styles.headerTitle}
+        titleStyle={
+          consultationType === "Online"
+            ? styles.onlineHeaderTitle
+            : styles.headerTitle
+        }
       />
 
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -133,15 +152,24 @@ export function DoctorProfileScreen({
         <DoctorCard
           {...doctor}
           contextLabel={
-            consultationType === "Online" ? "Online Consultation" : undefined
+            consultationType === "Online" ? undefined : flow.profileContext
           }
           showChevron={false}
         />
 
-        {consultationType !== "Online" ? (
+        {consultationType === "Clinic Visit" ? (
           <OnlineConsultation
             fee={doctor.fee}
             onBookPress={selectOnlineConsultation}
+          />
+        ) : null}
+
+        {flow.requiresAddress ? (
+          <HomeVisitAddress
+            address={addressDraft}
+            onAddressChange={setAddressDraft}
+            onConfirm={() => setHomeAddress(addressDraft.trim())}
+            verifiedAddress={homeAddress}
           />
         ) : null}
 
@@ -173,12 +201,13 @@ export function DoctorProfileScreen({
             style={[styles.page, { width: pageWidth }]}
           >
             <BookSlots
+              address={flow.requiresAddress ? homeAddress : undefined}
               consultationType={consultationType}
               onBookAppointment={onBookAppointment}
             />
           </View>
         </ScrollView>
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }
@@ -215,6 +244,51 @@ function OnlineConsultation({ fee, onBookPress }: OnlineConsultationProps) {
         style={styles.smallButton}
         labelStyle={styles.smallButtonLabel}
       />
+    </Card>
+  );
+}
+
+function HomeVisitAddress({
+  address,
+  onAddressChange,
+  onConfirm,
+  verifiedAddress,
+}: {
+  address: string;
+  onAddressChange: (address: string) => void;
+  onConfirm: () => void;
+  verifiedAddress: string;
+}) {
+  return (
+    <Card borderRadius={radius.md} gap={12} padding={14}>
+      <Input
+        accessibilityLabel="Home visit address"
+        label="Your address"
+        placeholder="Enter your address here..."
+        value={address}
+        onChangeText={onAddressChange}
+      />
+      <Button
+        label="Update your location"
+        disabled={!address.trim()}
+        onPress={onConfirm}
+        style={styles.locationButton}
+      />
+      <View style={styles.pinnedLocation}>
+        <Navigation
+          color={colors.patient.primaryDark}
+          size={19}
+          strokeWidth={1.9}
+        />
+        <View style={styles.pinnedLocationCopy}>
+          <Text style={styles.pinnedLocationTitle}>
+            Verified visit location
+          </Text>
+          <Text numberOfLines={2} style={styles.pinnedLocationAddress}>
+            {verifiedAddress || "Add an address for the doctor’s visit"}
+          </Text>
+        </View>
+      </View>
     </Card>
   );
 }
@@ -297,10 +371,12 @@ function AboutDoctor({ doctorName }: { doctorName: string }) {
 }
 
 function BookSlots({
+  address,
   consultationType,
   onBookAppointment,
 }: {
-  consultationType: "Clinic Visit" | "Online";
+  address?: string;
+  consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
 }) {
   const [selectedDate, setSelectedDate] = useState("today");
@@ -424,6 +500,7 @@ function BookSlots({
             patient,
             reason,
             consultationType,
+            address,
           });
         }}
         style={styles.bookButton}
@@ -442,6 +519,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     lineHeight: 26,
+  },
+  onlineHeaderTitle: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 22,
   },
   content: {
     gap: 14,
@@ -473,8 +556,37 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
   },
+  locationButton: {
+    minHeight: 44,
+    borderRadius: radius.md,
+  },
+  pinnedLocation: {
+    minHeight: 68,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: radius.md,
+    backgroundColor: colors.patient.surface,
+  },
+  pinnedLocationCopy: { flex: 1, gap: 2 },
+  pinnedLocationTitle: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 16,
+  },
+  pinnedLocationAddress: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.regular,
+    fontSize: 11,
+    fontStyle: "italic",
+    lineHeight: 15,
+  },
   smallButton: {
-    minHeight: 34,
+    minHeight: 48,
     paddingHorizontal: 15,
     paddingVertical: 6,
     borderRadius: 17,

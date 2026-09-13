@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
   Bell,
@@ -12,7 +12,14 @@ import {
   ShieldCheck,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Button, Card, CardSeparator, Header, Input } from "@startup/mobile-ui";
+import {
+  Button,
+  Card,
+  CardSeparator,
+  FadedScrollView,
+  Header,
+  Input,
+} from "@startup/mobile-ui";
 import type { PatientScreenProps } from "../types";
 
 export function ProfileScreen({ onBackPress }: PatientScreenProps) {
@@ -35,7 +42,7 @@ export function ProfileScreen({ onBackPress }: PatientScreenProps) {
         onBackPress={onBackPress}
         style={styles.header}
       />
-      <ScrollView
+      <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -133,7 +140,7 @@ export function ProfileScreen({ onBackPress }: PatientScreenProps) {
           </View>
           <Text style={styles.logoutText}>Log Out</Text>
         </Card>
-      </ScrollView>
+      </FadedScrollView>
     </View>
   );
 }

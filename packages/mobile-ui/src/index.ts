@@ -51,6 +51,10 @@ export {
   type SearchInputProps,
 } from "./primitives/SearchInput";
 export { TextArea, type TextAreaProps } from "./primitives/TextArea";
+export {
+  FadedScrollView,
+  type FadedScrollViewProps,
+} from "./primitives/FadedScrollView";
 export { TimeSlot, type TimeSlotProps } from "./primitives/TimeSlot";
 export {
   UploadInput,

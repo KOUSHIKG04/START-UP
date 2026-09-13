@@ -2,6 +2,21 @@ import type { Appointment } from "../types/appointment";
 
 export const appointments: readonly Appointment[] = [
   {
+    id: "#APT20260818",
+    doctorName: "Dr. Mandira Rao",
+    qualification: "MBBS, MD (General Medicine)",
+    specialty: "General Physician",
+    consultationType: "Clinic Visit",
+    date: "16 Jun 2026",
+    time: "09:30 AM – 10:00 AM",
+    hospital: "Apollo Hospitals",
+    location: "Koramangala, Bengaluru",
+    experience: "7+ years experience",
+    rating: "4.7 (96 reviews)",
+    fee: "₹450",
+    status: "approved",
+  },
+  {
     id: "#APT20260820",
     doctorName: "Dr. Ananya Sharma",
     qualification: "MBBS, MD (General Medicine)",
@@ -29,6 +44,21 @@ export const appointments: readonly Appointment[] = [
     experience: "10+ years experience",
     rating: "4.9 (164 reviews)",
     fee: "₹600",
+    status: "approved",
+  },
+  {
+    id: "#APT20260822",
+    doctorName: "Dr. Sriram Reddy",
+    qualification: "MBBS, DNB, Superspecialist",
+    specialty: "General Physician",
+    consultationType: "Online",
+    date: "24 Aug 2026",
+    time: "04:00 PM – 04:30 PM",
+    hospital: "Apollo Hospitals",
+    location: "Secure video consultation",
+    experience: "11+ years experience",
+    rating: "4.9 (180+ reviews)",
+    fee: "₹650",
     status: "approved",
   },
 ] as const;

@@ -3,6 +3,7 @@ import {
   DoctorProfileScreen,
   type BookingSelection,
 } from "../../../screens/doctor-profile/DoctorProfileScreen";
+import { parseConsultationType } from "../../../utils/consultationFlow";
 
 type DoctorProfileParams = {
   name?: string;
@@ -11,6 +12,7 @@ type DoctorProfileParams = {
   experience?: string;
   rating?: string;
   fee?: string;
+  consultationType?: string | string[];
 };
 
 export default function DoctorProfileRoute() {
@@ -23,6 +25,7 @@ export default function DoctorProfileRoute() {
     rating: params.rating ?? "4.8 (120+ reviews)",
     fee: params.fee ?? "₹500",
   };
+  const consultationType = parseConsultationType(params.consultationType);
 
   const handleBookAppointment = (selection: BookingSelection) => {
     router.push({
@@ -36,7 +39,11 @@ export default function DoctorProfileRoute() {
         date: `${selection.date} 2026`,
         time: selection.time,
         hospital: "Apollo Hospitals",
-        location: "Jayanagar, Bengaluru",
+        location:
+          selection.address ??
+          (selection.consultationType === "Online"
+            ? "Secure video consultation"
+            : "Jayanagar, Bengaluru"),
         experience: doctor.experience,
         rating: doctor.rating,
         fee: doctor.fee,
@@ -48,6 +55,7 @@ export default function DoctorProfileRoute() {
   return (
     <DoctorProfileScreen
       doctor={doctor}
+      consultationType={consultationType}
       onBookAppointment={handleBookAppointment}
       onBackPress={() => router.back()}
     />
