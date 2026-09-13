@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { Bell, ChevronDown, ChevronRight, MapPin } from "lucide-react-native";
 import {
   colors,
@@ -14,6 +14,8 @@ import { homeActions } from "../../utils/HomeActions";
 import AmbulanceBanner from "../../components/AmbulanceBanner";
 import UpcomingAppointmentCard from "../../components/UpcomingAppointmentCard";
 import PopularServices from "../../components/PopularServices";
+
+const findDoctorRoute = "/find-doctor" as Href;
 
 export function HomeScreen() {
   return (
@@ -75,7 +77,7 @@ export function HomeScreen() {
               label={action.label}
               onPress={
                 action.key === "doctor"
-                  ? () => router.push("/(tabs)/find-doctor/index")
+                  ? () => router.push(findDoctorRoute)
                   : undefined
               }
               surfaceSize={52}
