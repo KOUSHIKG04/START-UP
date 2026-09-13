@@ -35,7 +35,9 @@ export default function TabsLayout() {
           <BottomNavBar
             items={patientNavItems}
             activeTab={
-              state.routes[state.index]?.name.split("/")[0] === "find-doctor"
+              ["find-doctor", "doctor-results"].includes(
+                state.routes[state.index]?.name.split("/")[0] ?? ""
+              )
                 ? "index"
                 : (state.routes[state.index]?.name.split("/")[0] ?? "index")
             }
@@ -52,6 +54,7 @@ export default function TabsLayout() {
         <Tabs.Screen name="records/index" />
         <Tabs.Screen name="profile/index" />
         <Tabs.Screen name="find-doctor/index" options={{ href: null }} />
+        <Tabs.Screen name="doctor-results/index" options={{ href: null }} />
       </Tabs>
 
       <StatusBar style="light" />

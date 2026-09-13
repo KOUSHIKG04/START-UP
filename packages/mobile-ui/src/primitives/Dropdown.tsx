@@ -37,6 +37,7 @@ export type DropdownProps = {
   containerStyle?: StyleProp<ViewStyle>;
   triggerStyle?: StyleProp<ViewStyle>;
   valueStyle?: StyleProp<TextStyle>;
+  accessibilityLabel?: string;
 };
 
 type TriggerPosition = {
@@ -62,6 +63,7 @@ export function Dropdown({
   containerStyle,
   triggerStyle,
   valueStyle,
+  accessibilityLabel,
 }: DropdownProps) {
   const triggerRef = useRef<View>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -105,7 +107,7 @@ export function Dropdown({
 
       <Pressable
         ref={triggerRef}
-        accessibilityLabel={label ?? placeholder}
+        accessibilityLabel={accessibilityLabel ?? label ?? placeholder}
         accessibilityRole="button"
         accessibilityState={{ disabled, expanded: isOpen }}
         disabled={disabled}

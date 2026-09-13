@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router, type Href } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   Activity,
@@ -39,6 +40,13 @@ const symptoms = [
   "Anxiety",
   "Dizziness",
 ] as const;
+
+function getDoctorResultsRoute(symptom: string) {
+  return {
+    pathname: "/doctor-results",
+    params: { symptom },
+  } as Href;
+}
 
 type DoctorCategory = {
   key: string;
@@ -109,9 +117,10 @@ export function FindDoctorScreen({ onBackPress }: PatientScreenProps) {
                 <Chip
                   key={symptom}
                   label={symptom}
-                  onPress={() =>
-                    setSelectedSymptom(selected ? undefined : symptom)
-                  }
+                  onPress={() => {
+                    setSelectedSymptom(symptom);
+                    router.push(getDoctorResultsRoute(symptom));
+                  }}
                   style={[
                     styles.chip,
                     selected ? styles.selectedChip : undefined,
