@@ -1,10 +1,12 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { Bell, ChevronDown, ChevronRight, MapPin } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
   gradients,
+  shadows,
   spacing,
 } from "@startup/design-tokens";
 import { IconLabel, SafeAreaView, SearchInput } from "@startup/mobile-ui";
@@ -71,6 +73,11 @@ export function HomeScreen() {
               key={action.key}
               icon={action.icon}
               label={action.label}
+              onPress={
+                action.key === "doctor"
+                  ? () => router.push("/(tabs)/find-doctor/index")
+                  : undefined
+              }
               surfaceSize={52}
               surfaceRadius={16}
               iconSize={24}
@@ -157,6 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 22,
     backgroundColor: colors.white,
+    ...shadows.card,
   },
   searchWrap: {
     zIndex: 2,
@@ -170,11 +178,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderWidth: 0,
     borderRadius: 22,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    elevation: 5,
+    ...shadows.card,
   },
   searchInput: {
     fontFamily: fontFamilies.regular,

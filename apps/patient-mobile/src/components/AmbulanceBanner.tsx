@@ -6,7 +6,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { Button, StatusBadge } from "@startup/mobile-ui";
 
 export type AmbulanceBannerProps = {
@@ -66,11 +66,7 @@ const styles = StyleSheet.create({
     padding:20,
     borderRadius: 16,
     backgroundColor: "#E6F7F6",
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    ...shadows.card,
   },
   content: {
     minWidth: 0,

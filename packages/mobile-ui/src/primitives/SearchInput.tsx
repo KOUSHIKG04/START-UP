@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -15,6 +16,7 @@ export type SearchInputProps = Omit<TextInputProps, "style"> & {
   inputStyle?: TextInputProps["style"];
   iconColor?: string;
   iconSize?: number;
+  rightAccessory?: ReactNode;
 };
 
 export function SearchInput({
@@ -24,6 +26,7 @@ export function SearchInput({
   inputStyle,
   iconColor = colors.textSecondary,
   iconSize = 20,
+  rightAccessory,
   placeholder = "Search",
   placeholderTextColor = colors.textSecondary,
   accessibilityLabel = "Search",
@@ -49,6 +52,7 @@ export function SearchInput({
         returnKeyType="search"
         style={[styles.input, inputStyle]}
       />
+      {rightAccessory}
     </View>
   );
 }

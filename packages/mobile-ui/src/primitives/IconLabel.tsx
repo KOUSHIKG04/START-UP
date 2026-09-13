@@ -9,7 +9,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
 export type IconLabelIconProps = {
@@ -121,11 +121,7 @@ const styles = StyleSheet.create({
   iconSurface: {
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    ...shadows.card,
   },
   label: {
     fontFamily: fontFamilies.semibold,
