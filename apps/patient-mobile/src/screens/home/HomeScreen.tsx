@@ -101,7 +101,11 @@ export function HomeScreen() {
         </View>
 
         <View style={styles.ambulanceBanner}>
-          <AmbulanceBanner />
+          <AmbulanceBanner
+            onBookPress={() =>
+              router.push("/ambulance" as unknown as Href)
+            }
+          />
         </View>
 
         <View style={styles.appointmentSection}>

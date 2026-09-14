@@ -41,6 +41,9 @@ export function SOSButton({
 
   return (
     <Pressable
+      accessibilityHint="Press and hold to activate emergency SOS"
+      accessibilityLabel="Emergency SOS"
+      accessibilityRole="button"
       onLongPress={handleLongPress}
       onPress={handlePress}
       delayLongPress={400}

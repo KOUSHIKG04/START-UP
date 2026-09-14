@@ -23,6 +23,8 @@ const parentTabByRoute: Record<string, string> = {
   "find-doctor": "index",
   "doctor-results": "index",
   "doctor-profile": "index",
+  ambulance: "index",
+  sos: "index",
   "booking-status": "appointments",
   "visit-session": "appointments",
   prescription: "records",
@@ -49,11 +51,17 @@ export default function TabsLayout() {
         tabBar={({ state }) => {
           const activeRoute = state.routes[state.index];
           const mode = (activeRoute?.params as { mode?: string } | undefined)?.mode;
+          const fullscreen = (
+            activeRoute?.params as { fullscreen?: string } | undefined
+          )?.fullscreen;
           const isOnlineSession =
             activeRoute?.name === "visit-session/index" &&
             (mode === "online-chat" || mode === "online-video");
+          const isSosEmergency = activeRoute?.name === "sos/index";
 
-          if (isOnlineSession) return null;
+          if (isOnlineSession || isSosEmergency || fullscreen === "true") {
+            return null;
+          }
 
           return (
             <BottomNavBar
@@ -63,6 +71,7 @@ export default function TabsLayout() {
                 const href = patientTabRoutes[routeName];
                 if (href) router.navigate(href);
               }}
+              onSOSPress={() => router.push("/sos" as unknown as Href)}
               showSOS
             />
           );
@@ -75,6 +84,8 @@ export default function TabsLayout() {
         <Tabs.Screen name="find-doctor/index" options={{ href: null }} />
         <Tabs.Screen name="doctor-results/index" options={{ href: null }} />
         <Tabs.Screen name="doctor-profile/index" options={{ href: null }} />
+        <Tabs.Screen name="ambulance/index" options={{ href: null }} />
+        <Tabs.Screen name="sos/index" options={{ href: null }} />
         <Tabs.Screen name="booking-status/index" options={{ href: null }} />
         <Tabs.Screen name="visit-session/index" options={{ href: null }} />
         <Tabs.Screen name="prescription/index" options={{ href: null }} />
