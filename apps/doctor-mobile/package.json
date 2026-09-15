@@ -1,7 +1,7 @@
 {
   "name": "doctor-mobile",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
     "@startup/design-tokens": "workspace:*",
     "@startup/mobile-ui": "workspace:*",
@@ -13,7 +13,17 @@
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "15.15.4",
+    "expo-constants": "~57.0.18",
+    "expo-linear-gradient": "~57.0.2",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.21",
+    "react-dom": "19.2.3",
+    "react-native-screens": "~4.26.2",
+    "react-native-web": "^0.21.2",
+    "zustand": "^5.0.15",
+    "expo-camera": "~57.0.5",
+    "@react-native-community/slider": "5.2.0"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
@@ -24,7 +34,9 @@
     "tunnel": "expo start --tunnel",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.cjs"
   },
   "private": true
 }

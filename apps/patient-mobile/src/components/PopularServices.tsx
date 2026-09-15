@@ -1,7 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Accessibility,
-  ChevronRight,
   Heart,
   Hospital,
   Pill,
@@ -9,6 +8,8 @@ import {
 } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { IconLabel } from "@startup/mobile-ui";
+import SectionHeader from "./SectionHeader";
+import { router } from "expo-router";
 
 export type PopularService = {
   key: string;
@@ -57,34 +58,16 @@ const defaultServices: readonly PopularService[] = [
 
 export default function PopularServices({
   services = defaultServices,
-  onSeeAllPress,
+  onSeeAllPress = () => router.push("/appointments"),
   onServicePress,
 }: PopularServicesProps) {
   return (
     <View style={styles.section}>
-      <View style={styles.headingRow}>
-        <Text style={styles.title}>Popular Services</Text>
-
-        <IconLabel
-          accessibilityLabel="See all popular services"
-          backgroundColor="transparent"
-          gap={0}
-          icon={({ color, size }) => (
-            <ChevronRight color={color} size={size} strokeWidth={2.2} />
-          )}
-          iconColor={colors.patient.primaryDark}
-          iconContainerStyle={styles.seeAllIcon}
-          iconSize={17}
-          label="See all"
-          labelNumberOfLines={1}
-          labelStyle={styles.seeAllLabel}
-          labelWidth={42}
-          onPress={onSeeAllPress}
-          style={styles.seeAll}
-          surfaceRadius={0}
-          surfaceSize={20}
-        />
-      </View>
+      <SectionHeader
+        title="Popular Services"
+        seeAllText="View all"
+        onSeeAllPress={onSeeAllPress}
+      />
 
       <View style={styles.servicesRow}>
         {services.map((service) => (
@@ -103,6 +86,7 @@ export default function PopularServices({
                 />
               );
             }}
+            iconContainerStyle={styles.serviceIconContainer}
             iconSize={24}
             label={service.label}
             labelNumberOfLines={2}
@@ -124,35 +108,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 4,
   },
-  headingRow: {
-    minHeight: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-  },
-  title: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  seeAll: {
-    flexDirection: "row-reverse",
-    alignItems: "center",
-  },
-  seeAllIcon: {
-    borderWidth: 0,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  seeAllLabel: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 13,
-    lineHeight: 18,
-    textAlign: "right",
-  },
   servicesRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -163,6 +118,10 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flex: 1,
   },
+  serviceIconContainer: {
+    elevation: 0,
+    shadowOpacity: 0,
+  },
   serviceLabel: {
     color: colors.patient.text,
     fontFamily: fontFamilies.regular,
@@ -170,3 +129,4 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
 });
+

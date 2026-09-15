@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { router, type Href } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   Activity,
   Baby,
@@ -11,6 +12,7 @@ import {
   Ear,
   Eye,
   HeartPulse,
+  ChevronLeft,
   Mars,
   Mic,
   ShieldCheck,
@@ -23,6 +25,7 @@ import {
 import {
   colors,
   fontFamilies,
+  gradients,
   radius,
   shadows,
   spacing,
@@ -30,12 +33,11 @@ import {
 import {
   Chip,
   FadedScrollView,
-  Header,
   IconLabel,
+  SafeAreaView,
   SearchInput,
 } from "@startup/mobile-ui";
 import type { ConsultationType } from "../../types/appointment";
-import { consultationFlows } from "../../utils/consultationFlow";
 import type { PatientScreenProps } from "../types";
 
 const symptoms = [
@@ -88,73 +90,108 @@ type FindDoctorScreenProps = PatientScreenProps & {
   consultationType: ConsultationType;
 };
 
+type FindDoctorHeaderProps = {
+  onBackPress: () => void;
+  onSearchFocus: () => void;
+};
+
+function FindDoctorHeader({
+  onBackPress,
+  onSearchFocus,
+}: FindDoctorHeaderProps) {
+  return (
+    <LinearGradient
+      colors={gradients.patientBanner.colors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+    >
+      <SafeAreaView edges={["top"]}>
+        <View style={styles.headerRow}>
+          <Pressable
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
+            hitSlop={12}
+            onPress={onBackPress}
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed ? styles.backButtonPressed : undefined,
+            ]}
+          >
+            <ChevronLeft color={colors.white} size={30} strokeWidth={2.5} />
+          </Pressable>
+
+          <SearchInput
+            accessibilityLabel="Describe what you're feeling"
+            containerStyle={styles.headerSearch}
+            iconSize={18}
+            inputStyle={styles.searchInput}
+            onFocus={onSearchFocus}
+            placeholder="Describe what you're feeling..."
+            placeholderTextColor={colors.patient.muted}
+            rightAccessory={
+              <Mic
+                color={colors.patient.primaryDark}
+                size={19}
+                strokeWidth={2}
+              />
+            }
+          />
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
 export function FindDoctorScreen({
   consultationType,
   onBackPress,
 }: FindDoctorScreenProps) {
   const [selectedSymptom, setSelectedSymptom] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState("common");
-  const flow = consultationFlows[consultationType];
+  const [showSymptoms, setShowSymptoms] = useState(false);
 
   return (
     <View style={styles.screen}>
-      <Header
-        title={flow.findDoctorTitle}
-        app="patient"
+      <FindDoctorHeader
         onBackPress={onBackPress}
-        style={styles.header}
-        titleStyle={styles.headerTitle}
+        onSearchFocus={() => setShowSymptoms(true)}
       />
-
-      <View style={styles.searchWrap}>
-        <SearchInput
-          accessibilityLabel="Describe what you're feeling"
-          containerStyle={styles.search}
-          inputStyle={styles.searchInput}
-          placeholder="Describe what you're feeling..."
-          rightAccessory={
-            <Mic
-              color={colors.patient.primaryDark}
-              size={19}
-              strokeWidth={2}
-            />
-          }
-        />
-      </View>
 
       <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Common symptoms</Text>
-          <View style={styles.chipList}>
-            {symptoms.map((symptom) => {
-              const selected = selectedSymptom === symptom;
-              return (
-                <Chip
-                  key={symptom}
-                  label={symptom}
-                  onPress={() => {
-                    setSelectedSymptom(symptom);
-                    router.push(
-                      getDoctorResultsRoute(symptom, consultationType)
-                    );
-                  }}
-                  style={[
-                    styles.chip,
-                    selected ? styles.selectedChip : undefined,
-                  ]}
-                  labelStyle={[
-                    styles.chipLabel,
-                    selected ? styles.selectedChipLabel : undefined,
-                  ]}
-                />
-              );
-            })}
+        {showSymptoms ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Common symptoms</Text>
+            <View style={styles.chipList}>
+              {symptoms.map((symptom) => {
+                const selected = selectedSymptom === symptom;
+                return (
+                  <Chip
+                    key={symptom}
+                    label={symptom}
+                    onPress={() => {
+                      setSelectedSymptom(symptom);
+                      router.push(
+                        getDoctorResultsRoute(symptom, consultationType)
+                      );
+                    }}
+                    style={[
+                      styles.chip,
+                      selected ? styles.selectedChip : undefined,
+                    ]}
+                    labelStyle={[
+                      styles.chipLabel,
+                      selected ? styles.selectedChipLabel : undefined,
+                    ]}
+                  />
+                );
+              })}
+            </View>
           </View>
-        </View>
+        ) : null}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Browse by categories</Text>
@@ -217,25 +254,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.patient.background,
   },
-  header: {
-    paddingBottom: 24,
-  },
-  headerTitle: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 25,
-    lineHeight: 32,
-  },
-  searchWrap: {
-    zIndex: 2,
+  headerRow: {
+    minHeight: 76,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: -24,
+    gap: spacing.sm,
     paddingHorizontal: spacing.lg,
   },
-  search: {
+  backButton: {
+    width: 32,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backButtonPressed: {
+    opacity: 0.7,
+  },
+  headerSearch: {
     maxWidth: 420,
-    minHeight: 50,
+    height: 48,
+    flex: 1,
     borderWidth: 0,
-    borderRadius: radius.xl,
+    borderRadius: 24,
     ...shadows.card,
   },
   searchInput: {

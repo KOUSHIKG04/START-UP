@@ -19,6 +19,8 @@ import {
   CardSeparator,
   CardTitle,
 } from "@startup/mobile-ui";
+import SectionHeader from "./SectionHeader";
+import { router } from "expo-router";
 
 export type UpcomingAppointmentCardProps = {
   doctorName?: string;
@@ -40,83 +42,92 @@ export default function UpcomingAppointmentCard({
   onViewProfilePress,
 }: UpcomingAppointmentCardProps) {
   return (
-    <Card
-      accessibilityLabel={`Upcoming appointment with ${doctorName} on ${date} at ${time}`}
-      backgroundColor={gradients.patientBanner.colors[1]}
-      borderRadius={16}
-      gap={10}
-      onPress={onCardPress}
-      padding={14}
-      style={styles.card}
-    >
-      <LinearGradient
-        pointerEvents="none"
-        colors={gradients.patientBanner.colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.gradient}
+    <View style={styles.appointmentSection}>
+      <SectionHeader
+        title="Upcoming Appointments"
+        seeAllText="View all"
+        onSeeAllPress={() => router.push("/appointments")}
       />
+      <Card
+        accessibilityLabel={`Upcoming appointment with ${doctorName} on ${date} at ${time}`}
+        backgroundColor={gradients.patientBanner.colors[1]}
+        borderRadius={16}
+        gap={10}
+        onPress={onCardPress}
+        padding={14}
+        style={styles.card}
+      >
+        <LinearGradient
+          pointerEvents="none"
+          colors={gradients.patientBanner.colors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.gradient}
+        />
 
-      <CardHeader gap={12} style={styles.header}>
-        <View style={styles.avatar}>
-          <UserRound color={colors.white} size={23} strokeWidth={1.9} />
-        </View>
+        <CardHeader gap={12} style={styles.header}>
+          <View style={styles.avatar}>
+            <UserRound color={colors.white} size={23} strokeWidth={1.9} />
+          </View>
 
-        <View style={styles.doctorDetails}>
-          <CardTitle numberOfLines={1} style={styles.doctorName}>
-            {doctorName}
-          </CardTitle>
-          <CardDescription numberOfLines={1} style={styles.specialization}>
-            {specialization}
-          </CardDescription>
-        </View>
+          <View style={styles.doctorDetails}>
+            <CardTitle numberOfLines={1} style={styles.doctorName}>
+              {doctorName}
+            </CardTitle>
+            <CardDescription numberOfLines={1} style={styles.specialization}>
+              {specialization}
+            </CardDescription>
+          </View>
 
-        <CardAction style={styles.chevronButton}>
-          <ChevronRight
-            color={colors.patient.primaryDark}
-            size={17}
-            strokeWidth={2.2}
+          <CardAction style={styles.chevronButton}>
+            <ChevronRight
+              color={colors.patient.primaryDark}
+              size={17}
+              strokeWidth={2.2}
+            />
+          </CardAction>
+        </CardHeader>
+
+        <CardSeparator color="#FFFFFF47" />
+
+        <CardContent style={styles.detailsRow}>
+          <AppointmentDetail
+            icon={
+              <CalendarDays color={colors.white} size={17} strokeWidth={1.9} />
+            }
+            label="Date"
+            value={date}
           />
-        </CardAction>
-      </CardHeader>
+          <View style={styles.detailDivider} />
+          <AppointmentDetail
+            icon={<Clock3 color={colors.white} size={17} strokeWidth={1.9} />}
+            label="Time"
+            value={time}
+          />
+        </CardContent>
 
-      <CardSeparator color="#FFFFFF47" />
-
-      <CardContent style={styles.detailsRow}>
-        <AppointmentDetail
-          icon={<CalendarDays color={colors.white} size={17} strokeWidth={1.9} />}
-          label="Date"
-          value={date}
-        />
-        <View style={styles.detailDivider} />
-        <AppointmentDetail
-          icon={<Clock3 color={colors.white} size={17} strokeWidth={1.9} />}
-          label="Time"
-          value={time}
-        />
-      </CardContent>
-
-      <CardFooter gap={14} style={styles.cardFooter}>
-        <Button
-          hitSlop={4}
-          label="Re-schedule"
-          onPress={onReschedulePress}
-          style={styles.actionButton}
-          labelStyle={styles.actionLabel}
-          theme="patient"
-          variant="secondary"
-        />
-        <Button
-          hitSlop={4}
-          label="View Profile"
-          onPress={onViewProfilePress}
-          style={styles.actionButton}
-          labelStyle={styles.actionLabel}
-          theme="patient"
-          variant="secondary"
-        />
-      </CardFooter>
-    </Card>
+        <CardFooter gap={14} style={styles.cardFooter}>
+          <Button
+            hitSlop={4}
+            label="Re-schedule"
+            onPress={onReschedulePress}
+            style={styles.actionButton}
+            labelStyle={styles.actionLabel}
+            theme="patient"
+            variant="secondary"
+          />
+          <Button
+            hitSlop={4}
+            label="View Profile"
+            onPress={onViewProfilePress}
+            style={styles.actionButton}
+            labelStyle={styles.actionLabel}
+            theme="patient"
+            variant="secondary"
+          />
+        </CardFooter>
+      </Card>
+    </View>
   );
 }
 
@@ -148,7 +159,7 @@ function AppointmentDetail({ icon, label, value }: AppointmentDetailProps) {
 const styles = StyleSheet.create({
   card: {
     width: "98%",
-    padding:20,
+    padding: 20,
     alignItems: "center",
   },
   gradient: {
@@ -157,7 +168,7 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 4,
-    marginBottom:8
+    marginBottom: 8,
   },
   avatar: {
     width: 42,
@@ -196,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingVertical:4
+    paddingVertical: 4,
   },
   detail: {
     flex: 1,
@@ -245,7 +256,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
-  cardFooter:{
-    marginTop:4
-  }
+  cardFooter: {
+    marginTop: 4,
+  },
+  appointmentSection: {
+    gap: 10,
+    marginTop: 10,
+    marginBottom:10
+  },
 });

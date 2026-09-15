@@ -17,12 +17,14 @@ export type FadedScrollViewProps = ScrollViewProps & {
   containerStyle?: StyleProp<ViewStyle>;
   edgeColor?: string;
   edgeSize?: number;
+  topEdgeOffset?: number;
 };
 
 export function FadedScrollView({
   containerStyle,
   edgeColor = colors.background,
   edgeSize = 28,
+  topEdgeOffset = 0,
   onContentSizeChange,
   onLayout,
   onScroll,
@@ -74,7 +76,10 @@ export function FadedScrollView({
         <LinearGradient
           colors={[edgeColor, transparentEdge]}
           pointerEvents="none"
-          style={[styles.topEdge, { height: edgeSize }]}
+          style={[
+            styles.topEdge,
+            { height: edgeSize, top: topEdgeOffset },
+          ]}
         />
       ) : null}
       {showBottomEdge ? (
@@ -95,6 +100,6 @@ function toTransparent(color: string) {
 const styles = StyleSheet.create({
   container: { flex: 1, position: "relative" },
   scrollView: { flex: 1 },
-  topEdge: { position: "absolute", top: 0, left: 0, right: 0, zIndex: 2 },
+  topEdge: { position: "absolute", left: 0, right: 0, zIndex: 2 },
   bottomEdge: { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2 },
 });
