@@ -1,13 +1,13 @@
 import { router, useLocalSearchParams, type Href } from "expo-router";
-import { VisitSessionScreen } from "../../../screens/visit-session/VisitSessionScreen";
+import { VisitSessionScreen } from "../../screens/visit-session/VisitSessionScreen";
 import type {
   ConsultationType,
   VisitSessionMode,
-} from "../../../types/appointment";
+} from "../../types/appointment";
 import {
   appointmentFromParams,
   type AppointmentParams,
-} from "../../../utils/appointmentParams";
+} from "../../utils/appointmentParams";
 
 type VisitSessionParams = AppointmentParams & {
   mode?: VisitSessionMode | VisitSessionMode[];

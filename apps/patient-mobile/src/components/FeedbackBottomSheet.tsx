@@ -74,7 +74,7 @@ export default function FeedbackBottomSheet({
 const styles = StyleSheet.create({
   modal: { flex: 1, justifyContent: "flex-end" },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(5, 28, 31, 0.42)",
   },
   sheet: {

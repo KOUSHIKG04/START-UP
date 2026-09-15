@@ -9,10 +9,7 @@ import { appointments } from "../../utils/appointments";
 import type { PatientScreenProps } from "../types";
 
 type BookingFilter =
-  | "Clinic Visit"
-  | "Home Visit"
-  | "Online"
-  | "Medicine and test";
+  "Clinic Visit" | "Home Visit" | "Online" | "Medicine and test";
 
 const bookingFilters: readonly BookingFilter[] = [
   "Clinic Visit",

@@ -9,7 +9,7 @@ export const colors = {
     text: "#0C2434",
     textSecondary: "#374151",
     muted: "#9CA3AF",
-    background: "#F9FAFB",
+    background: "#FFFFFF",
 
     // Embedded SOS feature inside Patient App
     sos: {
@@ -62,7 +62,7 @@ export const colors = {
   brand: "#008877",
   white: "#FFFFFF",
   black: "#000000",
-  background: "#F9FAFB",
+  background: "#FFFFFF",
   surface: "#FFFFFF",
   textPrimary: "#0C2434",
   textSecondary: "#374151",

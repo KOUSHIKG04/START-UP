@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { router } from "expo-router";
-import { AmbulanceBookingScreen } from "../../../screens/ambulance/AmbulanceBookingScreen";
+import { AmbulanceBookingScreen } from "../../screens/ambulance/AmbulanceBookingScreen";
 
 export default function AmbulanceRoute() {
   const handleFullscreenChange = useCallback((fullscreen: boolean) => {

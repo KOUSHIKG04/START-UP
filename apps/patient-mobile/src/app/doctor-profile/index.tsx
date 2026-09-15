@@ -2,8 +2,8 @@ import { router, useLocalSearchParams, type Href } from "expo-router";
 import {
   DoctorProfileScreen,
   type BookingSelection,
-} from "../../../screens/doctor-profile/DoctorProfileScreen";
-import { parseConsultationType } from "../../../utils/consultationFlow";
+} from "../../screens/doctor-profile/DoctorProfileScreen";
+import { parseConsultationType } from "../../utils/consultationFlow";
 
 type DoctorProfileParams = {
   name?: string;
