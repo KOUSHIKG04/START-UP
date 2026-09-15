@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "driver-mobile",
+    "name": "CLINZO Ambulance",
     "slug": "driver-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,10 +16,13 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "scheme": "clinzo-driver",
+    "plugins": ["expo-router", "expo-document-picker"]
   }
 }

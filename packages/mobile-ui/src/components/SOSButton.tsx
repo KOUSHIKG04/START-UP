@@ -67,8 +67,8 @@ export function SOSButton({
             height: innerRingSize,
             borderRadius: innerRingRadius,
             borderColor: isRed
-              ? "rgba(255, 255, 255, 0.45)"
-              : "rgba(239, 59, 67, 0.25)",
+              ? "#FFFFFF73"
+              : "#EF3B4340",
           },
         ]}
       />
