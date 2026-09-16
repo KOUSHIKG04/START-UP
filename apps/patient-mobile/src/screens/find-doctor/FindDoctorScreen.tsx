@@ -164,11 +164,6 @@ const categories: readonly DoctorCategory[] = [
     imageScale: 1.1,
   },
   {
-    key: "general_physician",
-    label: "General\nPhysician",
-    image: require("../../../assets/clinzo-symptom-icons/common-illness.png"),
-  },
-  {
     key: "diabetes",
     label: "Diabetes &\nHormones",
     image: require("../../../assets/clinzo-symptom-icons/Diabeties.png"),
