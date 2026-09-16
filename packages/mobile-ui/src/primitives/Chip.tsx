@@ -55,8 +55,9 @@ const styles = StyleSheet.create({
   chip: {
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    minHeight: 40,
     borderWidth: 1,
     borderColor: colors.borderDefault,
     borderRadius: 999,
@@ -64,10 +65,10 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.textPrimary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    fontWeight: "400",
-    lineHeight: 16,
+    fontFamily: fontFamilies.medium,
+    fontSize: 14,
+    fontWeight: "500",
+    lineHeight: 20,
   },
   pressed: {
     opacity: 0.75,

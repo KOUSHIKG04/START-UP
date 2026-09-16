@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { forwardRef, type ReactNode } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -16,46 +16,56 @@ export type SearchInputProps = Omit<TextInputProps, "style"> & {
   inputStyle?: TextInputProps["style"];
   iconColor?: string;
   iconSize?: number;
+  showIcon?: boolean;
   rightAccessory?: ReactNode;
 };
 
-export function SearchInput({
-  disabled = false,
-  editable = true,
-  containerStyle,
-  inputStyle,
-  iconColor = colors.textSecondary,
-  iconSize = 20,
-  rightAccessory,
-  placeholder = "Search",
-  placeholderTextColor = colors.textSecondary,
-  accessibilityLabel = "Search",
-  accessibilityState,
-  ...props
-}: SearchInputProps) {
-  return (
-    <View
-      style={[
-        styles.container,
-        disabled ? styles.disabled : undefined,
-        containerStyle,
-      ]}
-    >
-      <Search color={iconColor} size={iconSize} strokeWidth={2} />
-      <TextInput
-        {...props}
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ ...accessibilityState, disabled }}
-        editable={!disabled && editable}
-        placeholder={placeholder}
-        placeholderTextColor={placeholderTextColor}
-        returnKeyType="search"
-        style={[styles.input, inputStyle]}
-      />
-      {rightAccessory}
-    </View>
-  );
-}
+export const SearchInput = forwardRef<TextInput, SearchInputProps>(
+  function SearchInput(
+    {
+      disabled = false,
+      editable = true,
+      containerStyle,
+      inputStyle,
+      iconColor = colors.textSecondary,
+      iconSize = 20,
+      showIcon = true,
+      rightAccessory,
+      placeholder = "Search",
+      placeholderTextColor = colors.textSecondary,
+      accessibilityLabel = "Search",
+      accessibilityState,
+      ...props
+    },
+    ref
+  ) {
+    return (
+      <View
+        style={[
+          styles.container,
+          disabled ? styles.disabled : undefined,
+          containerStyle,
+        ]}
+      >
+        {showIcon ? (
+          <Search color={iconColor} size={iconSize} strokeWidth={2} />
+        ) : null}
+        <TextInput
+          ref={ref}
+          {...props}
+          accessibilityLabel={accessibilityLabel}
+          accessibilityState={{ ...accessibilityState, disabled }}
+          editable={!disabled && editable}
+          placeholder={placeholder}
+          placeholderTextColor={placeholderTextColor}
+          returnKeyType="search"
+          style={[styles.input, inputStyle]}
+        />
+        {rightAccessory}
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

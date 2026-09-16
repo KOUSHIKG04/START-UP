@@ -33,18 +33,18 @@ export const homeActions: readonly HomeAction[] = [
     ),
   },
   {
-    key: "lab",
-    label: "Lab Tests",
-    icon: ({ color, size }: IconLabelIconProps) => (
-      <Microscope color={color} size={size} strokeWidth={1.8} />
-    ),
-  },
-  {
     key: "consultation",
     label: "Online\nConsultation",
     consultationType: "Online",
     icon: ({ color, size }: IconLabelIconProps) => (
       <MessageCircle color={color} size={size} strokeWidth={1.8} />
+    ),
+  },
+  {
+    key: "lab",
+    label: "Book\nLab Tests",
+    icon: ({ color, size }: IconLabelIconProps) => (
+      <Microscope color={color} size={size} strokeWidth={1.8} />
     ),
   },
 ];

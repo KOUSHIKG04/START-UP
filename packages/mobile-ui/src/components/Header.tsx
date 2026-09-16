@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -15,7 +16,9 @@ import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 export type { HeaderApp } from "../utils/headerBackground";
 
 export type HeaderProps = ViewProps & {
-  title: string;
+  title?: string;
+  centerContent?: ReactNode;
+  rightAction?: ReactNode;
   onBackPress: () => void;
   app?: HeaderApp;
   backgroundColor?: string;
@@ -27,6 +30,8 @@ export type HeaderProps = ViewProps & {
 
 export function Header({
   title,
+  centerContent,
+  rightAction,
   onBackPress,
   app = "patient",
   backgroundColor,
@@ -75,12 +80,24 @@ export function Header({
             <ChevronLeft color={foregroundColor} size={30} strokeWidth={2.5} />
           </Pressable>
 
-          <Text
-            numberOfLines={1}
-            style={[styles.title, { color: foregroundColor }, titleStyle]}
-          >
-            {title}
-          </Text>
+          {centerContent ? (
+            <View style={styles.centerContent}>{centerContent}</View>
+          ) : title ? (
+            <Text
+              numberOfLines={1}
+              style={[styles.title, { color: foregroundColor }, titleStyle]}
+            >
+              {title}
+            </Text>
+          ) : (
+            <View style={styles.centerContent} />
+          )}
+
+          {rightAction ? (
+            <View style={styles.rightAction}>{rightAction}</View>
+          ) : centerContent ? (
+            <View style={styles.backButtonPlaceholder} />
+          ) : null}
         </View>
       </SafeAreaView>
     </View>
@@ -103,8 +120,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  backButtonPlaceholder: {
+    width: 32,
+    marginLeft: 16,
+  },
   backButtonPressed: {
     opacity: 0.7,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rightAction: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 16,
   },
   title: {
     ...typography.headerText,
