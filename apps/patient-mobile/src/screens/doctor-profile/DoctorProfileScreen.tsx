@@ -6,7 +6,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { MapPin, Navigation, Video } from "lucide-react-native";
+import {
+  MapPin,
+  Navigation,
+  Video,
+} from "lucide-react-native";
 import {
   colors,
   fontFamilies,
@@ -151,25 +155,34 @@ type OnlineConsultationProps = {
 function OnlineConsultation({ fee, onBookPress }: OnlineConsultationProps) {
   return (
     <Card
-      backgroundColor={colors.patient.surface}
-      borderRadius={radius.md}
-      gap={10}
+      backgroundColor={colors.white}
+      borderRadius={16}
+      borderWidth={0}
+      gap={14}
       orientation="horizontal"
-      padding={12}
-      variant="soft"
-      style={styles.consultationCopy}
+      padding={14}
+      variant="elevated"
+      style={styles.consultationCard}
     >
-      <CardContent gap={1} style={styles.consultationCard}>
+      <View style={styles.consultationIconContainer}>
+        <Video color={colors.patient.primary} size={22} strokeWidth={2.2} />
+      </View>
+
+      <View style={styles.consultationCopy}>
         <Text style={styles.consultationTitle}>
-          Online consultation available: {fee}
+          Online Consultation Available
         </Text>
-      </CardContent>
+        <Text style={styles.consultationSubtitle}>
+          {`Video call from home · ${fee}`}
+        </Text>
+      </View>
+
       <Button
         label="Book"
+        theme="patient"
         onPress={onBookPress}
-        style={styles.smallButton}
-        labelStyle={styles.smallButtonLabel}
-        leftIcon={<Video color={colors.white} size={19} strokeWidth={2} />}
+        style={styles.consultationButton}
+        labelStyle={styles.consultationButtonLabel}
       />
     </Card>
   );
@@ -378,7 +391,7 @@ function BookSlots({
     >
       <View style={styles.bookingSection}>
         {/* Horizontal Months Strip using Chips */}
-        <ScrollView
+        <FadedScrollView
           ref={monthsScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -405,10 +418,10 @@ function BookSlots({
               />
             );
           })}
-        </ScrollView>
+        </FadedScrollView>
 
         {/* Dates Carousel - all same size with border */}
-        <ScrollView
+        <FadedScrollView
           ref={datesScrollRef}
           horizontal
           nestedScrollEnabled
@@ -419,26 +432,27 @@ function BookSlots({
             const selected = date.key === selectedDate;
 
             return (
-              <Pressable
+              <Button
                 key={date.key}
+                variant={selected ? "primary" : "outline"}
+                theme="patient"
+                disabled={date.closed}
                 accessibilityRole="radio"
                 accessibilityState={{
                   selected,
                   disabled: date.closed === true,
                 }}
-                disabled={date.closed}
                 onPress={() => handleSelectDate(date.key, idx)}
-                style={({ pressed }) => [
+                style={[
                   styles.dateCard,
                   selected ? styles.selectedDateCard : undefined,
-                  date.closed ? styles.closedDateCard : undefined,
-                  pressed && styles.pressed,
                 ]}
               >
                 <Text
                   style={[
                     styles.dateNumber,
                     selected ? styles.selectedDateNumber : undefined,
+                    date.closed ? styles.disabledDateText : undefined,
                   ]}
                 >
                   {date.dayNumber}
@@ -447,14 +461,15 @@ function BookSlots({
                   style={[
                     styles.dateDay,
                     selected ? styles.selectedDateDay : undefined,
+                    date.closed ? styles.disabledDateText : undefined,
                   ]}
                 >
                   {date.day}
                 </Text>
-              </Pressable>
+              </Button>
             );
           })}
-        </ScrollView>
+        </FadedScrollView>
       </View>
 
       <View style={styles.bookingSection}>
@@ -492,13 +507,16 @@ function BookSlots({
               <Chip
                 key={option}
                 label={option}
+                selected={selected}
                 accessibilityState={{ selected }}
                 onPress={() => setPatient(option)}
                 style={[
                   styles.patientChip,
                   selected ? styles.selectedPatientChip : undefined,
                 ]}
-                labelStyle={selected ? styles.selectedPatientText : undefined}
+                labelStyle={
+                  selected ? styles.selectedPatientText : styles.patientChipText
+                }
               />
             );
           })}
@@ -557,44 +575,54 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: 126,
   },
-  videoIcon: {
-    width: 38,
-    height: 38,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 11,
-    backgroundColor: colors.white,
-  },
   consultationCard: {
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  consultationCopy: {
-    display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 12,
-    shadowColor: colors.black,
+    elevation: 4,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowRadius: 8,
+  },
+  consultationIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#E6F7F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  consultationCopy: {
+    flex: 1,
+    gap: 3,
   },
   consultationTitle: {
-    color: colors.patient.primaryDark,
+    color: "#0C2434",
     fontFamily: fontFamilies.semibold,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
-    lineHeight: 16,
+    lineHeight: 20,
   },
-  consultationDescription: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 10,
-    lineHeight: 14,
+  consultationSubtitle: {
+    color: "#5B6B79",
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+  consultationButton: {
+    minHeight: 40,
+    paddingHorizontal: 22,
+    paddingVertical: 8,
+    borderRadius: 14,
+    backgroundColor: colors.patient.primary,
+  },
+  consultationButtonLabel: {
+    color: colors.white,
+    fontFamily: fontFamilies.bold,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 18,
   },
   locationButton: {
     minHeight: 44,
@@ -624,14 +652,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontStyle: "italic",
     lineHeight: 15,
-  },
-  smallButton: {
-    paddingHorizontal: 14,
-    borderRadius: 12,
-  },
-  smallButtonLabel: {
-    fontSize: 12,
-    lineHeight: 14,
   },
   tabs: {
     minHeight: 44,
@@ -763,10 +783,11 @@ const styles = StyleSheet.create({
   dateCard: {
     width: 54,
     height: 64,
+    minHeight: 64,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
-    backgroundColor: colors.patient.background,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
@@ -774,9 +795,6 @@ const styles = StyleSheet.create({
   selectedDateCard: {
     borderColor: colors.patient.primaryDark,
     backgroundColor: colors.patient.primaryDark,
-  },
-  closedDateCard: {
-    opacity: 0.38,
   },
   dateNumber: {
     color: colors.patient.text,
@@ -796,6 +814,9 @@ const styles = StyleSheet.create({
   },
   selectedDateDay: {
     color: colors.white,
+  },
+  disabledDateText: {
+    color: colors.disabledText,
   },
   sectionHeadingRow: {
     flexDirection: "row",
@@ -832,13 +853,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   patientChip: {
-    borderColor: colors.patient.primaryDark,
+    minHeight: 34,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    backgroundColor: colors.patient.background,
   },
   selectedPatientChip: {
-    backgroundColor: colors.patient.surface,
+    borderColor: colors.patient.primaryDark,
+    backgroundColor: colors.patient.primaryDark,
+  },
+  patientChipText: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
   },
   selectedPatientText: {
-    color: colors.patient.primaryDark,
+    color: colors.white,
     fontFamily: fontFamilies.semibold,
   },
   bookButton: {

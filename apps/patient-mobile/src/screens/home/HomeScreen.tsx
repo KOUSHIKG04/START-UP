@@ -165,7 +165,6 @@ export function HomeScreen({
           isSearchActive && { paddingTop: searchActivePaddingTop },
         ]}
         containerStyle={styles.scrollContainer}
-        edgeColor={colors.white}
         keyboardShouldPersistTaps="handled"
         topEdgeOffset={collapsedHeight}
         onScroll={

@@ -53,6 +53,7 @@ export {
 export { TextArea, type TextAreaProps } from "./primitives/TextArea";
 export {
   FadedScrollView,
+  DEFAULT_FADED_EDGE_COLOR,
   type FadedScrollViewProps,
 } from "./primitives/FadedScrollView";
 export { TimeSlot, type TimeSlotProps } from "./primitives/TimeSlot";

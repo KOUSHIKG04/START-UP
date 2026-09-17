@@ -25,7 +25,8 @@ export type ButtonProps = Omit<
   PressableProps,
   "children" | "style" | "disabled"
 > & {
-  label: string;
+  label?: string;
+  children?: ReactNode;
   variant?: ButtonVariant;
   theme?: AppTheme;
   disabled?: boolean;
@@ -41,6 +42,7 @@ type ButtonPalette = {
 
 export function Button({
   label,
+  children,
   variant = "primary",
   theme = "patient",
   disabled = false,
@@ -69,18 +71,24 @@ export function Button({
         typeof style === "function" ? style(state) : style,
       ]}
     >
-      {leftIcon}
-      <Text
-        numberOfLines={1}
-        style={[
-          styles.label,
-          palette.label,
-          disabled ? styles.disabledLabel : undefined,
-          labelStyle,
-        ]}
-      >
-        {label}
-      </Text>
+      {children ?? (
+        <>
+          {leftIcon}
+          {label ? (
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.label,
+                palette.label,
+                disabled ? styles.disabledLabel : undefined,
+                labelStyle,
+              ]}
+            >
+              {label}
+            </Text>
+          ) : null}
+        </>
+      )}
     </Pressable>
   );
 }

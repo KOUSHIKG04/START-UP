@@ -9,43 +9,20 @@ import {
   View,
 } from "react-native";
 import { ChevronDown, Clock, MapPin, Search, Sparkles, X } from "lucide-react-native";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, SearchInput } from "@startup/mobile-ui";
+import {
+  DEFAULT_SEARCH_CITY,
+  INITIAL_RECENTS,
+  POPULAR_SEARCHES,
+  filterSearchDirectory,
+  findSearchItem,
+  getDoctorResultsSearchRoute,
+  type SearchItem,
+} from "../../utils/homeSearchConstants";
 
-export type SearchItem = {
-  id: string;
-  title: string;
-  type: "Speciality" | "Symptom";
-};
-
-const INITIAL_RECENTS: SearchItem[] = [
-  { id: "rec-1", title: "General Physician", type: "Speciality" },
-  { id: "rec-2", title: "Dermatologist", type: "Speciality" },
-  { id: "rec-3", title: "Fever", type: "Symptom" },
-];
-
-const POPULAR_SEARCHES: SearchItem[] = [
-  { id: "pop-1", title: "Cardiologist", type: "Speciality" },
-  { id: "pop-2", title: "Pediatrician", type: "Speciality" },
-  { id: "pop-3", title: "Orthopedic", type: "Speciality" },
-  { id: "pop-4", title: "Gynecologist", type: "Speciality" },
-  { id: "pop-5", title: "Dentist", type: "Speciality" },
-  { id: "pop-6", title: "ENT Specialist", type: "Speciality" },
-  { id: "pop-7", title: "Cough & Cold", type: "Symptom" },
-  { id: "pop-8", title: "Headache", type: "Symptom" },
-  { id: "pop-9", title: "Stomach Pain", type: "Symptom" },
-];
-
-const SEARCH_DIRECTORY: SearchItem[] = [
-  ...INITIAL_RECENTS,
-  ...POPULAR_SEARCHES,
-  { id: "s8", title: "Neurologist", type: "Speciality" },
-  { id: "s10", title: "Psychiatrist", type: "Speciality" },
-  { id: "sym5", title: "Back pain", type: "Symptom" },
-  { id: "sym6", title: "Skin rash", type: "Symptom" },
-  { id: "sym8", title: "Breathing issue", type: "Symptom" },
-];
+export type { SearchItem };
 
 type HomeSearchOverlayProps = {
   visible: boolean;
@@ -56,19 +33,13 @@ type HomeSearchOverlayProps = {
 export function HomeSearchOverlay({
   visible,
   onClose,
-  selectedCity = "Bangalore",
+  selectedCity = DEFAULT_SEARCH_CITY,
 }: HomeSearchOverlayProps) {
   const [query, setQuery] = useState("");
-  const [recents, setRecents] = useState<SearchItem[]>(INITIAL_RECENTS);
+  const [recents, setRecents] = useState<SearchItem[]>(() => [...INITIAL_RECENTS]);
 
   const trimmedQuery = query.trim().toLowerCase();
-  const searchResults = trimmedQuery
-    ? SEARCH_DIRECTORY.filter(
-        (item) =>
-          item.title.toLowerCase().includes(trimmedQuery) ||
-          item.type.toLowerCase().includes(trimmedQuery)
-      )
-    : [];
+  const searchResults = filterSearchDirectory(query);
 
   const handleClose = () => {
     Keyboard.dismiss();
@@ -86,11 +57,7 @@ export function HomeSearchOverlay({
     });
 
     handleClose();
-
-    router.push({
-      pathname: "/doctor-results",
-      params: { symptom: item.title, consultationType: "Clinic Visit" },
-    } as unknown as Href);
+    router.push(getDoctorResultsSearchRoute(item.title));
   };
 
   const handleRemoveRecent = (id: string) => {
@@ -103,9 +70,7 @@ export function HomeSearchOverlay({
 
   const handleSubmitEditing = () => {
     if (trimmedQuery) {
-      const existing = SEARCH_DIRECTORY.find(
-        (item) => item.title.toLowerCase() === trimmedQuery
-      );
+      const existing = findSearchItem(trimmedQuery);
       const itemToSelect: SearchItem = existing ?? {
         id: `custom-${Date.now()}`,
         title: query.trim(),

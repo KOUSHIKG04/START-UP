@@ -258,7 +258,6 @@ export function FindDoctorScreen({
           isSearchActive && { paddingTop: searchActivePaddingTop },
         ]}
         containerStyle={styles.scrollContainer}
-        edgeColor={colors.white}
         topEdgeOffset={collapsedHeight}
         onScroll={
           isSearchActive
