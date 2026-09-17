@@ -9,10 +9,9 @@ import {
   Text,
   TextInput,
   View,
-  type ImageSourcePropType,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, Mic, X } from "lucide-react-native";
 import {
@@ -24,6 +23,7 @@ import {
   spacing,
 } from "@startup/design-tokens";
 import {
+  Button,
   Chip,
   FadedScrollView,
   SafeAreaView,
@@ -31,234 +31,20 @@ import {
 } from "@startup/mobile-ui";
 import {
   COLLAPSE_DISTANCE,
-  SEARCH_HEIGHT,
   getHeaderAnimationStyles,
 } from "../../utils/headerConstants";
 import type { ConsultationType } from "../../types/appointment";
 import type { PatientScreenProps } from "../types";
-
-const EXPANDED_HEADER_HEIGHT = 147;
-const SEARCH_OVERLAP = 24;
-const COLLAPSED_HEADER_H = 74; // gives comfortable ~19px padding below search bar
-const SEARCH_END_TOP_OFFSET = 11;
-const CONTENT_TOP =
-  EXPANDED_HEADER_HEIGHT - SEARCH_OVERLAP + SEARCH_HEIGHT + 14;
-
-const symptoms = [
-  "Fever",
-  "Cough",
-  "Headache",
-  "Stomach pain",
-  "Back pain",
-  "Skin rash",
-  "Cold",
-  "Breathing issue",
-] as const;
-
-function getDoctorResultsRoute(
-  symptom: string,
-  consultationType: ConsultationType
-) {
-  return {
-    pathname: "/doctor-results",
-    params: { symptom, consultationType },
-  } as unknown as Href;
-}
-
-type DoctorCategory = {
-  key: string;
-  label: string;
-  image: ImageSourcePropType;
-  imageScale?: number;
-};
-
-const categories: readonly DoctorCategory[] = [
- 
-  {
-    key: "cold_cough",
-    label: "Cold &\nCough",
-    image: require("../../../assets/clinzo-symptom-icons/cold-and-cough.png"),
-    imageScale:1.05
-  },
-  {
-    key: "headache",
-    label: "Headache &\nMigraine",
-    image: require("../../../assets/clinzo-symptom-icons/headache.png"),
-    imageScale:1.05
-  },
-   {
-    key: "fever",
-    label: "Fever",
-    image: require("../../../assets/clinzo-symptom-icons/fever.png"),
-    imageScale: 1.2,
-  },
-  {
-    key: "vision",
-    label: "Eyes &\nVision",
-    image: require("../../../assets/clinzo-symptom-icons/eye-care.png"),
-  },
-  {
-    key: "dental",
-    label: "Dental\nCare",
-    image: require("../../../assets/clinzo-symptom-icons/Dental.png"),
-  },
-  {
-    key: "heart",
-    label: "Heart",
-    image: require("../../../assets/clinzo-symptom-icons/Heart.png"),
-  },
-  {
-    key: "lungs",
-    label: "Breathing &\nLungs",
-    image: require("../../../assets/clinzo-symptom-icons/lungs.png"),
-  },
-  {
-    key: "digestion",
-    label: "Stomach &\nDigestion",
-    image: require("../../../assets/clinzo-symptom-icons/Stomach.png"),
-  },
-  {
-    key: "stomach_pain",
-    label: "Stomach\nPain",
-    image: require("../../../assets/clinzo-symptom-icons/stomach-pain.png"),
-  },
-  {
-    key: "bones",
-    label: "Bones, Joints\n& Muscles",
-    image: require("../../../assets/clinzo-symptom-icons/Knee.png"),
-  },
-  {
-    key: "spine",
-    label: "Spine & Back\nCare",
-    image: require("../../../assets/clinzo-symptom-icons/Spine.png"),
-  },
-  {
-    key: "brain",
-    label: "Brain & Nervous\nSystem",
-    image: require("../../../assets/clinzo-symptom-icons/neuro.png"),
-  },
-  {
-    key: "skin",
-    label: "Skin & Hair",
-    image: require("../../../assets/clinzo-symptom-icons/skin.png"),
-  },
-  {
-    key: "women",
-    label: "Women's\nHealth",
-    image: require("../../../assets/clinzo-symptom-icons/women-health.png"),
-  },
-  {
-    key: "men",
-    label: "sexual\nHealth",
-    image: require("../../../assets/clinzo-symptom-icons/sexcual-wellness.png"),
-  },
-  {
-    key: "mental",
-    label: "Mental\nHealth",
-    image: require("../../../assets/clinzo-symptom-icons/mental-health.png"),
-  },
-  {
-    key: "ent",
-    label: "Ear, Nose &\nThroat",
-    image: require("../../../assets/clinzo-symptom-icons/sinusitis.png"),
-    imageScale: 1.1,
-  },
-  {
-    key: "diabetes",
-    label: "Diabetes &\nHormones",
-    image: require("../../../assets/clinzo-symptom-icons/Diabeties.png"),
-  },
-  {
-    key: "kidney",
-    label: "Kidney &\nUrinary",
-    image: require("../../../assets/clinzo-symptom-icons/Kidney.png"),
-  },
-  {
-    key: "kidney_stone",
-    label: "Kidney\nStones",
-    image: require("../../../assets/clinzo-symptom-icons/kidney-stone.png"),
-  },
-  {
-    key: "gallstones",
-    label: "Gall\nStones",
-    image: require("../../../assets/clinzo-symptom-icons/gallstones.png"),
-  },
-  {
-    key: "children",
-    label: "Children's\nHealth",
-    image: require("../../../assets/clinzo-symptom-icons/Children.png"),
-  },
-  {
-    key: "constipation",
-    label: "Constipation\n& Bowel",
-    image: require("../../../assets/clinzo-symptom-icons/constipation.png"),
-  },
-  {
-    key: "piles",
-    label: "Piles &\nHemorrhoids",
-    image: require("../../../assets/clinzo-symptom-icons/piles-hemorrhoids.png"),
-  },
-  {
-    key: "fissure_fistula",
-    label: "Fissure &\nFistula",
-    image: require("../../../assets/clinzo-symptom-icons/anal-fissure-fistula.png"),
-  },
-  {
-    key: "hernia",
-    label: "Hernia\nCare",
-    image: require("../../../assets/clinzo-symptom-icons/hernia.png"),
-  },
-  {
-    key: "appendicitis",
-    label: "Appendicitis",
-    image: require("../../../assets/clinzo-symptom-icons/appendicitis.png"),
-  },
-  {
-    key: "varicose_veins",
-    label: "Varicose\nVeins",
-    image: require("../../../assets/clinzo-symptom-icons/varicose-veins.png"),
-  },
-  {
-    key: "general_surgery",
-    label: "General\nSurgery",
-    image: require("../../../assets/clinzo-symptom-icons/general-surgery.png"),
-  },
-  {
-    key: "allergies",
-    label: "Allergies &\nImmune",
-    image: require("../../../assets/clinzo-symptom-icons/allergy-immune.png"),
-  },
-  {
-    key: "cancer",
-    label: "Cancer\nCare",
-    image: require("../../../assets/clinzo-symptom-icons/cancer.png"),
-  },
-  {
-    key: "ayurveda",
-    label: "Ayurveda",
-    image: require("../../../assets/clinzo-symptom-icons/ayurveda.png"),
-  },
-  {
-    key: "vertigo",
-    label: "Vertigo &\nBalance",
-    image: require("../../../assets/clinzo-symptom-icons/vertigo.png"),
-  },
-  {
-    key: "circumcision",
-    label: "Circumcision",
-    image: require("../../../assets/clinzo-symptom-icons/circumcision.png"),
-  },
-  {
-    key: "covid",
-    label: "Covid & Viral\nCare",
-    image: require("../../../assets/clinzo-symptom-icons/covid.png"),
-  },
-  {
-    key: "blood_test",
-    label: "Blood Test &\nDiagnostics",
-    image: require("../../../assets/clinzo-symptom-icons/Blood-test.png"),
-  },
-];
+import {
+  COLLAPSED_HEADER_H,
+  CONTENT_TOP,
+  EXPANDED_HEADER_HEIGHT,
+  SEARCH_END_TOP_OFFSET,
+  SEARCH_OVERLAP,
+  categories,
+  getDoctorResultsRoute,
+  symptoms,
+} from "../../utils/findDoctorConstants";
 
 type FindDoctorScreenProps = PatientScreenProps & {
   consultationType: ConsultationType;
@@ -448,10 +234,18 @@ export function FindDoctorScreen({
                   onPress={() => setSearchQuery("")}
                   style={{ padding: 4 }}
                 >
-                  <X color={colors.patient.primaryDark} size={20} strokeWidth={2.4} />
+                  <X
+                    color={colors.patient.primaryDark}
+                    size={20}
+                    strokeWidth={2.4}
+                  />
                 </Pressable>
               ) : (
-                <Mic color={colors.patient.primaryDark} size={19} strokeWidth={2} />
+                <Mic
+                  color={colors.patient.primaryDark}
+                  size={19}
+                  strokeWidth={2}
+                />
               )
             }
           />
@@ -483,7 +277,7 @@ export function FindDoctorScreen({
         {!isSearchActive ? (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Common symptoms</Text>
+              <Text style={styles.symptomsTitle}>Most searched symptoms</Text>
               <View style={styles.chipList}>
                 {symptoms.map((symptom) => {
                   const selected = selectedSymptom === symptom;
@@ -550,23 +344,17 @@ export function FindDoctorScreen({
                 ))}
               </View>
 
-              <Pressable
-                accessibilityRole="button"
+              <Button
+                variant="outline"
+                label={showAllCategories ? "Show Less" : "Show All Categories"}
                 accessibilityLabel={
                   showAllCategories
                     ? "Show less categories"
                     : "Show all categories"
                 }
                 onPress={() => setShowAllCategories((prev) => !prev)}
-                style={({ pressed }) => [
-                  styles.showAllButton,
-                  pressed && styles.showAllButtonPressed,
-                ]}
-              >
-                <Text style={styles.showAllButtonText}>
-                  {showAllCategories ? "Show Less" : "Show All Categories"}
-                </Text>
-              </Pressable>
+                style={styles.showAllButton}
+              />
             </View>
           </>
         ) : (
@@ -745,10 +533,17 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
-    fontSize: 17,
-    fontWeight: "700",
+    fontFamily: fontFamilies.semibold,
+    fontSize: 18,
+    fontWeight: "400",
     lineHeight: 23,
+  },
+  symptomsTitle: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.regular,
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 20,
   },
   chipList: {
     flexDirection: "row",
@@ -796,23 +591,8 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   showAllButton: {
+    width: "100%",
     marginTop: spacing.md,
-    alignSelf: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: radius.pill,
-    backgroundColor: colors.patient.surface,
-    borderWidth: 1,
-    borderColor: colors.patient.surfaceBorder,
-  },
-  showAllButtonPressed: {
-    opacity: 0.75,
-  },
-  showAllButtonText: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 13,
-    fontWeight: "600",
   },
   searchActiveList: {
     paddingTop: spacing.xs,

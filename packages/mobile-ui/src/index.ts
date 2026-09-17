@@ -29,7 +29,7 @@ export {
   type CardTitleProps,
   type CardVariant,
 } from "./primitives/Card";
-export { Chip, type ChipProps } from "./primitives/Chip";
+export { Chip, type ChipProps, type ChipVariant } from "./primitives/Chip";
 export {
   appThemeColors,
   type AppTheme,

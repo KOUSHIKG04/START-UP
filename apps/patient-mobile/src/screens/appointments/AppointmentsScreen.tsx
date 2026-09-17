@@ -39,7 +39,6 @@ export function AppointmentsScreen({ onBackPress }: PatientScreenProps) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Bookings</Text>
         <ScrollView
           horizontal
           contentContainerStyle={styles.filters}
@@ -50,13 +49,11 @@ export function AppointmentsScreen({ onBackPress }: PatientScreenProps) {
             return (
               <Chip
                 key={option}
+                variant="radio"
+                selected={selected}
+                theme="patient"
                 label={option}
-                accessibilityState={{ selected }}
                 onPress={() => setFilter(option)}
-                style={[styles.filter, selected && styles.selectedFilter]}
-                labelStyle={
-                  selected ? styles.selectedFilterText : styles.filterText
-                }
               />
             );
           })}
@@ -101,18 +98,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   filters: { gap: 8 },
-  filter: {
-    paddingHorizontal: 13,
-    paddingVertical: 6,
-    borderWidth: 0,
-    backgroundColor: colors.patient.surface,
-  },
-  selectedFilter: { backgroundColor: colors.patient.primaryDark },
-  filterText: { color: colors.patient.primaryDark },
-  selectedFilterText: {
-    color: colors.white,
-    fontFamily: fontFamilies.semibold,
-  },
   list: { gap: 14 },
   emptyState: {
     alignItems: "center",

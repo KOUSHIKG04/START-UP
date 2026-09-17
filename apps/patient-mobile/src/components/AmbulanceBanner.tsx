@@ -14,10 +14,7 @@ export type AmbulanceBannerProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function AmbulanceBanner({
-  onBookPress,
-  style,
-}: AmbulanceBannerProps) {
+export function AmbulanceBanner({ onBookPress, style }: AmbulanceBannerProps) {
   return (
     <View style={[styles.banner, style]}>
       <View style={styles.content}>
@@ -63,10 +60,10 @@ const styles = StyleSheet.create({
     minHeight: 145,
     flexDirection: "row",
     alignItems: "center",
-    padding:20,
+    padding: 20,
     borderRadius: 16,
     backgroundColor: "#E6F7F6",
-    ...shadows.card,
+    elevation: 8,
   },
   content: {
     minWidth: 0,
@@ -126,5 +123,4 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 12,
   },
- 
 });

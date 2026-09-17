@@ -1,13 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  type LayoutChangeEvent,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { MapPin, Navigation, Video } from "lucide-react-native";
@@ -33,8 +29,17 @@ import DoctorCard, { type DoctorCardProps } from "../../components/DoctorCard";
 import type { ConsultationType } from "../../types/appointment";
 import { consultationFlows } from "../../utils/consultationFlow";
 import type { PatientScreenProps } from "../types";
-
-type ProfileTab = "about" | "slots";
+import {
+  DEFAULT_ADDRESS,
+  dates,
+  getDatesForMonth,
+  languages,
+  months,
+  patientOptions,
+  profileTabs,
+  timeSlots,
+  type ProfileTab,
+} from "../../utils/doctorProfileConstants";
 
 type DoctorProfileScreenProps = PatientScreenProps & {
   doctor: DoctorCardProps;
@@ -51,31 +56,6 @@ export type BookingSelection = {
   address?: string;
 };
 
-const dates = [
-  { key: "today", day: "Today", date: "20 Aug", closed: false },
-  { key: "tomorrow", day: "Tomorrow", date: "21 Aug", closed: true },
-  { key: "sat", day: "Sat", date: "22 Aug", closed: true },
-  { key: "sun", day: "Sun", date: "23 Aug", closed: true },
-  { key: "mon", day: "Mon", date: "24 Aug", closed: false },
-] as const;
-
-const timeSlots = [
-  { time: "09:00 AM", disabled: true },
-  { time: "09:30 AM", disabled: true },
-  { time: "10:00 AM", disabled: true },
-  { time: "10:30 AM", disabled: true },
-  { time: "11:00 AM", disabled: true },
-  { time: "11:30 AM", disabled: true },
-  { time: "02:00 PM", disabled: false },
-  { time: "02:30 PM", disabled: false },
-  { time: "03:00 PM", disabled: false },
-  { time: "03:30 PM", disabled: false },
-  { time: "04:00 PM", disabled: false },
-  { time: "04:30 PM", disabled: false },
-  { time: "05:00 PM", disabled: false },
-  { time: "05:30 PM", disabled: false },
-] as const;
-
 export function DoctorProfileScreen({
   doctor,
   consultationType: initialConsultationType,
@@ -86,40 +66,12 @@ export function DoctorProfileScreen({
   const [consultationType, setConsultationType] = useState<ConsultationType>(
     initialConsultationType
   );
-  const [addressDraft, setAddressDraft] = useState(
-    "2nd Main Road, Jayanagar, Bengaluru"
-  );
+  const [addressDraft, setAddressDraft] = useState(DEFAULT_ADDRESS);
   const [homeAddress, setHomeAddress] = useState(addressDraft);
-  const [pageHeights, setPageHeights] = useState<Record<ProfileTab, number>>({
-    about: 0,
-    slots: 0,
-  });
-  const pagerRef = useRef<ScrollView>(null);
-  const { width } = useWindowDimensions();
-  const pageWidth = width - spacing.lg * 2;
   const flow = consultationFlows[consultationType];
 
   const changeTab = (tab: ProfileTab) => {
     setActiveTab(tab);
-    pagerRef.current?.scrollTo({
-      x: tab === "about" ? 0 : pageWidth,
-      animated: true,
-    });
-  };
-
-  const recordPageHeight = (tab: ProfileTab, event: LayoutChangeEvent) => {
-    const height = event.nativeEvent.layout.height;
-    setPageHeights((current) =>
-      current[tab] === height ? current : { ...current, [tab]: height }
-    );
-  };
-
-  const handleSwipeEnd = (
-    event: NativeSyntheticEvent<NativeScrollEvent>
-  ) => {
-    const nextTab =
-      event.nativeEvent.contentOffset.x >= pageWidth / 2 ? "slots" : "about";
-    setActiveTab(nextTab);
   };
 
   const selectOnlineConsultation = () => {
@@ -175,38 +127,17 @@ export function DoctorProfileScreen({
 
         <ProfileTabs activeTab={activeTab} onTabChange={changeTab} />
 
-        <ScrollView
-          ref={pagerRef}
-          horizontal
-          bounces={false}
-          nestedScrollEnabled
-          onMomentumScrollEnd={handleSwipeEnd}
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={[
-            styles.pager,
-            pageHeights[activeTab]
-              ? { height: pageHeights[activeTab] }
-              : undefined,
-          ]}
-        >
-          <View
-            onLayout={(event) => recordPageHeight("about", event)}
-            style={[styles.page, { width: pageWidth }]}
-          >
+        <View style={styles.page}>
+          {activeTab === "about" ? (
             <AboutDoctor doctorName={doctor.name} />
-          </View>
-          <View
-            onLayout={(event) => recordPageHeight("slots", event)}
-            style={[styles.page, { width: pageWidth }]}
-          >
+          ) : (
             <BookSlots
               address={flow.requiresAddress ? homeAddress : undefined}
               consultationType={consultationType}
               onBookAppointment={onBookAppointment}
             />
-          </View>
-        </ScrollView>
+          )}
+        </View>
       </FadedScrollView>
     </View>
   );
@@ -226,16 +157,11 @@ function OnlineConsultation({ fee, onBookPress }: OnlineConsultationProps) {
       orientation="horizontal"
       padding={12}
       variant="soft"
+      style={styles.consultationCopy}
     >
-      <View style={styles.videoIcon}>
-        <Video color={colors.patient.primaryDark} size={19} strokeWidth={2} />
-      </View>
-      <CardContent gap={1} style={styles.consultationCopy}>
+      <CardContent gap={1} style={styles.consultationCard}>
         <Text style={styles.consultationTitle}>
-          Online consultation available
-        </Text>
-        <Text style={styles.consultationDescription}>
-          Video call from home · {fee}
+          Online consultation available: {fee}
         </Text>
       </CardContent>
       <Button
@@ -243,6 +169,7 @@ function OnlineConsultation({ fee, onBookPress }: OnlineConsultationProps) {
         onPress={onBookPress}
         style={styles.smallButton}
         labelStyle={styles.smallButtonLabel}
+        leftIcon={<Video color={colors.white} size={19} strokeWidth={2} />}
       />
     </Card>
   );
@@ -301,7 +228,7 @@ type ProfileTabsProps = {
 function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
   return (
     <View accessibilityRole="tablist" style={styles.tabs}>
-      {(["about", "slots"] as const).map((tab) => {
+      {profileTabs.map((tab) => {
         const selected = activeTab === tab;
         const label = tab === "about" ? "About" : "Book Slots";
         return (
@@ -328,7 +255,12 @@ function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
 
 function AboutDoctor({ doctorName }: { doctorName: string }) {
   return (
-    <Card borderRadius={radius.md} gap={16} padding={16}>
+    <Card
+      borderRadius={radius.md}
+      gap={16}
+      padding={16}
+      style={styles.aboutCard}
+    >
       <View style={styles.aboutSection}>
         <Text style={styles.sectionTitle}>About</Text>
         <Text style={styles.bodyText}>
@@ -361,7 +293,7 @@ function AboutDoctor({ doctorName }: { doctorName: string }) {
       <View style={styles.aboutSection}>
         <Text style={styles.sectionTitle}>Languages</Text>
         <View style={styles.languageRow}>
-          {(["English", "Hindi", "Kannada"] as const).map((language) => (
+          {languages.map((language) => (
             <Chip key={language} label={language} style={styles.languageChip} />
           ))}
         </View>
@@ -379,58 +311,146 @@ function BookSlots({
   consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
 }) {
-  const [selectedDate, setSelectedDate] = useState("today");
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(10); // November (matches reference)
+  const [monthDates, setMonthDates] = useState(() => getDatesForMonth(10));
+  const [selectedDate, setSelectedDate] = useState("5-nov");
   const [selectedTime, setSelectedTime] = useState("02:30 PM");
   const [patient, setPatient] = useState("Self");
   const [reason, setReason] = useState("");
 
+  const datesScrollRef = useRef<ScrollView>(null);
+  const monthsScrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      monthsScrollRef.current?.scrollTo({
+        x: Math.max(0, 10 * 85 - 80),
+        animated: false,
+      });
+      const selIdx = monthDates.findIndex((d) => d.key === "5-nov");
+      if (selIdx >= 0) {
+        datesScrollRef.current?.scrollTo({
+          x: Math.max(0, selIdx * 54 - 110),
+          animated: false,
+        });
+      }
+    }, 120);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleSelectMonth = (index: number) => {
+    setSelectedMonthIndex(index);
+    const newDates = getDatesForMonth(index);
+    setMonthDates(newDates);
+
+    const targetKey = `5-${months[index].short.toLowerCase()}`;
+    const targetDate =
+      newDates.find((d) => d.key === targetKey && !d.closed) ??
+      newDates.find((d) => !d.closed) ??
+      newDates[0];
+    setSelectedDate(targetDate.key);
+
+    const selIdx = newDates.findIndex((d) => d.key === targetDate.key);
+    if (selIdx >= 0) {
+      setTimeout(() => {
+        datesScrollRef.current?.scrollTo({
+          x: Math.max(0, selIdx * 54 - 110),
+          animated: true,
+        });
+      }, 50);
+    }
+  };
+
+  const handleSelectDate = (key: string, idx: number) => {
+    setSelectedDate(key);
+    datesScrollRef.current?.scrollTo({
+      x: Math.max(0, idx * 54 - 110),
+      animated: true,
+    });
+  };
+
   return (
-    <Card borderRadius={radius.md} gap={20} padding={14}>
+    <Card
+      borderRadius={radius.md}
+      gap={20}
+      padding={14}
+      style={styles.bookSlotsCard}
+    >
       <View style={styles.bookingSection}>
-        <View style={styles.sectionHeadingRow}>
-          <Text style={styles.sectionTitle}>Select date</Text>
-          <Text style={styles.monthLabel}>August</Text>
-        </View>
+        {/* Horizontal Months Strip using Chips */}
         <ScrollView
+          ref={monthsScrollRef}
           horizontal
-          contentContainerStyle={styles.dateRow}
           showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.monthsStrip}
         >
-          {dates.map((date) => {
+          {months.map((m) => {
+            const isSelected = m.index === selectedMonthIndex;
+            return (
+              <Chip
+                key={m.name}
+                label={m.name}
+                selected={isSelected}
+                accessibilityState={{ selected: isSelected }}
+                onPress={() => handleSelectMonth(m.index)}
+                style={[
+                  styles.monthChip,
+                  isSelected ? styles.selectedMonthChip : undefined,
+                ]}
+                labelStyle={
+                  isSelected
+                    ? styles.selectedMonthChipText
+                    : styles.monthChipText
+                }
+              />
+            );
+          })}
+        </ScrollView>
+
+        {/* Dates Carousel - all same size with border */}
+        <ScrollView
+          ref={datesScrollRef}
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.datesCarousel}
+        >
+          {monthDates.map((date, idx) => {
             const selected = date.key === selectedDate;
+
             return (
               <Pressable
                 key={date.key}
                 accessibilityRole="radio"
-                accessibilityState={{ selected, disabled: date.closed === true }}
+                accessibilityState={{
+                  selected,
+                  disabled: date.closed === true,
+                }}
                 disabled={date.closed}
-                onPress={() => setSelectedDate(date.key)}
+                onPress={() => handleSelectDate(date.key, idx)}
                 style={({ pressed }) => [
-                  styles.dateOption,
-                  selected ? styles.selectedDate : undefined,
-                  date.closed ? styles.closedDate : undefined,
-                  pressed ? styles.pressed : undefined,
+                  styles.dateCard,
+                  selected ? styles.selectedDateCard : undefined,
+                  date.closed ? styles.closedDateCard : undefined,
+                  pressed && styles.pressed,
                 ]}
               >
                 <Text
                   style={[
+                    styles.dateNumber,
+                    selected ? styles.selectedDateNumber : undefined,
+                  ]}
+                >
+                  {date.dayNumber}
+                </Text>
+                <Text
+                  style={[
                     styles.dateDay,
-                    selected ? styles.selectedDateText : undefined,
+                    selected ? styles.selectedDateDay : undefined,
                   ]}
                 >
                   {date.day}
                 </Text>
-                <Text
-                  style={[
-                    styles.dateValue,
-                    selected ? styles.selectedDateText : undefined,
-                  ]}
-                >
-                  {date.date}
-                </Text>
-                {date.closed ? (
-                  <Text style={styles.closedLabel}>Closed</Text>
-                ) : null}
               </Pressable>
             );
           })}
@@ -438,7 +458,10 @@ function BookSlots({
       </View>
 
       <View style={styles.bookingSection}>
-        <Text style={styles.availability}>5 slots available</Text>
+        <View style={styles.sectionHeadingRow}>
+          <Text style={styles.sectionTitle}>Select time</Text>
+          <Text style={styles.availability}>5 slots available</Text>
+        </View>
         <View style={styles.slotGrid}>
           {timeSlots.map((slot) => {
             const selected = selectedTime === slot.time;
@@ -463,7 +486,7 @@ function BookSlots({
       <View style={styles.bookingSection}>
         <Text style={styles.sectionTitle}>For whom?</Text>
         <View style={styles.patientRow}>
-          {(["Self", "Family 1"] as const).map((option) => {
+          {patientOptions.map((option) => {
             const selected = patient === option;
             return (
               <Chip
@@ -493,9 +516,11 @@ function BookSlots({
       <Button
         label="Book Appointment"
         onPress={() => {
-          const date = dates.find((item) => item.key === selectedDate)?.date;
+          const date =
+            monthDates.find((item) => item.key === selectedDate)?.date ??
+            selectedDate;
           onBookAppointment({
-            date: date ?? "20 Aug",
+            date,
             time: selectedTime,
             patient,
             reason,
@@ -515,15 +540,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.patient.background,
   },
   headerTitle: {
-    fontFamily: fontFamilies.bold,
+    color: colors.white,
     fontSize: 20,
-    fontWeight: "700",
-    lineHeight: 26,
+    fontWeight: "600",
+    lineHeight: 28,
   },
   onlineHeaderTitle: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: "600",
     lineHeight: 22,
   },
   content: {
@@ -540,14 +565,29 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: colors.white,
   },
+  consultationCard: {
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
+  },
   consultationCopy: {
-    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
   consultationTitle: {
     color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.bold,
-    fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fontFamilies.semibold,
+    fontSize: 14,
+    fontWeight: "500",
     lineHeight: 16,
   },
   consultationDescription: {
@@ -586,28 +626,34 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   smallButton: {
-    minHeight: 48,
-    paddingHorizontal: 15,
-    paddingVertical: 6,
-    borderRadius: 17,
+    paddingHorizontal: 14,
+    borderRadius: 12,
   },
   smallButtonLabel: {
-    fontSize: 11,
+    fontSize: 12,
     lineHeight: 14,
   },
   tabs: {
     minHeight: 44,
     flexDirection: "row",
-    padding: 3,
+    padding: 1,
     borderRadius: radius.md,
-    backgroundColor: colors.white,
-    ...shadows.card,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
   },
   pager: {
     width: "100%",
   },
   page: {
     paddingBottom: 2,
+    borderWidth: 1,
+    borderRadius: radius.md,
+  },
+  aboutCard: {
+    flex: 1,
+  },
+  bookSlotsCard: {
+    flex: 1,
   },
   tab: {
     flex: 1,
@@ -621,7 +667,7 @@ const styles = StyleSheet.create({
   tabLabel: {
     color: colors.patient.primaryDark,
     fontFamily: fontFamilies.medium,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
   },
   activeTabLabel: {
@@ -681,67 +727,86 @@ const styles = StyleSheet.create({
   bookingSection: {
     gap: 10,
   },
+  monthsStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 2,
+  },
+  monthChip: {
+    minHeight: 34,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    backgroundColor: colors.patient.background,
+  },
+  selectedMonthChip: {
+    borderColor: colors.patient.primaryDark,
+    backgroundColor: colors.patient.primaryDark,
+  },
+  monthChipText: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+  },
+  selectedMonthChipText: {
+    color: colors.white,
+    fontFamily: fontFamilies.semibold,
+  },
+  datesCarousel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 4,
+  },
+  dateCard: {
+    width: 54,
+    height: 64,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    backgroundColor: colors.patient.background,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  },
+  selectedDateCard: {
+    borderColor: colors.patient.primaryDark,
+    backgroundColor: colors.patient.primaryDark,
+  },
+  closedDateCard: {
+    opacity: 0.38,
+  },
+  dateNumber: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 17,
+    fontWeight: "700",
+    lineHeight: 22,
+  },
+  selectedDateNumber: {
+    color: colors.white,
+  },
+  dateDay: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.regular,
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  selectedDateDay: {
+    color: colors.white,
+  },
   sectionHeadingRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  monthLabel: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  dateRow: {
-    gap: 8,
-  },
-  dateOption: {
-    minWidth: 64,
-    minHeight: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 2,
-    paddingHorizontal: 9,
-    paddingVertical: 7,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
-    borderRadius: 11,
-    backgroundColor: colors.patient.background,
-  },
-  selectedDate: {
-    borderColor: colors.patient.primaryDark,
-    backgroundColor: colors.patient.primaryDark,
-  },
-  closedDate: {
-    opacity: 0.58,
-  },
-  dateDay: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 9,
-    lineHeight: 12,
-  },
-  dateValue: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
-    fontWeight: "600",
-    lineHeight: 16,
-  },
-  selectedDateText: {
-    color: colors.white,
-  },
-  closedLabel: {
-    color: colors.danger,
-    fontFamily: fontFamilies.medium,
-    fontSize: 8,
-    lineHeight: 10,
-  },
   availability: {
     color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 10,
-    lineHeight: 14,
+    fontFamily: fontFamilies.medium,
+    fontSize: 12,
+    lineHeight: 16,
   },
   slotGrid: {
     flexDirection: "row",

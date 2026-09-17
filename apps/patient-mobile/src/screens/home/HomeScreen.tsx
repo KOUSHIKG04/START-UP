@@ -29,6 +29,7 @@ import { homeActions } from "../../utils/HomeActions";
 import AmbulanceBanner from "../../components/AmbulanceBanner";
 import UpcomingAppointmentCard from "../../components/UpcomingAppointmentCard";
 import PopularServices from "../../components/PopularServices";
+import { useTypewriterPlaceholder } from "../../hooks/useTypewriterPlaceholder";
 import {
   COLLAPSE_DISTANCE,
   CONTENT_TOP,
@@ -67,6 +68,7 @@ export function HomeScreen({
   const searchInputRef = useRef<TextInput>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchPlaceholder = useTypewriterPlaceholder();
 
   const { collapsedHeight, expandedHeaderStyle, searchStyle } =
     getHeaderAnimationStyles(scrollY, topInset);
@@ -231,6 +233,8 @@ export function HomeScreen({
                   key={action.key}
                   icon={action.icon}
                   label={action.label}
+                  backgroundColor={colors.patient.primary}
+                  iconColor={colors.patient.surface}
                   onPress={
                     action.consultationType
                       ? () =>
@@ -335,7 +339,7 @@ export function HomeScreen({
               handleSelectItem(searchQuery.trim());
             }
           }}
-          placeholder="Search Symptoms / Specialities"
+          placeholder={searchPlaceholder}
           placeholderTextColor={colors.patient.muted}
           returnKeyType="search"
           value={searchQuery}
@@ -452,13 +456,13 @@ const styles = StyleSheet.create({
     height: SEARCH_HEIGHT,
     gap: 10,
     paddingVertical: 0,
-    borderWidth: 0,
+    borderWidth: 0.5,
     borderRadius: 24,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 3.85,
-    elevation: 4,
+    elevation: 6,
   },
   searchInput: {
     fontFamily: fontFamilies.regular,

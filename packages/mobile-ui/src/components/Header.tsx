@@ -10,7 +10,7 @@ import {
   type ViewProps,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
-import { colors, typography } from "@startup/design-tokens";
+import { colors, fontFamilies, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 
 export type { HeaderApp } from "../utils/headerBackground";
@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    
   },
   rightAction: {
     alignItems: "center",

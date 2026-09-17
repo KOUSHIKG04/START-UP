@@ -179,10 +179,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.patient.background,
   },
   headerTitle: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 18,
-    fontWeight: "700",
-    lineHeight: 24,
+    color: colors.white,
+    // fontFamily: fontFamilies.medium,
+    fontSize: 20,
+    fontWeight: "600",
+    lineHeight: 28,
   },
   content: {
     gap: spacing.lg,
@@ -201,10 +202,10 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 20,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 28,
   },
   subtitle: {
     color: colors.patient.textSecondary,
