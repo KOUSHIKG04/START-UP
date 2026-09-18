@@ -44,7 +44,14 @@ export function TimeSlot({
         typeof style === "function" ? style(state) : style,
       ]}
     >
-      <Text numberOfLines={1} style={[styles.text, textStyle]}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.text,
+          disabled ? styles.disabledText : undefined,
+          textStyle,
+        ]}
+      >
         {time}
       </Text>
     </Pressable>
@@ -75,6 +82,10 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   disabled: {
-    opacity: 0.5,
+    backgroundColor: colors.disabledBackground,
+    borderWidth: 0,
+  },
+  disabledText: {
+    color: colors.disabledText,
   },
 });

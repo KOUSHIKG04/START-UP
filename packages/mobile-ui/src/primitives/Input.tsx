@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    maxWidth: 340,
   },
   input: {
     minHeight: 44,

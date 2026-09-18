@@ -22,13 +22,9 @@ import {
   type SearchItem,
 } from "../../utils/homeSearchConstants";
 
-export type { SearchItem };
+import type { HomeSearchOverlayProps } from "../../types/home";
 
-type HomeSearchOverlayProps = {
-  visible: boolean;
-  onClose: () => void;
-  selectedCity?: string;
-};
+export type { SearchItem, HomeSearchOverlayProps };
 
 export function HomeSearchOverlay({
   visible,

@@ -33,6 +33,7 @@ export type ButtonProps = Omit<
   style?: PressableProps["style"];
   labelStyle?: StyleProp<TextStyle>;
   leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
 };
 
 type ButtonPalette = {
@@ -49,6 +50,7 @@ export function Button({
   style,
   labelStyle,
   leftIcon,
+  rightIcon,
   accessibilityLabel = label,
   accessibilityState,
   ...props
@@ -87,6 +89,7 @@ export function Button({
               {label}
             </Text>
           ) : null}
+          {rightIcon}
         </>
       )}
     </Pressable>

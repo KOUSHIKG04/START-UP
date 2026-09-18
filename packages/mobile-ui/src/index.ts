@@ -65,5 +65,10 @@ export {
   StatusBadge,
   type StatusBadgeProps,
 } from "./primitives/StatusBadge";
+export {
+  Accordion,
+  type AccordionProps,
+  type AccordionVariant,
+} from "./primitives/Accordion";
 export * from "./utils/notchedBarPath";
 export { albertSansFonts } from "./utils/fonts";

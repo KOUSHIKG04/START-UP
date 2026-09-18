@@ -3,9 +3,9 @@ import { Pill } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Card, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import { prescriptionMedicines } from "../../utils/prescription";
-import type { PatientScreenProps } from "../types";
+import type { MedicinesScreenProps } from "../../types/medicines";
 
-export function MedicinesScreen({ onBackPress }: PatientScreenProps) {
+export function MedicinesScreen({ onBackPress }: MedicinesScreenProps) {
   return (
     <View style={styles.screen}>
       <Header app="patient" onBackPress={onBackPress} title="Medicines" />

@@ -20,9 +20,9 @@ import {
   Header,
   Input,
 } from "@startup/mobile-ui";
-import type { PatientScreenProps } from "../types";
+import type { ProfileScreenProps } from "../../types/profile";
 
-export function ProfileScreen({ onBackPress }: PatientScreenProps) {
+export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
   const [showPin, setShowPin] = useState(false);
   const [pin, setPin] = useState(["", "", "", ""]);
 

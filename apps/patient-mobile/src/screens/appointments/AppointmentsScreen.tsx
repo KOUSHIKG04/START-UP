@@ -6,10 +6,10 @@ import { Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import BookingCard from "../../components/BookingCard";
 import type { Appointment } from "../../types/appointment";
 import { appointments } from "../../utils/appointments";
-import type { PatientScreenProps } from "../types";
-
-type BookingFilter =
-  "Clinic Visit" | "Home Visit" | "Online" | "Medicine and test";
+import type {
+  AppointmentsScreenProps,
+  BookingFilter,
+} from "../../types/appointments";
 
 const bookingFilters: readonly BookingFilter[] = [
   "Clinic Visit",
@@ -25,7 +25,7 @@ function openAppointment(appointment: Appointment) {
   } as unknown as Href);
 }
 
-export function AppointmentsScreen({ onBackPress }: PatientScreenProps) {
+export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
   const [filter, setFilter] = useState<BookingFilter>("Home Visit");
   const visibleAppointments = useMemo(
     () => appointments.filter((item) => item.consultationType === filter),

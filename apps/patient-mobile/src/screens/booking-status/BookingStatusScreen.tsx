@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 import {
   CalendarDays,
   CheckCircle2,
@@ -15,17 +23,9 @@ import AppointmentDetailsCard from "../../components/AppointmentDetailsCard";
 import DoctorCard from "../../components/DoctorCard";
 import type {
   Appointment,
-  AppointmentStatus,
-  VisitSessionMode,
 } from "../../types/appointment";
 import { consultationFlows } from "../../utils/consultationFlow";
-import type { PatientScreenProps } from "../types";
-
-type BookingStatusScreenProps = PatientScreenProps & {
-  appointment: Appointment;
-  status: AppointmentStatus;
-  onContinue: (mode: VisitSessionMode) => void;
-};
+import type { BookingStatusScreenProps } from "../../types/booking-status";
 
 export function BookingStatusScreen({
   appointment,
@@ -50,66 +50,86 @@ export function BookingStatusScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {isApprovedOnline ? (
-          <OnlineScheduleCard appointment={appointment} />
-        ) : (
-          <DoctorCard
-            name={appointment.doctorName}
-            qualification={appointment.qualification}
-            specialty={appointment.specialty}
-            experience={appointment.experience}
-            rating={appointment.rating}
-            fee={appointment.fee}
-            contextLabel={flow.profileContext}
-            showChevron={false}
-          />
-        )}
+        <View style={styles.mainContent}>
+          {isApprovedOnline ? (
+            <OnlineScheduleCard appointment={appointment} />
+          ) : (
+            <DoctorCard
+              name={appointment.doctorName}
+              qualification={appointment.qualification}
+              specialty={appointment.specialty}
+              experience={appointment.experience}
+              rating={appointment.rating}
+              fee={appointment.fee}
+              contextLabel={flow.profileContext}
+              showChevron={false}
+            />
+          )}
 
-        <AppointmentDetailsCard appointment={appointment} />
+          <AppointmentDetailsCard appointment={appointment} />
 
-        {currentStatus === "pending" ? (
-          <PendingStatus onPreviewApproval={() => setCurrentStatus("approved")} />
-        ) : isApprovedOnline ? (
-          <OnlineConsultationActions
-            onChatPress={() => onContinue("online-chat")}
-            onJoinPress={() => onContinue("online-video")}
-          />
-        ) : (
-          <ApprovedStatus label={flow.confirmationLabel} />
-        )}
+          {currentStatus === "pending" ? (
+            <PendingStatus onPreviewApproval={() => setCurrentStatus("approved")} />
+          ) : null}
+        </View>
 
-        {!isApprovedOnline ? (
-          <Button
-            label="Cancel Appointment"
-            onPress={onBackPress}
-            variant="secondary"
-            style={styles.cancelButton}
-            labelStyle={styles.cancelLabel}
-          />
-        ) : null}
+        <View style={styles.bottomSection}>
+          {currentStatus === "approved" ? (
+            isApprovedOnline ? (
+              <OnlineConsultationActions
+                onChatPress={() => onContinue("online-chat")}
+                onJoinPress={() => onContinue("online-video")}
+              />
+            ) : (
+              <View style={styles.actionsRow}>
+                <Button
+                  label="Cancel Appointment"
+                  onPress={onBackPress}
+                  variant="secondary"
+                  style={styles.sideButton}
+                  labelStyle={styles.sideButtonLabel}
+                /> 
+                <ApprovedStatus
+                  label={flow.confirmationLabel}
+                  style={styles.sideButton}
+                  labelStyle={styles.sideButtonLabel}
+                />
+               
+              </View>
+            )
+          ) : (
+            <Button
+              label="Cancel Appointment"
+              onPress={onBackPress}
+              variant="secondary"
+              style={styles.cancelButton}
+              labelStyle={styles.cancelLabel}
+            />
+          )}
 
-        {currentStatus === "approved" && flow.showsPayment ? (
-          <PaymentOptions />
-        ) : null}
+          {currentStatus === "approved" && flow.showsPayment ? (
+            <PaymentOptions />
+          ) : null}
 
-        {currentStatus === "approved" &&
-        appointment.consultationType !== "Online" ? (
-          <Button
-            label={
-              appointment.consultationType === "Home Visit"
-                ? "Track doctor visit"
-                : "View hospital check-in"
-            }
-            onPress={() =>
-              onContinue(
+          {currentStatus === "approved" &&
+          appointment.consultationType !== "Online" ? (
+            <Button
+              label={
                 appointment.consultationType === "Home Visit"
-                  ? "home-tracking"
-                  : "clinic-check-in"
-              )
-            }
-            style={styles.continueButton}
-          />
-        ) : null}
+                  ? "Track doctor visit"
+                  : "View hospital check-in"
+              }
+              onPress={() =>
+                onContinue(
+                  appointment.consultationType === "Home Visit"
+                    ? "home-tracking"
+                    : "clinic-check-in"
+                )
+              }
+              style={styles.continueButton}
+            />
+          ) : null}
+        </View>
       </FadedScrollView>
     </View>
   );
@@ -121,13 +141,21 @@ function PendingStatus({
   onPreviewApproval: () => void;
 }) {
   return (
-    <View style={styles.pendingGroup}>
-      <View style={styles.pendingBanner}>
-        <Info color={colors.patient.primaryDark} size={21} strokeWidth={2} />
+    <View style={styles.pendingCard}>
+      <View style={styles.pendingHeader}>
+        <View style={styles.pendingIconContainer}>
+          <Clock3 color={colors.patient.primaryDark} size={20} strokeWidth={2.2} />
+        </View>
         <View style={styles.statusCopy}>
-          <Text style={styles.pendingTitle}>Waiting for doctor’s approval</Text>
+          <View style={styles.pendingTitleRow}>
+            <Text style={styles.pendingTitle}>Waiting for doctor’s approval</Text>
+            {/* <View style={styles.pendingTag}>
+              <View style={styles.pendingDot} />
+              <Text style={styles.pendingTagText}>In Review</Text>
+            </View> */}
+          </View>
           <Text style={styles.pendingDescription}>
-            We’ll notify you once your booking is approved.
+            We’ll notify you once your booking is confirmed by the doctor.
           </Text>
         </View>
       </View>
@@ -135,23 +163,55 @@ function PendingStatus({
         label="Preview approved booking"
         onPress={onPreviewApproval}
         variant="outline"
+        theme="patient"
+        style={styles.previewButton}
+        labelStyle={styles.previewButtonLabel}
+        leftIcon={
+          <CheckCircle2
+            color={colors.patient.primaryDark}
+            size={16}
+            strokeWidth={2}
+          />
+        }
       />
     </View>
   );
 }
 
-function ApprovedStatus({ label }: { label: string }) {
+function ApprovedStatus({
+  label,
+  style,
+  labelStyle,
+}: {
+  label: string;
+  style?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
+}) {
   return (
-    <View style={styles.approvedBanner}>
-      <Text style={styles.approvedTitle}>{label}</Text>
-      <CheckCircle2 color={colors.white} size={21} strokeWidth={2.2} />
-    </View>
+    <Button
+      label={label}
+      variant="primary"
+      theme="patient"
+      style={[styles.approvedButton, style]}
+      labelStyle={[styles.approvedButtonLabel, labelStyle]}
+      rightIcon={
+        <CheckCircle2 color={colors.white} size={16} strokeWidth={2.2} />
+      }
+    />
   );
 }
 
 function OnlineScheduleCard({ appointment }: { appointment: Appointment }) {
   return (
-    <Card borderRadius={radius.md} gap={10} padding={16}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      gap={10}
+      padding={16}
+      style={styles.flatCard}
+    >
       <Text style={styles.onlineDoctorName}>{appointment.doctorName}</Text>
       <View style={styles.scheduleRow}>
         <Clock3 color={colors.patient.primaryDark} size={18} />
@@ -209,22 +269,42 @@ function PaymentOptions() {
   const [payment, setPayment] = useState<"now" | "later">("later");
 
   return (
-    <Card borderRadius={radius.md} gap={10} padding={14}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      gap={10}
+      padding={14}
+      style={styles.flatCard}
+    >
       <Text style={styles.paymentTitle}>Payment</Text>
       <View style={styles.paymentRow}>
         <Button
           label="Pay Now"
-          leftIcon={<CreditCard color={colors.patient.primaryDark} size={16} />}
+          theme="patient"
+          leftIcon={
+            <CreditCard
+              color={payment === "now" ? colors.white : colors.patient.primaryDark}
+              size={16}
+            />
+          }
           onPress={() => setPayment("now")}
-          variant={payment === "now" ? "secondary" : "outline"}
+          variant={payment === "now" ? "primary" : "outline"}
           style={styles.paymentButton}
           labelStyle={styles.paymentLabel}
         />
         <Button
           label="Pay Later"
-          leftIcon={<Clock3 color={colors.patient.primaryDark} size={16} />}
+          theme="patient"
+          leftIcon={
+            <Clock3
+              color={payment === "later" ? colors.white : colors.patient.primaryDark}
+              size={16}
+            />
+          }
           onPress={() => setPayment("later")}
-          variant={payment === "later" ? "secondary" : "outline"}
+          variant={payment === "later" ? "primary" : "outline"}
           style={styles.paymentButton}
           labelStyle={styles.paymentLabel}
         />
@@ -236,62 +316,136 @@ function PaymentOptions() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.patient.background },
   headerTitle: {
-    fontFamily: fontFamilies.bold,
+    color: colors.white,
+    // fontFamily: fontFamilies.medium,
     fontSize: 20,
-    fontWeight: "700",
-    lineHeight: 26,
+    fontWeight: "600",
+    lineHeight: 28,
   },
   content: {
+    flexGrow: 1,
     gap: 14,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
-    paddingBottom: 126,
+    paddingBottom: spacing.xl,
   },
-  pendingBanner: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 11,
+  mainContent: {
+    gap: 14,
+  },
+  bottomSection: {
+    gap: 14,
+  },
+  flatCard: {
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  pendingCard: {
     padding: 16,
     borderRadius: radius.md,
-    backgroundColor: "#CCE9E6",
+    backgroundColor: colors.patient.surface,
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
+    gap: 14,
   },
-  pendingGroup: { gap: 10 },
-  statusCopy: { flex: 1, gap: 2 },
-  pendingTitle: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.medium,
-    fontSize: 15,
-    fontWeight: "500",
-    lineHeight: 20,
-  },
-  pendingDescription: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.regular,
-    fontSize: 11,
-    fontStyle: "italic",
-    lineHeight: 15,
-  },
-  approvedBanner: {
-    minHeight: 54,
+  pendingHeader: {
     flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  pendingIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
-    borderRadius: radius.md,
-    backgroundColor: colors.patient.primaryDark,
   },
-  approvedTitle: {
-    color: colors.white,
+  statusCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  pendingTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  pendingTitle: {
+    color: colors.patient.primary,
+    fontFamily: fontFamilies.bold,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  pendingTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
+  },
+  pendingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#F59E0B",
+  },
+  pendingTagText: {
+    color: colors.patient.primaryDark,
     fontFamily: fontFamilies.semibold,
-    fontSize: 17,
+    fontSize: 11,
     fontWeight: "600",
-    lineHeight: 23,
+  },
+  pendingDescription: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  previewButton: {
+    minHeight: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
+  },
+  previewButtonLabel: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  approvedButton: {
+    minHeight: 52,
+    borderRadius: radius.md,
+  },
+  approvedButtonLabel: {
+    fontSize: 15,
   },
   cancelButton: {
     minHeight: 52,
     borderRadius: radius.md,
   },
   cancelLabel: { fontSize: 15 },
+  actionsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  sideButton: {
+    flex: 1,
+    minHeight: 48,
+    paddingHorizontal: 8,
+  },
+  sideButtonLabel: {
+    fontSize: 13,
+  },
   paymentTitle: {
     color: colors.patient.text,
     fontFamily: fontFamilies.bold,

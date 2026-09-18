@@ -9,21 +9,30 @@ import {
   Stethoscope,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Card, CardSeparator, Chip } from "@startup/mobile-ui";
+import { Accordion, Chip } from "@startup/mobile-ui";
 import type { Appointment } from "../types/appointment";
 
 export default function AppointmentDetailsCard({
   appointment,
+  defaultOpen = true,
 }: {
   appointment: Appointment;
+  defaultOpen?: boolean;
 }) {
   return (
-    <Card borderRadius={radius.md} gap={0} padding={16}>
-      <View style={styles.heading}>
-        <CalendarDays color={colors.patient.primaryDark} size={19} />
-        <Text style={styles.title}>Appointment Details</Text>
-      </View>
-      <CardSeparator color="#E7ECEF" />
+    <Accordion
+      title="Appointment Details"
+      leftIcon={<CalendarDays color={colors.patient.primaryDark} size={19} />}
+      defaultOpen={defaultOpen}
+      variant="outlined"
+      theme="patient"
+      style={styles.card}
+      headerStyle={styles.header}
+      titleStyle={styles.title}
+      contentStyle={styles.content}
+      separator={true}
+      separatorColor="#E7ECEF"
+    >
       <DetailRow
         icon={<Stethoscope size={17} color={colors.textSecondary} />}
         label="Consultation Type"
@@ -56,7 +65,7 @@ export default function AppointmentDetailsCard({
         value={appointment.location}
         last
       />
-    </Card>
+    </Accordion>
   );
 }
 
@@ -78,18 +87,27 @@ function DetailRow({
         <Text style={styles.label}>{label}</Text>
       </View>
       {typeof value === "string" ? (
-        <Text numberOfLines={2} style={styles.value}>{value}</Text>
-      ) : value}
+        <Text numberOfLines={2} style={styles.value}>
+          {value}
+        </Text>
+      ) : (
+        value
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingBottom: 13,
+  card: {
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 52,
   },
   title: {
     color: colors.patient.text,
@@ -98,8 +116,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 19,
   },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 0,
+    paddingBottom: 4,
+  },
   row: {
-    minHeight: 52,
+    minHeight: 50,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

@@ -1,107 +1,21 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { router, type Href } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { ArrowDown, ArrowUp } from "lucide-react-native";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import {
-  Dropdown,
-  FadedScrollView,
-  Header,
-  type DropdownOption,
-} from "@startup/mobile-ui";
-import DoctorCard, { type DoctorCardProps } from "../../components/DoctorCard";
+import { Dropdown, FadedScrollView, Header } from "@startup/mobile-ui";
+import DoctorCard from "../../components/DoctorCard";
 import type { ConsultationType } from "../../types/appointment";
 import { consultationFlows } from "../../utils/consultationFlow";
-import type { PatientScreenProps } from "../types";
-
-type DoctorResultsScreenProps = PatientScreenProps & {
-  symptom: string;
-  consultationType: ConsultationType;
-};
-
-type DoctorResult = DoctorCardProps & {
-  distanceKm: number;
-  experienceYears: number;
-  ratingValue: number;
-  feeValue: number;
-};
-
-type DoctorFilter = "distance" | "experience" | "rating" | "fee";
-
-const filterOptions: readonly DropdownOption[] = [
-  { label: "By distance", value: "distance" },
-  { label: "By experience", value: "experience" },
-  { label: "By ratings", value: "rating" },
-  { label: "Consultation fee", value: "fee" },
-];
-
-const doctors: DoctorResult[] = [
-  {
-    name: "Dr. Ananya Sharma",
-    qualification: "MBBS, MD (General Medicine)",
-    specialty: "General Physician",
-    experience: "8+ years experience",
-    rating: "4.8 (120+ reviews)",
-    fee: "₹500",
-    distanceKm: 2.4,
-    experienceYears: 8,
-    ratingValue: 4.8,
-    feeValue: 500,
-  },
-  {
-    name: "Dr. Mandira Rao",
-    qualification: "MBBS, MD (General Medicine)",
-    specialty: "General Physician",
-    experience: "7+ years experience",
-    rating: "4.7 (96 reviews)",
-    fee: "₹450",
-    distanceKm: 1.8,
-    experienceYears: 7,
-    ratingValue: 4.7,
-    feeValue: 450,
-  },
-  {
-    name: "Dr. Sriram Reddy",
-    qualification: "MBBS, DNB, Superspecialist",
-    specialty: "General Physician",
-    experience: "11+ years experience",
-    rating: "4.9 (180+ reviews)",
-    fee: "₹650",
-    distanceKm: 4.1,
-    experienceYears: 11,
-    ratingValue: 4.9,
-    feeValue: 650,
-  },
-  {
-    name: "Dr. Deepthi Nair",
-    qualification: "MBBS, DNB, Superspecialist",
-    specialty: "General Physician",
-    experience: "9+ years experience",
-    rating: "4.8 (140+ reviews)",
-    fee: "₹600",
-    distanceKm: 3.2,
-    experienceYears: 9,
-    ratingValue: 4.8,
-    feeValue: 600,
-  },
-];
-
-function getDoctorProfileRoute(
-  doctor: DoctorResult,
-  consultationType: ConsultationType
-) {
-  return {
-    pathname: "/doctor-profile",
-    params: {
-      name: doctor.name,
-      qualification: doctor.qualification,
-      specialty: doctor.specialty,
-      experience: doctor.experience,
-      rating: doctor.rating,
-      fee: doctor.fee,
-      consultationType,
-    },
-  } as unknown as Href;
-}
+import {
+  doctors,
+  filterOptions,
+  getDoctorProfileRoute,
+} from "../../utils/doctorResultsConstants";
+import type {
+  DoctorFilter,
+  DoctorResultsScreenProps,
+} from "../../types/doctor-results";
 
 export function DoctorResultsScreen({
   symptom,
@@ -109,21 +23,42 @@ export function DoctorResultsScreen({
   onBackPress,
 }: DoctorResultsScreenProps) {
   const [filter, setFilter] = useState<DoctorFilter>("distance");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleFilterChange = (newFilter: DoctorFilter) => {
+    setFilter(newFilter);
+    if (newFilter === "rating" || newFilter === "experience") {
+      setSortOrder("desc");
+    } else {
+      setSortOrder("asc");
+    }
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+
   const sortedDoctors = useMemo(() => {
     return [...doctors].sort((a, b) => {
+      let diff = 0;
       switch (filter) {
         case "experience":
-          return b.experienceYears - a.experienceYears;
+          diff = a.experienceYears - b.experienceYears;
+          break;
         case "rating":
-          return b.ratingValue - a.ratingValue;
+          diff = a.ratingValue - b.ratingValue;
+          break;
         case "fee":
-          return a.feeValue - b.feeValue;
+          diff = a.feeValue - b.feeValue;
+          break;
         case "distance":
         default:
-          return a.distanceKm - b.distanceKm;
+          diff = a.distanceKm - b.distanceKm;
+          break;
       }
+      return sortOrder === "asc" ? diff : -diff;
     });
-  }, [filter]);
+  }, [filter, sortOrder]);
 
   return (
     <View style={styles.screen}>
@@ -134,28 +69,59 @@ export function DoctorResultsScreen({
         titleStyle={styles.headerTitle}
       />
 
+      <View style={styles.topSection}>
+        <View style={styles.headingRow}>
+          <View style={styles.headingCopy}>
+            <Text style={styles.title}>Doctors available for your care</Text>
+          </View>
+          <View style={styles.filterActions}>
+            <Dropdown
+              accessibilityLabel="Sort doctors"
+              options={filterOptions}
+              value={filter}
+              onValueChange={(value) => handleFilterChange(value as DoctorFilter)}
+              triggerLabel="Filter"
+              chevronSize={12}
+              chevronColor={colors.patient.primaryDark}
+              containerStyle={styles.filterContainer}
+              triggerStyle={styles.filterTrigger}
+              valueStyle={styles.filterValue}
+              menuWidth={176}
+            />
+            <Pressable
+              accessibilityLabel={
+                sortOrder === "asc"
+                  ? "Sort ascending (tap for descending)"
+                  : "Sort descending (tap for ascending)"
+              }
+              accessibilityRole="button"
+              onPress={toggleSortOrder}
+              style={({ pressed }) => [
+                styles.sortOrderButton,
+                pressed && styles.sortOrderButtonPressed,
+              ]}
+            >
+              {sortOrder === "asc" ? (
+                <ArrowUp
+                  color={colors.patient.primaryDark}
+                  size={14}
+                  strokeWidth={2.4}
+                />
+              ) : (
+                <ArrowDown
+                  color={colors.patient.primaryDark}
+                  size={14}
+                  strokeWidth={2.4}
+                />
+              )}
+            </Pressable>
+          </View>
+        </View>
+      </View>
       <FadedScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headingRow}>
-          <View style={styles.headingCopy}>
-            <Text style={styles.title}>Doctors available for your care</Text>
-            <Text style={styles.subtitle}>
-              {consultationFlows[consultationType].resultsDescription}
-            </Text>
-          </View>
-          <Dropdown
-            accessibilityLabel="Sort doctors"
-            options={filterOptions}
-            value={filter}
-            onValueChange={(value) => setFilter(value as DoctorFilter)}
-            containerStyle={styles.filterContainer}
-            triggerStyle={styles.filterTrigger}
-            valueStyle={styles.filterValue}
-          />
-        </View>
-
         <View style={styles.list}>
           {sortedDoctors.map((doctor) => (
             <DoctorCard
@@ -185,51 +151,77 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 28,
   },
+  topSection: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: 14,
+    paddingBottom: 6,
+    backgroundColor: colors.patient.background,
+  },
   content: {
     gap: spacing.lg,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.sm,
     paddingBottom: 126,
   },
   headingRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: spacing.sm,
+     paddingHorizontal: spacing.xs,
   },
   headingCopy: {
     flex: 1,
-    gap: 3,
+    paddingRight: spacing.xs,
   },
   title: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 14,
+    fontFamily: fontFamilies.medium,
+    fontSize: 16,
     fontWeight: "600",
-    lineHeight: 28,
+    lineHeight: 24,
   },
-  subtitle: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 11,
-    lineHeight: 15,
+  filterActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
   },
   filterContainer: {
-    width: 142,
+    flexShrink: 0,
   },
   filterTrigger: {
-    minHeight: 36,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderWidth: 0,
-    borderRadius: 18,
+    minHeight: 32,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
+    borderRadius: 999,
     backgroundColor: colors.patient.surface,
   },
   filterValue: {
+    flexShrink: 0,
     color: colors.patient.primaryDark,
     fontFamily: fontFamilies.semibold,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    lineHeight: 14,
+    lineHeight: 16,
+  },
+  sortOrderButton: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.patient.surfaceBorder,
+    borderRadius: 999,
+    backgroundColor: colors.patient.surface,
+  },
+  sortOrderButtonPressed: {
+    opacity: 0.72,
   },
   list: {
     gap: 12,

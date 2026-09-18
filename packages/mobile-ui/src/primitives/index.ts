@@ -10,3 +10,4 @@ export * from "./TimeSlot";
 export * from "./UploadInput";
 export * from "./StatusBadge";
 export * from "./FadedScrollView";
+export * from "./Accordion";

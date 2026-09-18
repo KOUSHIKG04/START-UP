@@ -13,12 +13,7 @@ import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import type { Appointment } from "../../types/appointment";
 import { prescriptionMedicines } from "../../utils/prescription";
-import type { PatientScreenProps } from "../types";
-
-type PrescriptionScreenProps = PatientScreenProps & {
-  appointment: Appointment;
-  onViewMedicines: () => void;
-};
+import type { PrescriptionScreenProps } from "../../types/prescription";
 
 export function PrescriptionScreen({
   appointment,

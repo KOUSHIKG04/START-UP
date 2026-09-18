@@ -12,10 +12,12 @@ import {
 } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SafeAreaView } from "@startup/mobile-ui";
+import type { SosEmergencyScreenProps } from "../../types/sos";
 
-type Props = { onCancel: () => void; onCallEmergency: () => void };
-
-export function SosEmergencyScreen({ onCancel, onCallEmergency }: Props) {
+export function SosEmergencyScreen({
+  onCancel,
+  onCallEmergency,
+}: SosEmergencyScreenProps) {
   const [dispatched, setDispatched] = useState(false);
 
   useEffect(() => {

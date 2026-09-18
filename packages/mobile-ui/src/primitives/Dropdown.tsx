@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import {
   Modal,
   Pressable,
@@ -13,10 +13,7 @@ import {
 } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import {
-  appThemeColors,
-  type AppTheme,
-} from "../utils/appTheme";
+import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
 export type DropdownOption = {
   label: string;
@@ -30,6 +27,8 @@ export type DropdownProps = {
   onValueChange: (value: string) => void;
   label?: string;
   placeholder?: string;
+  triggerLabel?: string;
+  prefix?: string;
   theme?: AppTheme;
   disabled?: boolean;
   error?: string;
@@ -38,6 +37,12 @@ export type DropdownProps = {
   triggerStyle?: StyleProp<ViewStyle>;
   valueStyle?: StyleProp<TextStyle>;
   accessibilityLabel?: string;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  chevronSize?: number;
+  chevronColor?: string;
+  menuWidth?: number;
+  menuStyle?: StyleProp<ViewStyle>;
 };
 
 type TriggerPosition = {
@@ -56,6 +61,8 @@ export function Dropdown({
   onValueChange,
   label,
   placeholder = "Select an option",
+  triggerLabel,
+  prefix,
   theme = "patient",
   disabled = false,
   error,
@@ -64,14 +71,21 @@ export function Dropdown({
   triggerStyle,
   valueStyle,
   accessibilityLabel,
+  leftIcon,
+  rightIcon,
+  chevronSize = 14,
+  chevronColor,
+  menuWidth,
+  menuStyle,
 }: DropdownProps) {
   const triggerRef = useRef<View>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [triggerPosition, setTriggerPosition] = useState<TriggerPosition>();
-  const { height: windowHeight } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const themeColors = appThemeColors[theme];
   const selectedOption = options.find((option) => option.value === value);
-  const menuHeight = Math.min(options.length, maxVisibleOptions) * OPTION_HEIGHT + 8;
+  const menuHeight =
+    Math.min(options.length, maxVisibleOptions) * OPTION_HEIGHT + 12;
 
   const openMenu = () => {
     if (disabled) return;
@@ -101,6 +115,21 @@ export function Dropdown({
       : triggerPosition.y + triggerPosition.height + MENU_GAP
     : 0;
 
+  const targetWidth = menuWidth ?? Math.max(triggerPosition?.width ?? 160, 160);
+  const idealLeft = triggerPosition
+    ? triggerPosition.x + triggerPosition.width / 2 > windowWidth / 2
+      ? triggerPosition.x + triggerPosition.width - targetWidth
+      : triggerPosition.x
+    : 0;
+  const maxLeft = Math.max(12, windowWidth - targetWidth - 12);
+  const menuLeft = Math.max(12, Math.min(idealLeft, maxLeft));
+
+  const displayValue =
+    triggerLabel ??
+    (prefix
+      ? `${prefix}${selectedOption?.label ?? placeholder}`
+      : (selectedOption?.label ?? placeholder));
+
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -121,23 +150,33 @@ export function Dropdown({
           triggerStyle,
         ]}
       >
+        {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
         <Text
           numberOfLines={1}
           style={[
             styles.value,
-            !selectedOption ? styles.placeholder : undefined,
+            !selectedOption && !triggerLabel ? styles.placeholder : undefined,
             disabled ? styles.disabledText : undefined,
             valueStyle,
           ]}
         >
-          {selectedOption?.label ?? placeholder}
+          {displayValue}
         </Text>
-        <ChevronDown
-          color={disabled ? colors.disabledText : colors.textSecondary}
-          size={20}
-          strokeWidth={2}
-          style={isOpen ? styles.chevronOpen : undefined}
-        />
+        {rightIcon ?? (
+          <ChevronDown
+            color={
+              chevronColor ??
+              (disabled
+                ? colors.disabledText
+                : isOpen
+                  ? themeColors.primary
+                  : colors.textSecondary)
+            }
+            size={chevronSize}
+            strokeWidth={2.2}
+            style={isOpen ? styles.chevronOpen : undefined}
+          />
+        )}
       </Pressable>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -153,7 +192,7 @@ export function Dropdown({
           <Pressable
             accessibilityLabel="Close options"
             onPress={closeMenu}
-            style={StyleSheet.absoluteFill}
+            style={styles.backdrop}
           />
 
           {triggerPosition ? (
@@ -162,16 +201,18 @@ export function Dropdown({
                 styles.menu,
                 {
                   top: menuTop,
-                  left: triggerPosition.x,
-                  width: triggerPosition.width,
+                  left: menuLeft,
+                  width: targetWidth,
                   maxHeight: menuHeight,
                 },
+                menuStyle,
               ]}
             >
               <ScrollView
                 bounces={false}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.menuContent}
               >
                 {options.map((option) => {
                   const isSelected = option.value === value;
@@ -189,23 +230,20 @@ export function Dropdown({
                       onPress={() => selectOption(option)}
                       style={({ pressed }) => [
                         styles.option,
-                        isSelected
-                          ? { backgroundColor: themeColors.soft }
-                          : undefined,
-                        pressed && !option.disabled
-                          ? styles.optionPressed
-                          : undefined,
-                        option.disabled ? styles.optionDisabled : undefined,
+                        isSelected && { backgroundColor: themeColors.soft },
+                        pressed && !option.disabled && styles.optionPressed,
+                        option.disabled && styles.optionDisabled,
                       ]}
                     >
                       <Text
                         numberOfLines={1}
                         style={[
                           styles.optionLabel,
-                          isSelected
-                            ? { color: themeColors.primaryText }
-                            : undefined,
-                          option.disabled ? styles.disabledText : undefined,
+                          isSelected && [
+                            styles.optionLabelSelected,
+                            { color: themeColors.primaryText },
+                          ],
+                          option.disabled && styles.disabledText,
                         ]}
                       >
                         {option.label}
@@ -214,8 +252,8 @@ export function Dropdown({
                       {isSelected ? (
                         <Check
                           color={themeColors.primary}
-                          size={18}
-                          strokeWidth={2.25}
+                          size={16}
+                          strokeWidth={2.4}
                         />
                       ) : null}
                     </Pressable>
@@ -231,10 +269,7 @@ export function Dropdown({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    maxWidth: 340,
-  },
+  container: {},
   label: {
     marginBottom: 4,
     color: colors.textPrimary,
@@ -249,12 +284,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: colors.borderDefault,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: colors.white,
+  },
+  leftIcon: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   triggerError: {
     borderColor: colors.danger,
@@ -267,7 +306,7 @@ const styles = StyleSheet.create({
   },
   value: {
     minWidth: 0,
-    flex: 1,
+    flexShrink: 1,
     color: colors.textPrimary,
     fontFamily: fontFamilies.regular,
     fontSize: 14,
@@ -292,40 +331,59 @@ const styles = StyleSheet.create({
   modal: {
     flex: 1,
   },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(12, 36, 52, 0.12)",
+  },
   menu: {
     position: "absolute",
-    paddingVertical: 4,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.borderDefault,
-    borderRadius: 10,
+    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderRadius: 14,
     backgroundColor: colors.white,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#055B56",
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
-    shadowRadius: 12,
+    shadowRadius: 16,
     elevation: 8,
   },
+  menuContent: {
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    gap: 2,
+  },
   option: {
-    minHeight: OPTION_HEIGHT,
+    minHeight: 38,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   optionPressed: {
     opacity: 0.7,
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
   },
   optionDisabled: {
-    opacity: 0.5,
+    opacity: 0.45,
   },
   optionLabel: {
     minWidth: 0,
     flex: 1,
     color: colors.textPrimary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 14,
-    lineHeight: 20,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  optionLabelSelected: {
+    fontFamily: fontFamilies.semibold,
+    fontWeight: "600",
   },
 });

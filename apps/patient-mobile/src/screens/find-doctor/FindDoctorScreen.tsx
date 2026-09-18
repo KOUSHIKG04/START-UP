@@ -34,7 +34,6 @@ import {
   getHeaderAnimationStyles,
 } from "../../utils/headerConstants";
 import type { ConsultationType } from "../../types/appointment";
-import type { PatientScreenProps } from "../types";
 import {
   COLLAPSED_HEADER_H,
   CONTENT_TOP,
@@ -46,10 +45,7 @@ import {
   symptoms,
 } from "../../utils/findDoctorConstants";
 
-type FindDoctorScreenProps = PatientScreenProps & {
-  consultationType: ConsultationType;
-  onBackPress?: () => void;
-};
+import type { FindDoctorScreenProps } from "../../types/find-doctor";
 
 export function FindDoctorScreen({
   consultationType,

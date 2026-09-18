@@ -39,21 +39,19 @@ import {
   type AmbulanceFlowStep,
   type AmbulanceType,
 } from "../../utils/ambulanceFlow";
+import type {
+  AmbulanceBookingScreenProps,
+  TrackingStage,
+} from "../../types/ambulance";
 
 const pickupMap = require("../../../assets/images/ambulance/pickup-map-a.png");
 const trackingMap = require("../../../assets/images/ambulance/hospital-map.png");
-
-type Props = {
-  onBackPress: () => void;
-  onComplete: () => void;
-  onFullscreenChange?: (fullscreen: boolean) => void;
-};
 
 export function AmbulanceBookingScreen({
   onBackPress,
   onComplete,
   onFullscreenChange,
-}: Props) {
+}: AmbulanceBookingScreenProps) {
   const [step, setStep] = useState<AmbulanceFlowStep>("booking");
   const [destination, setDestination] = useState("");
   const [searching, setSearching] = useState(false);
@@ -421,8 +419,6 @@ function Assigning({ onBack }: { onBack: () => void }) {
     </View>
   );
 }
-
-type TrackingStage = "tracking" | "arrived" | "hospital";
 
 function Tracking({
   stage,

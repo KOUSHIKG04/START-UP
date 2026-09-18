@@ -1,3 +1,1 @@
-export type PatientScreenProps = {
-  onBackPress: () => void;
-};
+export * from "../types/screen";
