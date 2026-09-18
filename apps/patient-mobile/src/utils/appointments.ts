@@ -49,7 +49,7 @@ export const appointments: readonly Appointment[] = [
   {
     id: "#APT20260822",
     doctorName: "Dr. Sriram Reddy",
-    qualification: "MBBS, DNB, Superspecialist",
+    qualification: "MBBS, DNB (Superspecialist)",
     specialty: "General Physician",
     consultationType: "Online",
     date: "24 Aug 2026",

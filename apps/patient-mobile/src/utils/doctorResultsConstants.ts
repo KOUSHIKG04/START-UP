@@ -37,7 +37,7 @@ export const doctors: DoctorResult[] = [
   },
   {
     name: "Dr. Sriram Reddy",
-    qualification: "MBBS, DNB, Superspecialist",
+    qualification: "MBBS, DNB (Superspecialist)",
     specialty: "General Physician",
     experience: "11+ years experience",
     rating: "4.9 (180+ reviews)",
@@ -49,7 +49,7 @@ export const doctors: DoctorResult[] = [
   },
   {
     name: "Dr. Deepthi Nair",
-    qualification: "MBBS, DNB, Superspecialist",
+    qualification: "MBBS, DNB (Superspecialist)",
     specialty: "General Physician",
     experience: "9+ years experience",
     rating: "4.8 (140+ reviews)",

@@ -156,7 +156,7 @@ export default function DoctorCard({
       onTouchStart={onPress ? handleTouchStart : undefined}
       onTouchMove={onPress ? handleTouchMove : undefined}
       pressRetentionOffset={8}
-      padding={16}
+      padding={14}
       style={[styles.flatCard, style]}
     >
       <View style={styles.headerRow}>
