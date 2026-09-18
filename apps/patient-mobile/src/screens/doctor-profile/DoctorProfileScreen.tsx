@@ -75,13 +75,12 @@ export function DoctorProfileScreen({
           contextLabel={
             consultationType === "Online" ? undefined : flow.profileContext
           }
-          variant="profile"
           showChevron={false}
         />
 
         {consultationType === "Clinic Visit" ? (
           <OnlineConsultation
-            fee={doctor.fee}
+            fee={doctor.fee ?? ""}
             onBookPress={selectOnlineConsultation}
           />
         ) : null}

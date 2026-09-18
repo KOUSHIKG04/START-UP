@@ -29,6 +29,7 @@ import { homeActions } from "../../utils/HomeActions";
 import AmbulanceBanner from "../../components/AmbulanceBanner";
 import UpcomingAppointmentCard from "../../components/UpcomingAppointmentCard";
 import PopularServices from "../../components/PopularServices";
+import { NotificationDrawer } from "../../components/NotificationDrawer";
 import { useTypewriterPlaceholder } from "../../hooks/useTypewriterPlaceholder";
 import {
   COLLAPSE_DISTANCE,
@@ -67,6 +68,7 @@ export function HomeScreen({
   const scrollY = useRef(new Animated.Value(0)).current;
   const searchInputRef = useRef<TextInput>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchPlaceholder = useTypewriterPlaceholder();
 
@@ -292,7 +294,10 @@ export function HomeScreen({
               accessibilityLabel="Notifications"
               accessibilityRole="button"
               hitSlop={10}
-              onPress={onNotificationPress}
+              onPress={() => {
+                onNotificationPress?.();
+                setIsNotificationOpen(true);
+              }}
               style={({ pressed }) => [
                 styles.notificationButton,
                 pressed && styles.notificationButtonPressed,
@@ -360,6 +365,11 @@ export function HomeScreen({
           }
         />
       </Animated.View>
+
+      <NotificationDrawer
+        visible={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+      />
     </View>
   );
 }

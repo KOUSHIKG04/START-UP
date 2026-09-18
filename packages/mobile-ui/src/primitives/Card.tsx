@@ -49,6 +49,7 @@ export function Card({
   accessibilityRole,
   accessibilityState,
   style,
+  pressRetentionOffset,
   ...props
 }: CardProps) {
   const palette = getCardPalette(variant, theme);
@@ -59,6 +60,7 @@ export function Card({
       accessibilityRole={accessibilityRole ?? (onPress ? "button" : undefined)}
       accessibilityState={{ ...accessibilityState, disabled }}
       disabled={disabled}
+      pressRetentionOffset={pressRetentionOffset ?? (onPress ? 8 : undefined)}
       onPress={onPress}
       style={(state) => [
         styles.card,

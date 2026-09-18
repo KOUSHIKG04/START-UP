@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import { Info, UserRound } from "lucide-react-native";
+import Svg, { Circle } from "react-native-svg";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 
@@ -9,14 +10,14 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
   return (
     <>
       <Card
-        variant="plain"
-        borderRadius={radius.lg}
-        borderWidth={0}
-        borderColor="transparent"
+        variant="outlined"
+        borderRadius={radius.md}
+        borderWidth={1}
+        borderColor="#E0E5EB"
         backgroundColor={colors.white}
         gap={16}
         padding={16}
-        style={[styles.centeredCard, styles.flatCard, styles.noBorderCard]}
+        style={[styles.centeredCard, styles.flatCard]}
       >
         <View style={styles.queueHeading}>
           <Text style={styles.queueTitle}>You are in queue</Text>
@@ -26,7 +27,24 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
           </View>
         </View>
 
-        <View style={styles.peopleAheadSection}>
+      
+
+        <View style={styles.queueStatsRow}>
+          <View style={styles.queueStatBox}>
+            <Text style={styles.statPanelLabel}>TOKEN NUMBER</Text>
+
+            <Text style={styles.statBigNumber}>7</Text>
+          </View>
+
+          <View style={styles.queueStatBox}>
+            <Text style={styles.statPanelLabel}>ESTIMATED TIME</Text>
+            <Text style={styles.statBigNumber}>
+              37<Text style={styles.waitTimeUnit}>MIN.</Text>
+            </Text>
+          </View>
+        </View>
+
+          <View style={styles.peopleAheadSection}>
           <View style={styles.peopleAvatarsRow}>
             {[1, 2, 3, 4, 5].map((id) => (
               <View key={id} style={styles.avatarCircle}>
@@ -41,22 +59,6 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
             <View style={styles.plusCircle}>
               <Text style={styles.plusCircleText}>+2</Text>
             </View>
-          </View>
-        </View>
-
-        <View style={styles.queueStatsStack}>
-          <View style={styles.queueStatCard}>
-            <Text style={styles.queuePhraseText}>
-              You are currently at{" "}
-              <Text style={styles.queuePhraseHighlight}>7</Text> in the queue.
-            </Text>
-          </View>
-
-          <View style={styles.queueStatCard}>
-            <Text style={styles.queuePhraseText}>
-              Estimated Wait Time ·{" "}
-              <Text style={styles.queuePhraseHighlight}>37 min.</Text>
-            </Text>
           </View>
         </View>
 
@@ -89,10 +91,9 @@ const styles = StyleSheet.create({
   flatCard: {
     elevation: 0,
     shadowOpacity: 0,
-  },
-  noBorderCard: {
-    borderWidth: 0,
-    borderColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    borderRadius: radius.md,
   },
   centeredCard: { alignItems: "center" },
   queueHeading: {
@@ -123,33 +124,57 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
-  queueStatsStack: {
+  queueStatsRow: {
     width: "100%",
+    flexDirection: "row",
     gap: 10,
   },
-  queueStatCard: {
-    width: "100%",
+  queueStatBox: {
+    flex: 1,
+    flexBasis: 0,
+    minWidth: 0,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
     backgroundColor: colors.patient.surface,
     borderWidth: 1,
     borderColor: "#D5EBE6",
-    borderRadius: radius.md,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: radius.lg,
+    paddingVertical: 20,
+    paddingHorizontal: 8,
+  },
+  statPanelLabel: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.bold,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  statBigNumber: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.bold,
+    fontSize: 56,
+    fontWeight: "700",
+    lineHeight: 64,
+  },
+  ringContainer: {
+    width: 85,
+    height: 85,
     alignItems: "center",
     justifyContent: "center",
   },
-  queuePhraseText: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.medium,
-    fontSize: 14.5,
-    lineHeight: 26,
-    textAlign: "center",
+  ringCenter: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  queuePhraseHighlight: {
-    color: colors.patient.accent,
+  waitTimeUnit: {
+    color: colors.patient.primaryDark,
     fontFamily: fontFamilies.bold,
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 2,
   },
   peopleAheadSection: {
     width: "80%",

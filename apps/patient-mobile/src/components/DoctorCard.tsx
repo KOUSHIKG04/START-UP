@@ -1,20 +1,15 @@
-import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useRef, type ReactNode } from "react";
 import {
-  Briefcase,
-  ChevronRight,
-  Star,
-  UserRound,
-} from "lucide-react-native";
+  type GestureResponderEvent,
+  type StyleProp,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
+import { Briefcase, UserRound } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@startup/mobile-ui";
+import { Card } from "@startup/mobile-ui";
 
 export type DoctorCardProps = {
   name: string;
@@ -22,12 +17,26 @@ export type DoctorCardProps = {
   specialty: string;
   experience: string;
   rating: string;
-  fee: string;
+  fee?: string;
+  hideFee?: boolean;
+  hideExperience?: boolean;
   onPress?: () => void;
   showChevron?: boolean;
   contextLabel?: string;
   variant?: "default" | "profile";
+  style?: StyleProp<ViewStyle>;
 };
+
+function splitQualification(q: string): {
+  degree: string;
+  department: string | null;
+} {
+  const match = q.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  if (match) {
+    return { degree: match[1].trim(), department: match[2].trim() };
+  }
+  return { degree: q.trim(), department: null };
+}
 
 export default function DoctorCard({
   name,
@@ -35,76 +44,100 @@ export default function DoctorCard({
   specialty,
   experience,
   rating,
-  fee,
+  fee = "",
+  hideFee = false,
+  hideExperience = false,
   onPress,
-  showChevron = Boolean(onPress),
   contextLabel,
   variant = "default",
+  style,
 }: DoctorCardProps) {
+  const { degree, department } = splitQualification(qualification);
+
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isDragOrScroll = useRef(false);
+
+  const handleTouchStart = (e: GestureResponderEvent) => {
+    touchStartPos.current = {
+      x: e.nativeEvent.pageX,
+      y: e.nativeEvent.pageY,
+    };
+    isDragOrScroll.current = false;
+  };
+
+  const handleTouchMove = (e: GestureResponderEvent) => {
+    if (!touchStartPos.current) return;
+    const dx = Math.abs(e.nativeEvent.pageX - touchStartPos.current.x);
+    const dy = Math.abs(e.nativeEvent.pageY - touchStartPos.current.y);
+    if (dx > 7 || dy > 7) {
+      isDragOrScroll.current = true;
+    }
+  };
+
+  const handlePress = () => {
+    if (isDragOrScroll.current) return;
+    onPress?.();
+  };
+
   if (variant === "profile") {
     return (
       <Card
-        accessibilityLabel={`${name}, ${specialty}, consultation fee ${fee}`}
+        accessibilityLabel={`${name}, ${specialty}${hideFee || !fee ? "" : `, consultation fee ${fee}`}`}
         variant="outlined"
-        backgroundColor="#EFF9F8"
-        borderColor="#E0E5EB"
+        backgroundColor="#E6F4F3"
+        // borderColor="#E0E5EB"
         borderRadius={radius.md}
-        borderWidth={1}
+        // borderWidth={1}
         gap={13}
-        onPress={onPress}
+        onPress={onPress ? handlePress : undefined}
+        onTouchStart={onPress ? handleTouchStart : undefined}
+        onTouchMove={onPress ? handleTouchMove : undefined}
+        pressRetentionOffset={8}
         padding={16}
-        style={styles.profileCard}
+        style={[styles.flatCard, style]}
       >
-        <View style={styles.doctorHeaderRow}>
-          <View style={styles.profileAvatar}>
+        <View style={styles.headerRow}>
+          <View style={styles.avatarSquare}>
             <UserRound color={colors.white} size={25} strokeWidth={2} />
           </View>
 
           <View style={styles.doctorInfo}>
-            <View style={styles.doctorNameRow}>
-              <Text numberOfLines={1} style={styles.doctorName}>
+            <View style={styles.nameRow}>
+              <Text numberOfLines={1} style={styles.profileName}>
                 {name}
               </Text>
               {contextLabel ? (
                 <View style={styles.contextBadge}>
-                  <Text numberOfLines={1} style={styles.contextBadgeText}>
-                    {contextLabel}
-                  </Text>
+                  <Text style={styles.contextBadgeText}>{contextLabel}</Text>
                 </View>
               ) : null}
             </View>
 
-            <Text numberOfLines={1} style={styles.doctorQualification}>
-              {qualification}
-              {specialty ? ` • ${specialty}` : ""}
+            <Text numberOfLines={1} style={styles.secondaryText}>
+              {degree}
+            </Text>
+
+            <Text numberOfLines={1} style={styles.specialtyText}>
+              {specialty}
             </Text>
           </View>
         </View>
 
         <View style={styles.profileGrid}>
-          <View style={styles.profileCell}>
-            <View style={styles.profileIconSurface}>
-              <Briefcase color={colors.patient.primaryDark} size={15} strokeWidth={2} />
-            </View>
-            <View style={styles.profileCellText}>
-              <Text style={styles.profileCellLabel}>Experience</Text>
-              <Text numberOfLines={1} style={styles.profileCellValue}>
-                {experience}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.profileCell}>
-            <View style={styles.profileIconSurface}>
-              <Star color={colors.patient.primaryDark} size={15} fill={colors.patient.primaryDark} strokeWidth={1.5} />
-            </View>
-            <View style={styles.profileCellText}>
-              <Text style={styles.profileCellLabel}>Rating</Text>
-              <Text numberOfLines={1} style={styles.profileCellValue}>
-                {rating}
-              </Text>
-            </View>
-          </View>
+          {!hideExperience && experience ? (
+            <MetricCell
+              icon={
+                <Briefcase
+                  color={colors.patient.primaryDark}
+                  size={14}
+                  strokeWidth={2}
+                />
+              }
+              label="Experience"
+              value={experience}
+            />
+          ) : null}
+          <MetricCell icon={<StarIcon />} label="Rating" value={rating} />
         </View>
       </Card>
     );
@@ -112,215 +145,176 @@ export default function DoctorCard({
 
   return (
     <Card
-      accessibilityLabel={`${name}, ${specialty}, consultation fee ${fee}`}
+      accessibilityLabel={`${name}, ${specialty}${hideFee || !fee ? "" : `, consultation fee ${fee}`}`}
       variant="outlined"
-      backgroundColor="#EFF9F8"
+      backgroundColor="#E6F4F3"
       borderColor="#E0E5EB"
       borderRadius={radius.lg}
       borderWidth={1}
-      gap={12}
-      onPress={onPress}
-      padding={14}
-      style={styles.flatCard}
+      gap={10}
+      onPress={onPress ? handlePress : undefined}
+      onTouchStart={onPress ? handleTouchStart : undefined}
+      onTouchMove={onPress ? handleTouchMove : undefined}
+      pressRetentionOffset={8}
+      padding={16}
+      style={[styles.flatCard, style]}
     >
-      <CardHeader gap={11}>
-        <View style={styles.avatar}>
-          <UserRound color={colors.white} size={27} strokeWidth={1.8} />
+      <View style={styles.headerRow}>
+        <View style={styles.avatarSquare}>
+          <UserRound color={colors.white} size={26} strokeWidth={1.8} />
         </View>
 
-        <CardContent gap={2} style={styles.identity}>
-          <CardTitle numberOfLines={1} style={styles.name}>
-            {name}
-          </CardTitle>
-          <Text numberOfLines={2} style={styles.qualification}>
-            {qualification}
+        <View style={styles.doctorInfo}>
+          <Text numberOfLines={1} style={styles.nameLine}>
+            <Text style={styles.nameText}>{name}</Text>
+            {degree ? (
+              <Text style={styles.degreeText}>{`  ${degree}`}</Text>
+            ) : null}
           </Text>
-          <Text numberOfLines={1} style={styles.specialty}>
-            {specialty}
-          </Text>
-          {contextLabel ? (
-            <Text numberOfLines={1} style={styles.contextLabel}>
-              ({contextLabel})
+
+          {department || rating ? (
+            <Text numberOfLines={1} style={styles.deptRatingLine}>
+              {department ?? ""}
+              {department && rating ? " • " : ""}
+              {rating}
             </Text>
           ) : null}
-        </CardContent>
 
-        <CardAction style={styles.feeSection}>
-          <Text style={styles.feeLabel}>Consultation</Text>
-          <Text numberOfLines={1} style={styles.fee}>
-            {fee}
+          <Text numberOfLines={1} style={styles.specialtyText}>
+            {specialty}
+            {contextLabel ? (
+              <Text style={styles.contextInline}>{`  (${contextLabel})`}</Text>
+            ) : null}
           </Text>
-          {showChevron ? (
-            <View style={styles.chevron}>
-              <ChevronRight color={colors.white} size={17} strokeWidth={2.4} />
-            </View>
-          ) : null}
-        </CardAction>
-      </CardHeader>
+        </View>
+      </View>
 
-      <CardFooter gap={8} style={styles.metaRow}>
-        <DoctorMeta
-          icon={<Briefcase color={colors.patient.primaryDark} size={16} />}
-          label={experience}
-        />
-        <DoctorMeta
-          icon={<Star color={colors.patient.primaryDark} size={16} />}
-          label={rating}
-        />
-      </CardFooter>
+      {(!hideExperience && experience) || (!hideFee && fee) ? (
+        <View style={styles.pillRow}>
+          {!hideExperience && experience ? (
+            <Pill>
+              <Text style={styles.pillText}>{experience}</Text>
+            </Pill>
+          ) : null}
+          {!hideFee && fee ? (
+            <Pill>
+              <Text style={styles.pillText}>{`Consultation fee: ${fee}`}</Text>
+            </Pill>
+          ) : null}
+        </View>
+      ) : null}
     </Card>
   );
 }
 
-type DoctorMetaProps = {
+function Pill({ children }: { children: ReactNode }) {
+  return <View style={styles.pill}>{children}</View>;
+}
+
+function StarIcon() {
+  return (
+    <View style={styles.starWrap}>
+      <Text style={styles.starEmoji}>★</Text>
+    </View>
+  );
+}
+
+function MetricCell({
+  icon,
+  label,
+  value,
+}: {
   icon: ReactNode;
   label: string;
-};
-
-function DoctorMeta({ icon, label }: DoctorMetaProps) {
+  value: string;
+}) {
   return (
-    <View style={styles.meta}>
-      {icon}
-      <Text numberOfLines={1} style={styles.metaLabel}>
-        {label}
-      </Text>
+    <View style={styles.profileCell}>
+      <View style={styles.profileIconSurface}>{icon}</View>
+      <View style={styles.profileCellText}>
+        <Text style={styles.profileCellLabel}>{label}</Text>
+        <Text numberOfLines={1} style={styles.profileCellValue}>
+          {value}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  avatar: {
-    width: 56,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 28,
-    backgroundColor: colors.patient.accent,
-  },
-  identity: {
-    flex: 1,
-    minWidth: 0,
-  },
-  name: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.bold,
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 19,
-  },
-  qualification: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  specialty: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.medium,
-    fontSize: 11,
-    fontWeight: "500",
-    lineHeight: 14,
-  },
-  contextLabel: {
-    color: colors.patient.accent,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 10,
-    fontWeight: "600",
-    lineHeight: 13,
-  },
-  feeSection: {
-    width: 78,
-    minHeight: 60,
-    alignItems: "flex-start",
-    justifyContent: "center",
-    paddingLeft: 10,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: colors.patient.surfaceBorder,
-  },
-  feeLabel: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 9,
-    lineHeight: 12,
-  },
-  fee: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.bold,
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  chevron: {
-    width: 25,
-    height: 25,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-    borderRadius: 13,
-    backgroundColor: colors.patient.accent,
-  },
-  metaRow: {
-    paddingLeft: 67,
-  },
-  meta: {
-    minWidth: 0,
-    flexShrink: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    borderRadius: radius.md,
-    backgroundColor: "#DFF3F1",
-  },
-  metaLabel: {
-    minWidth: 0,
-    flexShrink: 1,
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.medium,
-    fontSize: 10,
-    fontWeight: "500",
-    lineHeight: 13,
-  },
   flatCard: {
     elevation: 0,
     shadowOpacity: 0,
   },
-  profileCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  doctorHeaderRow: {
+  headerRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 12,
   },
-  profileAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+  avatarSquare: {
+    width: 55,
+    height: 55,
+    borderRadius: "50%",
     backgroundColor: colors.patient.accent,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
+    marginTop: 4,
   },
   doctorInfo: {
     flex: 1,
     minWidth: 0,
-    gap: 3,
+    gap: 2,
+    paddingTop: 2,
   },
-  doctorNameRow: {
+  nameLine: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+    flexWrap: "wrap",
   },
-  doctorName: {
+  nameText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.bold,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  degreeText: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.regular,
+    fontSize: 11,
+    fontWeight: "400",
+    lineHeight: 20,
+  },
+  deptRatingLine: {
+    color: "#677e87",
+    fontFamily: fontFamilies.medium,
+    fontSize: 14,
+    lineHeight: 16,
+  },
+  specialtyText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 17,
+  },
+  contextInline: {
+    color: colors.patient.accent,
+    fontFamily: fontFamilies.regular,
+    fontSize: 10,
+  },
+  profileName: {
     flex: 1,
     color: colors.patient.text,
     fontFamily: fontFamilies.bold,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     lineHeight: 21,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   contextBadge: {
     paddingHorizontal: 8,
@@ -334,10 +328,37 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "600",
   },
-  doctorQualification: {
+  secondaryText: {
     color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.medium,
-    fontSize: 12,
+    fontFamily: fontFamilies.regular,
+    fontSize: 14,
+    lineHeight: 15,
+  },
+  pillRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingTop: 2,
+    display:"flex", 
+    alignItems:"center",
+    justifyContent:"space-between"
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#d9efee",
+    backgroundColor: "#d9efee",
+  },
+  pillText: {
+    color: colors.patient.primary,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+    fontWeight: "500",
     lineHeight: 16,
   },
   profileGrid: {
@@ -372,7 +393,7 @@ const styles = StyleSheet.create({
   profileCellLabel: {
     color: colors.patient.textSecondary,
     fontFamily: fontFamilies.medium,
-    fontSize: 10,
+    fontSize: 9,
     textTransform: "uppercase",
     letterSpacing: 0.3,
   },
@@ -381,5 +402,14 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.bold,
     fontSize: 12,
     fontWeight: "700",
+  },
+  starWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  starEmoji: {
+    color: colors.patient.primaryDark,
+    fontSize: 13,
+    lineHeight: 14,
   },
 });

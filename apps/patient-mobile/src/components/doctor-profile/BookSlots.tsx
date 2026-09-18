@@ -83,13 +83,17 @@ export function BookSlots({
   };
 
   return (
-    <Card
-      variant="plain"
-      borderRadius={radius.md}
-      gap={20}
-      padding={4}
-      style={styles.bookSlotsCard}
-    >
+    <View style={styles.container}>
+      <Card
+        variant="outlined"
+        borderRadius={radius.md}
+        borderColor="#E0E5EB"
+        borderWidth={1}
+        backgroundColor={colors.white}
+        gap={20}
+        padding={16}
+        style={styles.bookSlotsCard}
+      >
       <View style={styles.bookingSection}>
         <Text style={styles.sectionTitle}>Select date</Text>
         <FadedScrollView
@@ -225,7 +229,24 @@ export function BookSlots({
       </View>
 
       <View style={styles.bookingSection}>
-        <Text style={styles.sectionTitle}>Reason for visit (optional)</Text>
+        <View style={styles.sectionHeadingRow}>
+          <Text style={styles.sectionTitle}>Reason for visit (optional)</Text>
+          <Button
+            label="About Doctor"
+            variant="ghost"
+            theme="patient"
+            onPress={onGoToAbout}
+            style={styles.backToAboutButton}
+            labelStyle={styles.backToAboutLabel}
+            leftIcon={
+              <ChevronLeft
+                color={colors.patient.primaryDark}
+                size={15}
+                strokeWidth={2.4}
+              />
+            }
+          />
+        </View>
         <Input
           accessibilityLabel="Reason for visit"
           placeholder="e.g. Fever, back pain, routine check-up..."
@@ -234,51 +255,41 @@ export function BookSlots({
           containerStyle={styles.reasonInputContainer}
         />
       </View>
-
-      <Button
-        label="Book Appointment"
-        onPress={() => {
-          const date =
-            monthDates.find((item) => item.key === selectedDate)?.date ??
-            selectedDate;
-          onBookAppointment({
-            date,
-            time: selectedTime,
-            patient,
-            reason,
-            consultationType,
-            address,
-          });
-        }}
-        style={styles.bookButton}
-      />
-
-      <View style={styles.slotsFooterRow}>
-        <Button
-          label="About Doctor"
-          variant="ghost"
-          theme="patient"
-          onPress={onGoToAbout}
-          style={styles.backToAboutButton}
-          labelStyle={styles.backToAboutLabel}
-          leftIcon={
-            <ChevronLeft
-              color={colors.patient.primaryDark}
-              size={16}
-              strokeWidth={2.4}
-            />
-          }
-        />
-      </View>
     </Card>
+
+    <Button
+      label="Book Appointment"
+      onPress={() => {
+        const date =
+          monthDates.find((item) => item.key === selectedDate)?.date ??
+          selectedDate;
+        onBookAppointment({
+          date,
+          time: selectedTime,
+          patient,
+          reason,
+          consultationType,
+          address,
+        });
+      }}
+      style={styles.bookButton}
+    />
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    gap: 14,
+  },
   bookSlotsCard: {
-    flex: 1,
     elevation: 0,
     shadowOpacity: 0,
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
   },
   bookingSection: {
     gap: 10,
@@ -404,28 +415,25 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
   },
   bookButton: {
-    minHeight: 50,
+    width: "100%",
+    alignSelf: "stretch",
+    minHeight: 48,
     borderRadius: radius.md,
   },
-  slotsFooterRow: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    paddingTop: 2,
-  },
   backToAboutButton: {
-    minHeight: 34,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    minHeight: 28,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: colors.white,
+    backgroundColor: "transparent",
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 2,
   },
   backToAboutLabel: {
     color: colors.patient.primaryDark,
     fontFamily: fontFamilies.semibold,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
 });

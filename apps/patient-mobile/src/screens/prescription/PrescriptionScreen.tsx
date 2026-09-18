@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Share, StyleSheet, Text, View } from "react-native";
+import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import {
   Download,
   FileText,
-  Heart,
   Info,
   Pill,
   Share2,
-  UserRound,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
+import DoctorCard from "../../components/DoctorCard";
 import type { Appointment } from "../../types/appointment";
 import { prescriptionMedicines } from "../../utils/prescription";
 import type { PrescriptionScreenProps } from "../../types/prescription";
@@ -20,7 +19,6 @@ export function PrescriptionScreen({
   onBackPress,
   onViewMedicines,
 }: PrescriptionScreenProps) {
-  const [saved, setSaved] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
 
   const sharePrescription = () =>
@@ -32,26 +30,27 @@ export function PrescriptionScreen({
     <View style={styles.screen}>
       <Header app="patient" onBackPress={onBackPress} title="Prescription" />
       <FadedScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.doctorRow}>
-          <View style={styles.avatar}>
-            <UserRound color={colors.patient.primaryDark} size={27} />
-          </View>
-          <View style={styles.doctorCopy}>
-            <Text style={styles.doctorName}>{appointment.doctorName} ✓</Text>
-            <Text style={styles.specialty}>{appointment.specialty}</Text>
-            <Text style={styles.qualification}>{appointment.qualification}</Text>
-            <Text style={styles.rating}>★ {appointment.rating} · {appointment.experience}</Text>
-          </View>
-          <Button
-            accessibilityLabel={saved ? "Remove saved doctor" : "Save doctor"}
-            label=""
-            leftIcon={<Heart color={colors.white} fill={saved ? colors.white : "transparent"} size={19} />}
-            onPress={() => setSaved((current) => !current)}
-            style={styles.favoriteButton}
-          />
-        </View>
+        <DoctorCard
+          name={appointment.doctorName}
+          qualification={appointment.qualification}
+          specialty={appointment.specialty}
+          experience={appointment.experience}
+          rating={appointment.rating}
+          fee={appointment.fee}
+          hideFee
+          hideExperience
+        />
 
-        <Card borderRadius={radius.md} gap={10} orientation="horizontal" padding={14}>
+        <Card
+          variant="outlined"
+          borderRadius={radius.md}
+          borderWidth={1}
+          borderColor="#E0E5EB"
+          gap={10}
+          orientation="horizontal"
+          padding={14}
+          style={styles.noElevation}
+        >
           <FileText color={colors.patient.primary} size={23} />
           <View style={styles.flexCopy}>
             <Text style={styles.cardTitle}>Prescription #RX20260820</Text>
@@ -60,13 +59,7 @@ export function PrescriptionScreen({
           <Chip label="Active" style={styles.activeChip} labelStyle={styles.activeChipText} />
         </Card>
 
-        <Card
-          accessibilityLabel="View medicine details"
-          borderRadius={radius.md}
-          gap={10}
-          onPress={onViewMedicines}
-          padding={15}
-        >
+        <View style={styles.medicinesCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Medicines</Text>
             <Chip label="Viral fever" style={styles.diagnosisChip} />
@@ -82,11 +75,19 @@ export function PrescriptionScreen({
               </View>
             </View>
           ))}
-          <View style={styles.viewDetailsRow}>
+          <Pressable
+            accessibilityLabel="View medicine schedule"
+            accessibilityRole="button"
+            onPress={onViewMedicines}
+            style={({ pressed }) => [
+              styles.viewDetailsRow,
+              pressed ? styles.pressed : undefined,
+            ]}
+          >
             <Pill color={colors.patient.primaryDark} size={17} />
             <Text style={styles.viewDetailsText}>View medicine schedule</Text>
-          </View>
-        </Card>
+          </Pressable>
+        </View>
 
         <View style={styles.adviceBanner}>
           <View style={styles.adviceIcon}>
@@ -121,14 +122,17 @@ export function PrescriptionScreen({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.patient.background },
   content: { gap: 14, padding: spacing.lg, paddingBottom: 126 },
-  doctorRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14 },
-  avatar: { width: 60, height: 60, alignItems: "center", justifyContent: "center", borderRadius: 30, backgroundColor: "#C8EDE9" },
-  doctorCopy: { flex: 1, gap: 2 },
-  doctorName: { color: colors.patient.text, fontFamily: fontFamilies.bold, fontSize: 16, fontWeight: "700" },
-  specialty: { color: colors.patient.text, fontFamily: fontFamilies.regular, fontSize: 12 },
-  qualification: { color: colors.patient.textSecondary, fontFamily: fontFamilies.regular, fontSize: 11 },
-  rating: { color: colors.patient.primaryDark, fontFamily: fontFamilies.regular, fontSize: 10 },
-  favoriteButton: { width: 44, minHeight: 44, paddingHorizontal: 0, borderRadius: 22 },
+  noElevation: { elevation: 0, shadowOpacity: 0 },
+  medicinesCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    padding: 16,
+    gap: 12,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
   flexCopy: { flex: 1, minWidth: 0, gap: 2 },
   cardTitle: { color: colors.patient.text, fontFamily: fontFamilies.bold, fontSize: 13, fontWeight: "700" },
   secondaryText: { color: colors.patient.textSecondary, fontFamily: fontFamilies.regular, fontSize: 10, lineHeight: 14 },
@@ -142,8 +146,19 @@ const styles = StyleSheet.create({
   medicineNumberText: { color: colors.white, fontFamily: fontFamilies.bold, fontSize: 11, fontWeight: "700" },
   medicineName: { color: colors.patient.text, fontFamily: fontFamilies.semibold, fontSize: 12, fontWeight: "600" },
   medicineDose: { color: colors.patient.textSecondary, fontFamily: fontFamilies.regular, fontSize: 9 },
-  viewDetailsRow: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 },
+  viewDetailsRow: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E5EB",
+    paddingTop: 8,
+    marginTop: 2,
+  },
   viewDetailsText: { color: colors.patient.primaryDark, fontFamily: fontFamilies.semibold, fontSize: 12, fontWeight: "600" },
+  pressed: { opacity: 0.72 },
   adviceBanner: { minHeight: 72, flexDirection: "row", alignItems: "center", gap: 11, padding: 14, borderRadius: radius.md, backgroundColor: "#E8F8F4" },
   adviceIcon: { width: 32, height: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: colors.white },
   adviceTitle: { color: colors.patient.text, fontFamily: fontFamilies.semibold, fontSize: 11, fontWeight: "600", lineHeight: 15 },

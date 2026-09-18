@@ -11,7 +11,16 @@ export function HomeVisitAddress({
   verifiedAddress,
 }: HomeVisitAddressProps) {
   return (
-    <Card borderRadius={radius.md} gap={12} padding={14}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      gap={12}
+      padding={14}
+      style={styles.addressCard}
+    >
       <Input
         accessibilityLabel="Home visit address"
         label="Your address"
@@ -45,6 +54,13 @@ export function HomeVisitAddress({
 }
 
 const styles = StyleSheet.create({
+  addressCard: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    borderRadius: radius.md,
+  },
   locationButton: {
     minHeight: 44,
     borderRadius: radius.md,

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   AlertCircle,
   CalendarDays,
@@ -36,8 +37,25 @@ export function CompletionView({
   onViewMedicines,
   onViewPrescription,
 }: CompletionViewProps) {
+  const insets = useSafeAreaInsets();
   const [rating, setRating] = useState<number>();
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const ratingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (ratingTimerRef.current) clearTimeout(ratingTimerRef.current);
+    };
+  }, []);
+
+  const handleRatingSubmit = () => {
+    if (rating === undefined || ratingSubmitted) return;
+    setRatingSubmitted(true);
+    ratingTimerRef.current = setTimeout(() => {
+      onGoHome();
+    }, 2000);
+  };
   const isClinic = appointment.consultationType === "Clinic Visit";
   const isHome = appointment.consultationType === "Home Visit";
   const completionCopy = isClinic
@@ -49,132 +67,153 @@ export function CompletionView({
 
   return (
     <FadedScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: Math.max(insets.bottom, 20) + 36 },
+      ]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.completionHero}>
-        <View style={styles.completionHaloOuter}>
-          <View style={styles.completionHaloInner}>
-            <View style={styles.completionIcon}>
-              <HeroIcon color={colors.white} size={50} strokeWidth={1.8} />
+      <View style={styles.topSection}>
+        <View style={styles.completionHero}>
+          <View style={styles.completionHaloOuter}>
+            <View style={styles.completionHaloInner}>
+              <View style={styles.completionIcon}>
+                <HeroIcon color={colors.white} size={50} strokeWidth={1.8} />
+              </View>
+              <View style={styles.completionCheckBadge}>
+                <CheckCircle2 color={colors.white} size={32} strokeWidth={2.5} />
+              </View>
             </View>
-            <View style={styles.completionCheckBadge}>
-              <CheckCircle2 color={colors.white} size={32} strokeWidth={2.5} />
-            </View>
           </View>
-        </View>
-        <Text style={styles.thankYouTitle}>Thank you!</Text>
-        <Text style={styles.completedTitle}>{completionCopy}</Text>
-        <Text style={styles.centeredDescription}>
-          {appointment.doctorName} has completed your consultation.
-        </Text>
-      </View>
-
-      {!isClinic ? <ConsultationSummary appointment={appointment} /> : null}
-
-      {isClinic ? (
-        <View style={styles.clinicOrderSection}>
-          {/* <View style={styles.wellnessBanner}>
-            <View style={styles.wellnessIcon}>
-              <ShieldCheck color={colors.white} size={20} />
-            </View>
-            <Text style={styles.infoText}>
-              We hope you are feeling better.{"\n"}Take care and stay healthy!
-            </Text>
-          </View> */}
-
-          <View style={styles.completionActionsRow}>
-            <Button
-              label="Order Medicine"
-              disabled
-              onPress={onViewMedicines}
-              style={styles.completionSecondaryAction}
-              variant="secondary"
-            />
-            <Button
-              label="View Prescription"
-              onPress={onViewPrescription}
-              style={styles.completionSecondaryAction}
-              variant="secondary"
-            />
-          </View>
-          <View style={styles.orderMedicineNotice}>
-            <AlertCircle color={colors.patient.primary} size={16} strokeWidth={2} />
-            <Text style={styles.orderMedicineNoticeText}>
-              Order medicine will work once we start operations.
-            </Text>
-          </View>
-        </View>
-      ) : isHome ? (
-        <View style={styles.wellnessBanner}>
-          {/* <View style={styles.wellnessIcon}>
-            <ShieldCheck color={colors.white} size={20} />
-          </View>
-          <Text style={styles.infoText}>
-            We hope you are feeling better.{"\n"}Take care and stay healthy!
-          </Text> */}
-        </View>
-      ) : (
-        <View style={styles.recordsBanner}>
-          <FileText color={colors.patient.primaryDark} size={23} />
-          <Text style={styles.infoText}>
-            Prescription and consultation notes have been sent to your email and are available in records.
+          <Text style={styles.thankYouTitle}>Thank you!</Text>
+          <Text style={styles.completedTitle}>{completionCopy}</Text>
+          <Text style={styles.centeredDescription}>
+            {appointment.doctorName} has completed your consultation.
           </Text>
         </View>
-      )}
 
-      <Card
-        variant="outlined"
-        borderRadius={radius.md}
-        borderWidth={1}
-        borderColor="#E0E5EB"
-        gap={12}
-        padding={16}
-        style={styles.experienceCard}
-      >
-        <Text style={styles.feedbackTitle}>How was your experience?</Text>
-        <Text style={styles.feedbackDescription}>
-          Your feedback helps us improve
-        </Text>
-        <View style={styles.ratingRow}>
-          {experienceRatings.map((item, index) => (
-            <Pressable
-              key={item.label}
-              accessibilityLabel={item.label}
-              accessibilityRole="button"
-              accessibilityState={{ selected: rating === index }}
-              onPress={() => setRating(index)}
-              style={({ pressed }) => [
-                styles.ratingButton,
-                rating === index ? styles.selectedRating : undefined,
-                pressed ? styles.pressed : undefined,
-              ]}
-            >
-              <Text style={styles.ratingEmoji}>{item.emoji}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </Card>
+        {!isClinic ? <ConsultationSummary appointment={appointment} /> : null}
 
-      <View style={styles.completionActionsRow}>
-        <Button
-          label="Go to Home"
-          onPress={onGoHome}
-          style={styles.completionSideButton}
-          labelStyle={styles.completionSideButtonLabel}
-        />
-        <Button
-          label="Share Detailed Feedback"
-          onPress={() => setFeedbackOpen(true)}
-          style={styles.completionSideButton}
-          labelStyle={styles.completionSideButtonLabel}
-          variant="outline"
-        />
+        {isClinic ? (
+          <View style={styles.clinicOrderSection}>
+            {/* <View style={styles.wellnessBanner}>
+              <View style={styles.wellnessIcon}>
+                <ShieldCheck color={colors.white} size={20} />
+              </View>
+              <Text style={styles.infoText}>
+                We hope you are feeling better.{"\n"}Take care and stay healthy!
+              </Text>
+            </View> */}
+
+            <View style={styles.completionActionsRow}>
+              <Button
+                label="Order Medicine"
+                disabled
+                onPress={onViewMedicines}
+                style={styles.completionSecondaryAction}
+                variant="secondary"
+              />
+              <Button
+                label="View Prescription"
+                onPress={onViewPrescription}
+                style={styles.completionSecondaryAction}
+                variant="secondary"
+              />
+            </View>
+            <View style={styles.orderMedicineNotice}>
+              <AlertCircle color={colors.patient.primary} size={16} strokeWidth={2} />
+              <Text style={styles.orderMedicineNoticeText}>
+                Order medicine will work once we start operations.
+              </Text>
+            </View>
+          </View>
+        ) : isHome ? null : (
+          <View style={styles.recordsBanner}>
+            <FileText color={colors.patient.primaryDark} size={23} />
+            <Text style={styles.infoText}>
+              Prescription and consultation notes have been sent to your email and are available in records.
+            </Text>
+          </View>
+        )}
       </View>
+
+      <View style={styles.bottomSection}>
+        <Card
+          variant="outlined"
+          backgroundColor="#E8F8F4"
+          borderRadius={radius.md}
+          borderWidth={1}
+          borderColor="#E0E5EB"
+          gap={12}
+          padding={16}
+          style={styles.experienceCard}
+        >
+          <Text style={styles.feedbackTitle}>How was your experience?</Text>
+          {/* <Text style={styles.feedbackDescription}>
+            Your feedback helps us improve
+          </Text> */}
+          <View style={styles.ratingRow}>
+            {experienceRatings.map((item, index) => (
+              <Pressable
+                key={item.label}
+                accessibilityLabel={item.label}
+                accessibilityRole="button"
+                accessibilityState={{ selected: rating === index }}
+                disabled={ratingSubmitted}
+                onPress={() => setRating(index)}
+                style={({ pressed }) => [
+                  styles.ratingButton,
+                  rating === index ? styles.selectedRating : undefined,
+                  pressed ? styles.pressed : undefined,
+                ]}
+              >
+                <Text style={styles.ratingEmoji}>{item.emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {!ratingSubmitted ? (
+            <Button
+              label="Submit"
+              variant="outline"
+              disabled={rating === undefined}
+              onPress={handleRatingSubmit}
+              style={[
+                styles.experienceSubmitButton,
+                rating !== undefined && styles.experienceSubmitButtonActive,
+              ]}
+              labelStyle={styles.experienceSubmitLabel}
+            />
+          ) : (
+            <View style={styles.ratingSubmittedConfirmation}>
+              <CheckCircle2 color={colors.patient.primaryDark} size={16} strokeWidth={2.4} />
+              <Text style={styles.ratingSubmittedText}>Submitted • Returning home...</Text>
+            </View>
+          )}
+        </Card>
+
+        <View style={styles.completionActionsRow}>
+          <Button
+            label="Go to Home"
+            onPress={onGoHome}
+            style={styles.completionSideButton}
+            labelStyle={styles.completionSideButtonLabel}
+          />
+          <Button
+            label="Share Detailed Feedback"
+            onPress={() => setFeedbackOpen(true)}
+            style={styles.completionSideButton}
+            labelStyle={styles.completionSideButtonLabel}
+            variant="outline"
+          />
+        </View>
+      </View>
+
       <FeedbackBottomSheet
         visible={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
+        onSubmitSuccess={onGoHome}
       />
     </FadedScrollView>
   );
@@ -182,7 +221,16 @@ export function CompletionView({
 
 function ConsultationSummary({ appointment }: { appointment: Appointment }) {
   return (
-    <Card borderRadius={radius.md} gap={0} padding={0}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      gap={0}
+      padding={0}
+      style={styles.summaryCard}
+    >
       <View style={styles.summaryHeading}>
         <ClipboardList color={colors.patient.primaryDark} size={20} />
         <Text style={styles.cardTitle}>Consultation Summary</Text>
@@ -209,10 +257,21 @@ function ConsultationSummary({ appointment }: { appointment: Appointment }) {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 14,
+    flexGrow: 1,
+    justifyContent: "space-between",
+    gap: 16,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
-    paddingBottom: 126,
+  },
+  topSection: {
+    width: "100%",
+    gap: 14,
+  },
+  bottomSection: {
+    width: "100%",
+    gap: 14,
+    marginTop: "auto",
+    paddingTop: 12,
   },
   completionHero: {
     alignItems: "center",
@@ -337,7 +396,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8F8F4",
   },
   experienceCard: {
-    backgroundColor: colors.white,
+    backgroundColor: "#E8F8F4",
     borderWidth: 1,
     borderColor: "#E0E5EB",
     borderRadius: radius.md,
@@ -346,9 +405,9 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
+    fontFamily: fontFamilies.medium,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "600",
     textAlign: "center",
   },
   feedbackDescription: {
@@ -378,6 +437,39 @@ const styles = StyleSheet.create({
   },
   ratingEmoji: { fontSize: 27, lineHeight: 34 },
   pressed: { opacity: 0.72 },
+  experienceSubmitButton: {
+    minHeight: 40,
+    marginTop: 4,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderColor: "#D1D5DB",
+    borderWidth: 1,
+  },
+  experienceSubmitButtonActive: {
+    borderColor: colors.patient.primary,
+  },
+  experienceSubmitLabel: {
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+  },
+  ratingSubmittedConfirmation: {
+    minHeight: 40,
+    marginTop: 4,
+    borderRadius: radius.md,
+    backgroundColor: "#DDF4EE",
+    borderWidth: 1,
+    borderColor: "#A9E4D7",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+  },
+  ratingSubmittedText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+  },
   completionSideButton: {
     flex: 1,
     minHeight: 48,
@@ -385,6 +477,15 @@ const styles = StyleSheet.create({
   },
   completionSideButtonLabel: {
     fontSize: 13,
+  },
+  summaryCard: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    overflow: "hidden",
   },
   summaryHeading: {
     flexDirection: "row",
