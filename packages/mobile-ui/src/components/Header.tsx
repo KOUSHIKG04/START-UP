@@ -17,26 +17,34 @@ export type { HeaderApp } from "../utils/headerBackground";
 
 export type HeaderProps = ViewProps & {
   title?: string;
+  subtitle?: string;
+  centered?: boolean;
   centerContent?: ReactNode;
   rightAction?: ReactNode;
-  onBackPress: () => void;
+  onBackPress?: () => void;
+  onBack?: () => void;
   app?: HeaderApp;
   backgroundColor?: string;
   foregroundColor?: string;
   titleStyle?: TextStyle;
+  subtitleStyle?: TextStyle;
   backAccessibilityLabel?: string;
   safeAreaEdges?: readonly Edge[];
 };
 
 export function Header({
   title,
+  subtitle,
+  centered = false,
   centerContent,
   rightAction,
   onBackPress,
+  onBack,
   app = "patient",
   backgroundColor,
   foregroundColor = colors.white,
   titleStyle,
+  subtitleStyle,
   style,
   backAccessibilityLabel = "Go back",
   safeAreaEdges = ["top"],
@@ -48,6 +56,7 @@ export function Header({
     (appBackground.type === "solid"
       ? appBackground.color
       : appBackground.colors[0]);
+  const handleBack = onBackPress ?? onBack;
 
   return (
     <View
@@ -67,35 +76,62 @@ export function Header({
 
       <SafeAreaView edges={safeAreaEdges}>
         <View style={styles.container}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={backAccessibilityLabel}
-            hitSlop={12}
-            onPress={onBackPress}
-            style={({ pressed }) => [
-              styles.backButton,
-              pressed && styles.backButtonPressed,
-            ]}
-          >
-            <ChevronLeft color={foregroundColor} size={30} strokeWidth={2.5} />
-          </Pressable>
+          {handleBack ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={backAccessibilityLabel}
+              hitSlop={12}
+              onPress={handleBack}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backButtonPressed,
+              ]}
+            >
+              <ChevronLeft color={foregroundColor} size={30} strokeWidth={2.5} />
+            </Pressable>
+          ) : null}
 
           {centerContent ? (
             <View style={styles.centerContent}>{centerContent}</View>
-          ) : title ? (
-            <Text
-              numberOfLines={1}
-              style={[styles.title, { color: foregroundColor }, titleStyle]}
-            >
-              {title}
-            </Text>
           ) : (
-            <View style={styles.centerContent} />
+            <View
+              style={[
+                styles.titleContainer,
+                centered && styles.titleContainerCentered,
+              ]}
+            >
+              {title ? (
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.title,
+                    centered && styles.centeredText,
+                    { color: foregroundColor },
+                    titleStyle,
+                  ]}
+                >
+                  {title}
+                </Text>
+              ) : null}
+              {subtitle ? (
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.subtitle,
+                    centered && styles.centeredText,
+                    { color: foregroundColor },
+                    subtitleStyle,
+                  ]}
+                >
+                  {subtitle}
+                </Text>
+              ) : null}
+            </View>
           )}
 
           {rightAction ? (
             <View style={styles.rightAction}>{rightAction}</View>
-          ) : centerContent ? (
+          ) : centerContent || (centered && handleBack) ? (
             <View style={styles.backButtonPlaceholder} />
           ) : null}
         </View>
@@ -131,7 +167,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  titleContainerCentered: {
+    alignItems: "center",
+  },
+  centeredText: {
+    textAlign: "center",
   },
   rightAction: {
     alignItems: "center",
@@ -140,6 +185,12 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.headerText,
-    flex: 1,
+  },
+  subtitle: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    opacity: 0.9,
+    marginTop: 2,
   },
 });
