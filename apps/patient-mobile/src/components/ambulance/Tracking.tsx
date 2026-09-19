@@ -1,94 +1,141 @@
-import type { ReactNode } from "react";
 import {
   Image,
   Linking,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from "react-native";
 import {
+  Clock3,
   Info,
+  MapPin,
   Phone,
   Share2,
   ShieldCheck,
   Star,
   UserRound,
 } from "lucide-react-native";
-import { fontFamilies, shadows } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import { Button, Card } from "@startup/mobile-ui";
 import type { TrackingStage } from "../../types/ambulance";
 import {
   ambulanceTrip,
   trackingMapImage,
 } from "../../utils/ambulanceConstants";
+import { EmergencyModeCard } from "./EmergencyModeCard";
 
 export function Tracking({
   stage,
   emergency,
   onEmergencyChange,
   onCancel,
+  onProceedToPayment,
 }: {
   stage: TrackingStage;
   emergency: boolean;
   onEmergencyChange: (value: boolean) => void;
   onCancel: () => void;
+  onProceedToPayment?: () => void;
 }) {
-  if (stage === "hospital") return <HospitalJourney />;
+  if (stage === "hospital") {
+    return (
+      <HospitalJourney
+        emergency={emergency}
+        onEmergencyChange={onEmergencyChange}
+        onProceedToPayment={onProceedToPayment}
+      />
+    );
+  }
   const arrived = stage === "arrived";
+
   return (
     <ScrollView
-      contentContainerStyle={styles.trackingContent}
+      contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.trackingTitle}>
-        {arrived ? "Arrived at the location" : "Ambulance on the way"}
+        {arrived ? "Ambulance Arrived" : "Ambulance on the Way"}
       </Text>
-      <Image
-        source={trackingMapImage}
-        resizeMode="cover"
-        style={styles.trackingMap}
-      />
-      <Text style={styles.blueStatus}>
-        {arrived
-          ? "Reached your location"
-          : "Driver is on the way, Will reach in 5 min"}
-      </Text>
-      <View style={styles.trackEmergencyRow}>
-        <View style={styles.trackEmergencyPill}>
-          <Text style={styles.emergencyText}>Emergency</Text>
-        </View>
-        <Switch
-          value={emergency}
-          onValueChange={onEmergencyChange}
-          trackColor={{ false: "#D8E3E6", true: "#8DCFC8" }}
-          thumbColor="#FFFFFF"
+
+      <View style={styles.mapFrame}>
+        <Image
+          source={trackingMapImage}
+          resizeMode="cover"
+          style={styles.trackingMap}
         />
       </View>
+
+      <View
+        style={[
+          styles.statusBanner,
+          arrived ? styles.statusBannerArrived : styles.statusBannerWay,
+        ]}
+      >
+        {arrived ? (
+          <MapPin color={colors.patient.primaryDark} size={18} />
+        ) : (
+          <Clock3 color={colors.patient.primaryDark} size={18} />
+        )}
+        <Text style={styles.statusText}>
+          {arrived
+            ? "Ambulance reached your pickup location"
+            : "Driver is on the way • Arriving in 5 min"}
+        </Text>
+      </View>
+
+      <EmergencyModeCard
+        emergency={emergency}
+        onEmergencyChange={onEmergencyChange}
+        style={styles.emergencyCardReset}
+      />
+
       <PinRow />
-      <DriverCard name="Driver" />
+
+      <DriverCard name={ambulanceTrip.driver} />
+
       <TripCard eta="9 min" distance="4.6 km" title="Trip Details" />
+
       {arrived ? <TripControls /> : null}
-      <Pressable onPress={onCancel} style={styles.cancelButton}>
-        <Text style={styles.cancelText}>Cancel Appointment</Text>
-      </Pressable>
-      {arrived ? <SafetyCard /> : null}
+
+      <SafetyCard />
+
+      <Button
+        label="Cancel Booking"
+        onPress={onCancel}
+        variant="secondary"
+        style={styles.cancelButton}
+        labelStyle={styles.cancelLabel}
+      />
     </ScrollView>
   );
 }
 
-function HospitalJourney() {
+function HospitalJourney({
+  emergency,
+  onEmergencyChange,
+  onProceedToPayment,
+}: {
+  emergency: boolean;
+  onEmergencyChange: (value: boolean) => void;
+  onProceedToPayment?: () => void;
+}) {
   return (
     <ScrollView
-      contentContainerStyle={styles.hospitalContent}
+      contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.reachingRow}>
-        <View style={styles.liveDot} />
-        <Text style={styles.reachingTitle}>Reaching Hospital</Text>
+      <View style={styles.reachingHeader}>
+        <View style={styles.reachingTitleRow}>
+          <View style={styles.liveDot} />
+          <Text style={styles.reachingTitle}>Reaching Hospital</Text>
+        </View>
+        <Text style={styles.reachingSubtitle}>
+          Patient onboard • Driver is en route to emergency ward
+        </Text>
       </View>
-      <Text style={styles.reachingSubtitle}>Driver is currently en route</Text>
+
       <View style={styles.liveMapWrap}>
         <Image
           source={trackingMapImage}
@@ -97,55 +144,105 @@ function HospitalJourney() {
         />
         <View style={styles.liveBadge}>
           <View style={styles.liveWhiteDot} />
-          <Text style={styles.liveText}>LIVE</Text>
+          <Text style={styles.liveText}>LIVE ROUTE</Text>
         </View>
       </View>
-      <TripCard eta="7 min" distance="3.2 km" title="Estimated Arrival" />
-      <DriverCard name="Rajesh Kumar" />
+
+      <EmergencyModeCard
+        emergency={emergency}
+        onEmergencyChange={onEmergencyChange}
+        style={styles.emergencyCardReset}
+      />
+
+      <TripCard
+        eta="7 min"
+        distance="3.2 km"
+        title="Hospital Destination"
+      />
+
+      <DriverCard name={ambulanceTrip.driver} />
+
       <TripControls />
+
       <SafetyCard />
+
+      {onProceedToPayment ? (
+        <Button
+          label="Arrived at Hospital • View Emergency Handover"
+          variant="primary"
+          theme="patient"
+          onPress={onProceedToPayment}
+          style={styles.proceedButton}
+        />
+      ) : null}
     </ScrollView>
   );
 }
 
 function PinRow() {
   return (
-    <View style={styles.pinRow}>
-      <View style={styles.pinLabelBox}>
-        <Text style={styles.pinLabel}>PIN</Text>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      gap={16}
+      padding={18}
+      style={styles.centeredCard}
+    >
+      <View style={styles.otpNotice}>
+        <Info color={colors.patient.primaryDark} size={20} />
+        <Text style={styles.infoText}>
+          Share this OTP when the ambulance driver arrives.
+        </Text>
       </View>
-      <View style={styles.pinDigits}>
+      <View style={styles.otpRow}>
         {ambulanceTrip.pin.split("").map((digit, index) => (
-          <View key={`${digit}-${index}`} style={styles.pinBox}>
-            <Text style={styles.pinDigit}>{digit}</Text>
+          <View key={`${digit}-${index}`} style={styles.otpCell}>
+            <Text style={styles.otpText}>{digit}</Text>
           </View>
         ))}
       </View>
-    </View>
+    </Card>
   );
 }
 
 function DriverCard({ name }: { name: string }) {
   return (
-    <View style={styles.driverCard}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      padding={16}
+      style={styles.driverCard}
+    >
       <View style={styles.avatar}>
-        <UserRound color="#FFFFFF" size={27} />
+        <UserRound color={colors.white} size={24} />
       </View>
       <View style={styles.driverCopy}>
         <View style={styles.driverNameRow}>
           <Text style={styles.driverName}>{name}</Text>
-          <Star color="#008877" size={14} />
-          <Text style={styles.driverRating}>4.8</Text>
+          <View style={styles.ratingBadge}>
+            <Star color="#F59E0B" fill="#F59E0B" size={11} />
+            <Text style={styles.driverRating}>{ambulanceTrip.rating}</Text>
+          </View>
         </View>
-        <Text style={styles.vehicle}>Ambulance - KA 01 AB 1234</Text>
+        <Text style={styles.vehicle}>
+          {ambulanceTrip.vehicle} • {ambulanceTrip.service}
+        </Text>
       </View>
       <Pressable
         onPress={() => void Linking.openURL("tel:9876543210")}
-        style={styles.callButton}
+        style={({ pressed }) => [styles.callButton, pressed && styles.pressed]}
+        accessibilityRole="button"
+        accessibilityLabel="Call driver"
       >
-        <Phone color="#FFFFFF" size={19} />
+        <Phone color={colors.white} size={18} />
       </Pressable>
-    </View>
+    </Card>
   );
 }
 
@@ -159,202 +256,275 @@ function TripCard({
   distance: string;
 }) {
   return (
-    <View style={styles.tripCard}>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      padding={16}
+      gap={14}
+    >
       <View style={styles.tripHeader}>
         <Text style={styles.tripTitle}>{title}</Text>
-        <Info color="#0C2434" size={16} />
+        <Info color={colors.patient.textSecondary} size={16} />
       </View>
+
       <View style={styles.statsRow}>
-        <Stat value={eta} label="ETA" />
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{eta}</Text>
+          <Text style={styles.statLabel}>ETA</Text>
+        </View>
         <View style={styles.statDivider} />
-        <Stat value={distance} label="Distance" />
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{distance}</Text>
+          <Text style={styles.statLabel}>Distance</Text>
+        </View>
         <View style={styles.statDivider} />
-        <Stat value="₹1200" label="Est. Fare" />
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>₹{ambulanceTrip.fare}</Text>
+          <Text style={styles.statLabel}>Est. Fare</Text>
+        </View>
       </View>
+
       <View style={styles.divider} />
-      <RoutePoint color="#009E92" label="PICKUP">
-        Sriramapura, Shivamogga, Karnataka
-      </RoutePoint>
-      <RoutePoint color="#0C2434" label="DROP-OFF">
-        Manipal Hospital, Shivamogga
-      </RoutePoint>
+
+      <View style={styles.routeContainer}>
+        {/* Pickup Row */}
+        <View style={styles.routeStopRow}>
+          <View style={styles.stopIndicatorWrapper}>
+            <View style={styles.pickupHalo}>
+              <View style={styles.pickupCore} />
+            </View>
+            <View style={styles.connectorLine} />
+          </View>
+          <View style={styles.stopTextContent}>
+            <Text style={styles.routeLabel}>PICKUP LOCATION</Text>
+            <Text style={styles.routeAddress}>{ambulanceTrip.pickup}</Text>
+            <Text style={styles.routeSubtext}>Current patient location</Text>
+          </View>
+        </View>
+
+        {/* Dropoff Row */}
+        <View style={styles.routeStopRow}>
+          <View style={styles.stopIndicatorWrapper}>
+            <View style={styles.dropHalo}>
+              <View style={styles.dropCore} />
+            </View>
+          </View>
+          <View style={styles.stopTextContent}>
+            <Text style={styles.routeLabel}>HOSPITAL DESTINATION</Text>
+            <Text style={styles.routeAddress}>{ambulanceTrip.dropoff}</Text>
+            <Text style={styles.routeSubtext}>
+              Emergency & Trauma Care Entrance
+            </Text>
+          </View>
+        </View>
+      </View>
+
       <View style={styles.divider} />
+
       <View style={styles.serviceRow}>
         <Text style={styles.serviceLabel}>Ambulance Service</Text>
-        <Text style={styles.serviceValue}>Advanced Life Support</Text>
+        <Text style={styles.serviceValue}>{ambulanceTrip.service}</Text>
       </View>
-    </View>
+    </Card>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function TripControls() {
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    <Card
+      variant="outlined"
+      borderRadius={radius.md}
+      borderWidth={1}
+      borderColor="#E0E5EB"
+      backgroundColor={colors.white}
+      padding={16}
+      gap={10}
+    >
+      <Text style={styles.cardTitle}>Trip Controls</Text>
+      <Button
+        label="Share Live Location"
+        variant="secondary"
+        theme="patient"
+        leftIcon={<Share2 color={colors.patient.primaryDark} size={16} />}
+        onPress={() => {}}
+        style={styles.shareButton}
+        labelStyle={styles.shareText}
+      />
+    </Card>
   );
 }
 
-function RoutePoint({
-  color,
-  label,
-  children,
-}: {
-  color: string;
-  label: string;
-  children: ReactNode;
-}) {
+function SafetyCard() {
   return (
-    <View style={styles.routePoint}>
-      <View style={[styles.routeDot, { backgroundColor: color }]} />
-      <View style={styles.routeCopy}>
-        <Text style={styles.routeLabel}>{label}</Text>
-        <Text numberOfLines={1} style={styles.routeValue}>
-          {children}
+    <View style={styles.wellnessBanner}>
+      <View style={styles.wellnessIcon}>
+        <ShieldCheck color={colors.white} size={20} />
+      </View>
+      <View style={styles.wellnessCopy}>
+        <Text style={styles.wellnessTitle}>Your safety is our priority</Text>
+        <Text style={styles.infoText}>
+          GPS tracked with certified paramedic crew on standby.
         </Text>
       </View>
     </View>
   );
 }
 
-function TripControls() {
-  return (
-    <View style={styles.controls}>
-      <Text style={styles.controlsTitle}>Trip Controls</Text>
-      <Pressable style={styles.shareButton}>
-        <Share2 color="#0C2434" size={16} />
-        <Text style={styles.shareText}>Share Live Location</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-function SafetyCard() {
-  return (
-    <View style={styles.safetyCard}>
-      <ShieldCheck color="#008877" size={20} />
-      <View style={styles.safetyCopy}>
-        <Text style={styles.safetyTitle}>Your safety is our priority</Text>
-        <Text style={styles.safetySubtitle}>Share trip status with family</Text>
-      </View>
-      <Share2 color="#008877" size={17} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  emergencyText: {
-    color: "#087F78",
-    fontFamily: fontFamilies.medium,
-    fontSize: 14,
-  },
-  trackingContent: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 122,
+  pressed: { opacity: 0.72 },
+  content: {
+    gap: 16,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: 60,
   },
   trackingTitle: {
-    marginBottom: 11,
-    color: "#008877",
+    color: colors.patient.primaryDark,
     fontFamily: fontFamilies.bold,
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     textAlign: "center",
   },
-  trackingMap: { width: "100%", height: 211, borderRadius: 12 },
-  blueStatus: {
-    marginTop: 10,
-    color: "#3B82F6",
-    fontFamily: fontFamilies.bold,
-    fontSize: 14,
-    textAlign: "center",
-  },
-  trackEmergencyRow: {
-    height: 61,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-  },
-  trackEmergencyPill: {
-    minWidth: 117,
-    height: 39,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 15,
-    backgroundColor: "#D7E3E5",
-  },
-  pinRow: {
-    height: 61,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 11,
-    paddingHorizontal: 6,
-  },
-  pinLabelBox: {
-    width: 119,
-    height: 39,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
-    backgroundColor: "#07595D",
-  },
-  pinLabel: {
-    color: "#FFFFFF",
-    fontFamily: fontFamilies.semibold,
-    fontSize: 14,
-  },
-  pinDigits: { flex: 1, flexDirection: "row", justifyContent: "space-between" },
-  pinBox: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
+  mapFrame: {
+    width: "100%",
+    height: 195,
+    borderRadius: radius.md,
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.19)",
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    borderColor: "#E0E5EB",
+    backgroundColor: colors.patient.surface,
+    elevation: 0,
+    shadowOpacity: 0,
   },
-  pinDigit: {
-    color: "#000000",
-    fontFamily: fontFamilies.regular,
-    fontSize: 14,
+  trackingMap: {
+    width: "100%",
+    height: "100%",
+  },
+  statusBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  statusBannerWay: {
+    backgroundColor: colors.patient.surface,
+    borderColor: "#C8EDE9",
+  },
+  statusBannerArrived: {
+    backgroundColor: "#E6F7ED",
+    borderColor: "#A7F3D0",
+  },
+  statusText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  emergencyCardReset: {
+    marginHorizontal: 0,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  centeredCard: {
+    alignItems: "center",
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  otpNotice: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 13,
+    borderRadius: radius.md,
+    backgroundColor: colors.patient.surface,
+  },
+  infoText: {
+    flex: 1,
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+  otpRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  otpCell: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: "#F4F8F7",
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+  },
+  otpText: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 18,
+    fontWeight: "700",
   },
   driverCard: {
-    height: 84,
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 6,
-    marginTop: 2,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#D7E3E5",
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    ...shadows.card,
+    gap: 14,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   avatar: {
-    width: 52,
-    height: 52,
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: colors.patient.primaryDark,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 26,
-    backgroundColor: "#008877",
   },
-  driverCopy: { flex: 1, marginLeft: 26 },
-  driverNameRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  driverName: { color: "#0C2434", fontFamily: fontFamilies.bold, fontSize: 16 },
+  driverCopy: {
+    flex: 1,
+    gap: 3,
+  },
+  driverNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  driverName: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+    backgroundColor: "#FEF3C7",
+  },
   driverRating: {
-    color: "#0C2434",
-    fontFamily: fontFamilies.semibold,
-    fontSize: 14,
+    color: "#92400E",
+    fontFamily: fontFamilies.bold,
+    fontSize: 11,
+    fontWeight: "700",
   },
   vehicle: {
-    marginTop: 5,
-    color: "#71818F",
+    color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,
-    fontSize: 13,
+    fontSize: 12,
   },
   callButton: {
     width: 42,
@@ -362,143 +532,210 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 21,
-    backgroundColor: "#008877",
+    backgroundColor: colors.patient.primaryDark,
   },
-  tripCard: {
-    marginHorizontal: 2,
-    marginTop: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 15,
-    borderWidth: 1,
-    borderColor: "#D7E3E5",
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-    ...shadows.card,
+  cardTitle: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 15,
+    fontWeight: "700",
   },
   tripHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
   },
-  tripTitle: { color: "#0C2434", fontFamily: fontFamilies.bold, fontSize: 14 },
+  tripTitle: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 15,
+    fontWeight: "700",
+  },
   statsRow: {
-    height: 70,
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 5,
+    marginTop: 2,
   },
-  stat: { flex: 1, alignItems: "center", gap: 5 },
-  statValue: { color: "#008877", fontFamily: fontFamilies.bold, fontSize: 18 },
+  stat: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+  },
+  statValue: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.bold,
+    fontSize: 17,
+    fontWeight: "700",
+  },
   statLabel: {
-    color: "#71818F",
+    color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,
     fontSize: 11,
   },
-  statDivider: { width: 1, height: 32, backgroundColor: "#D7E3E5" },
-  divider: { height: 1, marginVertical: 8, backgroundColor: "#E3E9EA" },
-  routePoint: {
-    minHeight: 55,
+  statDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: "#E0E5EB",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E0E5EB",
+  },
+  routeContainer: {
+    gap: 2,
+    paddingVertical: 2,
+  },
+  routeStopRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  stopIndicatorWrapper: {
+    width: 24,
     alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 9,
+    paddingTop: 3,
   },
-  routeDot: { width: 8, height: 8, borderRadius: 4 },
-  routeCopy: { flex: 1, gap: 2 },
+  pickupHalo: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#E6F4EA",
+    borderWidth: 1.5,
+    borderColor: "#059669",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pickupCore: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#059669",
+  },
+  connectorLine: {
+    width: 2,
+    height: 38,
+    backgroundColor: "#CBD5E1",
+    marginVertical: 3,
+  },
+  dropHalo: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#FEE2E2",
+    borderWidth: 1.5,
+    borderColor: "#DC2626",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dropCore: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#DC2626",
+  },
+  stopTextContent: {
+    flex: 1,
+    paddingLeft: 10,
+    paddingBottom: 6,
+    gap: 2,
+  },
   routeLabel: {
-    color: "#71818F",
-    fontFamily: fontFamilies.regular,
-    fontSize: 10,
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
-  routeValue: {
-    color: "#0C2434",
-    fontFamily: fontFamilies.medium,
+  routeAddress: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 22,
+  },
+  routeSubtext: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.regular,
     fontSize: 12,
   },
   serviceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 9,
+    alignItems: "center",
   },
   serviceLabel: {
-    color: "#71818F",
+    color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,
     fontSize: 12,
   },
   serviceValue: {
-    color: "#0C2434",
+    color: colors.patient.text,
     fontFamily: fontFamilies.bold,
-    fontSize: 12,
-  },
-  controls: {
-    gap: 12,
-    marginTop: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#D7E3E5",
-    borderRadius: 16,
-  },
-  controlsTitle: {
-    color: "#0C2434",
-    fontFamily: fontFamilies.bold,
-    fontSize: 14,
+    fontSize: 13,
+    fontWeight: "700",
   },
   shareButton: {
-    height: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#D7E3E5",
-    borderRadius: 12,
+    minHeight: 48,
+    borderRadius: radius.md,
   },
   shareText: {
-    color: "#0C2434",
+    color: colors.patient.primaryDark,
     fontFamily: fontFamilies.semibold,
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "600",
   },
-  cancelButton: {
-    height: 54,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,136,119,0.1)",
-  },
-  cancelText: {
-    color: "rgba(0,136,119,0.8)",
-    fontFamily: fontFamilies.semibold,
-    fontSize: 16,
-  },
-  safetyCard: {
-    minHeight: 69,
+  wellnessBanner: {
+    minHeight: 64,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: "#E8F7F4",
+    gap: 11,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: radius.md,
+    backgroundColor: colors.patient.surface,
+    borderWidth: 1,
+    borderColor: "#C8EDE9",
+    elevation: 0,
+    shadowOpacity: 0,
   },
-  safetyCopy: { flex: 1, gap: 2 },
-  safetyTitle: {
-    color: "#008877",
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
+  wellnessIcon: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 18,
+    backgroundColor: colors.patient.primaryDark,
   },
-  safetySubtitle: {
-    color: "#008877",
-    fontFamily: fontFamilies.regular,
-    fontSize: 11,
+  wellnessCopy: {
+    flex: 1,
+    gap: 2,
   },
-  hospitalContent: {
-    paddingHorizontal: 20,
-    paddingTop: 19,
-    paddingBottom: 122,
+  wellnessTitle: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.bold,
+    fontSize: 13,
+    fontWeight: "700",
   },
-  reachingRow: {
+  cancelButton: {
+    minHeight: 52,
+    borderRadius: radius.md,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  cancelLabel: {
+    fontSize: 15,
+  },
+  proceedButton: {
+    minHeight: 52,
+    borderRadius: radius.md,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  reachingHeader: {
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+  },
+  reachingTitleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -508,40 +745,59 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#EF3B43",
+    backgroundColor: "#EF4444",
   },
   reachingTitle: {
-    color: "#087F78",
+    color: colors.patient.primaryDark,
     fontFamily: fontFamilies.bold,
     fontSize: 20,
+    fontWeight: "700",
   },
   reachingSubtitle: {
-    marginTop: 4,
-    marginBottom: 12,
-    color: "#008877",
+    color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,
     fontSize: 13,
     textAlign: "center",
   },
-  liveMapWrap: { position: "relative" },
-  liveMap: { width: "100%", height: 191, borderRadius: 14 },
+  liveMapWrap: {
+    position: "relative",
+    width: "100%",
+    height: 195,
+    borderRadius: radius.md,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E0E5EB",
+    backgroundColor: colors.patient.surface,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  liveMap: {
+    width: "100%",
+    height: "100%",
+  },
   liveBadge: {
     position: "absolute",
     top: 11,
     left: 12,
-    height: 21,
+    height: 22,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
     paddingHorizontal: 8,
     borderRadius: 11,
-    backgroundColor: "#D63A32",
+    backgroundColor: "#EF4444",
   },
   liveWhiteDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
   },
-  liveText: { color: "#FFFFFF", fontFamily: fontFamilies.bold, fontSize: 9 },
+  liveText: {
+    color: colors.white,
+    fontFamily: fontFamilies.bold,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
 });

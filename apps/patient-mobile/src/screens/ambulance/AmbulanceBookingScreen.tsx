@@ -13,6 +13,7 @@ import { colors, fontFamilies, gradients } from "@startup/design-tokens";
 import { Header } from "@startup/mobile-ui";
 import {
   ASSIGNING_DELAY_MS,
+  HOSPITAL_ARRIVED_DELAY_MS,
   TRACKING_STAGE_DELAY_MS,
   ambulanceTypes,
   nearbyHospitals,
@@ -22,6 +23,7 @@ import {
 import type { AmbulanceBookingScreenProps } from "../../types/ambulance";
 import {
   ActionButton,
+  AmbulanceCompletion,
   AmbulanceOption,
   Assigning,
   EmergencyModeCard,
@@ -52,7 +54,9 @@ export function AmbulanceBookingScreen({
           ? ["arrived", TRACKING_STAGE_DELAY_MS]
           : step === "arrived"
             ? ["hospital", TRACKING_STAGE_DELAY_MS]
-            : undefined;
+            : step === "hospital"
+              ? ["complete", HOSPITAL_ARRIVED_DELAY_MS]
+              : undefined;
     if (!next) return undefined;
     const timer = setTimeout(() => setStep(next[0]), next[1]);
     return () => clearTimeout(timer);
@@ -76,6 +80,14 @@ export function AmbulanceBookingScreen({
         setStep("booking");
         return true;
       }
+      if (step === "payment") {
+        setStep("hospital");
+        return true;
+      }
+      if (step === "complete") {
+        onComplete();
+        return true;
+      }
       return false;
     };
 
@@ -84,7 +96,7 @@ export function AmbulanceBookingScreen({
       onHardwareBack
     );
     return () => sub.remove();
-  }, [searching, step]);
+  }, [onComplete, searching, step]);
 
   const handleBack = () => {
     if (searching) {
@@ -97,6 +109,14 @@ export function AmbulanceBookingScreen({
     }
     if (step === "assigning") {
       setStep("booking");
+      return;
+    }
+    if (step === "payment") {
+      setStep("hospital");
+      return;
+    }
+    if (step === "complete") {
+      onComplete();
       return;
     }
     onBackPress();
@@ -112,6 +132,8 @@ export function AmbulanceBookingScreen({
     ) {
       return "Ambulance Tracking";
     }
+    if (step === "payment") return "Hospital Handover & Bill";
+    if (step === "complete") return "Emergency Handover";
     return "Book Ambulance";
   };
 
@@ -120,7 +142,9 @@ export function AmbulanceBookingScreen({
       <Header
         title={getHeaderTitle()}
         onBackPress={handleBack}
-        centered={step === "hospital"}
+        centered={
+          step === "hospital" || step === "payment" || step === "complete"
+        }
       />
       {step === "pickup" ? (
         <PickupMap
@@ -135,7 +159,10 @@ export function AmbulanceBookingScreen({
           emergency={emergency}
           onEmergencyChange={setEmergency}
           onCancel={onComplete}
+          onProceedToPayment={() => setStep("complete")}
         />
+      ) : step === "complete" ? (
+        <AmbulanceCompletion onGoHome={onComplete} />
       ) : (
         <ScrollView
           contentContainerStyle={s.bookingContent}

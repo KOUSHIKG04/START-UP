@@ -5,3 +5,4 @@ export const trackingMapImage = require("../../assets/images/ambulance/hospital-
 
 export const ASSIGNING_DELAY_MS = 2200;
 export const TRACKING_STAGE_DELAY_MS = 7000;
+export const HOSPITAL_ARRIVED_DELAY_MS = 6000;

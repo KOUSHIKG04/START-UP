@@ -1,16 +1,31 @@
-import { StyleSheet, Switch, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { Siren } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
 export function EmergencyModeCard({
   emergency,
   onEmergencyChange,
+  style,
 }: {
   emergency: boolean;
   onEmergencyChange: (val: boolean) => void;
+  style?: StyleProp<ViewStyle>;
 }) {
   return (
-    <View style={[styles.emergencyCard, emergency && styles.emergencyCardActive]}>
+    <View
+      style={[
+        styles.emergencyCard,
+        emergency && styles.emergencyCardActive,
+        style,
+      ]}
+    >
       <View style={styles.emergencyLeft}>
         <View
           style={[
@@ -51,11 +66,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     backgroundColor: "#E8F5F4",
+    borderWidth: 1,
+    borderColor: "#C8EDE9",
+    elevation: 0,
+    shadowOpacity: 0,
   },
   emergencyCardActive: {
     backgroundColor: "#FEF2F2",
-    borderWidth: 1,
-    borderColor: "rgba(220, 38, 38, 0.3)",
+    borderColor: "#FECACA",
   },
   emergencyLeft: {
     flex: 1,
