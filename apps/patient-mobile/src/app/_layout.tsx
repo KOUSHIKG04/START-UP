@@ -8,6 +8,8 @@ import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
 
 void SplashScreen.preventAutoHideAsync();
 
+export const unstable_settings = { initialRouteName: "(app)" };
+
 const navTheme = {
   ...DefaultTheme,
   colors: {
@@ -45,9 +47,8 @@ export default function RootLayout() {
               contentStyle: styles.scene,
             }}
           >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="onboarding" />
+            <Stack.Screen name="(app)" />
+            <Stack.Screen name="(auth)" />
           </Stack>
         </View>
       </ThemeProvider>

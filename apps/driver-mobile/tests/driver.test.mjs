@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { useDriver } from "../src/store/driver.ts";
+import { useDriver } from "../src/stores/driver.ts";
 
 test("driver cannot go online before verification; submission never grants approval", () => {
   const d = useDriver.getState();

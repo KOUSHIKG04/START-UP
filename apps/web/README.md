@@ -1,4 +1,11 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web admin
+
+Read [ARCHITECTURE.md](./ARCHITECTURE.md) for folder ownership, feature conventions,
+server boundaries, and the future shared backend integration contract.
+
+The existing dashboard lives in `src/features/dashboard/screens/DashboardScreen.tsx`.
+Its route adapter is `src/app/page.tsx`; the URL remains `/`.
+Other feature and integration folders are placeholders pending screen requirements.
 
 ## Getting Started
 
@@ -16,7 +23,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Edit the dashboard feature screen to update the existing page. Keep route files thin.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

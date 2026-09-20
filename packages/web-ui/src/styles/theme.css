@@ -1,0 +1,33 @@
+@import "@startup/design-tokens/theme.css";
+
+:root {
+  --background: var(--color-admin-bg);
+  --foreground: var(--color-admin-text);
+  --card: var(--color-admin-card);
+  --card-foreground: var(--color-admin-text);
+  --popover: var(--color-admin-card);
+  --popover-foreground: var(--color-admin-text);
+  --primary: var(--color-admin-primary);
+  --primary-foreground: var(--color-admin-on-primary);
+  --secondary: var(--color-admin-surface);
+  --secondary-foreground: var(--color-admin-text);
+  --muted: var(--color-admin-surface);
+  --muted-foreground: var(--color-admin-text-secondary);
+  --accent: var(--color-admin-surface);
+  --accent-foreground: var(--color-admin-primary);
+  --destructive: var(--color-sos-primary);
+  --destructive-foreground: #FFFFFF;
+  --border: var(--color-admin-border);
+  --input: var(--color-admin-border);
+  --ring: var(--color-admin-accent);
+  --radius: 0.625rem;
+
+  --sidebar: var(--color-admin-card);
+  --sidebar-foreground: var(--color-admin-text);
+  --sidebar-primary: var(--color-admin-primary);
+  --sidebar-primary-foreground: var(--color-admin-on-primary);
+  --sidebar-accent: var(--color-admin-surface);
+  --sidebar-accent-foreground: var(--color-admin-text);
+  --sidebar-border: var(--color-admin-border);
+  --sidebar-ring: var(--color-admin-accent);
+}
