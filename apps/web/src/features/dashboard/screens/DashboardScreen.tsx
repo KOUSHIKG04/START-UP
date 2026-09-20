@@ -1,200 +1,286 @@
+import type { ReactNode } from "react";
+import {
+  Search,
+  Calendar,
+  CalendarDays,
+  Clock,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@startup/web-ui/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@startup/web-ui/components/ui/table";
 
-export default function DashboardScreen() {
+import {
+  wards,
+  doctors,
+  dashboardDateLabel,
+  dashboardCapacityLabel,
+  scheduleDays,
+  pendingRequests,
+} from "../utils/dashboardConstants";
+
+export default function DashboardScreen({
+  doctorAction,
+}: {
+  doctorAction: ReactNode;
+}) {
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 font-sans text-foreground">
-      {/* Banner */}
-      <header className="rounded-2xl bg-gradient-to-r from-[#0A4A47] to-[#087F78] p-8 text-white shadow-lg">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Admin Operations Portal
-            </h1>
-            <p className="mt-1 text-sm text-emerald-100/90">
-              MedCab Real-Time Dispatch, Providers & Platform Metrics
-            </p>
+    <div className="flex flex-col gap-6 pb-12">
+      {/* TopBar (Figma 809:48) */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
+            Hospital Dashboard
+          </h1>
+          <p className="text-[13px] text-[#475569] mt-0.5">
+            Real-time administrative operations overview
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Search Box */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg w-64 shadow-xs">
+            <Search className="size-4 text-[#94a3b8] shrink-0" />
+            <input
+              type="text"
+              placeholder="Search patient, doctor..."
+              className="bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none w-full"
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
-            >
-              Export Report
-            </Button>
-            <Button className="bg-white text-[#087F78] hover:bg-emerald-50">
-              + New Broadcast
-            </Button>
+
+          {/* Date Badge */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg shadow-xs">
+            <Calendar className="size-4 text-[#475569] shrink-0" />
+            <span className="text-[13px] font-semibold text-[#475569] whitespace-nowrap">
+              {dashboardDateLabel}
+            </span>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Metrics Cards */}
-      <section className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border border-border shadow-sm">
-          <CardHeader>
-            <CardDescription className="uppercase text-xs font-semibold tracking-wider">
-              Active Consultations
-            </CardDescription>
-            <CardTitle className="text-3xl font-extrabold text-foreground mt-1">
-              1,248
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="inline-block bg-secondary text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
-              +18% Today
+      {/* Bed Availability Section (Figma 809:59) */}
+      <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-[18px] font-bold text-[#0f172a]">
+              Bed Availability by Type
+            </h2>
+            <p className="text-[13px] text-[#475569] mt-0.5">
+              Availability &amp; occupancy metrics across specialized wards
+            </p>
+          </div>
+          <div className="inline-flex items-center px-3 py-1.5 bg-[#e6f4f5] rounded-lg self-start sm:self-auto">
+            <span className="text-[11px] font-semibold text-[#07595d] tracking-wide uppercase">
+              {dashboardCapacityLabel}
             </span>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border border-border shadow-sm">
-          <CardHeader>
-            <CardDescription className="uppercase text-xs font-semibold tracking-wider">
-              Ambulances On-Duty
-            </CardDescription>
-            <CardTitle className="text-3xl font-extrabold text-foreground mt-1">
-              84 / 92
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="inline-block bg-secondary text-[#087F8C] text-xs font-semibold px-2.5 py-1 rounded-full">
-              Ready & En Route
-            </span>
-          </CardContent>
-        </Card>
+        {/* 8 Bed Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {wards.map((ward) => {
+            const Icon = ward.icon;
+            return (
+              <div
+                key={ward.name}
+                className="bg-white border border-[#e2e8f0] rounded-xl p-4 flex flex-col justify-between gap-3 shadow-2xs hover:border-slate-300 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[15px] font-semibold text-[#0f172a] leading-tight">
+                      {ward.name}
+                    </h3>
+                    <span className="text-[11px] text-[#94a3b8]">
+                      Total: {ward.total}
+                    </span>
+                  </div>
+                  <div
+                    className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${ward.iconBg} ${ward.iconColor}`}
+                  >
+                    <Icon className="size-[18px]" />
+                  </div>
+                </div>
 
-        <Card className="border border-[#EF3B43]/30 shadow-sm">
-          <CardHeader>
-            <CardDescription className="uppercase text-xs font-semibold tracking-wider text-[#EF3B43]">
-              Active Emergency SOS
-            </CardDescription>
-            <CardTitle className="text-3xl font-extrabold text-[#EF3B43] mt-1">
-              3 Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="inline-block bg-[#FDF2F2] text-[#EF3B43] text-xs font-semibold px-2.5 py-1 rounded-full">
-              Dispatch Assigned
-            </span>
-          </CardContent>
-        </Card>
-      </section>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[12px]">
+                    <span className="text-[#475569]">
+                      Available{" "}
+                      <strong className="text-[#0f172a] font-bold">
+                        {ward.available}
+                      </strong>{" "}
+                      • Occupied{" "}
+                      <strong className="text-[#0f172a] font-bold">
+                        {ward.occupied}
+                      </strong>
+                    </span>
+                    <span
+                      className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${ward.iconBg} ${ward.iconColor}`}
+                    >
+                      {ward.percent}%
+                    </span>
+                  </div>
 
-      {/* Quick Dispatch Controls & Activity Table */}
-      <section className="mt-8">
-        <Card className="border border-border shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border">
-            <div>
-              <CardTitle className="text-lg font-bold">Quick Dispatch Controls</CardTitle>
-              <CardDescription className="text-sm mt-0.5">
-                Manage platform operations across patient, doctor, and driver flows.
-              </CardDescription>
+                  {/* Progress bar */}
+                  <div className="w-full bg-[#f1f5f9] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${ward.progressColor}`}
+                      style={{ width: `${ward.percent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Add New Doctor Action (Figma 809:321) */}
+      <div>{doctorAction}</div>
+
+      {/* Lower Split Layout (Figma 809:181) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Doctor Weekly Schedule (8 cols) */}
+        <div className="lg:col-span-8 bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs flex flex-col justify-between min-h-[420px]">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <CalendarDays className="size-5 text-[#07595d]" />
+                <h3 className="text-[18px] font-bold text-[#0f172a]">
+                  Doctor Weekly Schedule
+                </h3>
+              </div>
+              <button className="text-[13px] font-semibold text-[#07595d] hover:underline cursor-pointer">
+                View All
+              </button>
             </div>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline">
-                Filters
-              </Button>
-              <Button size="sm">Action</Button>
-            </div>
-          </CardHeader>
 
-          <CardContent className="pt-6">
-            <div className="flex flex-wrap gap-3 mb-6">
-              <Button size="sm" variant="default">
-                Patient Flow
-              </Button>
-              <Button size="sm" variant="secondary">
-                Doctor Dashboard
-              </Button>
-              <Button size="sm" variant="secondary">
-                Driver Network
-              </Button>
-              <Button size="sm" variant="destructive">
-                Emergency SOS
-              </Button>
-            </div>
-
-            <div className="rounded-lg border border-border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[120px]">Incident ID</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Vehicle / Doctor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-mono font-medium">SOS-9021</TableCell>
-                    <TableCell>Cardiac Emergency</TableCell>
-                    <TableCell>Indiranagar, Bangalore</TableCell>
-                    <TableCell>AMB-104 (ALS)</TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#FDF2F2] text-[#EF3B43]">
-                        En Route (4 mins)
+            {/* Schedule Table */}
+            <div className="overflow-x-auto">
+              <div className="min-w-[540px]">
+                {/* Header Row */}
+                <div className="bg-[#f8fafc] rounded-md px-4 py-2 flex items-center text-[#475569] text-[11px] font-bold mb-1">
+                  <div className="w-[180px] shrink-0">Doctor / Speciality</div>
+                  <div className="flex-1 flex justify-between text-center px-4">
+                    {scheduleDays.map((day) => (
+                      <span key={day} className="w-8">
+                        {day}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="xs">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-mono font-medium">APT-4421</TableCell>
-                    <TableCell>Home Consultation</TableCell>
-                    <TableCell>Koramangala, Bangalore</TableCell>
-                    <TableCell>Dr. Ananya Sharma</TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-primary">
-                        In Progress
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="xs">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-mono font-medium">TRP-3102</TableCell>
-                    <TableCell>Patient Transfer</TableCell>
-                    <TableCell>Whitefield, Bangalore</TableCell>
-                    <TableCell>AMB-088 (BLS)</TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-foreground">
-                        Completed
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="xs">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+                    ))}
+                  </div>
+                  <div className="w-8 shrink-0" />
+                </div>
+
+                {/* Doctor Rows */}
+                <div className="divide-y divide-[#e2e8f0]">
+                  {doctors.map((doc) => (
+                    <div
+                      key={doc.name}
+                      className="px-4 py-3 flex items-center hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="w-[180px] shrink-0 leading-tight">
+                        <p className="text-[14px] font-semibold text-[#0f172a]">
+                          {doc.name}
+                        </p>
+                        <p className="text-[12px] text-[#475569]">
+                          {doc.speciality}
+                        </p>
+                      </div>
+
+                      <div className="flex-1 flex justify-between items-center px-4">
+                        {doc.days.map((isAvail, idx) => (
+                          <div
+                            key={idx}
+                            className="w-8 flex justify-center items-center"
+                          >
+                            <span
+                              className={`size-2 rounded-full ${
+                                isAvail ? "bg-[#22c55e]" : "bg-[#ef4444]"
+                              }`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="w-8 shrink-0 flex justify-end">
+                        <ChevronRight className="size-4 text-[#94a3b8]" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </section>
+          </div>
+        </div>
+
+        {/* Right: Pending Appointment Requests (4 cols) */}
+        <div className="lg:col-span-4 bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs flex flex-col justify-between min-h-[420px]">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <Clock className="size-5 text-[#07595d]" />
+                <h3 className="text-[18px] font-bold text-[#0f172a]">
+                  Pending Requests
+                </h3>
+              </div>
+              <button className="text-[13px] font-semibold text-[#07595d] hover:underline cursor-pointer">
+                View All
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3.5">
+              {/* Request 1 */}
+              <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-[14px] font-bold text-[#0f172a]">
+                      {pendingRequests[0].patient}
+                    </h4>
+                    <p className="text-[12px] text-[#475569]">
+                      {pendingRequests[0].consultation}
+                    </p>
+                  </div>
+                  <span className="bg-[#eff6ff] text-[#3b82f6] text-[11px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap">
+                    {pendingRequests[0].time}
+                  </span>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-[11px] text-[#94a3b8]">
+                    {pendingRequests[0].requested}
+                  </span>
+                </div>
+              </div>
+
+              {/* Request 2 with Accept Action */}
+              <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-[14px] font-bold text-[#0f172a]">
+                      {pendingRequests[1].patient}
+                    </h4>
+                    <p className="text-[12px] text-[#475569]">
+                      {pendingRequests[1].consultation}
+                    </p>
+                  </div>
+                  <span className="bg-[#f0fdf4] text-[#16a34a] text-[11px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap">
+                    {pendingRequests[1].time}
+                  </span>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-[11px] text-[#94a3b8]">
+                    {pendingRequests[1].requested}
+                  </span>
+                  <Button
+                    size="sm"
+                    className="bg-[#07595d] hover:bg-[#064e52] text-white text-[12px] font-bold px-3 py-1.5 h-auto rounded-lg flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span>Accept</span>
+                    <Check className="size-3.5 stroke-[2.5]" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

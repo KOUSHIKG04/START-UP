@@ -22,10 +22,13 @@
   },
   "dependencies": {
     "@startup/design-tokens": "workspace:*",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.13",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "lucide-react": "^1.47.0",
-    "radix-ui": "^1.6.7"
+    "radix-ui": "^1.6.7",
+    "recharts": "^3.10.1"
   },
   "peerDependencies": {
     "react": "^19.0.0",

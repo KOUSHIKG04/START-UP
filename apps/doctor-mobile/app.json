@@ -31,7 +31,8 @@
           "recordAudioAndroid": false,
           "cameraPermission": "Allow Doctor to scan a patient QR code."
         }
-      ]
+      ],
+      "expo-localization"
     ]
   }
 }

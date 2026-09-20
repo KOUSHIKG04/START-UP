@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
+import { QueryProvider } from "../providers/QueryProvider";
 
 void SplashScreen.preventAutoHideAsync();
 export const unstable_settings = { initialRouteName: "(app)" };
@@ -16,19 +17,21 @@ export default function RootLayout() {
   if (!loaded && !error) return null;
   return (
     <SafeAreaProvider>
-      <View style={styles.root}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "none",
-            contentStyle: styles.scene,
-          }}
-        >
-          <Stack.Screen name="(app)" />
-          <Stack.Screen name="(auth)" />
-        </Stack>
-        <StatusBar style="dark" />
-      </View>
+      <QueryProvider>
+        <View style={styles.root}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "none",
+              contentStyle: styles.scene,
+            }}
+          >
+            <Stack.Screen name="(app)" />
+            <Stack.Screen name="(auth)" />
+          </Stack>
+          <StatusBar style="dark" />
+        </View>
+      </QueryProvider>
     </SafeAreaProvider>
   );
 }
