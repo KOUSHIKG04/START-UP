@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
 void SplashScreen.preventAutoHideAsync();
+export const unstable_settings = { initialRouteName: "(auth)" };
 export default function RootLayout() {
   const [loaded, error] = useFonts(albertSansFonts);
   useEffect(() => {

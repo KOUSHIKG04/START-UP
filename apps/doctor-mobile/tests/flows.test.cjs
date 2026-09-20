@@ -14,9 +14,9 @@ require.extensions[".ts"] = (module, filename) => {
   module._compile(result.outputText, filename);
 };
 const { initialSchedule } = require("../src/data/demo.ts");
-const { scheduleError, previewSlots } = require("../src/utils/schedule.ts");
-const { lookupPatient } = require("../src/utils/patientLookup.ts");
-const { useDoctorStore } = require("../src/store/useDoctorStore.ts");
+const { scheduleError, previewSlots } = require("../src/features/schedule/utils/schedule.ts");
+const { lookupPatient } = require("../src/features/patients/utils/patientLookup.ts");
+const { useDoctorStore } = require("../src/stores/useDoctorStore.ts");
 
 test("slots fit fully inside working hours and change with duration", () => {
   assert.equal(previewSlots(initialSchedule).length, 16);

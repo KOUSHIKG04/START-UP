@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
 
 void SplashScreen.preventAutoHideAsync();
+export const unstable_settings = { initialRouteName: "(app)" };
 export default function RootLayout() {
   const [loaded, error] = useFonts(albertSansFonts);
   useEffect(() => {
@@ -23,7 +24,8 @@ export default function RootLayout() {
             contentStyle: styles.scene,
           }}
         >
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(auth)" />
         </Stack>
         <StatusBar style="dark" />
       </View>

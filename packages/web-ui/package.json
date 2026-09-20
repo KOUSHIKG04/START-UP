@@ -9,14 +9,27 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./components/*": "./src/components/*.tsx",
+    "./lib/*": "./src/lib/*.ts",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./styles/theme.css": {
+      "style": "./src/styles/theme.css",
+      "import": "./src/styles/theme.css",
+      "default": "./src/styles/theme.css"
+    },
+    "./styles/*": "./src/styles/*"
   },
   "dependencies": {
     "@startup/design-tokens": "workspace:*",
-    "cn": "^0.2.6"
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.2.6",
+    "lucide-react": "^1.47.0",
+    "radix-ui": "^1.6.7"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

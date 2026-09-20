@@ -1,4 +1,4 @@
-@theme {
+@theme static {
   /* Patient App */
   --color-patient-primary: #008877;
   --color-patient-primary-dark: #087F78;
@@ -29,8 +29,13 @@
 
   /* Admin Web App */
   --color-admin-primary: #008877;
+  --color-admin-primary-dark: #087F78;
+  --color-admin-accent: #0A9E96;
   --color-admin-surface: #E6F5F4;
   --color-admin-text: #0C2434;
+  --color-admin-text-secondary: #374151;
+  --color-admin-card: #FFFFFF;
+  --color-admin-on-primary: #FFFFFF;
   --color-admin-bg: #F9FAFB;
   --color-admin-border: #E0E5EB;
 
