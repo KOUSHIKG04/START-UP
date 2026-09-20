@@ -4,8 +4,17 @@ Read [ARCHITECTURE.md](./ARCHITECTURE.md) for folder ownership, feature conventi
 server boundaries, and the future shared backend integration contract.
 
 The existing dashboard lives in `src/features/dashboard/screens/DashboardScreen.tsx`.
-Its route adapter is `src/app/page.tsx`; the URL remains `/`.
-Other feature and integration folders are placeholders pending screen requirements.
+Its route adapters are `src/app/(admin)/page.tsx` and
+`src/app/(admin)/dashboard/page.tsx`; the URLs remain `/` and `/dashboard`.
+The admin route group owns the shared shell. Login belongs to `(auth)` and the
+auth feature. Screen data lives in each feature's `utils/*Constants.ts` files.
+See the architecture guide for all current route and feature mappings.
+
+Routes import feature entry points (`@/features/doctors`, for example). Each feature
+owns its screens, components, hooks, types and `utils/*Constants.ts`. Shared admin
+navigation lives in `src/components/admin`; generic primitives live in web-ui.
+Run `pnpm --filter web check:architecture` to detect duplicate route URLs and
+incorrect imports, and `pnpm --filter web test:architecture` to test these guards.
 
 ## Getting Started
 

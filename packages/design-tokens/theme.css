@@ -42,4 +42,41 @@
   /* Banner Gradients (0% #0A4A47 -> 100% #087F78) */
   --background-image-gradient-patient: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
   --background-image-gradient-admin: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
+  /* Web chart palette and dark-mode colors. */
+  --color-admin-chart-1: oklch(0.87 0 0);
+  --color-admin-chart-2: oklch(0.556 0 0);
+  --color-admin-chart-3: oklch(0.439 0 0);
+  --color-admin-chart-4: oklch(0.371 0 0);
+  --color-admin-chart-5: oklch(0.269 0 0);
+  --color-admin-dark-background: oklch(0.145 0 0);
+  --color-admin-dark-foreground: oklch(0.985 0 0);
+  --color-admin-dark-card: oklch(0.205 0 0);
+  --color-admin-dark-card-foreground: oklch(0.985 0 0);
+  --color-admin-dark-popover: oklch(0.205 0 0);
+  --color-admin-dark-popover-foreground: oklch(0.985 0 0);
+  --color-admin-dark-primary: oklch(0.922 0 0);
+  --color-admin-dark-primary-foreground: oklch(0.205 0 0);
+  --color-admin-dark-secondary: oklch(0.269 0 0);
+  --color-admin-dark-secondary-foreground: oklch(0.985 0 0);
+  --color-admin-dark-muted: oklch(0.269 0 0);
+  --color-admin-dark-muted-foreground: oklch(0.708 0 0);
+  --color-admin-dark-accent: oklch(0.269 0 0);
+  --color-admin-dark-accent-foreground: oklch(0.985 0 0);
+  --color-admin-dark-destructive: oklch(0.704 0.191 22.216);
+  --color-admin-dark-border: oklch(1 0 0 / 10%);
+  --color-admin-dark-input: oklch(1 0 0 / 15%);
+  --color-admin-dark-ring: oklch(0.556 0 0);
+  --color-admin-dark-chart-1: oklch(0.87 0 0);
+  --color-admin-dark-chart-2: oklch(0.556 0 0);
+  --color-admin-dark-chart-3: oklch(0.439 0 0);
+  --color-admin-dark-chart-4: oklch(0.371 0 0);
+  --color-admin-dark-chart-5: oklch(0.269 0 0);
+  --color-admin-dark-sidebar: oklch(0.205 0 0);
+  --color-admin-dark-sidebar-foreground: oklch(0.985 0 0);
+  --color-admin-dark-sidebar-primary: oklch(0.488 0.243 264.376);
+  --color-admin-dark-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-admin-dark-sidebar-accent: oklch(0.269 0 0);
+  --color-admin-dark-sidebar-accent-foreground: oklch(0.985 0 0);
+  --color-admin-dark-sidebar-border: oklch(1 0 0 / 10%);
+  --color-admin-dark-sidebar-ring: oklch(0.556 0 0);
 }

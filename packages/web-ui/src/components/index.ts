@@ -14,3 +14,5 @@ export * from "./ui/sidebar";
 export * from "./ui/skeleton";
 export * from "./ui/table";
 export * from "./ui/tooltip";
+export * from "./data-table";
+export * from "./virtual-list";

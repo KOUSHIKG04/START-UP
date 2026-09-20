@@ -23,6 +23,10 @@
       "favicon": "./assets/favicon.png"
     },
     "scheme": "clinzo-driver",
-    "plugins": ["expo-router", "expo-document-picker"]
+    "plugins": [
+      "expo-router",
+      "expo-document-picker",
+      "expo-localization"
+    ]
   }
 }

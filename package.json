@@ -25,7 +25,9 @@
     "lint": "turbo lint",
     "format": "prettier --write .",
     "typecheck": "turbo typecheck",
-    "test": "turbo test"
+    "test": "turbo test",
+    "test:e2e": "pnpm --filter web exec playwright test",
+    "test:e2e:ui": "pnpm --filter web exec playwright test --ui"
   },
   "devEngines": {
     "packageManager": {

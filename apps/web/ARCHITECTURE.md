@@ -2,35 +2,52 @@
 
 The admin uses Next.js App Router with feature-based modules. Routes compose
 features; features own business UI and admin-specific server operations. The
-existing static dashboard is preserved at `/` and is the first example of this
-structure. Other feature folders are reservations for future screen requirements.
+dashboard is available at `/` and `/dashboard`. Appointments and login have their
+own feature screens, as do bed management, doctor management and doctor schedules.
+Each implemented feature exposes its supported entry points through `index.ts`.
 
 ## Folder ownership
 
 | Folder | Responsibility |
 | --- | --- |
 | `src/app` | Next.js routes, layouts, metadata, loading and error boundaries |
-| `src/app/page.tsx` | Thin adapter for the existing home page |
-| `src/app/(admin)` | Reserved for future admin routes and their shared layout |
-| `src/app/(auth)` | Reserved for authentication routes; no login screen yet |
+| `src/app/(admin)` | Thin route adapters and one shared admin layout |
+| `src/app/(auth)` | Login route adapter, outside the admin shell |
 | `src/features/dashboard` | Existing dashboard screen and future dashboard operations |
-| `src/features/auth` | Future login/session-facing UI |
-| `src/features/doctors` | Future doctor administration |
-| `src/features/appointments` | Future appointment administration |
+| `src/features/auth` | Login screen, form component and login constants |
+| `src/features/doctors` | Doctor directory, schedules, add-doctor UI, feature hooks, types and constants |
+| `src/features/appointments` | Appointment screen, record types, demo rows and filter/summary constants |
 | `src/features/dispatch` | Future ambulance dispatch operations |
-| `src/features/facilities` | Future clinic/hospital administration |
+| `src/features/facilities` | Bed management screen, allocation hook, types and constants |
 | `src/features/staff` | Future staff membership and permissions UI |
-| `src/components` | Admin-only UI shared across features, such as navigation |
+| `src/components/admin` | Shared admin layout, sidebar and reusable navigation components |
+| `src/components/admin/utils` | Shell-owned navigation, brand and demo-user constants |
 | `src/server/auth` | Future server-side identity, membership and permission checks |
 | `src/server/supabase` | Future request-scoped server client configuration |
 | `src/server/observability` | Future server logging and instrumentation |
 | `src/lib` | Small cross-feature helpers and future browser client configuration |
 | `src/providers` | Client providers, added only when an integration needs them |
 
-Route groups do not add URL segments or enforce authentication. The dashboard is
-still public, its metrics are demo values, and its controls remain placeholders.
-There are no backend connections, authorization guards, or new screens in this
-scaffold. Empty folders are tracked with `.gitkeep`, not fake implementations.
+Route groups do not add URL segments or enforce authentication. All screens remain
+public. Login is presentation only; no session or backend is connected. Dashboard
+metrics, appointment rows, date labels, summary totals and pagination are demo
+values. The appointment period control changes its selected state but does not
+filter real records. Bed counts and doctor search update local state. The add-doctor
+form simulates success with a timer; it does not persist or add a doctor to the
+directory. No authentication or backend integration is implied by this structure.
+
+| URL | Feature screen |
+| --- | --- |
+| `/`, `/dashboard` | `dashboard/screens/DashboardScreen.tsx` |
+| `/appointments` | `appointments/screens/AppointmentsScreen.tsx` |
+| `/bed-management` | `facilities/screens/BedManagementScreen.tsx` |
+| `/doctor-management` | `doctors/screens/DoctorManagementScreen.tsx` |
+| `/doctor-schedules` | `doctors/screens/DoctorSchedulesScreen.tsx` |
+| `/login` | `auth/screens/LoginScreen.tsx` |
+
+The admin shell is mounted once in `(admin)/layout.tsx`, so its sidebar state is
+preserved during navigation between admin pages. Do not wrap individual screens
+or route pages in a second admin layout. Login has no admin sidebar.
 
 ## Adding a feature
 
@@ -38,12 +55,14 @@ Use this shape as needed; do not create unused abstraction layers:
 
 ```text
 features/appointments/
+  index.ts
   screens/AppointmentsScreen.tsx
   components/AppointmentTable.tsx
   server/queries.ts
   server/actions.ts
   hooks/
-  types.ts
+  types/appointments.ts
+  utils/appointmentsConstants.ts
   tests/
 ```
 
@@ -61,8 +80,12 @@ mutations and Route Handlers only when an HTTP interface is needed.
 ## Dependency boundaries
 
 - Routes import features and shared code; features never import routes.
+- Routes import the feature's public `index.ts`, not its internal screen path.
 - Features own their components, hooks, local validation and display types.
-- Avoid cross-feature internal imports. Extract deliberately shared code instead.
+- Features do not import other features. Compose workflows at the route boundary:
+  the dashboard routes pass the doctors feature's `AddDoctorAction` as a ReactNode
+  slot into `DashboardScreen`. The action owns its dialog and client state, while
+  dashboard stays a Server Component. Keep feature public exports deliberate.
 - `src/components` contains presentation shared across admin features; generic
   reusable primitives belong in `@startup/web-ui`.
 - `@startup/design-tokens` owns visual tokens for web and mobile.
@@ -74,8 +97,23 @@ mutations and Route Handlers only when an HTTP interface is needed.
   setup in the app. The contracts and data-access packages are currently empty and
   are not dependencies of web until integration begins.
 
-These ownership rules are documented conventions; ESLint currently provides the
-standard Next.js/TypeScript rules, not a complete dependency-boundary checker.
+The architecture check runs before ESLint and checks both relative and `@/` imports.
+It rejects duplicate route URLs, feature-to-feature dependencies, shared-to-feature
+dependencies, route imports into lower layers, route imports of feature internals,
+module-level screen data, and hook calls without a client directive. These are
+static checks for the current conventions, not a complete runtime dependency audit.
+
+Keep static screen data, filter options, demo dates, summaries and pagination in
+the owning feature's `utils/<screen>Constants.ts`. Keep record types in `types/`.
+Do not move component state or values computed from props into constants. Shared
+navigation belongs to the admin shell, not dashboard or authentication. Generic
+component behavior, styling and SVG geometry stay with the component or design
+system. Dashboard-only doctor/ward summaries remain in dashboard until another
+feature actually needs a shared domain operation.
+
+The shadcn CLI can generate blocks into `src/components` and pages into `src/app`.
+After adding a block, move screen-specific forms/UI into the owning feature and
+leave a thin route adapter. Keep generic primitives in `@startup/web-ui`.
 
 ## Backend integration contract
 
@@ -112,13 +150,15 @@ Run from the monorepo root using its pnpm toolchain:
 
 ```sh
 pnpm --filter web lint
+pnpm --filter web check:architecture
+pnpm --filter web test:architecture
 pnpm --filter web typecheck
 pnpm --filter web build
 ```
 
 Typechecking first generates current Next.js route types. A production build can
-require network access for the existing Google fonts. This scaffold adds no test
-runner; add behavior tests with the first implemented workflows, including
+require network access for the existing Google fonts. Architecture regression tests
+use Node's built-in test runner. Add backend workflow tests when integrating data, including
 unauthenticated access, denied facility access and failed mutations. Database
 policies and transaction constraints require integration tests in
 `supabase/tests/database` before backend rollout.

@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@startup/design-tokens";
 import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
+import { QueryProvider } from "../providers/QueryProvider";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -36,22 +37,24 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={navTheme}>
-        <View style={styles.root}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "fade",
-              animationDuration: 350,
-              freezeOnBlur: true,
-              contentStyle: styles.scene,
-            }}
-          >
-            <Stack.Screen name="(app)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
-        </View>
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider value={navTheme}>
+          <View style={styles.root}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                animationDuration: 350,
+                freezeOnBlur: true,
+                contentStyle: styles.scene,
+              }}
+            >
+              <Stack.Screen name="(app)" />
+              <Stack.Screen name="(auth)" />
+            </Stack>
+          </View>
+        </ThemeProvider>
+      </QueryProvider>
     </SafeAreaProvider>
   );
 }
