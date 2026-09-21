@@ -5,6 +5,7 @@ import { AppSidebar } from "./app-sidebar";
 import {
   SidebarProvider,
   SidebarInset,
+  SidebarTrigger,
 } from "@startup/web-ui/components/ui/sidebar";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen w-full bg-[#f8fafc]">
         <AppSidebar />
         <SidebarInset className="flex-1 min-w-0 bg-[#f8fafc] p-6 lg:p-8">
+          <div className="md:hidden mb-4">
+            <SidebarTrigger />
+          </div>
           {children}
         </SidebarInset>
       </div>

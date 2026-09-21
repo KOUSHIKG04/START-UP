@@ -13,6 +13,7 @@ export interface VirtualListProps<T> {
   renderItem: (item: T, index: number) => React.ReactNode;
   emptyState?: React.ReactNode;
   emptyMessage?: string;
+  getItemKey?: (index: number) => React.Key;
 }
 
 export function VirtualList<T>({
@@ -24,6 +25,7 @@ export function VirtualList<T>({
   renderItem,
   emptyState,
   emptyMessage = "No items to display.",
+  getItemKey,
 }: VirtualListProps<T>) {
   const parentRef = React.useRef<HTMLDivElement>(null);
 
@@ -32,6 +34,7 @@ export function VirtualList<T>({
     getScrollElement: () => parentRef.current,
     estimateSize: () => estimateSize,
     overscan,
+    getItemKey,
   });
 
   if (items.length === 0) {

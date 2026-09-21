@@ -1,6 +1,6 @@
 export const loginContent = {
   heading: "Welcome back",
-  description: "Login to your Acme Inc account",
+  description: "Login to your MediCare Hospital account",
   emailPlaceholder: "m@example.com",
   image: "/placeholder.svg",
   imageAlt: "Image",

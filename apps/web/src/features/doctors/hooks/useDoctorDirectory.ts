@@ -33,6 +33,7 @@ export const doctorApi = {
     page = 1,
     pageSize = 10,
     status,
+    specialization,
     signal,
   }: DoctorFilters & { signal?: AbortSignal } = {}): Promise<DoctorListResponse> => {
     // Check if request was aborted
@@ -56,6 +57,12 @@ export const doctorApi = {
 
     if (status && status !== "all") {
       result = result.filter((d) => d.status.toLowerCase() === status.toLowerCase());
+    }
+
+    if (specialization && specialization !== "all") {
+      result = result.filter(
+        (d) => d.specialization.toLowerCase() === specialization.toLowerCase(),
+      );
     }
 
     const total = result.length;
@@ -107,13 +114,14 @@ export function useDoctorDirectory(initialFilters?: Partial<DoctorFilters>) {
   const [page, setPage] = React.useState(initialFilters?.page || 1);
   const [pageSize, setPageSize] = React.useState(initialFilters?.pageSize || 10);
   const [status, setStatus] = React.useState(initialFilters?.status || "all");
+  const [specialization, setSpecialization] = React.useState(initialFilters?.specialization || "all");
 
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["doctors", "directory", { search: searchTerm, page, pageSize, status }],
+    queryKey: ["doctors", "directory", { search: searchTerm, page, pageSize, status, specialization }],
     queryFn: ({ signal }) =>
-      doctorApi.list({ search: searchTerm, page, pageSize, status, signal }),
+      doctorApi.list({ search: searchTerm, page, pageSize, status, specialization, signal }),
     staleTime: 30_000,
   });
 
@@ -135,7 +143,15 @@ export function useDoctorDirectory(initialFilters?: Partial<DoctorFilters>) {
     pageSize,
     setPageSize,
     status,
-    setStatus,
+    setStatus: (s: string) => {
+      setStatus(s);
+      setPage(1);
+    },
+    specialization,
+    setSpecialization: (spec: string) => {
+      setSpecialization(spec);
+      setPage(1);
+    },
     data: query.data,
     doctors: query.data?.items ?? [],
     filteredDoctors: query.data?.items ?? [], // For backward compatibility

@@ -64,10 +64,11 @@ export function AddDoctorCard({
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
             {/* Doctor Name */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-[#5c6678]">
+              <label htmlFor="add-doctor-name" className="text-[13px] font-medium text-[#5c6678]">
                 Doctor Name
               </label>
               <input
+                id="add-doctor-name"
                 type="text"
                 required
                 value={formData.name}
@@ -81,10 +82,11 @@ export function AddDoctorCard({
 
             {/* Doctor ID (Clinzo) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-[#5c6678]">
+              <label htmlFor="add-doctor-clinzo-id" className="text-[13px] font-medium text-[#5c6678]">
                 Doctor ID (Clinzo) Optional
               </label>
               <input
+                id="add-doctor-clinzo-id"
                 type="text"
                 value={formData.clinzoId}
                 onChange={(e) =>
@@ -97,10 +99,11 @@ export function AddDoctorCard({
 
             {/* Specialization */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-[#5c6678]">
+              <label htmlFor="add-doctor-specialization" className="text-[13px] font-medium text-[#5c6678]">
                 Specialization
               </label>
               <input
+                id="add-doctor-specialization"
                 type="text"
                 value={formData.specialization}
                 onChange={(e) =>
@@ -113,10 +116,11 @@ export function AddDoctorCard({
 
             {/* Phone Number */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-[#5c6678]">
+              <label htmlFor="add-doctor-phone" className="text-[13px] font-medium text-[#5c6678]">
                 Phone Number
               </label>
               <input
+                id="add-doctor-phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) =>

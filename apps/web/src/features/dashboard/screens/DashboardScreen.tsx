@@ -42,6 +42,7 @@ export default function DashboardScreen({
             <Search className="size-4 text-[#94a3b8] shrink-0" />
             <input
               type="text"
+              aria-label="Search patient, doctor..."
               placeholder="Search patient, doctor..."
               className="bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none w-full"
             />

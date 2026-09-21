@@ -10,6 +10,7 @@ export interface DoctorTableProps {
   data: DoctorRecord[];
   isLoading?: boolean;
   pageCount?: number;
+  rowCount?: number;
   pagination?: PaginationState;
   onPaginationChange?: OnChangeFn<PaginationState>;
   manualPagination?: boolean;
@@ -23,6 +24,7 @@ export function DoctorTable({
   data,
   isLoading = false,
   pageCount,
+  rowCount,
   pagination,
   onPaginationChange,
   manualPagination = false,
@@ -37,6 +39,7 @@ export function DoctorTable({
       data={data}
       isLoading={isLoading}
       pageCount={pageCount}
+      rowCount={rowCount}
       pagination={pagination}
       onPaginationChange={onPaginationChange}
       manualPagination={manualPagination}
