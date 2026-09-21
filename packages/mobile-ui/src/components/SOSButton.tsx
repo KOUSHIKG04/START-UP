@@ -28,7 +28,8 @@ export function SOSButton({
   const [internalFullRed, setInternalFullRed] = useState(false);
   const isRed = controlledFullRed ?? internalFullRed;
 
-  const { radius, innerRingSize, innerRingRadius } = getSOSButtonDimensions(size);
+  const { radius, innerRingSize, innerRingRadius } =
+    getSOSButtonDimensions(size);
 
   const handleLongPress = () => {
     setInternalFullRed(true);
@@ -66,9 +67,7 @@ export function SOSButton({
             width: innerRingSize,
             height: innerRingSize,
             borderRadius: innerRingRadius,
-            borderColor: isRed
-              ? "#FFFFFF73"
-              : "#EF3B4340",
+            borderColor: isRed ? colors.ui.sosGlowLight : colors.ui.sosGlow,
           },
         ]}
       />
@@ -91,15 +90,15 @@ const styles = StyleSheet.create({
   },
 
   buttonLightRed: {
-    backgroundColor: "#FFEAEB",
+    backgroundColor: colors.ui.sosSurface,
     borderWidth: 2,
-    borderColor: "#FFA4AC",
+    borderColor: colors.ui.sosBorder,
   },
 
   buttonFullRed: {
     backgroundColor: colors.patient.sos.primary,
     borderWidth: 2,
-    borderColor: "#D62D35",
+    borderColor: colors.ui.sosInnerBorder,
   },
 
   innerRing: {

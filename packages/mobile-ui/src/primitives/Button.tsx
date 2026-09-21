@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ReactNode } from "react";
 import {
   Pressable,
@@ -9,17 +10,10 @@ import {
   type ViewStyle,
 } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import {
-  appThemeColors,
-  type AppTheme,
-} from "../utils/appTheme";
+import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "danger";
+  "primary" | "secondary" | "outline" | "ghost" | "danger";
 
 export type ButtonProps = Omit<
   PressableProps,
@@ -45,7 +39,7 @@ export function Button({
   label,
   children,
   variant = "primary",
-  theme = "patient",
+  theme,
   disabled = false,
   style,
   labelStyle,
@@ -55,7 +49,7 @@ export function Button({
   accessibilityState,
   ...props
 }: ButtonProps) {
-  const themeColors = appThemeColors[theme];
+  const themeColors = useMobileTheme(theme);
   const palette = getButtonPalette(variant, themeColors);
 
   return (
@@ -110,7 +104,7 @@ function getButtonPalette(
       return {
         container: {
           backgroundColor: "transparent",
-          borderColor: colors.borderDefault,
+          borderColor: theme.border,
           borderWidth: 1,
         },
         label: { color: theme.primaryText },
@@ -122,14 +116,14 @@ function getButtonPalette(
       };
     case "danger":
       return {
-        container: { backgroundColor: colors.danger },
-        label: { color: colors.white },
+        container: { backgroundColor: theme.danger },
+        label: { color: theme.onPrimary },
       };
     case "primary":
     default:
       return {
         container: { backgroundColor: theme.primary },
-        label: { color: colors.white },
+        label: { color: theme.onPrimary },
       };
   }
 }

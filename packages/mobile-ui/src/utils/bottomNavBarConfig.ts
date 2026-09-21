@@ -1,3 +1,4 @@
+import { colors } from "@startup/design-tokens";
 import type { ViewStyle } from "react-native";
 
 export const BOTTOM_NAV_BAR_HEIGHT = 72;
@@ -8,7 +9,7 @@ export const BOTTOM_NAV_BAR_MIN_BOTTOM_PADDING = 4;
 export const BOTTOM_NAV_BAR_SOS_SIZE = 64;
 
 export const BOTTOM_NAV_BAR_SHADOW = {
-  shadowColor: "#0C2434",
+  shadowColor: colors.textPrimary,
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.12,
   shadowRadius: 16,

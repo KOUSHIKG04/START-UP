@@ -10,6 +10,20 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./theme.css": "./theme.css"
+    "./theme.css": "./theme.css",
+    "./fonts/*": "./assets/fonts/*.ttf"
+  },
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "generate": "node --experimental-strip-types scripts/generate-theme.mjs",
+    "lint": "pnpm check",
+    "check": "node --experimental-strip-types scripts/generate-theme.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
   }
 }

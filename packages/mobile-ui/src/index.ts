@@ -46,10 +46,7 @@ export {
   type DropdownOption,
   type DropdownProps,
 } from "./primitives/Dropdown";
-export {
-  SearchInput,
-  type SearchInputProps,
-} from "./primitives/SearchInput";
+export { SearchInput, type SearchInputProps } from "./primitives/SearchInput";
 export { TextArea, type TextAreaProps } from "./primitives/TextArea";
 export {
   FadedScrollView,
@@ -57,14 +54,8 @@ export {
   type FadedScrollViewProps,
 } from "./primitives/FadedScrollView";
 export { TimeSlot, type TimeSlotProps } from "./primitives/TimeSlot";
-export {
-  UploadInput,
-  type UploadInputProps,
-} from "./primitives/UploadInput";
-export {
-  StatusBadge,
-  type StatusBadgeProps,
-} from "./primitives/StatusBadge";
+export { UploadInput, type UploadInputProps } from "./primitives/UploadInput";
+export { StatusBadge, type StatusBadgeProps } from "./primitives/StatusBadge";
 export {
   Accordion,
   type AccordionProps,
@@ -72,3 +63,8 @@ export {
 } from "./primitives/Accordion";
 export * from "./utils/notchedBarPath";
 export { albertSansFonts } from "./utils/fonts";
+
+export {
+  MobileThemeProvider,
+  useMobileTheme,
+} from "./theme/MobileThemeProvider";

@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import {
   Pressable,
   StyleSheet,
@@ -29,6 +30,7 @@ export function TimeSlot({
   onPress,
   ...props
 }: TimeSlotProps) {
+  const theme = useMobileTheme();
   return (
     <Pressable
       {...props}
@@ -39,6 +41,7 @@ export function TimeSlot({
       onPress={onPress}
       style={(state) => [
         styles.slot,
+        { backgroundColor: theme.surface, borderColor: theme.border },
         state.pressed && onPress && !disabled ? styles.pressed : undefined,
         disabled ? styles.disabled : undefined,
         typeof style === "function" ? style(state) : style,
@@ -48,6 +51,7 @@ export function TimeSlot({
         numberOfLines={1}
         style={[
           styles.text,
+          { color: theme.text },
           disabled ? styles.disabledText : undefined,
           textStyle,
         ]}

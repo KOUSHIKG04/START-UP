@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useState, type ReactNode } from "react";
 import {
   Pressable,
@@ -10,7 +11,7 @@ import {
 } from "react-native";
 import { ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { appThemeColors, type AppTheme } from "../utils/appTheme";
+import { type AppTheme } from "../utils/appTheme";
 
 export type AccordionVariant = "elevated" | "outlined" | "surface" | "plain";
 
@@ -51,7 +52,7 @@ export function Accordion({
   defaultOpen = false,
   onToggle,
   variant = "outlined",
-  theme = "patient",
+  theme,
   disabled = false,
   separator = true,
   separatorColor,
@@ -68,7 +69,7 @@ export function Accordion({
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const isControlled = controlledIsOpen !== undefined;
   const open = isControlled ? controlledIsOpen : internalOpen;
-  const themeColors = appThemeColors[theme];
+  const themeColors = useMobileTheme(theme);
 
   const handleToggle = () => {
     if (disabled) return;
@@ -87,11 +88,7 @@ export function Accordion({
 
   return (
     <View
-      style={[
-        styles.container,
-        getVariantStyle(variant, themeColors.soft),
-        style,
-      ]}
+      style={[styles.container, getVariantStyle(variant, themeColors), style]}
     >
       <Pressable
         accessibilityRole="button"
@@ -162,7 +159,9 @@ export function Accordion({
             <View
               style={[
                 styles.separator,
-                separatorColor ? { backgroundColor: separatorColor } : undefined,
+                separatorColor
+                  ? { backgroundColor: separatorColor }
+                  : undefined,
               ]}
             />
           ) : null}
@@ -174,7 +173,9 @@ export function Accordion({
             <View
               style={[
                 styles.separator,
-                separatorColor ? { backgroundColor: separatorColor } : undefined,
+                separatorColor
+                  ? { backgroundColor: separatorColor }
+                  : undefined,
               ]}
             />
           ) : null}
@@ -185,13 +186,16 @@ export function Accordion({
   );
 }
 
-function getVariantStyle(variant: AccordionVariant, softColor: string): ViewStyle {
+function getVariantStyle(
+  variant: AccordionVariant,
+  theme: ReturnType<typeof useMobileTheme>
+): ViewStyle {
   switch (variant) {
     case "elevated":
       return {
-        backgroundColor: colors.white,
+        backgroundColor: theme.surface,
         borderRadius: radius.md,
-        shadowColor: "#000",
+        shadowColor: colors.ui.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -200,7 +204,7 @@ function getVariantStyle(variant: AccordionVariant, softColor: string): ViewStyl
       };
     case "surface":
       return {
-        backgroundColor: softColor,
+        backgroundColor: theme.soft,
         borderRadius: radius.md,
         borderWidth: 1,
         borderColor: colors.patient.surfaceBorder,
@@ -214,10 +218,10 @@ function getVariantStyle(variant: AccordionVariant, softColor: string): ViewStyl
     case "outlined":
     default:
       return {
-        backgroundColor: colors.white,
+        backgroundColor: theme.surface,
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: colors.borderDefault,
+        borderColor: theme.border,
       };
   }
 }
@@ -290,7 +294,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: colors.ui.separator,
     marginHorizontal: 16,
   },
   content: {

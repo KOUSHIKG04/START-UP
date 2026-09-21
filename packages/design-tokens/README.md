@@ -1,146 +1,56 @@
 # @startup/design-tokens
 
-Design system tokens and color palettes for the Startup ecosystem.
+Shared TypeScript tokens, generated Tailwind CSS v4 theme variables, and Albert Sans font assets.
 
----
+## Public exports
 
-## 📱 Platform & App Architecture
+The root exports `colors`, palette shortcuts (`patientColors`, `doctorColors`, `driverColors`, `adminColors`, `sosColors`), `gradients` and gradient shortcuts, `spacing`, `radius`, `shadows`, `typography`, and `fontFamilies`. `tokens` (also the default export) groups the original six token categories.
 
-The ecosystem is structured into:
+`mobileThemes`, `MobileThemeName`, and `MobileThemeColors` provide patient, doctor, and driver semantic colors, including foreground, background, surface, border, placeholder, danger, and disabled roles. `webColors` contains the web chart and dark-mode palette. `colors.ui` holds shared component details.
 
-1. **Mobile Apps (React Native / Expo & `@startup/mobile-ui`):**
-   * **Patient App:** Booking, consultations, records, plus the embedded **SOS / Emergency** panic flow.
-   * **Doctor App:** Doctor dashboard, appointments, patient management, consultations.
-   * **Driver App:** Ambulance driver, navigation, trip management, status updates.
-
-2. **Web App (Next.js & `@startup/web-ui`):**
-   * **Admin App:** Operations portal, provider verification, trip monitoring, analytics.
-
----
-
-## 🎨 Color Palettes & Flows
-
-### 1. Patient App (Mobile) — with Embedded SOS Flow
-* **Banner / Hero Gradient:** Linear gradient from `#0A4A47` (0%) to `#087F78` (100%).
-
-| Color | Hex | Role & Usage |
-|---|---|---|
-| **Primary** | `#008877` | Main brand CTA buttons, active icons, interactive highlights |
-| **Primary Dark** | `#087F78` | Pressed states, focus rings, and banner gradient stop (100%) |
-| **Accent** | `#0A9E96` | Vibrant teal accent for badges, tags, and highlights |
-| **Surface Light** | `#E6F5F4` | Soft mint tint for card backgrounds, chips, and active pills |
-| **Text Primary** | `#0C2434` | Deep navy ink for headings, primary body copy |
-| **Text Secondary**| `#374151` | Slate gray for secondary descriptions, subtitles, metadata |
-| **Text Muted** | `#9CA3AF` | Cool gray for disabled states, placeholders, borders |
-| **Background** | `#F9FAFB` | Off-white canvas for screens and app shells |
-| **Banner Start** | `#0A4A47` | Deep spruce teal (0% gradient stop) |
-| **Banner End** | `#087F78` | Medium teal (100% gradient stop) |
-
-#### Embedded SOS / Emergency Flow (inside Patient App):
-* Accessible via `colors.patient.sos`.
-
-| Color | Hex | Role & Usage |
-|---|---|---|
-| **Panic Primary** | `#EF3B43` | Urgent panic red for SOS trigger button and critical alerts |
-| **Crimson Dark** | `#C0392B` | Dark crimson for pressed state and severe warning highlights |
-| **Surface Light** | `#FDF2F2` | Soft pink-red background for emergency banners and caution cards |
-| **Header Dark** | `#3A0508` | Deep wine blood red for emergency flow header |
-| **Safe Accent** | `#07595D` | Safe deep teal for canceling SOS, calling dispatch, or safe exit |
-| **Background** | `#EEF4F5` | Cool ice gray-blue for high-visibility screen background |
-
----
-
-### 2. Doctor App (Mobile)
-**Doctor dashboard — appointments, patient management, consultations.**
-
-| Color | Hex | Role & Usage |
-|---|---|---|
-| **Primary** | `#008877` | Primary action for medical workflows, confirm consultation |
-| **Primary Dark** | `#097F78` | Active navigation tabs and dark accent |
-| **Clinical Accent**| `#008F83`| Vibrant clinical teal for active consultation status |
-| **Header Dark** | `#0B4145` | Deep forest teal for doctor dashboard header and card headers |
-| **Surface Accent**| `#D9F2EF`| Light teal wash for patient charts and active patient cards |
-| **Surface Light** | `#E6F5F4`| Light mint tint for status pills |
-| **Text Primary** | `#0C2434` | Deep navy ink for patient names, clinical notes |
-| **Border** | `#E0E5EB` | Cool neutral gray for table borders and card dividers |
-
----
-
-### 3. Driver App (Mobile)
-**Ambulance driver — navigation, trip management, status updates.**
-
-| Color | Hex | Role & Usage |
-|---|---|---|
-| **Primary** | `#087F8C` | Ambulance cyan-teal for trip actions, accept button, map markers |
-| **Primary Dark** | `#173B4A` | Dark navy slate for night navigation panels and dark header |
-| **Surface Light** | `#EAF8F7` | Soft cyan surface tint for active ride cards and route summaries |
-| **Status Ready** | `#36B37E` | Emerald green for online, available, and en-route statuses |
-| **Surface Tint** | `#E6F5F4` | Light mint tint for secondary badges |
-| **Text Secondary**| `#71818F`| Slate gray for ETA, trip distances, timestamps |
-| **Text Muted** | `#9CA3AF` | Muted slate for disabled buttons and inactive state |
-| **Text Primary** | `#0C2434` | Deep navy ink for destination address and patient name |
-
----
-
-### 4. Admin App (Web)
-**Web administration dashboard — operations, provider management, analytics.**
-* **Banner / Header Gradient:** Shared brand linear gradient from `#0A4A47` (0%) to `#087F78` (100%).
-
-| Color | Hex | Role & Usage |
-|---|---|---|
-| **Primary** | `#008877` | Primary action for admin actions, approval buttons |
-| **Primary Dark** | `#087F78` | Hover/active states, banner gradient stop |
-| **Accent** | `#0A9E96` | Metrics badges, chart highlights |
-| **Surface Light** | `#E6F5F4` | Data table active row highlights, filters |
-| **Text Primary** | `#0C2434` | Deep navy ink for table text, metrics, headers |
-| **Text Secondary**| `#374151` | Slate gray for descriptions, timestamps |
-| **Border** | `#E0E5EB` | Table grid borders, dividers |
-| **Background** | `#F9FAFB` | Dashboard background canvas |
-
----
-
-## 💻 Code Usage by Platform
-
-### Mobile (React Native / NativeWind)
 ```tsx
-import { Screen, Banner, AppText, cn } from "@startup/mobile-ui";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "@startup/design-tokens";
-
-// 1. Patient App with Embedded SOS
-export function PatientHomeScreen() {
-  return (
-    <Screen>
-      {/* Patient Banner */}
-      <Banner GradientComponent={LinearGradient} />
-
-      {/* Embedded SOS Panic Trigger */}
-      <Banner app="sos" title="Emergency SOS" subtitle="Tap to alert ambulance dispatch" />
-    </Screen>
-  );
-}
-
-// 2. Doctor App
-<Banner app="doctor" />
-
-// 3. Driver App
-<Banner app="driver" />
+import { colors, typography, mobileThemes } from "@startup/design-tokens";
+const screenStyle = { backgroundColor: mobileThemes.patient.background };
+const headingStyle = { ...typography.heading, color: colors.patient.text };
 ```
 
-### Web (Next.js / Tailwind CSS)
-```tsx
-import { PageShell, Banner, cn } from "@startup/web-ui";
+Patient background is white (`#FFFFFF`) on both platforms; admin background is `#F9FAFB`. SOS colors live under `colors.patient.sos`.
 
-export default function AdminDashboardPage() {
-  return (
-    <PageShell>
-      {/* Automatically renders the Admin #0A4A47 -> #087F78 banner */}
-      <Banner />
+## Web theme
 
-      <div className={cn("p-6 mt-6 bg-white rounded-2xl border")}>
-        <h3 className="text-patient-text font-bold text-xl">Platform Overview</h3>
-      </div>
-    </PageShell>
-  );
-}
+```css
+@import "tailwindcss";
+@import "@startup/design-tokens/theme.css";
 ```
+
+Use utilities such as `bg-patient-bg`, `text-admin-text`, and `bg-gradient-admin`. Existing CSS variable names are preserved, including `--color-driver-ready` and `--color-admin-bg`. Other palette fields use kebab case. The CSS uses `@theme static` so variables remain available to consuming theme mappings.
+
+## Fonts
+
+Four bundled TrueType assets use extensionless public subpaths. Register them in an Expo application with `useFonts`:
+
+```tsx
+import { useFonts } from "expo-font";
+const [fontsLoaded] = useFonts({
+  AlbertSans_400Regular: require("@startup/design-tokens/fonts/AlbertSans_400Regular"),
+  AlbertSans_500Medium: require("@startup/design-tokens/fonts/AlbertSans_500Medium"),
+  AlbertSans_600SemiBold: require("@startup/design-tokens/fonts/AlbertSans_600SemiBold"),
+  AlbertSans_700Bold: require("@startup/design-tokens/fonts/AlbertSans_700Bold"),
+});
+```
+
+Wait for font loading in the app's existing loading flow. Registration names match `fontFamilies` and `typography`.
+
+## Changing tokens
+
+Edit `src/colors.ts`, `src/gradients.ts`, or `src/web-colors.ts`, then run `pnpm --filter @startup/design-tokens generate` and commit the generated `theme.css`. Do not edit CSS directly. `src/themes.ts` maps colors to mobile semantic roles.
+
+The generator needs Node 22.6 or later and uses built-in TypeScript stripping. From the repository root:
+
+```sh
+pnpm --filter @startup/design-tokens check
+pnpm --filter @startup/design-tokens test
+pnpm --filter @startup/design-tokens typecheck
+```
+
+`check` detects stale CSS without rewriting it. Tests verify CSS consistency, native/CSS gradient agreement, and actual package resolution of all font assets. `lint` runs the generation check for the monorepo task runner. UI components are provided by the platform UI packages.

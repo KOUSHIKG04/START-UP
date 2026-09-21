@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { forwardRef, type ReactNode } from "react";
 import {
   StyleSheet,
@@ -27,28 +28,34 @@ export const SearchInput = forwardRef<TextInput, SearchInputProps>(
       editable = true,
       containerStyle,
       inputStyle,
-      iconColor = colors.textSecondary,
+      iconColor,
       iconSize = 20,
       showIcon = true,
       rightAccessory,
       placeholder = "Search",
-      placeholderTextColor = colors.textSecondary,
+      placeholderTextColor,
       accessibilityLabel = "Search",
       accessibilityState,
       ...props
     },
     ref
   ) {
+    const theme = useMobileTheme();
     return (
       <View
         style={[
           styles.container,
+          { backgroundColor: theme.surface, borderColor: theme.border },
           disabled ? styles.disabled : undefined,
           containerStyle,
         ]}
       >
         {showIcon ? (
-          <Search color={iconColor} size={iconSize} strokeWidth={2} />
+          <Search
+            color={iconColor ?? theme.textMuted}
+            size={iconSize}
+            strokeWidth={2}
+          />
         ) : null}
         <TextInput
           ref={ref}
@@ -57,9 +64,9 @@ export const SearchInput = forwardRef<TextInput, SearchInputProps>(
           accessibilityState={{ ...accessibilityState, disabled }}
           editable={!disabled && editable}
           placeholder={placeholder}
-          placeholderTextColor={placeholderTextColor}
+          placeholderTextColor={placeholderTextColor ?? theme.textMuted}
           returnKeyType="search"
-          style={[styles.input, inputStyle]}
+          style={[styles.input, { color: theme.text }, inputStyle]}
         />
         {rightAccessory}
       </View>

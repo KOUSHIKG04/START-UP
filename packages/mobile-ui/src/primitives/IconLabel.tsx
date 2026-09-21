@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ReactNode } from "react";
 import {
   Pressable,
@@ -10,7 +11,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
-import { appThemeColors, type AppTheme } from "../utils/appTheme";
+import { type AppTheme } from "../utils/appTheme";
 
 export type IconLabelIconProps = {
   color: string;
@@ -38,7 +39,7 @@ export type IconLabelProps = Omit<PressableProps, "children"> & {
 export function IconLabel({
   icon,
   label,
-  theme = "patient",
+  theme,
   backgroundColor,
   borderColor = colors.borderDefault,
   borderWidth = 0,
@@ -58,7 +59,7 @@ export function IconLabel({
   style,
   ...props
 }: IconLabelProps) {
-  const themeColors = appThemeColors[theme];
+  const themeColors = useMobileTheme(theme);
   const resolvedBackgroundColor = backgroundColor ?? themeColors.soft;
   const resolvedIconColor = iconColor ?? themeColors.primary;
   const renderedIcon =

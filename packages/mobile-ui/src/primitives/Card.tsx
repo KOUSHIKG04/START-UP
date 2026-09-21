@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ReactNode } from "react";
 import {
   Pressable,
@@ -10,7 +11,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
-import { appThemeColors, type AppTheme } from "../utils/appTheme";
+import { type AppTheme } from "../utils/appTheme";
 
 export type CardVariant = "elevated" | "outlined" | "soft" | "plain";
 export type CardOrientation = "vertical" | "horizontal";
@@ -37,7 +38,7 @@ export function Card({
   children,
   variant = "elevated",
   orientation = "vertical",
-  theme = "patient",
+  theme,
   backgroundColor,
   borderColor,
   borderWidth,
@@ -52,7 +53,8 @@ export function Card({
   pressRetentionOffset,
   ...props
 }: CardProps) {
-  const palette = getCardPalette(variant, theme);
+  const themeColors = useMobileTheme(theme);
+  const palette = getCardPalette(variant, themeColors);
 
   return (
     <Pressable
@@ -88,27 +90,15 @@ export type CardSectionProps = ViewProps & {
   gap?: number;
 };
 
-export function CardHeader({
-  gap = 12,
-  style,
-  ...props
-}: CardSectionProps) {
+export function CardHeader({ gap = 12, style, ...props }: CardSectionProps) {
   return <View {...props} style={[styles.header, { gap }, style]} />;
 }
 
-export function CardContent({
-  gap = 12,
-  style,
-  ...props
-}: CardSectionProps) {
+export function CardContent({ gap = 12, style, ...props }: CardSectionProps) {
   return <View {...props} style={[styles.content, { gap }, style]} />;
 }
 
-export function CardFooter({
-  gap = 12,
-  style,
-  ...props
-}: CardSectionProps) {
+export function CardFooter({ gap = 12, style, ...props }: CardSectionProps) {
   return <View {...props} style={[styles.footer, { gap }, style]} />;
 }
 
@@ -124,19 +114,19 @@ export type CardTitleProps = TextProps & {
 };
 
 export function CardTitle({
-  theme = "patient",
+  theme,
   tone = "default",
   style,
   ...props
 }: CardTitleProps) {
+  const themeColors = useMobileTheme(theme);
   return (
     <Text
       {...props}
       style={[
         styles.title,
-        tone === "brand"
-          ? { color: appThemeColors[theme].primaryText }
-          : undefined,
+        { color: themeColors.text },
+        tone === "brand" ? { color: themeColors.primaryText } : undefined,
         style,
       ]}
     />
@@ -146,7 +136,13 @@ export function CardTitle({
 export type CardDescriptionProps = TextProps;
 
 export function CardDescription({ style, ...props }: CardDescriptionProps) {
-  return <Text {...props} style={[styles.description, style]} />;
+  const theme = useMobileTheme();
+  return (
+    <Text
+      {...props}
+      style={[styles.description, { color: theme.textMuted }, style]}
+    />
+  );
 }
 
 export type CardSeparatorProps = ViewProps & {
@@ -170,32 +166,32 @@ export function CardSeparator({
 
 function getCardPalette(
   variant: CardVariant,
-  theme: AppTheme
+  theme: ReturnType<typeof useMobileTheme>
 ): ViewStyle {
   switch (variant) {
     case "outlined":
       return {
-        backgroundColor: colors.surface,
-        borderColor: colors.borderDefault,
+        backgroundColor: theme.surface,
+        borderColor: theme.border,
         borderWidth: 1,
         ...shadows.card,
       };
     case "soft":
       return {
-        backgroundColor: appThemeColors[theme].soft,
+        backgroundColor: theme.soft,
         borderColor: "transparent",
         borderWidth: 0,
       };
     case "plain":
       return {
-        backgroundColor: colors.surface,
+        backgroundColor: theme.surface,
         borderColor: "transparent",
         borderWidth: 0,
       };
     case "elevated":
     default:
       return {
-        backgroundColor: colors.surface,
+        backgroundColor: theme.surface,
         borderColor: "transparent",
         borderWidth: 0,
         ...shadows.card,
@@ -235,7 +231,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   description: {
-    color: "#71818F",
+    color: colors.ui.cardDescription,
     fontFamily: fontFamilies.regular,
     fontSize: 12,
     fontWeight: "400",
