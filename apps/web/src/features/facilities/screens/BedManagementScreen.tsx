@@ -46,13 +46,17 @@ export default function BedManagementScreen() {
             <Search className="size-4 text-[#94a3b8] shrink-0" />
             <input
               type="text"
+              aria-label="Search patient, doctor..."
               placeholder="Search patient, doctor..."
               className="bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none w-full"
             />
           </div>
 
           {/* Bell button */}
-          <button className="size-9 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-[#475569] hover:bg-slate-50 transition-colors shadow-xs cursor-pointer">
+          <button
+            aria-label="Notifications"
+            className="size-9 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-[#475569] hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
+          >
             <Bell className="size-4" />
           </button>
 
@@ -231,6 +235,7 @@ export default function BedManagementScreen() {
                     <td className="py-3.5 px-3 text-center">
                       <div className="inline-flex items-center border border-[#cbd5e1] rounded-md bg-white shadow-2xs overflow-hidden">
                         <button
+                          aria-label="Decrease available beds"
                           onClick={() => handleAdjustAvailable(dept.id, -1)}
                           disabled={dept.available <= 0}
                           className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-r border-[#cbd5e1] cursor-pointer"
@@ -241,6 +246,7 @@ export default function BedManagementScreen() {
                           {dept.available}
                         </span>
                         <button
+                          aria-label="Increase available beds"
                           onClick={() => handleAdjustAvailable(dept.id, 1)}
                           disabled={dept.available >= dept.total}
                           className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-l border-[#cbd5e1] cursor-pointer"

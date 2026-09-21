@@ -9,7 +9,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#22c55e]",
     total: 120,
     available: 32,
-    occupied: 84,
+    occupied: 88,
   },
   {
     id: "priv",
@@ -18,7 +18,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#3b82f6]",
     total: 90,
     available: 28,
-    occupied: 59,
+    occupied: 62,
   },
   {
     id: "semi",
@@ -27,7 +27,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#8b5cf6]",
     total: 60,
     available: 18,
-    occupied: 40,
+    occupied: 42,
   },
   {
     id: "icu-v",
@@ -36,7 +36,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#ef4444]",
     total: 50,
     available: 12,
-    occupied: 35,
+    occupied: 38,
   },
   {
     id: "icu-nv",
@@ -45,7 +45,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#f59e0b]",
     total: 45,
     available: 10,
-    occupied: 32,
+    occupied: 35,
   },
   {
     id: "emer",
@@ -54,7 +54,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#06b6d4]",
     total: 40,
     available: 14,
-    occupied: 24,
+    occupied: 26,
   },
   {
     id: "nicu",
@@ -63,7 +63,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#8b5cf6]",
     total: 35,
     available: 7,
-    occupied: 26,
+    occupied: 28,
   },
   {
     id: "picu",
@@ -72,7 +72,7 @@ export const initialDepts: DeptBedData[] = [
     barColor: "bg-[#8b5cf6]",
     total: 35,
     available: 7,
-    occupied: 26,
+    occupied: 28,
   },
 ];
 export const bedManagementDateLabel = "Nov 15, 2024";

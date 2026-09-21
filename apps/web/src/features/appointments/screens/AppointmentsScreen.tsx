@@ -38,6 +38,11 @@ export default function AppointmentsScreen() {
     defaultAppointmentPeriod,
   );
 
+  const displayedAppointments = React.useMemo(() => {
+    if (filterPeriod === "All") return appointmentsData;
+    return appointmentsData.filter((item) => item.period === filterPeriod);
+  }, [filterPeriod]);
+
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* TopBar (Figma 815:56) */}
@@ -57,6 +62,7 @@ export default function AppointmentsScreen() {
             <Search className="size-4 text-[#94a3b8] shrink-0" />
             <input
               type="text"
+              aria-label="Search patient, doctor..."
               placeholder="Search patient, doctor..."
               className="bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none w-full"
             />
@@ -183,7 +189,7 @@ export default function AppointmentsScreen() {
                 Recent Bookings
               </h2>
               <span className="bg-[#e6f4f5] text-[#07595d] text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
-                {appointmentsData.length} APPOINTMENTS VISIBLE
+                {displayedAppointments.length} APPOINTMENTS VISIBLE
               </span>
             </div>
             <p className="text-[13px] text-[#475569] mt-0.5">
@@ -236,7 +242,7 @@ export default function AppointmentsScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e8f0]">
-              {appointmentsData.map((row) => (
+              {displayedAppointments.map((row) => (
                 <tr
                   key={row.id}
                   className="hover:bg-slate-50/70 transition-colors"
@@ -341,7 +347,10 @@ export default function AppointmentsScreen() {
                           </button>
                         </>
                       )}
-                      <button className="p-1 hover:bg-slate-100 rounded text-[#94a3b8] hover:text-[#0f172a] cursor-pointer transition-colors">
+                      <button
+                        aria-label="More actions"
+                        className="p-1 hover:bg-slate-100 rounded text-[#94a3b8] hover:text-[#0f172a] cursor-pointer transition-colors"
+                      >
                         <MoreVertical className="size-4" />
                       </button>
                     </div>

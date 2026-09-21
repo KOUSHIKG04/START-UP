@@ -9,6 +9,7 @@ export interface AppointmentRecord {
   time: string;
   mode: "In-Person" | "Video Call";
   status: "Pending" | "Confirmed" | "Rejected" | "Cancelled";
+  period?: AppointmentPeriod;
 }
 
 export type AppointmentPeriod = "All" | "Today" | "Tomorrow" | "This Week";

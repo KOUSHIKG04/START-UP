@@ -43,7 +43,10 @@ export default function DoctorSchedulesScreen() {
 
         <div className="flex items-center gap-3">
           {/* Bell Button */}
-          <button className="size-9 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-[#475569] hover:bg-slate-50 transition-colors shadow-xs cursor-pointer">
+          <button
+            aria-label="Notifications"
+            className="size-9 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-[#475569] hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
+          >
             <Bell className="size-4" />
           </button>
 
@@ -149,19 +152,21 @@ export default function DoctorSchedulesScreen() {
           <div className="flex flex-wrap items-center gap-4">
             {/* Filter Pills */}
             <div className="flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-lg border border-[#e2e8f0]">
-              {scheduleTabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1 rounded-md text-[12px] font-semibold transition-colors cursor-pointer ${
-                    activeTab === tab
-                      ? "bg-[#0f172a] text-white shadow-xs"
-                      : "text-[#64748b] hover:text-[#0f172a]"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {scheduleTabs
+                .filter((tab) => tab === "Today")
+                .map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 py-1 rounded-md text-[12px] font-semibold transition-colors cursor-pointer ${
+                      activeTab === tab
+                        ? "bg-[#0f172a] text-white shadow-xs"
+                        : "text-[#64748b] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
             </div>
 
             {/* Legend */}

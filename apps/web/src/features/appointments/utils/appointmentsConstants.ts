@@ -17,6 +17,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "11:30 AM - 12:00 PM",
     mode: "In-Person",
     status: "Pending",
+    period: "Today",
   },
   {
     id: "2",
@@ -30,6 +31,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "01:15 PM - 01:45 PM",
     mode: "Video Call",
     status: "Confirmed",
+    period: "Today",
   },
   {
     id: "3",
@@ -43,6 +45,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "02:30 PM - 03:00 PM",
     mode: "In-Person",
     status: "Confirmed",
+    period: "Today",
   },
   {
     id: "4",
@@ -56,6 +59,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "04:00 PM - 04:30 PM",
     mode: "In-Person",
     status: "Rejected",
+    period: "Today",
   },
   {
     id: "5",
@@ -69,6 +73,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "09:30 AM - 10:00 AM",
     mode: "Video Call",
     status: "Pending",
+    period: "Tomorrow",
   },
   {
     id: "6",
@@ -82,6 +87,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "04:00 PM - 04:30 PM",
     mode: "In-Person",
     status: "Cancelled",
+    period: "Tomorrow",
   },
   {
     id: "7",
@@ -95,6 +101,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "11:30 AM - 12:00 PM",
     mode: "In-Person",
     status: "Confirmed",
+    period: "This Week",
   },
   {
     id: "8",
@@ -108,6 +115,7 @@ export const appointmentsData: AppointmentRecord[] = [
     time: "03:15 PM",
     mode: "Video Call",
     status: "Confirmed",
+    period: "This Week",
   },
 ];
 
@@ -125,7 +133,7 @@ export const appointmentsSummary = {
   cancelled: 4,
 } as const;
 export const appointmentsDateLabel = "Nov 15, 2026";
-export const bookingDateLabel = "Today, Nov 15, 2024";
+export const bookingDateLabel = `Today, ${appointmentsDateLabel}`;
 export const appointmentsPagination = {
   range: "1-8",
   total: 156,

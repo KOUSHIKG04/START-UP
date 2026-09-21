@@ -35,6 +35,7 @@ export interface DataTableProps<TData, TValue> {
   className?: string;
   // Controlled pagination
   pageCount?: number;
+  rowCount?: number;
   pagination?: PaginationState;
   onPaginationChange?: OnChangeFn<PaginationState>;
   manualPagination?: boolean;
@@ -57,6 +58,7 @@ export function DataTable<TData, TValue>({
   emptyMessage = "No results found.",
   className,
   pageCount,
+  rowCount,
   pagination,
   onPaginationChange,
   manualPagination = false,
@@ -72,16 +74,19 @@ export function DataTable<TData, TValue>({
     pageSize: 10,
   });
 
-  const activeSorting = sorting !== undefined ? sorting : internalSorting;
-  const activeSetSorting = onSortingChange !== undefined ? onSortingChange : setInternalSorting;
+  const isSortingControlled = sorting !== undefined && onSortingChange !== undefined;
+  const activeSorting = isSortingControlled ? sorting : internalSorting;
+  const activeSetSorting = isSortingControlled ? onSortingChange : setInternalSorting;
 
-  const activePagination = pagination !== undefined ? pagination : internalPagination;
-  const activeSetPagination = onPaginationChange !== undefined ? onPaginationChange : setInternalPagination;
+  const isPaginationControlled = pagination !== undefined && onPaginationChange !== undefined;
+  const activePagination = isPaginationControlled ? pagination : internalPagination;
+  const activeSetPagination = isPaginationControlled ? onPaginationChange : setInternalPagination;
 
   const table = useReactTable({
     data,
     columns,
     pageCount,
+    rowCount,
     state: {
       sorting: activeSorting,
       pagination: activePagination,
@@ -152,10 +157,22 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  role={onRowClick ? "button" : undefined}
                   onClick={() => onRowClick?.(row.original)}
+                  onKeyDown={
+                    onRowClick
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onRowClick(row.original);
+                          }
+                        }
+                      : undefined
+                  }
                   className={cn(
                     "hover:bg-slate-50/70 transition-colors border-[#e2e8f0]",
-                    onRowClick && "cursor-pointer",
+                    onRowClick && "cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#07595d]",
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -189,29 +206,28 @@ export function DataTable<TData, TValue>({
       {!hidePagination && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 py-1 text-[12px] text-[#64748b]">
           <div className="flex items-center gap-2">
-            <span>
-              Showing{" "}
-              <span className="font-semibold text-[#0f172a]">
-                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize +
-                  (table.getRowModel().rows.length > 0 ? 1 : 0)}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold text-[#0f172a]">
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                  manualPagination
-                    ? (pageCount || 1) * table.getState().pagination.pageSize
-                    : data.length,
-                )}
-              </span>{" "}
-              of{" "}
-              <span className="font-semibold text-[#0f172a]">
-                {manualPagination
-                  ? (pageCount || 1) * table.getState().pagination.pageSize
-                  : data.length}
-              </span>{" "}
-              entries
-            </span>
+            {(() => {
+              const totalEntries = manualPagination
+                ? (rowCount !== undefined
+                    ? rowCount
+                    : (pageCount || 1) * table.getState().pagination.pageSize)
+                : data.length;
+              const startEntry =
+                table.getState().pagination.pageIndex * table.getState().pagination.pageSize +
+                (table.getRowModel().rows.length > 0 ? 1 : 0);
+              const endEntry = Math.min(
+                (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                totalEntries,
+              );
+
+              return (
+                <span>
+                  Showing <span className="font-semibold text-[#0f172a]">{startEntry}</span> to{" "}
+                  <span className="font-semibold text-[#0f172a]">{endEntry}</span> of{" "}
+                  <span className="font-semibold text-[#0f172a]">{totalEntries}</span> entries
+                </span>
+              );
+            })()}
           </div>
 
           <div className="flex items-center gap-1.5">

@@ -39,6 +39,7 @@ export default function DoctorManagementScreen() {
             <Search className="size-4 text-[#94a3b8] shrink-0" />
             <input
               type="text"
+              aria-label="Search by doctor or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by doctor or ID..."
