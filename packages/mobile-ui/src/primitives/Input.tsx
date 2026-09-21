@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import {
   StyleSheet,
   Text,
@@ -28,21 +29,33 @@ export function Input({
   labelStyle,
   errorStyle,
   style,
-  placeholderTextColor = colors.patient.muted,
+  placeholderTextColor,
   accessibilityState,
+  accessibilityLabel = label,
   ...props
 }: InputProps) {
+  const theme = useMobileTheme();
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text style={[styles.label, labelStyle]}>{label}</Text> : null}
+      {label ? (
+        <Text style={[styles.label, { color: theme.text }, labelStyle]}>
+          {label}
+        </Text>
+      ) : null}
 
       <TextInput
         {...props}
+        accessibilityLabel={accessibilityLabel}
         accessibilityState={{ ...accessibilityState, disabled }}
         editable={!disabled && editable}
-        placeholderTextColor={placeholderTextColor}
+        placeholderTextColor={placeholderTextColor ?? theme.placeholder}
         style={[
           styles.input,
+          {
+            backgroundColor: theme.surface,
+            color: theme.text,
+            borderColor: theme.border,
+          },
           error ? styles.inputError : undefined,
           disabled ? styles.inputDisabled : undefined,
           style,

@@ -547,7 +547,11 @@ importers:
 
   packages/data-access: {}
 
-  packages/design-tokens: {}
+  packages/design-tokens:
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
 
   packages/mobile-ui:
     dependencies:

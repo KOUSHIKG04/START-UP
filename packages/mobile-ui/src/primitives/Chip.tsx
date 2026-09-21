@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import {
   Pressable,
   StyleSheet,
@@ -8,10 +9,7 @@ import {
   type TextStyle,
 } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import {
-  appThemeColors,
-  type AppTheme,
-} from "../utils/appTheme";
+import { type AppTheme } from "../utils/appTheme";
 
 export type ChipVariant = "default" | "radio";
 
@@ -33,7 +31,7 @@ export function Chip({
   label,
   variant = "default",
   selected = false,
-  theme = "patient",
+  theme,
   radioPosition = "left",
   disabled = false,
   style,
@@ -44,7 +42,7 @@ export function Chip({
   onPress,
   ...props
 }: ChipProps) {
-  const themeColors = appThemeColors[theme];
+  const themeColors = useMobileTheme(theme);
   const isRadio = variant === "radio";
 
   const renderRadioIndicator = () => (
@@ -72,19 +70,31 @@ export function Chip({
       {...props}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={
-        accessibilityRole ?? (isRadio ? "radio" : onPress ? "button" : undefined)
+        accessibilityRole ??
+        (isRadio ? "radio" : onPress ? "button" : undefined)
       }
       accessibilityState={{
         ...accessibilityState,
         disabled,
-        selected: selected ?? accessibilityState?.selected,
+        ...(isRadio ? { checked: selected } : { selected }),
       }}
       disabled={disabled}
       onPress={onPress}
       style={(state) => [
         styles.chip,
+        {
+          backgroundColor: themeColors.surface,
+          borderColor: themeColors.border,
+        },
         isRadio && styles.radioChip,
-        isRadio && (selected ? styles.radioChipSelected : styles.radioChipUnselected),
+        isRadio &&
+          (selected ? styles.radioChipSelected : styles.radioChipUnselected),
+        isRadio && {
+          backgroundColor: selected
+            ? themeColors.primaryText
+            : themeColors.surface,
+          borderColor: selected ? themeColors.primaryText : themeColors.border,
+        },
         state.pressed && onPress && !disabled ? styles.pressed : undefined,
         disabled ? styles.disabled : undefined,
         typeof style === "function" ? style(state) : style,
@@ -95,7 +105,17 @@ export function Chip({
         numberOfLines={1}
         style={[
           styles.label,
-          isRadio && (selected ? styles.radioLabelSelected : styles.radioLabelUnselected),
+          isRadio &&
+            (selected
+              ? styles.radioLabelSelected
+              : styles.radioLabelUnselected),
+          {
+            color: isRadio
+              ? selected
+                ? themeColors.onPrimary
+                : themeColors.primaryText
+              : themeColors.text,
+          },
           labelStyle,
         ]}
       >

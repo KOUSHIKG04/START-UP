@@ -4,7 +4,11 @@ import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { albertSansFonts, SafeAreaProvider } from "@startup/mobile-ui";
+import {
+  albertSansFonts,
+  SafeAreaProvider,
+  MobileThemeProvider,
+} from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 
 void SplashScreen.preventAutoHideAsync();
@@ -16,23 +20,25 @@ export default function RootLayout() {
   }, [loaded, error]);
   if (!loaded && !error) return null;
   return (
-    <SafeAreaProvider>
-      <QueryProvider>
-        <View style={styles.root}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "none",
-              contentStyle: styles.scene,
-            }}
-          >
-            <Stack.Screen name="(app)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
-          <StatusBar style="dark" />
-        </View>
-      </QueryProvider>
-    </SafeAreaProvider>
+    <MobileThemeProvider theme="doctor">
+      <SafeAreaProvider>
+        <QueryProvider>
+          <View style={styles.root}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "none",
+                contentStyle: styles.scene,
+              }}
+            >
+              <Stack.Screen name="(app)" />
+              <Stack.Screen name="(auth)" />
+            </Stack>
+            <StatusBar style="dark" />
+          </View>
+        </QueryProvider>
+      </SafeAreaProvider>
+    </MobileThemeProvider>
   );
 }
 const styles = StyleSheet.create({

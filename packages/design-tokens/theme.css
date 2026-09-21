@@ -1,48 +1,46 @@
+/* Generated from src tokens by pnpm generate. Do not edit directly. */
 @theme static {
-  /* Patient App */
   --color-patient-primary: #008877;
   --color-patient-primary-dark: #087F78;
   --color-patient-accent: #0A9E96;
   --color-patient-surface: #E6F5F4;
+  --color-patient-surface-border: #C8E8E7;
   --color-patient-text: #0C2434;
-  --color-patient-bg: #F9FAFB;
-
-  /* SOS Flow (inside Patient App) */
+  --color-patient-text-secondary: #374151;
+  --color-patient-muted: #9CA3AF;
+  --color-patient-bg: #FFFFFF;
   --color-sos-primary: #EF3B43;
   --color-sos-dark: #C0392B;
   --color-sos-surface: #FDF2F2;
   --color-sos-header: #3A0508;
   --color-sos-safe: #07595D;
-
-  /* Doctor App */
+  --color-sos-background: #EEF4F5;
   --color-doctor-primary: #008877;
   --color-doctor-dark: #097F78;
   --color-doctor-accent: #008F83;
   --color-doctor-header: #0B4145;
   --color-doctor-chart: #D9F2EF;
-
-  /* Driver App */
+  --color-doctor-surface: #E6F5F4;
+  --color-doctor-text: #0C2434;
+  --color-doctor-border: #E0E5EB;
   --color-driver-primary: #087F8C;
   --color-driver-dark: #173B4A;
   --color-driver-surface: #EAF8F7;
   --color-driver-ready: #36B37E;
-
-  /* Admin Web App */
+  --color-driver-surface-tint: #E6F5F4;
+  --color-driver-text-secondary: #71818F;
+  --color-driver-muted: #9CA3AF;
+  --color-driver-text: #0C2434;
   --color-admin-primary: #008877;
   --color-admin-primary-dark: #087F78;
   --color-admin-accent: #0A9E96;
   --color-admin-surface: #E6F5F4;
   --color-admin-text: #0C2434;
   --color-admin-text-secondary: #374151;
+  --color-admin-border: #E0E5EB;
+  --color-admin-bg: #F9FAFB;
   --color-admin-card: #FFFFFF;
   --color-admin-on-primary: #FFFFFF;
-  --color-admin-bg: #F9FAFB;
-  --color-admin-border: #E0E5EB;
-
-  /* Banner Gradients (0% #0A4A47 -> 100% #087F78) */
-  --background-image-gradient-patient: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
-  --background-image-gradient-admin: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
-  /* Web chart palette and dark-mode colors. */
   --color-admin-chart-1: oklch(0.87 0 0);
   --color-admin-chart-2: oklch(0.556 0 0);
   --color-admin-chart-3: oklch(0.439 0 0);
@@ -79,4 +77,7 @@
   --color-admin-dark-sidebar-accent-foreground: oklch(0.985 0 0);
   --color-admin-dark-sidebar-border: oklch(1 0 0 / 10%);
   --color-admin-dark-sidebar-ring: oklch(0.556 0 0);
+  --background-image-gradient-patient: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
+  --background-image-gradient-admin: linear-gradient(90deg, #0A4A47 0%, #087F78 100%);
+  --background-image-gradient-sos: linear-gradient(90deg, #3A0508 0%, #C0392B 100%);
 }

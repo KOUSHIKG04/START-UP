@@ -21,7 +21,7 @@ export type FadedScrollViewProps = ScrollViewProps & {
   ref?: Ref<ScrollView>;
 };
 
-export const DEFAULT_FADED_EDGE_COLOR = "#E6F7F6";
+export const DEFAULT_FADED_EDGE_COLOR = colors.ui.fade;
 
 export function FadedScrollView({
   containerStyle,
@@ -101,7 +101,10 @@ export function FadedScrollView({
         onLayout={handleLayout}
         onScroll={handleScroll}
         scrollEventThrottle={scrollEventThrottle}
-        style={[horizontal ? styles.horizontalScrollView : styles.scrollView, style]}
+        style={[
+          horizontal ? styles.horizontalScrollView : styles.scrollView,
+          style,
+        ]}
       />
       {horizontal ? (
         <>
@@ -130,10 +133,7 @@ export function FadedScrollView({
             <LinearGradient
               colors={[edgeColor, transparentEdge]}
               pointerEvents="none"
-              style={[
-                styles.topEdge,
-                { height: edgeSize, top: topEdgeOffset },
-              ]}
+              style={[styles.topEdge, { height: edgeSize, top: topEdgeOffset }]}
             />
           ) : null}
           {showBottomEdge ? (

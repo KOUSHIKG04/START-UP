@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -85,7 +86,7 @@ export function BottomNavBar({
       pointerEvents="box-none"
     >
       <LinearGradient
-        colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.96)"]}
+        colors={[colors.ui.navFadeStart, colors.ui.navFadeEnd]}
         pointerEvents="none"
         style={styles.navFade}
       />
@@ -103,7 +104,7 @@ export function BottomNavBar({
               <Path
                 d={pathData}
                 fill={colors.white}
-                stroke="#E2E8F0"
+                stroke={colors.ui.navBorder}
                 strokeWidth={1.5}
               />
             </Svg>
@@ -174,18 +175,34 @@ type TabButtonProps = {
 
 function TabButton({ item, isActive, onPress }: TabButtonProps) {
   const Icon = item.icon;
+  const theme = useMobileTheme();
 
   return (
     <TouchableOpacity
       style={styles.tabButton}
       activeOpacity={0.7}
       onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={
+        item.badge !== undefined
+          ? `${item.label}, ${item.badge} ${String(item.badge) === "1" ? "notification" : "notifications"}`
+          : item.label
+      }
     >
-      <View style={[styles.iconWrapper, isActive && styles.activeIconWrapper]}>
+      <View
+        style={[
+          styles.iconWrapper,
+          isActive && [
+            styles.activeIconWrapper,
+            { backgroundColor: theme.soft },
+          ],
+        ]}
+      >
         {Icon && (
           <Icon
             size={20}
-            color={isActive ? colors.brand : styles.inactiveText.color}
+            color={isActive ? theme.primary : styles.inactiveText.color}
             strokeWidth={isActive ? 2.3 : 1.8}
           />
         )}
@@ -201,7 +218,9 @@ function TabButton({ item, isActive, onPress }: TabButtonProps) {
         ellipsizeMode="tail"
         style={[
           styles.label,
-          isActive ? styles.activeLabel : styles.inactiveText,
+          isActive
+            ? [styles.activeLabel, { color: theme.primary }]
+            : styles.inactiveText,
         ]}
       >
         {item.label}
@@ -239,7 +258,7 @@ const styles = StyleSheet.create({
   plainBar: {
     backgroundColor: colors.white,
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    borderColor: colors.ui.navBorder,
     borderRadius: 32,
     ...BOTTOM_NAV_BAR_SHADOW,
   },
@@ -293,7 +312,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   inactiveText: {
-    color: "#8E9BAE",
+    color: colors.ui.navMuted,
     fontFamily: fontFamilies.medium,
     fontWeight: "500",
   },

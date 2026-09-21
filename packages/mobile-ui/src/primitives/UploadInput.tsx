@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import {
   Pressable,
   StyleSheet,
@@ -38,6 +39,7 @@ export function UploadInput({
   accessibilityState,
   ...props
 }: UploadInputProps) {
+  const theme = useMobileTheme();
   return (
     <View style={containerStyle}>
       {label ? <Text style={[styles.label, labelStyle]}>{label}</Text> : null}
@@ -50,16 +52,21 @@ export function UploadInput({
         disabled={disabled}
         style={(state) => [
           styles.input,
+          { backgroundColor: theme.surface, borderColor: theme.border },
           error ? styles.inputError : undefined,
           disabled ? styles.disabled : undefined,
           state.pressed && !disabled ? styles.pressed : undefined,
           typeof style === "function" ? style(state) : style,
         ]}
       >
-        <Upload color={colors.patient.primary} size={20} strokeWidth={2} />
+        <Upload color={theme.primary} size={20} strokeWidth={2} />
         <Text
           numberOfLines={1}
-          style={[styles.value, !value ? styles.placeholder : undefined]}
+          style={[
+            styles.value,
+            { color: theme.text },
+            !value ? styles.placeholder : undefined,
+          ]}
         >
           {value || placeholder}
         </Text>
@@ -105,7 +112,7 @@ const styles = StyleSheet.create({
     color: colors.patient.muted,
   },
   disabled: {
-    backgroundColor: "#EEF4F5",
+    backgroundColor: colors.disabledBackground,
     opacity: 0.7,
   },
   pressed: {

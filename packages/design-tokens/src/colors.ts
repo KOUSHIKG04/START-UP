@@ -1,4 +1,23 @@
 export const colors = {
+  ui: {
+    shadow: "#000",
+    separator: "#E5E7EB",
+    sosGlowLight: "#FFFFFF73",
+    sosGlow: "#EF3B4340",
+    sosSurface: "#FFEAEB",
+    sosBorder: "#FFA4AC",
+    sosInnerBorder: "#D62D35",
+    navBorder: "#E2E8F0",
+    navMuted: "#8E9BAE",
+    cardDescription: "#71818F",
+    overlay: "rgba(12, 36, 52, 0.12)",
+    menuBorder: "rgba(0, 0, 0, 0.08)",
+    menuShadow: "#055B56",
+    pressedOverlay: "rgba(0, 0, 0, 0.03)",
+    fade: "#E6F7F6",
+    navFadeStart: "rgba(255,255,255,0)",
+    navFadeEnd: "rgba(255,255,255,0.96)",
+  },
   // Patient Mobile App
   patient: {
     primary: "#008877",

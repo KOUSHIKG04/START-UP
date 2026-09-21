@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useRef, useState, type ReactNode } from "react";
 import {
   Modal,
@@ -13,7 +14,7 @@ import {
 } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { appThemeColors, type AppTheme } from "../utils/appTheme";
+import { type AppTheme } from "../utils/appTheme";
 
 export type DropdownOption = {
   label: string;
@@ -63,7 +64,7 @@ export function Dropdown({
   placeholder = "Select an option",
   triggerLabel,
   prefix,
-  theme = "patient",
+  theme,
   disabled = false,
   error,
   maxVisibleOptions = 5,
@@ -82,7 +83,7 @@ export function Dropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [triggerPosition, setTriggerPosition] = useState<TriggerPosition>();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const themeColors = appThemeColors[theme];
+  const themeColors = useMobileTheme(theme);
   const selectedOption = options.find((option) => option.value === value);
   const menuHeight =
     Math.min(options.length, maxVisibleOptions) * OPTION_HEIGHT + 12;
@@ -143,6 +144,10 @@ export function Dropdown({
         onPress={openMenu}
         style={({ pressed }) => [
           styles.trigger,
+          {
+            backgroundColor: themeColors.surface,
+            borderColor: themeColors.border,
+          },
           isOpen ? { borderColor: themeColors.primary } : undefined,
           error ? styles.triggerError : undefined,
           disabled ? styles.triggerDisabled : undefined,
@@ -155,6 +160,7 @@ export function Dropdown({
           numberOfLines={1}
           style={[
             styles.value,
+            { color: themeColors.text },
             !selectedOption && !triggerLabel ? styles.placeholder : undefined,
             disabled ? styles.disabledText : undefined,
             valueStyle,
@@ -199,6 +205,7 @@ export function Dropdown({
             <View
               style={[
                 styles.menu,
+                { backgroundColor: themeColors.surface },
                 {
                   top: menuTop,
                   left: menuLeft,
@@ -239,6 +246,7 @@ export function Dropdown({
                         numberOfLines={1}
                         style={[
                           styles.optionLabel,
+                          { color: themeColors.text },
                           isSelected && [
                             styles.optionLabelSelected,
                             { color: themeColors.primaryText },
@@ -337,16 +345,16 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: "rgba(12, 36, 52, 0.12)",
+    backgroundColor: colors.ui.overlay,
   },
   menu: {
     position: "absolute",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: colors.ui.menuBorder,
     borderRadius: 14,
     backgroundColor: colors.white,
-    shadowColor: "#055B56",
+    shadowColor: colors.ui.menuShadow,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
@@ -369,7 +377,7 @@ const styles = StyleSheet.create({
   },
   optionPressed: {
     opacity: 0.7,
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    backgroundColor: colors.ui.pressedOverlay,
   },
   optionDisabled: {
     opacity: 0.45,

@@ -1,3 +1,4 @@
+import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { type PropsWithChildren } from "react";
 import { StyleSheet, type ViewProps } from "react-native";
 import {
@@ -23,13 +24,14 @@ export function Screen({
   className,
   ...props
 }: ScreenProps) {
+  const theme = useMobileTheme();
   return (
     <SafeAreaProvider>
       <SafeAreaView
         edges={edges}
         {...props}
         {...(className ? { className: cn("flex-1", className) } : {})}
-        style={[styles.container, style]}
+        style={[styles.container, { backgroundColor: theme.background }, style]}
       >
         {children}
       </SafeAreaView>
