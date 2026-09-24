@@ -1,0 +1,7185 @@
+{
+  "source": "Drizzle working tree",
+  "tables": [
+    {
+      "table": "ambulance_assignment",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "offer_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "shift_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "driver_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "vehicle_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "accepted_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "released_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "release_reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "driver_name_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "vehicle_registration_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "operator_name_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "offer_id"
+          ],
+          "target": "dispatch_offer",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "shift_id"
+          ],
+          "target": "driver_shift",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "driver_id"
+          ],
+          "target": "driver",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "vehicle_id"
+          ],
+          "target": "vehicle",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "shift_id",
+            "driver_id",
+            "vehicle_id"
+          ],
+          "target": "driver_shift",
+          "targetColumns": [
+            "id",
+            "driver_id",
+            "vehicle_id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "ambulance_booking",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "requested_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "guest_session_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "booking_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "normal",
+            "sos"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "awaiting_location",
+            "searching",
+            "assigned",
+            "fulfilled",
+            "cancelled",
+            "unfulfilled"
+          ]
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "pickup_position",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "pickup_address",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "destination_facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "destination_position",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "destination_address",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "patient_name_snapshot",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "contact_phone_snapshot",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "cancel_reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "requested_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "guest_session_id"
+          ],
+          "target": "guest_emergency_session",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "destination_facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "ambulance_review",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "trip_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "submitted_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "driver_rating",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "service_rating",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "comment",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "moderation_state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "published",
+            "hidden"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "trip_id"
+          ],
+          "target": "trip",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "submitted_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "appointment",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "window_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "practice_service_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "patient_online",
+            "reception_walk_in",
+            "staff_booking",
+            "offline_sync"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "confirmed",
+            "in_consultation",
+            "completed",
+            "rejected",
+            "cancelled",
+            "no_show"
+          ]
+        },
+        {
+          "name": "requested_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "capacity_released_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "request_expires_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "decision_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "decision_reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "replaces_appointment_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "fee_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "currency",
+          "type": "char(3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_name_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_name_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_address_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "service_name_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_registration_snapshot",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "session_id"
+          ],
+          "target": "session",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "window_id"
+          ],
+          "target": "appointment_window",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "practice_service_id"
+          ],
+          "target": "practice_service",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "requested_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "decision_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "replaces_appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "window_id",
+            "session_id"
+          ],
+          "target": "appointment_window",
+          "targetColumns": [
+            "id",
+            "session_id"
+          ]
+        },
+        {
+          "columns": [
+            "session_id",
+            "practice_service_id"
+          ],
+          "target": "session_service",
+          "targetColumns": [
+            "session_id",
+            "practice_service_id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "appointment_checkin",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "appointment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "token_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "checked_in_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "method",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "qr",
+            "manual"
+          ]
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "token_id"
+          ],
+          "target": "checkin_token",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "checked_in_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "appointment_window",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ends_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "hard_capacity",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "open",
+            "blocked"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "session_id"
+          ],
+          "target": "session",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "audit_log",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "guest_session_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "actor_kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "identity",
+            "guest",
+            "system"
+          ]
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "resource_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "resource_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "organization_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "outcome",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "allowed",
+            "denied",
+            "failed"
+          ]
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "guest_session_id"
+          ],
+          "target": "guest_emergency_session",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "organization_id"
+          ],
+          "target": "organization",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "booking_capability",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "capability_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "capability_id"
+          ],
+          "target": "capability",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "booking_destination_change",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "position",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "changed_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "changed_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "capability",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "checkin_token",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "appointment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "token_hash",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consumed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "clinical_access_grant",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "granted_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "granted_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "clinical_attachment",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "uploaded_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "storage_key",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "mime_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sha256",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "scan_status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "clean",
+            "quarantined"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "uploaded_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "clinical_note",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "author_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "assessment",
+            "advice",
+            "addendum",
+            "correction"
+          ]
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "signed_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "author_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "supersedes_id"
+          ],
+          "target": "clinical_note",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "consultation",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "appointment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "active",
+            "signed",
+            "amended",
+            "void"
+          ]
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "signed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "consultation_diagnosis",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "coding_system",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "is_primary",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recorded_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "recorded_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "supersedes_id"
+          ],
+          "target": "consultation_diagnosis",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "dispatch_offer",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "round_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "shift_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "accepted",
+            "rejected",
+            "expired",
+            "withdrawn"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "responded_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "distance_meters",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "round_id"
+          ],
+          "target": "dispatch_round",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "shift_id"
+          ],
+          "target": "driver_shift",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "dispatch_round",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "round_number",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "radius_meters",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "open",
+            "exhausted",
+            "matched",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "full_name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "registration_authority",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "registration_number",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "practice_started_on",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "credential_status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "verified",
+            "suspended"
+          ]
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor_booking_day",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_date",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "auto_confirm_limit",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor_facility",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "room_label",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor_language",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "language_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor_review",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "appointment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "rating",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "comment",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "submitted_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "moderation_state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "published",
+            "hidden"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "submitted_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "doctor_specialty",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "specialty_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "specialty_id"
+          ],
+          "target": "specialty",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "domain_event",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "aggregate_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "aggregate_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "aggregate_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "guest_session_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "payload",
+          "type": "jsonb",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "guest_session_id"
+          ],
+          "target": "guest_emergency_session",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "driver",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "organization_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "full_name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "license_number",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "license_expires_on",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verification_status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "verified",
+            "suspended"
+          ]
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "organization_id"
+          ],
+          "target": "organization",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "driver_location_latest",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "driver_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "shift_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "stream_epoch",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sequence",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "position",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "accuracy_meters",
+          "type": "numeric(8, 2)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "device_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "driver_id"
+          ],
+          "target": "driver",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "shift_id"
+          ],
+          "target": "driver_shift",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "driver_shift",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "driver_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "vehicle_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "desired_availability",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "online",
+            "offline"
+          ]
+        },
+        {
+          "name": "service_area",
+          "type": "extensions.geography(MultiPolygon,4326)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "crew_attestation",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "crew_verified_until",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "driver_id"
+          ],
+          "target": "driver",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "vehicle_id"
+          ],
+          "target": "vehicle",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "emergency_case",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reported_summary",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "opened_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "emergency_start_override",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "trip_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "approved_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consumed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "trip_id"
+          ],
+          "target": "trip",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "approved_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "event_delivery",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consumer",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "leased",
+            "done",
+            "dead"
+          ]
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "available_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "lease_until",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "last_error_code",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "event_id"
+          ],
+          "target": "domain_event",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "facility",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "organization_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "hospital",
+            "clinic"
+          ]
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "location",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "organization_id"
+          ],
+          "target": "organization",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "fare_quote",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "estimate",
+            "final"
+          ]
+        },
+        {
+          "name": "currency",
+          "type": "char(3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "base_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "distance_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "waiting_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "other_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "discount_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "tax_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "total_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "pricing_policy_version",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "distance_meters",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "accepted_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "accepted_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "followup_recommendation",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recommended_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recommended_date",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "active",
+            "withdrawn",
+            "fulfilled"
+          ]
+        },
+        {
+          "name": "booked_appointment_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "recommended_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "booked_appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "guest_emergency_session",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "token_hash",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verified_contact",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "claimed_identity_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "claimed_identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "idempotency_record",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "principal_scope",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "operation",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "key",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "request_hash",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "resource_type",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "resource_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "result_code",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "identity",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "issuer",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "subject",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "display_name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verified_phone",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "disabled_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "medication_phase",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "prescription_item_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "phase_number",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "dose_quantity",
+          "type": "numeric(10, 3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "dose_unit",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "starts_on",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ends_on",
+          "type": "date",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "frequency_kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "daily_times",
+            "interval",
+            "as_needed"
+          ]
+        },
+        {
+          "name": "interval_minutes",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "anchor_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "max_doses_per_day",
+          "type": "smallint",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "prescription_item_id"
+          ],
+          "target": "prescription_item",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "medication_timing",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "phase_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sequence",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_time",
+          "type": "time",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "meal_anchor",
+          "type": "text",
+          "notNull": false,
+          "enumValues": [
+            "breakfast",
+            "lunch",
+            "dinner",
+            "bedtime"
+          ]
+        },
+        {
+          "name": "meal_relation",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "before",
+            "with",
+            "after",
+            "independent"
+          ]
+        },
+        {
+          "name": "offset_minutes",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "phase_id"
+          ],
+          "target": "medication_phase",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "member_doctor_scope",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "member_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "member_id"
+          ],
+          "target": "organization_member",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "doctor_facility_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "notification_delivery",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "intent_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "endpoint_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "leased",
+            "sent",
+            "delivered",
+            "failed",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "next_attempt_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "lease_until",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "provider_message_id",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "last_error_code",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "intent_id"
+          ],
+          "target": "notification_intent",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "endpoint_id"
+          ],
+          "target": "notification_endpoint",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "notification_endpoint",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "push",
+            "sms",
+            "email",
+            "in_app"
+          ]
+        },
+        {
+          "name": "address_ciphertext",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "address_digest",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "notification_intent",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recipient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "occurrence_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "template_key",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "dedup_key",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "safe_parameters",
+          "type": "jsonb",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "recipient_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "event_id"
+          ],
+          "target": "domain_event",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "occurrence_id"
+          ],
+          "target": "reminder_occurrence",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "notification_preference",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "push",
+            "sms",
+            "email",
+            "in_app"
+          ]
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "appointments",
+            "medication",
+            "followup",
+            "trips",
+            "marketing"
+          ]
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "quiet_start",
+          "type": "time",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "quiet_end",
+          "type": "time",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "organization",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "care_provider",
+            "ambulance_operator",
+            "mixed"
+          ]
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "organization_member",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "organization_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "owner",
+            "receptionist",
+            "facility_admin",
+            "dispatcher",
+            "organization_admin"
+          ]
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "organization_id"
+          ],
+          "target": "organization",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "patient",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "full_name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "birth_date",
+          "type": "date",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "sex_at_birth",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "contact_phone",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "patient_access",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "relationship",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "self",
+            "guardian",
+            "delegate"
+          ]
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "patient_ambulance_pin",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verifier",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "pepper_key_id",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "credential_version",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "failed_attempts",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "locked_until",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "last_changed_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "patient_contact",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "phone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "relationship",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sharing_consent_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "patient_routine",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "anchor",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "breakfast",
+            "lunch",
+            "dinner",
+            "bedtime"
+          ]
+        },
+        {
+          "name": "local_time",
+          "type": "time",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "payment",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "fare_quote_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "method",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "cash",
+            "external_direct",
+            "gateway"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "reported",
+            "confirmed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "amount_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "currency",
+          "type": "char(3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "provider_payment_id",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "reported_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "confirmed_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "fare_quote_id"
+          ],
+          "target": "fare_quote",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "reported_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "confirmed_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "pin_attempt",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "trip_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "driver_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "credential_version",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "outcome",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "success",
+            "invalid",
+            "throttled",
+            "stale",
+            "forbidden"
+          ]
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "trip_id"
+          ],
+          "target": "trip",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "driver_id"
+          ],
+          "target": "driver",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "platform_feedback",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "identity_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "app",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "patient",
+            "doctor",
+            "admin",
+            "driver"
+          ]
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "new",
+            "triaged",
+            "closed"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "identity_id"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "practice_service",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "fee_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "currency",
+          "type": "char(3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "duration_minutes",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "room_label",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_facility_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "prescription",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "public_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "prescription_item",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "revision_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "line_number",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "medicine_name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "medicine_code_system",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "medicine_code",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "strength",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "form",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "route",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "instructions",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "revision_id"
+          ],
+          "target": "prescription_revision",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "prescription_revision",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "prescription_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "revision_number",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "signed_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "signed_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "issue",
+            "replace",
+            "discontinue"
+          ]
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "prescription_id"
+          ],
+          "target": "prescription",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "supersedes_id"
+          ],
+          "target": "prescription_revision",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "signed_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "provider_event",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "event_id",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "payment_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "payload_digest",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "safe_payload",
+          "type": "jsonb",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "payment_id"
+          ],
+          "target": "payment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "queue_entry",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "queue_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "appointment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ticket_number",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "awaiting_arrival",
+            "waiting",
+            "called",
+            "in_service",
+            "held",
+            "completed",
+            "cancelled",
+            "no_show"
+          ]
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "order_key",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "called_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "hold_reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "queue_id"
+          ],
+          "target": "session_queue",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "appointment_id"
+          ],
+          "target": "appointment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "refund",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "payment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "amount_minor",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "confirmed",
+            "failed"
+          ]
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "provider_refund_id",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "requested_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "payment_id"
+          ],
+          "target": "payment",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "requested_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "reminder_occurrence",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "schedule_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "due_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_occurrence_key",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "pending",
+            "emitted",
+            "cancelled",
+            "expired"
+          ]
+        },
+        {
+          "name": "emitted_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "schedule_id"
+          ],
+          "target": "reminder_schedule",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "reminder_schedule",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "patient_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "phase_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "timing_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "followup_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "resolved_local_time",
+          "type": "time",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "next_due_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "active",
+            "paused",
+            "superseded",
+            "completed"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "patient_id"
+          ],
+          "target": "patient",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "phase_id"
+          ],
+          "target": "medication_phase",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "timing_id"
+          ],
+          "target": "medication_timing",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "followup_id"
+          ],
+          "target": "followup_recommendation",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "schedule_break",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "schedule_rule_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_start",
+          "type": "time",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_end",
+          "type": "time",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "schedule_rule_id"
+          ],
+          "target": "schedule_rule",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "schedule_exception",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ends_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "active",
+            "revoked"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "doctor_facility_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "schedule_rule",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "family_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "effective_until",
+          "type": "date",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "iso_weekdays",
+          "type": "smallint[]",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_start",
+          "type": "time",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "local_end",
+          "type": "time",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "window_minutes",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "window_capacity",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "session_capacity",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "auto_confirm_limit",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "draft",
+            "published",
+            "retired"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_facility_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "session",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_facility_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "doctor_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_day_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "schedule_rule_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "ends_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "hard_capacity",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "auto_confirm_limit",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "room_label",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "published",
+            "open",
+            "closed",
+            "cancelled"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "doctor_facility_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "doctor_id"
+          ],
+          "target": "doctor",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "booking_day_id"
+          ],
+          "target": "doctor_booking_day",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "schedule_rule_id"
+          ],
+          "target": "schedule_rule",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "doctor_facility_id",
+            "doctor_id"
+          ],
+          "target": "doctor_facility",
+          "targetColumns": [
+            "id",
+            "doctor_id"
+          ]
+        },
+        {
+          "columns": [
+            "booking_day_id",
+            "doctor_id"
+          ],
+          "target": "doctor_booking_day",
+          "targetColumns": [
+            "id",
+            "doctor_id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "session_queue",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "next_ticket",
+          "type": "integer",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "queue_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "session_id"
+          ],
+          "target": "session",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "session_service",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "practice_service_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "session_id"
+          ],
+          "target": "session",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "practice_service_id"
+          ],
+          "target": "practice_service",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "specialty",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "symptom",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "table": "symptom_specialty",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "symptom_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "specialty_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "rank",
+          "type": "smallint",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "symptom_id"
+          ],
+          "target": "symptom",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "specialty_id"
+          ],
+          "target": "specialty",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "tracking_share",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "trip_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "token_hash",
+          "type": "bytea",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "guest_session_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "contact_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "trip_id"
+          ],
+          "target": "trip",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "created_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "guest_session_id"
+          ],
+          "target": "guest_emergency_session",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "contact_id"
+          ],
+          "target": "patient_contact",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "triage_observation",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "emergency_case_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recorded_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "observed_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "severity",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "assessment",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "suggested_facility_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "emergency_case_id"
+          ],
+          "target": "emergency_case",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "recorded_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "suggested_facility_id"
+          ],
+          "target": "facility",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "trip",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "assignment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "heading_to_pickup",
+            "arrived_at_pickup",
+            "in_progress",
+            "arrived_at_destination",
+            "completed",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "arrived_pickup_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "arrived_destination_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "start_authorization",
+          "type": "text",
+          "notNull": false,
+          "enumValues": [
+            "patient_pin",
+            "emergency_override"
+          ]
+        },
+        {
+          "name": "pin_credential_version",
+          "type": "integer",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "distance_meters",
+          "type": "bigint",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "booking_id"
+          ],
+          "target": "ambulance_booking",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assignment_id"
+          ],
+          "target": "ambulance_assignment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "trip_location",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "trip_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "assignment_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "stream_epoch",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sequence",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "device_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "position",
+          "type": "extensions.geography(Point,4326)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "accuracy_meters",
+          "type": "numeric(8, 2)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "sample_reason",
+          "type": "text",
+          "notNull": true,
+          "enumValues": [
+            "periodic",
+            "pickup",
+            "start",
+            "destination",
+            "complete",
+            "deviation"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "trip_id"
+          ],
+          "target": "trip",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assignment_id"
+          ],
+          "target": "ambulance_assignment",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "vehicle",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "organization_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "registration_number",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "display_label",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "inspection_expires_on",
+          "type": "date",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "organization_id"
+          ],
+          "target": "organization",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "vehicle_capability",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "row_version",
+          "type": "bigint",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "vehicle_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "capability_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "vehicle_id"
+          ],
+          "target": "vehicle",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "capability_id"
+          ],
+          "target": "capability",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "table": "vital_observation",
+      "schema": "clinzo",
+      "rls": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "consultation_id",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "value_numeric",
+          "type": "numeric(12, 3)",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "unit_code",
+          "type": "text",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "measured_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "recorded_by",
+          "type": "uuid",
+          "notNull": true,
+          "enumValues": null
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "notNull": false,
+          "enumValues": null
+        },
+        {
+          "name": "void_reason",
+          "type": "text",
+          "notNull": false,
+          "enumValues": null
+        }
+      ],
+      "foreignKeys": [
+        {
+          "columns": [
+            "consultation_id"
+          ],
+          "target": "consultation",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "recorded_by"
+          ],
+          "target": "identity",
+          "targetColumns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "supersedes_id"
+          ],
+          "target": "vital_observation",
+          "targetColumns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ]
+}

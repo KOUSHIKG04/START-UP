@@ -5,6 +5,7 @@ export {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 export * from "./components";
+export { PhoneOtpForm } from "./components/PhoneOtpForm";
 export { Screen, type ScreenProps } from "./layout/Screen";
 export {
   Button,

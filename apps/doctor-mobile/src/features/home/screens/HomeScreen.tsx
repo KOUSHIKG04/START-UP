@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell, MapPin, ArrowRight } from "lucide-react-native";
 import { router } from "expo-router";
-import { FadedScrollView } from "@startup/mobile-ui";
+import { Button, FadedScrollView } from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
 import { appointments } from "../../../data/demo";
 import { PatientCard } from "../../patients/components/PatientCard";
@@ -52,6 +52,8 @@ export function HomeScreen() {
           { paddingBottom: 130 + insets.bottom },
         ]}
       >
+        <Button label="Manage live clinic sessions" onPress={() => router.push("/clinic")} />
+        <Label muted>Statistics and patient cards below are design previews. Use Clinic operations for live appointments.</Label>
         {showNotifications && (
           <Panel>
             <Heading>Notifications</Heading>

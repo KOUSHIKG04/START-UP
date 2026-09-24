@@ -2,6 +2,8 @@
 
 Expo / React Native doctor app, following the patient app's route and screen structure. Icons use `lucide-react-native`, as in patient-mobile.
 
+Phone OTP, credential onboarding/review gating, and the separate **Clinic operations** route now use the shared Supabase backend. The older home statistics, patient cards, schedule, prescription and home-visit screens are still design previews. Set this app's `.env.local` from `.env.example`; setup and current deployment blockers are in [mobile-backend-integration.md](../../plans/mobile-backend-integration.md).
+
 From the workspace root:
 
 ```sh
@@ -30,7 +32,7 @@ Schedule changes update the slot preview and save to the app session. Profile ac
 
 ## Scope
 
-The user requested local demo data and working screen flows. State is in memory and resets on reload. No backend, authentication, video transport, phone service, patient message delivery, clinical signature, or payment service is connected. The call controls simulate local UI state. Signing saves locally and sends nothing. Onboarding/login are intentionally outside this implementation.
+Legacy demo screens still keep state in memory and reset on reload. Their call controls simulate local UI state, and their signing sends nothing. Use the separately labelled Clinic operations route for live appointment actions; phone OTP delivery requires a configured SMS provider.
 
 The map is the supplied Figma image; it is not live location tracking. Start navigation opens the displayed destination in maps.
 

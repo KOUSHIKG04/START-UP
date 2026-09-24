@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790089993544,
+      "tag": "20260922151313_initial_models",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790089995271,
+      "tag": "20260922151315_model_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790139124673,
+      "tag": "20260923045204_aggregate_bed_inventory",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790142761583,
+      "tag": "20260923055241_clinic_workflow_models",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790233973336,
+      "tag": "20260924071252_doctor_bio",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790244627382,
+      "tag": "20260924101027_trip_pin_at_completion",
+      "breakpoints": true
+    }
+  ]
+}

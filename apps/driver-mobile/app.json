@@ -26,6 +26,7 @@
     "plugins": [
       "expo-router",
       "expo-document-picker",
+      ["expo-location", { "locationWhenInUsePermission": "Clinzo uses your location while you are available for ambulance requests." }],
       "expo-localization"
     ]
   }

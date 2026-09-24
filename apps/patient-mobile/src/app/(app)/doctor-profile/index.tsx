@@ -1,63 +1,7 @@
-import { router, useLocalSearchParams, type Href } from "expo-router";
-import {
-  DoctorProfileScreen,
-  type BookingSelection,
-} from "../../../features/doctors/screens/DoctorProfileScreen";
-import { parseConsultationType } from "../../../features/appointments/utils/consultationFlow";
-
-type DoctorProfileParams = {
-  name?: string;
-  qualification?: string;
-  specialty?: string;
-  experience?: string;
-  rating?: string;
-  fee?: string;
-  consultationType?: string | string[];
-};
+import { useLocalSearchParams } from "expo-router";
+import { LiveDoctorProfileScreen } from "../../../features/doctors/screens/LiveDoctorProfileScreen";
 
 export default function DoctorProfileRoute() {
-  const params = useLocalSearchParams<DoctorProfileParams>();
-  const doctor = {
-    name: params.name ?? "Dr. Ananya Sharma",
-    qualification: params.qualification ?? "MBBS, MD (General Medicine)",
-    specialty: params.specialty ?? "General Physician",
-    experience: params.experience ?? "8+ years experience",
-    rating: params.rating ?? "4.8 (120+ reviews)",
-    fee: params.fee ?? "₹500",
-  };
-  const consultationType = parseConsultationType(params.consultationType);
-
-  const handleBookAppointment = (selection: BookingSelection) => {
-    router.push({
-      pathname: "/booking-status",
-      params: {
-        id: "#APT20260820",
-        doctorName: doctor.name,
-        qualification: doctor.qualification,
-        specialty: doctor.specialty,
-        consultationType: selection.consultationType,
-        date: `${selection.date} 2026`,
-        time: selection.time,
-        hospital: "Apollo Hospitals",
-        location:
-          selection.address ??
-          (selection.consultationType === "Online"
-            ? "Secure video consultation"
-            : "Jayanagar, Bengaluru"),
-        experience: doctor.experience,
-        rating: doctor.rating,
-        fee: doctor.fee,
-        status: "pending",
-      },
-    } as unknown as Href);
-  };
-
-  return (
-    <DoctorProfileScreen
-      doctor={doctor}
-      consultationType={consultationType}
-      onBookAppointment={handleBookAppointment}
-      onBackPress={() => router.back()}
-    />
-  );
+  const params = useLocalSearchParams<{ practiceId?: string; serviceId?: string; consultationType?: string }>();
+  return <LiveDoctorProfileScreen practiceId={params.practiceId ?? ""} serviceId={params.serviceId ?? ""} consultationType={params.consultationType ?? "Clinic Visit"} />;
 }

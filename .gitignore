@@ -15,4 +15,5 @@ dist
 
 scripts
 
-tests
+/tests
+docs

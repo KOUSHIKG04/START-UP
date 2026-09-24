@@ -1,0 +1,1 @@
+ALTER TABLE "clinzo"."doctor" ADD COLUMN "bio" text;

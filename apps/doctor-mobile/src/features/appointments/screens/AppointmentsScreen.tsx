@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ScrollView, View, Pressable } from "react-native";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react-native";
+import { router } from "expo-router";
+import { Button } from "@startup/mobile-ui";
 import { appointments, demoDate, modeLabels } from "../../../data/demo";
 import { PatientCard } from "../../patients/components/PatientCard";
 import {
@@ -38,6 +40,8 @@ export function AppointmentsScreen() {
   );
   return (
     <DoctorScreen title="Appointment">
+      <Button label="Open live clinic appointments" onPress={() => router.push("/clinic")} />
+      <Label muted>Appointments below are design previews.</Label>
       <View style={ui.between}>
         <Heading style={{ fontSize: 18 }}>{days[0].month}</Heading>
         <View style={ui.row}>

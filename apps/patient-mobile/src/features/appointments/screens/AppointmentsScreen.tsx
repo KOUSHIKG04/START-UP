@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { Chip, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Button, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import BookingCard from "../components/BookingCard";
 import type { Appointment } from "../types/appointment";
 import { appointments } from "../utils/appointments";
@@ -39,6 +39,8 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <Button label="View my live clinic bookings" onPress={() => router.push("/(app)/clinic" as Href)} />
+        <Text>Bookings below are design previews for visit types not yet connected.</Text>
         <ScrollView
           horizontal
           contentContainerStyle={styles.filters}

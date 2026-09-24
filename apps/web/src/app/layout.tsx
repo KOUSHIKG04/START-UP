@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MediCare Hospital - Admin Console",
+  title: "Hospital and Clinic Portal",
   description:
     "Hospital administration, bed management, and appointment operations",
 };

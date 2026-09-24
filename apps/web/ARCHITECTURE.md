@@ -22,19 +22,18 @@ Each implemented feature exposes its supported entry points through `index.ts`.
 | `src/features/staff` | Future staff membership and permissions UI |
 | `src/components/admin` | Shared admin layout, sidebar and reusable navigation components |
 | `src/components/admin/utils` | Shell-owned navigation, brand and demo-user constants |
-| `src/server/auth` | Future server-side identity, membership and permission checks |
-| `src/server/supabase` | Future request-scoped server client configuration |
+| `src/server/auth` | Future additional server-side identity checks |
+| `src/lib/supabase` | Request-scoped server client, cookie proxy and public config |
 | `src/server/observability` | Future server logging and instrumentation |
 | `src/lib` | Small cross-feature helpers and future browser client configuration |
 | `src/providers` | Client providers, added only when an integration needs them |
 
-Route groups do not add URL segments or enforce authentication. All screens remain
-public. Login is presentation only; no session or backend is connected. Dashboard
-metrics, appointment rows, date labels, summary totals and pagination are demo
-values. The appointment period control changes its selected state but does not
-filter real records. Bed counts and doctor search update local state. The add-doctor
-form simulates success with a timer; it does not persist or add a doctor to the
-directory. No authentication or backend integration is implied by this structure.
+Route groups do not add URL segments. The admin layout now verifies a Supabase
+session and redirects unauthenticated visitors to `/login`; facility RPCs still
+authorize each read/write by membership. The web portal uses email/password Auth,
+with cookie refresh in `src/proxy.ts`. Bed management reads and writes scoped
+aggregate inventory. Dashboard metrics, appointment rows, doctor screens and the
+add-doctor form remain demo-only; they must not be treated as persisted records.
 
 | URL | Feature screen |
 | --- | --- |

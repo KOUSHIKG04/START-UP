@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -10,6 +10,8 @@ import {
   MobileThemeProvider,
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
+import { Button } from "@startup/mobile-ui";
+import { mobileSession, supabase, useMobileSession } from "../services/supabase";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +27,7 @@ const navTheme = {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(albertSansFonts);
+  const auth = useMobileSession();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -38,6 +41,9 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
+
+  if (auth.loading) return <View style={styles.root}><ActivityIndicator style={{ flex: 1 }} /></View>;
+  if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void supabase?.auth.signOut()} /></View>;
 
   return (
     <MobileThemeProvider theme="patient">
@@ -54,8 +60,8 @@ export default function RootLayout() {
                   contentStyle: styles.scene,
                 }}
               >
-                <Stack.Screen name="(app)" />
-                <Stack.Screen name="(auth)" />
+                <Stack.Protected guard={Boolean(auth.session && auth.profile?.patient_id)}><Stack.Screen name="(app)" /></Stack.Protected>
+                <Stack.Protected guard={!auth.session || !auth.profile?.patient_id}><Stack.Screen name="(auth)" /></Stack.Protected>
               </Stack>
             </View>
           </ThemeProvider>

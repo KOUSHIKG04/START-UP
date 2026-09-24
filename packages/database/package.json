@@ -1,0 +1,26 @@
+{
+  "name": "@startup/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "bun": ">=1.3.6"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test tests/schema.test.ts",
+    "test:database": "bun test tests/integration.test.ts tests/clinic.integration.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:seed": "bun tooling/seed.ts",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.44.5",
+    "postgres": "3.4.7"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.6",
+    "typescript": "5.9.3",
+    "drizzle-kit": "0.31.4"
+  }
+}

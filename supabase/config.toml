@@ -1,0 +1,52 @@
+# Optional LOCAL Supabase CLI configuration. Hosted setup is in README.md.
+# project_id is a local namespace, not your hosted project ref or credentials.
+project_id = "clinzo"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+# Supabase CLI is the sole application migration runner.
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = []
+jwt_expiry = 3600
+
+[storage]
+enabled = true
+
+[edge_runtime]
+enabled = true
+
+[functions.reserve-appointment]
+enabled = false
+
+[functions.dispatch-ambulance]
+enabled = false
+
+[functions.process-payment]
+enabled = false
+
+[functions.send-notification]
+enabled = false

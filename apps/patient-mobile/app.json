@@ -26,7 +26,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Clinzo to use your location to show nearby doctors and clinics."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

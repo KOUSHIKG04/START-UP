@@ -1,6 +1,6 @@
 # CLINZO Driver
 
-Expo / React Native ambulance-partner app implementing the supplied Figma screens. This is a local interactive preview: profile setup, document selection, verification states, availability, sample dispatch, trip progression, chat, earnings, Trips and Profile. No login or separate introductory onboarding flow was requested; the entry screen starts driver profile setup.
+Expo / React Native ambulance-partner app. Phone OTP, independent/invited driver onboarding and pending/verified access gates use the shared Supabase backend. The old sample dispatch, trip, chat and earnings implementations remain design previews in source; the active driver routes show backend verification status instead of presenting them as real trips. Set this app's `.env.local` from `.env.example`; see [mobile-backend-integration.md](../../plans/mobile-backend-integration.md) for setup and blockers.
 
 ## Run
 

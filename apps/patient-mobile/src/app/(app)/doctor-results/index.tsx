@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { DoctorResultsScreen } from "../../../features/doctors/screens/DoctorResultsScreen";
+import { LiveDoctorResultsScreen } from "../../../features/doctors/screens/LiveDoctorResultsScreen";
 import { parseConsultationType } from "../../../features/appointments/utils/consultationFlow";
 
 export default function DoctorResultsRoute() {
@@ -10,7 +10,7 @@ export default function DoctorResultsRoute() {
   const selectedSymptom = Array.isArray(symptom) ? symptom[0] : symptom;
 
   return (
-    <DoctorResultsScreen
+    <LiveDoctorResultsScreen
       symptom={selectedSymptom ?? "your symptoms"}
       consultationType={parseConsultationType(consultationType)}
       onBackPress={() => router.back()}

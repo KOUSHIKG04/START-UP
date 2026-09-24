@@ -1,1 +1,1 @@
-export { TripScreen as default } from "../../../features/trips/screens/TripScreen";
+export { LiveDriverTripScreen as default } from "../../../features/trip/screens/LiveDriverTripScreen";

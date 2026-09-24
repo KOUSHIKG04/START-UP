@@ -24,6 +24,7 @@ import {
   IconLabel,
   SafeAreaView,
   SearchInput,
+  Button,
 } from "@startup/mobile-ui";
 import { homeActions } from "../utils/HomeActions";
 import AmbulanceBanner from "../components/AmbulanceBanner";
@@ -180,6 +181,10 @@ export function HomeScreen({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
+        {!isSearchActive ? <>
+          <Button label="Book a live clinic visit" onPress={() => router.push("/(app)/clinic" as Href)} />
+          <Text style={{ color: colors.patient.textSecondary }}>Other home cards are design previews; live bookings appear in Clinic visits.</Text>
+        </> : null}
         {isSearchActive ? (
           <View style={styles.searchActiveContent}>
             {trimmedQuery ? (

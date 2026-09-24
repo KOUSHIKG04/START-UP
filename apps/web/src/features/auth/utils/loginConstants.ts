@@ -1,7 +1,5 @@
 export const loginContent = {
   heading: "Welcome back",
-  description: "Login to your MediCare Hospital account",
-  emailPlaceholder: "m@example.com",
-  image: "/placeholder.svg",
-  imageAlt: "Image",
+  description: "Sign in to your hospital or clinic portal",
+  emailPlaceholder: "you@clinic.com",
 } as const;

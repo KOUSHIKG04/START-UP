@@ -2,5 +2,19 @@
   "name": "@startup/data-access",
   "version": "0.0.0",
   "private": true,
-  "types": "./src/index.ts"
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@startup/contracts": "workspace:*",
+    "@supabase/supabase-js": "^2.57.4"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
 }

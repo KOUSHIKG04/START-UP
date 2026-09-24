@@ -12,6 +12,10 @@
   "scripts": {
     "dev": "turbo dev",
     "dev:web": "pnpm --filter web dev",
+    "supabase": "supabase",
+    "db:generate": "pnpm --filter @startup/database db:generate",
+    "db:check": "supabase db push --linked --dry-run --skip-vault",
+    "db:migrate": "supabase db push --linked",
     "dev:patient": "pnpm --filter patient-mobile start",
     "dev:patient:tunnel": "pnpm --filter patient-mobile start -- --tunnel",
     "dev:doctor": "pnpm --filter doctor-mobile start",
@@ -38,6 +42,7 @@
   },
   "devDependencies": {
     "prettier": "^3.9.6",
-    "prettier-plugin-tailwindcss": "^0.8.1"
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "supabase": "2.117.0"
   }
 }

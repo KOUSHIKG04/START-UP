@@ -1,289 +1,148 @@
 "use client";
 
-import { useBedManagement } from "../hooks/useBedManagement";
-import { bedManagementDateLabel, bedsUnderMaintenance } from "../utils/bedManagementConstants";
-import {
-  Search,
-  Bell,
-  Calendar,
-  Bed,
-  Check,
-  User,
-  Wrench,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { BedDouble, Check, Wrench } from "lucide-react";
+import type { BedInventoryProjection, InventoryFacility } from "@startup/contracts";
+import { Button } from "@startup/web-ui/components/ui/button";
+import { Input } from "@startup/web-ui/components/ui/input";
+import { saveBedInventory } from "../server/actions";
 
-export default function BedManagementScreen() {
-  const {
-    viewMode,
-    setViewMode,
-    departments,
-    handleAdjustAvailable,
-    totalBeds,
-    totalAvailable,
-    totalOccupied,
-    availPercent,
-    occPercent,
-  } = useBedManagement();
+interface Props {
+  facilities: InventoryFacility[];
+  selectedFacilityId: string | null;
+  inventory: BedInventoryProjection[];
+  loadError?: string;
+  signOutAction: () => Promise<void>;
+}
+
+export default function BedManagementScreen({ facilities, selectedFacilityId, inventory, loadError, signOutAction }: Props) {
+  const router = useRouter();
+  const selected = facilities.find((item) => item.facilityId === selectedFacilityId);
+  const totals = inventory.reduce(
+    (sum, row) => ({
+      total: sum.total + row.total,
+      available: sum.available + row.available,
+      occupied: sum.occupied + row.occupied,
+      maintenance: sum.maintenance + row.maintenance,
+    }),
+    { total: 0, available: 0, occupied: 0, maintenance: 0 }
+  );
 
   return (
-    <div className="flex flex-col gap-6 pb-12">
-      {/* TopBar (Figma 832:56) */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="flex flex-col gap-6 pb-12 text-foreground">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
-            Bed Management
-          </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Monitor and manage hospital bed allocation
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Bed management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Aggregate counts reported by each facility, by bed type.</p>
         </div>
+        <form action={signOutAction}><Button type="submit" variant="outline">Sign out</Button></form>
+      </header>
 
-        <div className="flex items-center gap-3">
-          {/* Search Box */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg w-56 shadow-xs">
-            <Search className="size-4 text-[#94a3b8] shrink-0" />
-            <input
-              type="text"
-              aria-label="Search patient, doctor..."
-              placeholder="Search patient, doctor..."
-              className="bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none w-full"
-            />
+      {loadError ? (
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-5">
+          <p className="font-semibold">Could not load inventory</p>
+          <p className="mt-1 text-sm text-muted-foreground">{loadError}</p>
+          <Button type="button" variant="outline" className="mt-4" onClick={() => router.refresh()}>Try again</Button>
+        </div>
+      ) : facilities.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="font-semibold">No facility access yet</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Your account needs an active hospital or clinic membership before inventory appears.</p>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <label className="flex min-w-64 flex-col gap-2 text-sm font-medium">
+              Facility
+              <select
+                value={selectedFacilityId ?? ""}
+                onChange={(event) => router.push(`/bed-management?facility=${encodeURIComponent(event.target.value)}`)}
+                className="h-10 rounded-md border border-input bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+              >
+                {facilities.map((facility) => <option key={facility.facilityId} value={facility.facilityId}>{facility.facilityName}</option>)}
+              </select>
+            </label>
+            <p className="text-sm text-muted-foreground">{selected?.facilityKind === "clinic" ? "Clinic" : "Hospital"} · Availability = total − occupied − maintenance</p>
           </div>
 
-          {/* Bell button */}
-          <button
-            aria-label="Notifications"
-            className="size-9 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-[#475569] hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
-          >
-            <Bell className="size-4" />
-          </button>
-
-          {/* Date Badge */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg shadow-xs">
-            <Calendar className="size-4 text-[#475569] shrink-0" />
-            <span className="text-[13px] font-semibold text-[#475569] whitespace-nowrap">
-              {bedManagementDateLabel}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4 Stat Cards Row (Figma 832:71) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Beds */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 shadow-2xs flex flex-col justify-between gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-[13px] font-medium text-[#475569]">
-                Total Beds
-              </p>
-              <h3 className="text-[28px] font-bold text-[#0f172a] leading-none mt-2">
-                {totalBeds}
-              </h3>
-            </div>
-            <div className="size-10 rounded-lg bg-[#f1f5f9] flex items-center justify-center text-slate-600 shrink-0">
-              <Bed className="size-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Available */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 shadow-2xs flex flex-col justify-between gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-[13px] font-medium text-[#475569]">
-                Available
-              </p>
-              <div className="flex items-baseline gap-2 mt-2">
-                <h3 className="text-[28px] font-bold text-[#10b981] leading-none">
-                  {totalAvailable}
-                </h3>
-                <span className="text-[12px] text-[#10b981] font-semibold">
-                  {availPercent}% available
-                </span>
-              </div>
-            </div>
-            <div className="size-10 rounded-lg bg-[#ecfdf5] flex items-center justify-center text-[#10b981] shrink-0">
-              <Check className="size-5 stroke-[2.5]" />
-            </div>
-          </div>
-        </div>
-
-        {/* Occupied */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 shadow-2xs flex flex-col justify-between gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-[13px] font-medium text-[#475569]">Occupied</p>
-              <div className="flex items-baseline gap-2 mt-2">
-                <h3 className="text-[28px] font-bold text-[#3b82f6] leading-none">
-                  {totalOccupied}
-                </h3>
-                <span className="text-[12px] text-[#3b82f6] font-semibold">
-                  {occPercent}% occupied
-                </span>
-              </div>
-            </div>
-            <div className="size-10 rounded-lg bg-[#eff6ff] flex items-center justify-center text-[#3b82f6] shrink-0">
-              <User className="size-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Under Maintenance */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 shadow-2xs flex flex-col justify-between gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-[13px] font-medium text-[#475569]">
-                Under Maintenance
-              </p>
-              <div className="flex items-baseline gap-2 mt-2">
-                <h3 className="text-[28px] font-bold text-[#f59e0b] leading-none">
-                  {bedsUnderMaintenance}
-                </h3>
-                <span className="text-[12px] text-[#f59e0b] font-semibold">
-                  1.5% offline
-                </span>
-              </div>
-            </div>
-            <div className="size-10 rounded-lg bg-[#fffbeb] flex items-center justify-center text-[#f59e0b] shrink-0">
-              <Wrench className="size-5" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bed Availability by Department (Figma 832:86) */}
-      <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
-        {/* Header & Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e2e8f0]">
-          <div>
-            <h2 className="text-[18px] font-bold text-[#0f172a]">
-              Bed Availability by Department
-            </h2>
-            <p className="text-[13px] text-[#475569] mt-0.5">
-              Overall occupancy rate across departments
-            </p>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Inventory summary">
+            <Summary label="Total beds" value={totals.total} icon={<BedDouble className="size-5" />} />
+            <Summary label="Available" value={totals.available} icon={<Check className="size-5" />} />
+            <Summary label="Occupied" value={totals.occupied} icon={<BedDouble className="size-5" />} />
+            <Summary label="Maintenance" value={totals.maintenance} icon={<Wrench className="size-5" />} />
           </div>
 
-          {/* % Percentage / Count Switch */}
-          <div className="inline-flex items-center p-1 bg-[#f1f5f9] rounded-lg self-start sm:self-auto border border-[#e2e8f0]">
-            <button
-              onClick={() => setViewMode("percent")}
-              className={`px-3 py-1 rounded-md text-[12px] font-semibold transition-colors cursor-pointer ${
-                viewMode === "percent"
-                  ? "bg-white text-[#0f172a] shadow-xs"
-                  : "text-[#64748b] hover:text-[#0f172a]"
-              }`}
-            >
-              % Percentage
-            </button>
-            <button
-              onClick={() => setViewMode("count")}
-              className={`px-3 py-1 rounded-md text-[12px] font-semibold transition-colors cursor-pointer ${
-                viewMode === "count"
-                  ? "bg-white text-[#0f172a] shadow-xs"
-                  : "text-[#64748b] hover:text-[#0f172a]"
-              }`}
-            >
-              Count
-            </button>
-          </div>
-        </div>
-
-        {/* Departments Table */}
-        <div className="overflow-x-auto mt-2">
-          <table className="w-full text-left text-[14px] border-collapse min-w-[760px]">
-            <thead>
-              <tr className="border-b border-[#e2e8f0] text-[#64748b] text-[12px] font-bold">
-                <th className="py-3 px-3">Department</th>
-                <th className="py-3 px-3 text-center">Total Beds</th>
-                <th className="py-3 px-3 text-center">Available</th>
-                <th className="py-3 px-3 text-center">Occupied</th>
-                <th className="py-3 px-3">Occupancy Rate</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e2e8f0]">
-              {departments.map((dept) => {
-                const occupancyPct =
-                  dept.total > 0
-                    ? Math.round((dept.occupied / dept.total) * 100)
-                    : 0;
-
-                return (
-                  <tr
-                    key={dept.id}
-                    className="hover:bg-slate-50/70 transition-colors"
-                  >
-                    {/* Department name with dot */}
-                    <td className="py-3.5 px-3">
-                      <div className="flex items-center gap-2.5 font-semibold text-[#0f172a]">
-                        <span
-                          className={`size-2.5 rounded-full ${dept.dotColor} shrink-0`}
-                        />
-                        <span>{dept.name}</span>
-                      </div>
-                    </td>
-
-                    {/* Total Beds */}
-                    <td className="py-3.5 px-3 text-center font-medium text-[#0f172a]">
-                      {dept.total}
-                    </td>
-
-                    {/* Available with Stepper (- / +) */}
-                    <td className="py-3.5 px-3 text-center">
-                      <div className="inline-flex items-center border border-[#cbd5e1] rounded-md bg-white shadow-2xs overflow-hidden">
-                        <button
-                          aria-label="Decrease available beds"
-                          onClick={() => handleAdjustAvailable(dept.id, -1)}
-                          disabled={dept.available <= 0}
-                          className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-r border-[#cbd5e1] cursor-pointer"
-                        >
-                          <ChevronDown className="size-3.5" />
-                        </button>
-                        <span className="w-10 text-center font-semibold text-[#0f172a] text-[13px]">
-                          {dept.available}
-                        </span>
-                        <button
-                          aria-label="Increase available beds"
-                          onClick={() => handleAdjustAvailable(dept.id, 1)}
-                          disabled={dept.available >= dept.total}
-                          className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-l border-[#cbd5e1] cursor-pointer"
-                        >
-                          <ChevronUp className="size-3.5" />
-                        </button>
-                      </div>
-                    </td>
-
-                    {/* Occupied */}
-                    <td className="py-3.5 px-3 text-center font-semibold text-[#0f172a]">
-                      {dept.occupied}
-                    </td>
-
-                    {/* Occupancy Rate Bar & Label */}
-                    <td className="py-3.5 px-3">
-                      <div className="flex items-center gap-4 max-w-[280px]">
-                        <div className="flex-1 bg-[#f1f5f9] h-2 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${dept.barColor}`}
-                            style={{ width: `${occupancyPct}%` }}
-                          />
-                        </div>
-                        <span className="w-12 text-right font-bold text-[#0f172a] text-[13px]">
-                          {viewMode === "percent"
-                            ? `${occupancyPct}%`
-                            : `${dept.occupied}/${dept.total}`}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          <section aria-labelledby="inventory-heading" className="rounded-xl border border-border bg-card p-4 sm:p-6">
+            <h2 id="inventory-heading" className="text-lg font-semibold">Bed availability by type</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Update counts for {selected?.facilityName}. Changes are saved to the shared database.</p>
+            <div className="mt-5 grid gap-3">
+              {inventory.length === 0 && <p className="py-4 text-sm text-muted-foreground">No bed types are available for this facility.</p>}
+              {inventory.map((row) => <BedRow key={`${row.bedTypeId}:${row.rowVersion ?? "new"}`} row={row} />)}
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
+}
+
+function Summary({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
+  return <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+    <div><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-2xl font-bold tabular-nums">{value.toLocaleString()}</p></div>
+    <div className="text-primary" aria-hidden="true">{icon}</div>
+  </div>;
+}
+
+function BedRow({ row }: { row: BedInventoryProjection }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const observed = row.observedAt
+    ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(row.observedAt))
+    : null;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setSaved(false);
+    const data = new FormData(event.currentTarget);
+    startTransition(async () => {
+      try {
+        const result = await saveBedInventory(data);
+        if (result.error) setError(result.error);
+        else { setSaved(true); router.refresh(); }
+      } catch {
+        setError("Could not reach the portal. Try again when the connection returns.");
+      }
+    });
+  }
+
+  return <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-background p-4">
+    <input type="hidden" name="facilityId" value={row.facilityId} />
+    <input type="hidden" name="bedTypeId" value={row.bedTypeId} />
+    <input type="hidden" name="expectedRowVersion" value={row.rowVersion ?? "0"} />
+    <div className="flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <h3 className="font-semibold">{row.bedTypeName}</h3>
+        <p className="text-sm text-muted-foreground">{row.configured ? `Last updated ${observed}` : "Not configured yet"}</p>
+      </div>
+      <p className="text-sm font-medium tabular-nums text-primary">{row.available} available</p>
+    </div>
+    <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-end">
+      <BedInput label="Total" name="total" value={row.total} />
+      <BedInput label="Occupied" name="occupied" value={row.occupied} />
+      <BedInput label="Maintenance" name="maintenance" value={row.maintenance} />
+      <Button type="submit" disabled={pending}>{pending ? "Saving…" : "Save counts"}</Button>
+    </div>
+    {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+    {saved && <p role="status" className="mt-3 text-sm text-primary">Saved. Refreshing inventory…</p>}
+  </form>;
+}
+
+function BedInput({ label, name, value }: { label: string; name: string; value: number }) {
+  return <label className="flex flex-col gap-1.5 text-sm font-medium">{label}
+    <Input name={name} type="number" min="0" max="2147483647" step="1" defaultValue={value} required className="tabular-nums" />
+  </label>;
 }
