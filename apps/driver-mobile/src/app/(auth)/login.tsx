@@ -1,9 +1,28 @@
 import { router } from "expo-router";
-import { PhoneOtpForm } from "@startup/mobile-ui";
-import { sendPhoneOtp, verifyPhoneOtp } from "@startup/data-access";
-import { mobileSession, supabase } from "../../services/supabase";
+import { DevPasswordForm, PhoneOtpForm } from "@startup/mobile-ui";
+import { sendPhoneOtp, signInWithDevPassword, verifyPhoneOtp } from "@startup/data-access";
+import { devPasswordLoginEnabled, mobileSession, supabase } from "../../services/supabase";
 
 export default function LoginRoute() {
+  async function finishSignIn() {
+    await mobileSession.refresh();
+    const profile = mobileSession.getSnapshot().profile;
+    router.replace(profile?.driver ? "/(app)/(tabs)/home" : "/onboarding");
+  }
+
+  if (devPasswordLoginEnabled) {
+    return (
+      <DevPasswordForm
+        title="Clinzo for drivers"
+        configurationError={supabase ? null : mobileSession.getSnapshot().error}
+        onSignIn={async (email, password) => {
+          await signInWithDevPassword(supabase!, email, password);
+          await finishSignIn();
+        }}
+      />
+    );
+  }
+
   return (
     <PhoneOtpForm
       title="Clinzo for drivers"
@@ -12,9 +31,7 @@ export default function LoginRoute() {
       onSend={(phone) => sendPhoneOtp(supabase!, phone)}
       onVerify={async (phone, code) => {
         await verifyPhoneOtp(supabase!, phone, code);
-        await mobileSession.refresh();
-        const profile = mobileSession.getSnapshot().profile;
-        router.replace(profile?.driver ? "/(app)/(tabs)/home" : "/onboarding");
+        await finishSignIn();
       }}
     />
   );

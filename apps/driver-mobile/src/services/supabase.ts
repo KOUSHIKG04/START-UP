@@ -11,6 +11,11 @@ import {
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+export const devPasswordLoginEnabled =
+  __DEV__ &&
+  process.env.EXPO_PUBLIC_ENABLE_DEV_PASSWORD_LOGIN === "true" &&
+  url === "https://enjafragbcrrgaclwopd.supabase.co";
+
 export const supabase = url && key
   ? createSupabaseClient(url, key, {
       auth: {

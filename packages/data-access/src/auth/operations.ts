@@ -27,6 +27,16 @@ export async function verifyPhoneOtp(client: AppSupabaseClient, phone: string, t
   return data.session;
 }
 
+export async function signInWithDevPassword(client: AppSupabaseClient, email: string, password: string) {
+  const { data, error } = await client.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+  if (error) throw error;
+  if (!data.session) throw new Error("Sign-in did not produce a session");
+  return data.session;
+}
+
 export async function getMyProfile(client: AppSupabaseClient) {
   const { data, error } = await client.rpc("get_my_profile");
   if (error) throw error;
