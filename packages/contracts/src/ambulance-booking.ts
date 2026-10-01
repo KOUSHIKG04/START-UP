@@ -35,6 +35,9 @@ export const myAmbulanceBookingSchema = z.object({
   vehicle_registration: z.string().nullable(),
   operator_name: z.string().nullable(),
   trip_status: z.enum(["heading_to_pickup", "arrived_at_pickup", "in_progress", "arrived_at_destination", "completed", "cancelled"]).nullable(),
+  review_rating: z.number().int().min(1).max(5).nullable(),
+  driver_rating: z.string().nullable(),
+  driver_review_count: z.number().int().nonnegative(),
 });
 
 export const cancelAmbulanceBookingSchema = z.object({

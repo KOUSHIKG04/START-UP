@@ -1,5 +1,5 @@
 import "react-native-url-polyfill/auto";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useSyncExternalStore } from "react";
 import {
@@ -18,7 +18,7 @@ export const devPasswordLoginEnabled =
 
 export const supabase = url && key
   ? createSupabaseClient(url, key, {
-      auth: {
+      auth: Platform.OS === "web" ? { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false } : {
         storage: createSecureSessionStorage(SecureStore),
         autoRefreshToken: true,
         persistSession: true,
@@ -33,7 +33,7 @@ export function useMobileSession() {
   return useSyncExternalStore(mobileSession.subscribe, mobileSession.getSnapshot);
 }
 
-if (supabase) {
+if (supabase && Platform.OS !== "web") {
   AppState.addEventListener("change", (state) => {
     if (state === "active") supabase.auth.startAutoRefresh();
     else supabase.auth.stopAutoRefresh();

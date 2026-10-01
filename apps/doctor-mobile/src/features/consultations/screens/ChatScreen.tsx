@@ -1,8 +1,14 @@
-import { useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import * as Crypto from "expo-crypto";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { listOnlineMessages, sendOnlineMessage, subscribeOnlineMessages } from "@startup/data-access";
 import {
+  FlatList,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   TextInput,
   View,
 } from "react-native";
@@ -15,12 +21,40 @@ import {
   IconButton,
   Label,
   MissingPatient,
-  palette,
-  ui,
 } from "../../../components/DoctorScreen";
+import { palette, ui } from "../../../components/theme";
 import { useVisit } from "../utils/consultation";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
-const homeThread = [
+import { supabase, useMobileSession } from "../../../services/supabase";
+import { useOnlineVisit } from "../utils/useOnlineVisit";
+
+interface MessageItem {
+  id: string;
+  sent: boolean;
+  text: string;
+  time: string;
+}
+
+const ChatMessageItem = memo(function ChatMessageItem({ message }: { message: MessageItem }) {
+  return (
+    <View
+      style={[
+        styles.messageContainer,
+        message.sent ? styles.sentContainer : styles.receivedContainer,
+      ]}
+    >
+      <Label style={styles.messageText}>{message.text}</Label>
+      <View style={styles.metaRow}>
+        <Label muted style={styles.metaTime}>
+          {message.time}
+        </Label>
+        {message.sent && <Check size={12} color={palette.muted} />}
+      </View>
+    </View>
+  );
+});
+
+const homeThread: MessageItem[] = [
   {
     id: "1",
     sent: false,
@@ -46,16 +80,47 @@ const homeThread = [
     time: "9:44 AM",
   },
 ];
+const ChatHeader = memo(function ChatHeader({ mode }: { mode?: string }) {
+  return (
+    <Label muted style={styles.headerLabel}>
+      TODAY · {mode === "home" ? "HOME VISIT" : "ONLINE CONSULTATION"}
+    </Label>
+  );
+});
+
 export function ChatScreen() {
+  const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
+  const live = useOnlineVisit(appointmentId);
+  const { profile } = useMobileSession();
+  const queryClient = useQueryClient();
+  const [sendError, setSendError] = useState("");
+  const liveMessages = useQuery({
+    queryKey: ["online-messages", appointmentId],
+    queryFn: () => listOnlineMessages(supabase!, appointmentId!),
+    enabled: Boolean(live.appointment && supabase),
+  });
+  useEffect(() => {
+    if (!live.appointment || !supabase || !appointmentId) return;
+    return subscribeOnlineMessages(supabase, appointmentId, () => {
+      void queryClient.invalidateQueries({ queryKey: ["online-messages", appointmentId] });
+    });
+  }, [live.appointment?.id, appointmentId, queryClient]);
   const { patient, appointment } = useVisit();
   const messages = useDoctorStore((s) => s.messages);
   const sendMessage = useDoctorStore((s) => s.sendMessage);
   const [draft, setDraft] = useState("");
   const insets = useSafeAreaInsets();
-  const scroll = useRef<ScrollView>(null);
-  if (!patient || !appointment) return <MissingPatient />;
-  const thread = [
-    ...(appointment.mode === "home"
+  const flatListRef = useRef<FlatList<MessageItem>>(null);
+  const renderItem = useCallback(
+    ({ item }: { item: MessageItem }) => <ChatMessageItem message={item} />,
+    [],
+  );
+
+  if (live.isLive && live.loading) return <Label>Loading consultation…</Label>;
+  if (live.isLive && !live.appointment) return <MissingPatient />;
+  if (!live.isLive && (!patient || !appointment)) return <MissingPatient />;
+  const demoThread: MessageItem[] = [
+    ...(appointment?.mode === "home"
       ? homeThread
       : [
           {
@@ -65,62 +130,43 @@ export function ChatScreen() {
             time: "9:42 AM",
           },
         ]),
-    ...(messages[appointment.id] ?? []),
+    ...(messages[appointment?.id ?? ""] ?? []),
   ];
-  const send = () => {
+  const thread: MessageItem[] = live.appointment
+    ? (liveMessages.data ?? []).map(item => ({ id: item.id, sent: item.sender_id === profile?.identity_id,
+      text: item.body, time: new Date(item.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) }))
+    : demoThread;
+  const send = async () => {
     if (!draft.trim()) return;
-    sendMessage(appointment.id, draft.trim());
-    setDraft("");
+    if (live.appointment && supabase) {
+      try {
+        await sendOnlineMessage(supabase, live.appointment.id, draft, Crypto.randomUUID());
+        setDraft(""); setSendError("");
+        await queryClient.invalidateQueries({ queryKey: ["online-messages", appointmentId] });
+      } catch (cause) { setSendError(cause instanceof Error ? cause.message : "Message could not be sent."); }
+    } else if (appointment) { sendMessage(appointment.id, draft.trim()); setDraft(""); }
   };
+
   return (
     <KeyboardAvoidingView
       style={ui.screen}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <DoctorHeader
-        title={patient.name}
-        subtitle="Demo chat · Messages stay on this device"
+        title={live.appointment?.patient_name ?? patient?.name ?? "Patient"}
+        subtitle={live.appointment ? "Secure consultation" : "Demo chat · Messages stay on this device"}
       />
-      <ScrollView
-        ref={scroll}
-        contentContainerStyle={{ padding: 16, gap: 16, flexGrow: 1 }}
+      <FlatList
+        ref={flatListRef}
+        data={thread}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListHeaderComponent={<ChatHeader mode={live.appointment ? "online" : appointment?.mode} />}
+        contentContainerStyle={styles.listContent}
         onContentSizeChange={() =>
-          scroll.current?.scrollToEnd({ animated: false })
+          flatListRef.current?.scrollToEnd({ animated: false })
         }
-      >
-        <Label
-          muted
-          style={{ textAlign: "center", fontSize: 11, marginBottom: 8 }}
-        >
-          TODAY ·{" "}
-          {appointment.mode === "home" ? "HOME VISIT" : "ONLINE CONSULTATION"}
-        </Label>
-        {thread.map((message) => (
-          <View
-            key={message.id}
-            style={{
-              alignSelf: message.sent ? "flex-end" : "flex-start",
-              maxWidth: "82%",
-              padding: 12,
-              borderRadius: 12,
-              borderBottomRightRadius: message.sent ? 4 : 12,
-              borderBottomLeftRadius: message.sent ? 12 : 4,
-              gap: 4,
-              backgroundColor: message.sent ? "white" : "#EAF8F7",
-              borderWidth: message.sent ? 1 : 0,
-              borderColor: "#E5EFF0",
-            }}
-          >
-            <Label style={{ color: "#173B4A" }}>{message.text}</Label>
-            <View style={{ ...ui.row, justifyContent: "flex-end", gap: 3 }}>
-              <Label muted style={{ fontSize: 10 }}>
-                {message.time}
-              </Label>
-              {message.sent && <Check size={12} color={palette.muted} />}
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+      />
       <View
         style={{
           padding: 16,
@@ -133,7 +179,7 @@ export function ChatScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 8 }}
         >
-          {(appointment.mode === "home"
+          {(appointment?.mode === "home"
             ? ["On my way", "Arriving in 5 mins", "At pickup location"]
             : ["Hello, how are you?", "Please share your symptoms", "Thank you"]
           ).map((text) => (
@@ -145,6 +191,7 @@ export function ChatScreen() {
             />
           ))}
         </ScrollView>
+        {sendError ? <Label style={ui.error}>{sendError}</Label> : null}
         <View style={ui.row}>
           <TextInput
             accessibilityLabel="Message"
@@ -169,9 +216,9 @@ export function ChatScreen() {
             }}
           />
           <IconButton
-            label="Send demo message"
+            label={live.appointment ? "Send message" : "Send demo message"}
             disabled={!draft.trim()}
-            onPress={send}
+            onPress={() => void send()}
             style={{ backgroundColor: "#36B37E", width: 48, height: 48 }}
           >
             <Send size={20} color="white" />
@@ -181,3 +228,48 @@ export function ChatScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    padding: 16,
+    gap: 16,
+    flexGrow: 1,
+  },
+  headerLabel: {
+    textAlign: "center",
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  messageContainer: {
+    maxWidth: "82%",
+    padding: 12,
+    borderRadius: 12,
+    gap: 4,
+  },
+  sentContainer: {
+    alignSelf: "flex-end",
+    borderBottomRightRadius: 4,
+    borderBottomLeftRadius: 12,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E5EFF0",
+  },
+  receivedContainer: {
+    alignSelf: "flex-start",
+    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 4,
+    backgroundColor: "#EAF8F7",
+    borderWidth: 0,
+  },
+  messageText: {
+    color: "#173B4A",
+  },
+  metaRow: {
+    ...ui.row,
+    justifyContent: "flex-end",
+    gap: 3,
+  },
+  metaTime: {
+    fontSize: 10,
+  },
+});

@@ -7,6 +7,7 @@ export type BookingSelection = {
   date: string;
   time: string;
   patient: string;
+  patientId: string;
   reason: string;
   consultationType: ConsultationType;
   address?: string;
@@ -37,6 +38,11 @@ export type HomeVisitAddressProps = {
 
 export type AboutDoctorProps = {
   doctorName: string;
+  bio: string | null;
+  facilityName: string;
+  facilityAddress: string;
+  distanceMeters: number | null;
+  languages: string[];
   onGoToSlots: () => void;
 };
 
@@ -45,4 +51,9 @@ export type BookSlotsProps = {
   consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
   onGoToAbout: () => void;
+  slots: { window_id: string; starts_at: string }[];
+  patientOptions: { id: string; label: string; verified: boolean }[];
+  loading?: boolean;
+  error?: string | null;
+  busy?: boolean;
 };

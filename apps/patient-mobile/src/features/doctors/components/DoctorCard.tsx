@@ -18,6 +18,7 @@ export type DoctorCardProps = {
   experience: string;
   rating: string;
   fee?: string;
+  distanceMeters?: number | null;
   hideFee?: boolean;
   hideExperience?: boolean;
   onPress?: () => void;
@@ -45,6 +46,7 @@ export default function DoctorCard({
   experience,
   rating,
   fee = "",
+  distanceMeters,
   hideFee = false,
   hideExperience = false,
   onPress,
@@ -145,7 +147,7 @@ export default function DoctorCard({
 
   return (
     <Card
-      accessibilityLabel={`${name}, ${specialty}${hideFee || !fee ? "" : `, consultation fee ${fee}`}`}
+      accessibilityLabel={`${name}, ${specialty}${hideFee || !fee ? "" : `, consultation fee ${fee}`}${distanceMeters == null ? "" : `, ${(distanceMeters / 1000).toFixed(1)} km away`}`}
       variant="outlined"
       backgroundColor="#E6F4F3"
       borderColor="#E0E5EB"
@@ -186,19 +188,20 @@ export default function DoctorCard({
               <Text style={styles.contextInline}>{`  (${contextLabel})`}</Text>
             ) : null}
           </Text>
+          {distanceMeters != null ? <Text style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
         </View>
       </View>
 
       {(!hideExperience && experience) || (!hideFee && fee) ? (
         <View style={styles.pillRow}>
           {!hideExperience && experience ? (
-            <Pill>
+            <Pill balanced={Boolean(fee && !hideFee)}>
               <Text style={styles.pillText}>{experience}</Text>
             </Pill>
           ) : null}
           {!hideFee && fee ? (
-            <Pill>
-              <Text style={styles.pillText}>{`Consultation fee: ${fee}`}</Text>
+            <Pill balanced={Boolean(experience && !hideExperience)}>
+              <Text style={styles.pillText}>{`Consultation Fee ${fee}`}</Text>
             </Pill>
           ) : null}
         </View>
@@ -207,8 +210,8 @@ export default function DoctorCard({
   );
 }
 
-function Pill({ children }: { children: ReactNode }) {
-  return <View style={styles.pill}>{children}</View>;
+function Pill({ children, balanced }: { children: ReactNode; balanced: boolean }) {
+  return <View style={[styles.pill, balanced && styles.balancedPill]}>{children}</View>;
 }
 
 function StarIcon() {
@@ -243,8 +246,7 @@ function MetricCell({
 
 const styles = StyleSheet.create({
   flatCard: {
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   headerRow: {
     flexDirection: "row",
@@ -298,6 +300,12 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     lineHeight: 17,
   },
+  distanceText: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.medium,
+    fontSize: 12,
+    lineHeight: 16,
+  },
   contextInline: {
     color: colors.patient.accent,
     fontFamily: fontFamilies.regular,
@@ -336,12 +344,9 @@ const styles = StyleSheet.create({
   },
   pillRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 8,
     paddingTop: 2,
-    display:"flex", 
-    alignItems:"center",
-    justifyContent:"space-between"
+    alignItems: "stretch",
   },
   pill: {
     flexDirection: "row",
@@ -354,12 +359,20 @@ const styles = StyleSheet.create({
     borderColor: "#d9efee",
     backgroundColor: "#d9efee",
   },
+  balancedPill: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
   pillText: {
     color: colors.patient.primary,
     fontFamily: fontFamilies.semibold,
     fontSize: 13,
     fontWeight: "500",
     lineHeight: 16,
+    flexShrink: 1,
+    textAlign: "center",
   },
   profileGrid: {
     flexDirection: "row",

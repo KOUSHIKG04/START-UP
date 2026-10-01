@@ -1,32 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getMyPatientVerificationPin } from "@startup/data-access";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { CheckCircle2, ChevronDown, Lock } from "lucide-react-native";
+import { ChevronDown, Lock } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, Input } from "@startup/mobile-ui";
+import { supabase, useMobileSession } from "../../../services/supabase";
 
 export function ProfilePinCard() {
+  const { profile } = useMobileSession();
   const [showPin, setShowPin] = useState(false);
-  const [pin, setPin] = useState(["", "", "", ""]);
-  const [pinSaved, setPinSaved] = useState(false);
+  const [pin, setPin] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
+  const patientId = profile?.patient_id;
 
-  const updatePin = (index: number, value: string) => {
-    setPinSaved(false);
-    setPin((current) =>
-      current.map((digit, digitIndex) =>
-        digitIndex === index ? value.replace(/\D/g, "").slice(-1) : digit
-      )
-    );
-  };
-
-  const handleSavePin = () => {
-    if (pin.every((digit) => digit.length === 1)) {
-      setPinSaved(true);
-      setTimeout(() => {
-        setShowPin(false);
-        setPinSaved(false);
-      }, 1400);
+  useEffect(() => {
+    const client = supabase;
+    if (!showPin || !client || !patientId) {
+      setPin(null);
+      setLoading(false);
+      setUnavailable(false);
+      return;
     }
-  };
+    let current = true;
+    const load = async () => {
+      if (current) setLoading(true);
+      try {
+        const value = await getMyPatientVerificationPin(client, patientId);
+        if (current) {
+          setPin(value);
+          setUnavailable(false);
+        }
+      } catch {
+        if (current) {
+          setPin(null);
+          setUnavailable(true);
+        }
+      } finally {
+        if (current) setLoading(false);
+      }
+    };
+    void load();
+    const interval = setInterval(() => void load(), 15_000);
+    return () => {
+      current = false;
+      clearInterval(interval);
+    };
+  }, [patientId, showPin]);
+
+  const digits = Array.from({ length: 4 }, (_, index) => pin?.[index] ?? "");
 
   return (
     <Card
@@ -41,17 +63,20 @@ export function ProfilePinCard() {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Set Security PIN"
-        onPress={() => setShowPin((value) => !value)}
+        accessibilityLabel="Verification PIN"
+        onPress={() => {
+          setPin(null);
+          setShowPin((value) => !value);
+        }}
         style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
       >
         <View style={styles.iconCircle}>
           <Lock color={colors.patient.primaryDark} size={18} />
         </View>
         <View style={styles.copyCol}>
-          <Text style={styles.rowTitle}>Set Security PIN</Text>
+          <Text style={styles.rowTitle}>Verification PIN</Text>
           <Text style={styles.rowSubtitle}>
-            Quick 4-digit verification passcode
+            Your 4-digit service completion passcode
           </Text>
         </View>
         <ChevronDown
@@ -65,40 +90,37 @@ export function ProfilePinCard() {
         <View style={styles.expandedSection}>
           <View style={styles.divider} />
           <Text style={styles.pinInstructions}>
-            Enter a 4-digit security PIN for quick authorization and sensitive
-            actions.
+            Share this PIN only when an active service is ready to be completed.
           </Text>
           <View style={styles.pinRow}>
-            {pin.map((digit, index) => (
+            {digits.map((digit, index) => (
               <Input
                 key={index}
                 accessibilityLabel={`PIN digit ${index + 1}`}
                 containerStyle={styles.pinContainer}
-                keyboardType="number-pad"
-                maxLength={1}
-                onChangeText={(value) => updatePin(index, value)}
-                secureTextEntry
+                editable={false}
                 style={styles.pinInput}
                 value={digit}
               />
             ))}
           </View>
-
-          {pinSaved ? (
-            <View style={styles.savedBanner}>
-              <CheckCircle2 color="#059669" size={16} />
-              <Text style={styles.savedText}>PIN Saved Successfully</Text>
-            </View>
-          ) : (
-            <Button
-              disabled={pin.some((digit) => !digit)}
-              label="Save PIN"
-              onPress={handleSavePin}
-              style={styles.savePinButton}
-              labelStyle={styles.savePinLabel}
-              variant="secondary"
-            />
-          )}
+          {loading ? (
+            <Text style={styles.pinInstructions}>Checking active service…</Text>
+          ) : null}
+          {unavailable ? (
+            <Text style={styles.pinInstructions}>
+              Your PIN is available during an active trip. Home-visit PIN
+              display will be enabled when that workflow is connected.
+            </Text>
+          ) : null}
+          <Button
+            disabled={!pin}
+            label="Done"
+            onPress={() => setShowPin(false)}
+            style={styles.savePinButton}
+            labelStyle={styles.savePinLabel}
+            variant="secondary"
+          />
         </View>
       ) : null}
     </Card>
@@ -183,21 +205,5 @@ const styles = StyleSheet.create({
   },
   savePinLabel: {
     fontSize: 13,
-  },
-  savedBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: radius.md,
-    backgroundColor: "#ECFDF5",
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
-  },
-  savedText: {
-    color: "#059669",
-    fontFamily: fontFamilies.bold,
-    fontSize: 12,
   },
 });

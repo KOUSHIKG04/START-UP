@@ -178,18 +178,26 @@ export function WelcomeScreen({ onNext }: { onNext: () => void }) {
 }
 
 export function DetailsScreen({
+  initialProfile,
   profile,
   onSave,
   onBack,
+  initialConsent = false,
 }: {
-  profile: DriverProfile;
-  onSave: (profile: DriverProfile) => void;
+  initialProfile?: DriverProfile;
+  profile?: DriverProfile;
+  onSave: (profile: DriverProfile) => Promise<void> | void;
   onBack: () => void;
+  initialConsent?: boolean;
 }) {
-  const [form, setForm] = useState(profile);
-  const [consent, setConsent] = useState(false);
+  const [form, setForm] = useState<DriverProfile>(
+    () =>
+      initialProfile ?? profile ?? { name: "", mobile: "", dob: "", city: "" }
+  );
+  const [consent, setConsent] = useState(initialConsent);
   const [error, setError] = useState("");
   const [picking, setPicking] = useState(false);
+  const [saving, setSaving] = useState(false);
   const change = (key: keyof DriverProfile, value: string) =>
     setForm((old) => ({ ...old, [key]: value }));
   const pickPhoto = async () => {
@@ -212,7 +220,7 @@ export function DetailsScreen({
       setPicking(false);
     }
   };
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim() || !form.city.trim() || !form.dob.trim())
       return setError("Enter your full name, date of birth and city.");
     if (
@@ -246,7 +254,16 @@ export function DetailsScreen({
     if (!consent)
       return setError("Agree to verification and safety checks to continue.");
     setError("");
-    onSave({ ...form, name: form.name.trim(), city: form.city.trim() });
+    setSaving(true);
+    try {
+      await onSave({ ...form, name: form.name.trim(), city: form.city.trim() });
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not save your details."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
   return (
     <Frame title="Personal Details" onBack={onBack}>
@@ -336,7 +353,12 @@ export function DetailsScreen({
             </Text>
           </Pressable>
           <ErrorText message={error} />
-          <Button theme="driver" label="Continue" onPress={save} />
+          <Button
+            theme="driver"
+            label="Continue"
+            disabled={saving}
+            onPress={() => void save()}
+          />
         </View>
       </ScrollView>
     </Frame>
@@ -358,7 +380,7 @@ export function DocumentsScreen({
   onBack,
   initialDocuments,
 }: {
-  onSubmit: (documents: RegistrationDocuments) => void;
+  onSubmit: (documents: RegistrationDocuments) => Promise<void> | void;
   onBack: () => void;
   initialDocuments?: RegistrationDocuments;
 }) {
@@ -373,6 +395,7 @@ export function DocumentsScreen({
   );
   const [error, setError] = useState("");
   const [picking, setPicking] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const pick = async (doc: (typeof documentTypes)[number]) => {
     setPicking(doc.name);
     setError("");
@@ -395,7 +418,7 @@ export function DocumentsScreen({
       setPicking(null);
     }
   };
-  const submit = () => {
+  const submit = async () => {
     if (!registration.trim())
       return setError("Enter the ambulance registration number.");
     const missing = documentTypes.filter((doc) => !files[doc.name]);
@@ -403,11 +426,21 @@ export function DocumentsScreen({
       return setError(
         `Add all required documents to continue. ${missing.length} remaining.`
       );
-    onSubmit({
-      classification,
-      registration: registration.trim().toUpperCase(),
-      files,
-    });
+    setSubmitting(true);
+    setError("");
+    try {
+      await onSubmit({
+        classification,
+        registration: registration.trim().toUpperCase(),
+        files,
+      });
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not submit documents."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
   return (
     <Frame title="Vehicle & documents" onBack={onBack}>
@@ -496,8 +529,8 @@ export function DocumentsScreen({
           <Button
             theme="driver"
             label="Submit for Verification"
-            disabled={picking !== null}
-            onPress={submit}
+            disabled={picking !== null || submitting}
+            onPress={() => void submit()}
           />
         </View>
       </ScrollView>
@@ -507,10 +540,12 @@ export function DocumentsScreen({
 
 export function VerificationScreen({
   verified,
+  rejectionReason,
   onDashboard,
   onBack,
 }: {
   verified: boolean;
+  rejectionReason?: string | null;
   onDashboard: () => void;
   onBack: () => void;
 }) {
@@ -526,8 +561,15 @@ export function VerificationScreen({
         <Text style={s.verificationSubtitle}>
           {verified
             ? "You’re ready to respond."
-            : "Please Wait Until We Verify Your Profile"}
+            : rejectionReason
+              ? "A document needs a replacement"
+              : "Please Wait Until We Verify Your Profile"}
         </Text>
+        {rejectionReason ? (
+          <Text accessibilityRole="alert" style={s.waitBody}>
+            {rejectionReason}
+          </Text>
+        ) : null}
         {verified ? (
           <View style={s.statusCard}>
             <Text style={s.sectionTitle}>Verification status</Text>
@@ -578,7 +620,11 @@ export function VerificationScreen({
             <Button
               theme="driver"
               variant="outline"
-              label="Review submitted details"
+              label={
+                rejectionReason
+                  ? "Replace document"
+                  : "Review submitted details"
+              }
               onPress={onBack}
             />
           )}

@@ -11,7 +11,9 @@
   },
   "scripts": {
     "dev": "turbo dev",
-    "dev:web": "pnpm --filter web dev",
+    "dev:web": "pnpm --filter facility-portal dev",
+    "dev:facility-portal": "pnpm --filter facility-portal dev",
+    "dev:company-admin": "pnpm --filter company-admin dev",
     "supabase": "supabase",
     "db:generate": "pnpm --filter @startup/database db:generate",
     "db:check": "supabase db push --linked --dry-run --skip-vault",
@@ -30,8 +32,14 @@
     "format": "prettier --write .",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "test:e2e": "pnpm --filter web exec playwright test",
-    "test:e2e:ui": "pnpm --filter web exec playwright test --ui"
+    "test:e2e": "pnpm --filter facility-portal exec playwright test",
+    "test:e2e:ui": "pnpm --filter facility-portal exec playwright test --ui",
+    "test:e2e:company-admin": "pnpm --filter company-admin test:e2e",
+    "test:e2e:company-admin:ui": "pnpm --filter company-admin test:e2e:ui",
+    "doctor": "react-doctor",
+    "doctor:changed": "react-doctor --scope changed",
+    "react-doctor": "react-doctor",
+    "react-doctor:changed": "react-doctor --scope changed"
   },
   "devEngines": {
     "packageManager": {
@@ -41,8 +49,11 @@
     }
   },
   "devDependencies": {
+    "@supabase/server": "^1.9.0",
+    "livekit-server-sdk": "^2.19.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "react-doctor": "^0.9.14",
     "supabase": "2.117.0"
   }
 }

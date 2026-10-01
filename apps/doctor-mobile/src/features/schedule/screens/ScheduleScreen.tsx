@@ -3,15 +3,17 @@ import { Pressable, Switch, View } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Button, Input } from "@startup/mobile-ui";
 import { Calendar, Check } from "lucide-react-native";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { addClinicUnavailability, getMySchedulePreferences, listClinicUnavailability, listMyClinicSessions, listMyPractices, publishClinicSession, publishOnlineSession, revokeClinicUnavailability, saveMySchedulePreferences, setClinicAutoConfirmLimit } from "@startup/data-access";
+import { supabase } from "../../../services/supabase";
 import {
+  Choice,
   DoctorScreen,
   Heading,
   Label,
-  palette,
   Panel,
-  ui,
 } from "../../../components/DoctorScreen";
-import { useDoctorStore } from "../../../stores/useDoctorStore";
+import { palette, ui } from "../../../components/theme";
 import {
   formatTime,
   minutes,
@@ -19,6 +21,14 @@ import {
   scheduleError,
 } from "../utils/schedule";
 import type { Schedule } from "../../../types/doctor";
+import {
+  PublishSessionPanel,
+  PublishedSessionsPanel,
+  UnavailableTimePanel,
+  ConsultationChargesPanel,
+  WorkingDaysPanel,
+  ClinicHoursPanel,
+} from "../components/ScheduleOperationsPanels";
 
 function Range({
   title,
@@ -70,12 +80,20 @@ function Range({
   );
 }
 export function ScheduleScreen() {
-  const savedSchedule = useDoctorStore((s) => s.schedule);
-  const save = useDoctorStore((s) => s.saveSchedule);
-  const [draft, setDraft] = useState<Schedule>(savedSchedule);
-  useEffect(() => {
-    setDraft(savedSchedule);
-  }, [savedSchedule]);
+  const queryClient = useQueryClient();
+  const practices = useQuery({ queryKey: ["my-practices"], queryFn: () => listMyPractices(supabase!), enabled: Boolean(supabase) });
+  const [practiceId, setPracticeId] = useState<string | null>(null);
+  const selectedPracticeId = practiceId ?? practices.data?.[0]?.practice_id ?? null;
+  const selectedPractice = practices.data?.find(item => item.practice_id === selectedPracticeId);
+  const saved = useQuery({ queryKey: ["my-doctor-schedule", selectedPracticeId], queryFn: () => getMySchedulePreferences(supabase!, selectedPracticeId!), enabled: Boolean(supabase && selectedPracticeId) });
+  const sessions = useQuery({ queryKey: ["doctor-clinic-sessions", selectedPracticeId], queryFn: () => listMyClinicSessions(supabase!, selectedPracticeId!), enabled: Boolean(supabase && selectedPracticeId) });
+  const unavailable = useQuery({ queryKey: ["doctor-clinic-unavailability", selectedPracticeId], queryFn: () => listClinicUnavailability(supabase!, selectedPracticeId!), enabled: Boolean(supabase && selectedPracticeId) });
+  const [draft, setDraft] = useState<Schedule>({ days: [], start: "09:00", end: "17:00", duration: 15, online: 1, walkIn: 1, autoAccept: false, autoLimit: 1, homeVisits: false, homeRadius: "", onlineFee: "0", clinicFee: "0", homeFee: "0" });
+  useEffect(() => { if (!saved.data) return; const p = saved.data; setDraft({ days: p.working_days.map(day => day - 1), start: p.clinic_start.slice(0, 5), end: p.clinic_end.slice(0, 5), duration: p.slot_minutes, online: p.online_daily_limit, walkIn: p.walkin_daily_limit, autoAccept: p.auto_accept, autoLimit: p.auto_accept_limit, homeVisits: p.home_visits, homeRadius: p.home_radius_km === null ? "" : String(p.home_radius_km), onlineFee: String((p.online_fee_minor ?? 0) / 100), clinicFee: String(p.clinic_fee_minor / 100), homeFee: String((p.home_fee_minor ?? 0) / 100) }); }, [saved.data]);
+  const [publishDate, setPublishDate] = useState("");
+  const [sessionLimits, setSessionLimits] = useState<Record<string, string>>({});
+  const [leaveDate, setLeaveDate] = useState(""); const [leaveStart, setLeaveStart] = useState(""); const [leaveEnd, setLeaveEnd] = useState(""); const [leaveReason, setLeaveReason] = useState("");
+  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const update = (changes: Partial<Schedule>) => {
@@ -87,91 +105,75 @@ export function ScheduleScreen() {
   const timeValid =
     Number.isFinite(minutes(draft.start)) &&
     Number.isFinite(minutes(draft.end));
+  async function save() {
+    const problem = scheduleError(draft);
+    if (problem) { setError(problem); return; }
+    if (!supabase || !selectedPracticeId) { setError("Choose your clinic first."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      await saveMySchedulePreferences(supabase, selectedPracticeId, { workingDays: draft.days.map(day => day + 1), clinicStart: draft.start, clinicEnd: draft.end, slotMinutes: draft.duration, onlineDailyLimit: draft.online, walkinDailyLimit: draft.walkIn, autoAccept: draft.autoAccept, autoAcceptLimit: draft.autoAccept ? draft.autoLimit : 0, homeVisits: draft.homeVisits, homeRadiusKm: draft.homeRadius ? Number(draft.homeRadius) : null, onlineFeeMinor: Math.round(Number(draft.onlineFee) * 100), clinicFeeMinor: Math.round(Number(draft.clinicFee) * 100), homeFeeMinor: Math.round(Number(draft.homeFee) * 100) }, Number(saved.data?.row_version ?? 0));
+      await queryClient.invalidateQueries({ queryKey: ["my-doctor-schedule", selectedPracticeId] });
+      setMessage("Schedule preferences saved. Publish a clinic date below to make slots bookable.");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not save schedule."); }
+    finally { setBusy(false); }
+  }
+  async function publish(mode: "clinic" | "online" = "clinic") {
+    if (!supabase || !selectedPracticeId || !saved.data) { setError("Save your schedule first."); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(publishDate)) { setError("Choose a valid date."); return; }
+    const selectedDate = new Date(`${publishDate}T12:00:00`);
+    const weekday = (selectedDate.getDay() + 6) % 7;
+    if (!draft.days.includes(weekday)) { setError("That date is not in your working days."); return; }
+    const startsAt = new Date(`${publishDate}T${draft.start}:00`);
+    const clinicEnd = new Date(`${publishDate}T${draft.end}:00`);
+    // Online slots occupy the final configured slots of the workday. Choose
+    // either clinic or online for a date unless their hours are separated.
+    if (mode === "online") startsAt.setTime(clinicEnd.getTime() - draft.online * draft.duration * 60000);
+    const endsAt = clinicEnd;
+    if (startsAt <= new Date() || endsAt <= startsAt) { setError("Choose future clinic hours."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const id = await (mode === "online" ? publishOnlineSession : publishClinicSession)(supabase, { practiceId: selectedPracticeId, startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(), slotMinutes: draft.duration, feeMinor: Math.round(Number(mode === "online" ? draft.onlineFee : draft.clinicFee) * 100), currency: "INR" });
+      if (draft.autoAccept) { const created = (await listMyClinicSessions(supabase, selectedPracticeId)).find(item => item.id === id); if (created) await setClinicAutoConfirmLimit(supabase, { sessionId: id, expectedVersion: Number(created.row_version), limit: Math.min(draft.autoLimit, created.hard_capacity) }); }
+      await queryClient.invalidateQueries({ queryKey: ["doctor-clinic-sessions", selectedPracticeId] });
+      setMessage(mode === "online" ? "Online slots published for patients." : "Clinic slots published for patients.");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not publish slots."); }
+    finally { setBusy(false); }
+  }
+  async function addLeave() {
+    if (!supabase || !selectedPracticeId) return;
+    setBusy(true); setError("");
+    try { const startsAt = new Date(`${leaveDate}T${leaveStart}:00`); const endsAt = new Date(`${leaveDate}T${leaveEnd}:00`); if (Number.isNaN(startsAt.getTime()) || endsAt <= startsAt) throw new Error("Enter a valid unavailable time."); await addClinicUnavailability(supabase, { practiceId: selectedPracticeId, startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(), reason: leaveReason }); await queryClient.invalidateQueries({ queryKey: ["doctor-clinic-unavailability", selectedPracticeId] }); setLeaveDate(""); setLeaveStart(""); setLeaveEnd(""); setLeaveReason(""); setMessage("Unavailable time saved."); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Could not save unavailable time."); }
+    finally { setBusy(false); }
+  }
   return (
     <DoctorScreen
       title="Manage Schedule"
       subtitle="Define your working hours and booking preferences"
       background="#F6F9F9"
     >
-      <Panel>
-        <Heading style={{ fontSize: 13 }}>Working Days</Heading>
-        <View style={{ ...ui.row, gap: 4, justifyContent: "space-between" }}>
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ].map((day, index) => (
-            <Pressable
-              key={day}
-              accessibilityRole="checkbox"
-              accessibilityLabel={day}
-              accessibilityState={{ checked: draft.days.includes(index) }}
-              onPress={() =>
-                update({
-                  days: draft.days.includes(index)
-                    ? draft.days.filter((d) => d !== index)
-                    : [...draft.days, index],
-                })
-              }
-              style={{
-                flex: 1,
-                maxWidth: 46,
-                minHeight: 44,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: palette.primary,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: draft.days.includes(index)
-                  ? palette.primary
-                  : "white",
-              }}
-            >
-              <Label
-                style={{
-                  color: draft.days.includes(index) ? "white" : palette.primary,
-                }}
-              >
-                {day[0]}
-              </Label>
-            </Pressable>
-          ))}
-        </View>
-      </Panel>
-      <Panel>
-        <View style={ui.between}>
-          <Heading style={{ fontSize: 13 }}>Clinic Hours</Heading>
-          <Label style={{ color: palette.primary, fontSize: 13 }}>
-            {timeValid
-              ? `${formatTime(minutes(draft.start))} – ${formatTime(minutes(draft.end))}`
-              : "Enter valid hours"}
-          </Label>
-        </View>
-        <View style={ui.row}>
-          <Input
-            label="Start Time"
-            accessibilityLabel="Start Time"
-            value={draft.start}
-            onChangeText={(start) => update({ start })}
-            placeholder="09:00"
-            maxLength={5}
-            containerStyle={ui.flex}
-          />
-          <Input
-            label="End Time"
-            accessibilityLabel="End Time"
-            value={draft.end}
-            onChangeText={(end) => update({ end })}
-            placeholder="17:00"
-            maxLength={5}
-            containerStyle={ui.flex}
-          />
-        </View>
-      </Panel>
+      {practices.isLoading ? <Label muted>Loading your clinics…</Label> : null}
+      {practices.isError ? <Label style={ui.error}>Could not load your clinics.</Label> : null}
+      {practices.data && practices.data.length > 1 ? <Panel><Heading style={{ fontSize: 13 }}>Your clinic</Heading><View style={ui.wrap}>{practices.data.map(practice => <Choice key={practice.practice_id} label={practice.facility_name} selected={selectedPracticeId === practice.practice_id} onPress={() => setPracticeId(practice.practice_id)} />)}</View></Panel> : null}
+      {selectedPractice ? <Label muted>{selectedPractice.facility_name}{selectedPractice.verified ? "" : " · awaiting verification"}</Label> : null}
+      {saved.isLoading ? <Label muted>Loading saved schedule…</Label> : null}
+      {saved.isError ? <Label style={ui.error}>Could not load saved schedule.</Label> : null}
+      <WorkingDaysPanel
+        selectedDays={draft.days}
+        onToggleDay={(index) =>
+          update({
+            days: draft.days.includes(index)
+              ? draft.days.filter((d) => d !== index)
+              : [...draft.days, index],
+          })
+        }
+      />
+      <ClinicHoursPanel
+        start={draft.start}
+        end={draft.end}
+        timeValid={timeValid}
+        onUpdate={update}
+      />
       <Panel>
         <Range
           title="Slot Duration"
@@ -241,7 +243,7 @@ export function ScheduleScreen() {
         </View>
         <Label muted style={{ fontSize: 12 }}>
           {draft.autoAccept
-            ? `New bookings will be auto-accepted up to ${draft.autoLimit} per day.`
+            ? `Published clinic sessions can auto-accept up to ${draft.autoLimit} bookings.`
             : "All new bookings will need manual approval."}
         </Label>
         {draft.autoAccept && (
@@ -280,52 +282,102 @@ export function ScheduleScreen() {
         </View>
         <Label muted style={{ fontSize: 12 }}>
           {draft.homeVisits
-            ? "Patients can request home visit appointments."
-            : "Home visit bookings are disabled. Clinic and online appointments remain available."}
+            ? "Home visit preference saved; home visit booking is not connected yet."
+            : "Home visit bookings are disabled."}
         </Label>
+        {draft.homeVisits ? <Input label="Travel radius from practice (km)" accessibilityLabel="Home visit travel radius in kilometres" value={draft.homeRadius} onChangeText={(homeRadius) => update({ homeRadius })} keyboardType="decimal-pad" /> : null}
       </Panel>
-      <Panel>
-        <Heading style={{ fontSize: 13 }}>Consultation Charges</Heading>
-        {(
-          [
-            ["Online Consultation", "onlineFee"],
-            ["Clinic Visit", "clinicFee"],
-            ["Home Visit", "homeFee"],
-          ] as const
-        ).map(([title, key]) => (
-          <View key={key} style={ui.between}>
-            <Label style={{ fontSize: 13, flex: 1 }}>{title}</Label>
-            <Label>₹</Label>
-            <Input
-              accessibilityLabel={`${title} charge in rupees`}
-              value={draft[key]}
-              onChangeText={(value) => update({ [key]: value })}
-              keyboardType="decimal-pad"
-              containerStyle={{ width: 100 }}
-            />
-          </View>
-        ))}
-        <Label muted style={{ fontSize: 12 }}>
-          Patients will see these charges while booking
-        </Label>
-      </Panel>
+      <ConsultationChargesPanel draft={draft} onUpdate={update} />
       {!!error && <Label style={ui.error}>{error}</Label>}
       {!!message && <Label style={ui.success}>{message}</Label>}
       <Button
         theme="doctor"
-        label="Save Schedule"
+        label={busy ? "Saving…" : "Save Schedule"}
         leftIcon={<Calendar size={17} color="white" />}
-        onPress={() => {
-          const problem = scheduleError(draft);
-          if (problem) {
-            setError(problem);
-            return;
-          }
-          save({ ...draft, days: [...draft.days] });
-          setMessage("Schedule saved for this demo session.");
-          setError("");
-        }}
+        disabled={busy || !selectedPracticeId}
+        onPress={() => void save()}
       />
+      {selectedPracticeId ? (
+        <>
+          <PublishSessionPanel
+            publishDate={publishDate}
+            onPublishDateChange={setPublishDate}
+            busy={busy}
+            disabled={!selectedPractice?.verified || !saved.data || !publishDate}
+            onPublish={() => void publish("clinic")}
+            onPublishOnline={() => void publish("online")}
+            onlineDisabled={draft.online < 1}
+          />
+          <PublishedSessionsPanel
+            sessions={sessions.data}
+            sessionLimits={sessionLimits}
+            onLimitChange={(id, value) =>
+              setSessionLimits((current) => ({ ...current, [id]: value }))
+            }
+            busy={busy}
+            onSaveLimit={async (session) => {
+              if (!supabase) return;
+              try {
+                await setClinicAutoConfirmLimit(supabase, {
+                  sessionId: session.id,
+                  expectedVersion: Number(session.row_version),
+                  limit: Number(
+                    sessionLimits[session.id] ??
+                      session.auto_confirm_limit ??
+                      0,
+                  ),
+                });
+                await queryClient.invalidateQueries({
+                  queryKey: ["doctor-clinic-sessions", selectedPracticeId],
+                });
+                setMessage("Approval limit updated.");
+              } catch {
+                setError("Could not update approval limit.");
+              }
+            }}
+            isError={sessions.isError}
+          />
+          <UnavailableTimePanel
+            leaveDate={leaveDate}
+            onLeaveDateChange={setLeaveDate}
+            leaveStart={leaveStart}
+            onLeaveStartChange={setLeaveStart}
+            leaveEnd={leaveEnd}
+            onLeaveEndChange={setLeaveEnd}
+            leaveReason={leaveReason}
+            onLeaveReasonChange={setLeaveReason}
+            busy={busy}
+            canAdd={
+              Boolean(
+                leaveDate &&
+                  leaveStart &&
+                  leaveEnd &&
+                  leaveReason.trim().length >= 2,
+              )
+            }
+            onAddLeave={() => void addLeave()}
+            unavailable={unavailable.data}
+            onRemoveLeave={async (item) => {
+              if (!supabase) return;
+              try {
+                await revokeClinicUnavailability(supabase, {
+                  exceptionId: item.id,
+                  expectedVersion: Number(item.row_version),
+                });
+                await queryClient.invalidateQueries({
+                  queryKey: [
+                    "doctor-clinic-unavailability",
+                    selectedPracticeId,
+                  ],
+                });
+              } catch {
+                setError("Could not remove unavailable time.");
+              }
+            }}
+            isError={unavailable.isError}
+          />
+        </>
+      ) : null}
     </DoctorScreen>
   );
 }

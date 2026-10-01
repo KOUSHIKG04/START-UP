@@ -11,7 +11,8 @@ import {
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
-import { mobileSession, supabase, useMobileSession } from "../services/supabase";
+import { mobileSession, useMobileSession } from "../services/supabase";
+import { signOutWithPushCleanup, useDeviceNotifications } from "../features/notifications/deviceNotifications";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -28,6 +29,7 @@ const navTheme = {
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(albertSansFonts);
   const auth = useMobileSession();
+  useDeviceNotifications(auth.profile?.identity_id);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -43,7 +45,7 @@ export default function RootLayout() {
   }
 
   if (auth.loading) return <View style={styles.root}><ActivityIndicator style={{ flex: 1 }} /></View>;
-  if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void supabase?.auth.signOut()} /></View>;
+  if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void signOutWithPushCleanup()} /></View>;
 
   return (
     <MobileThemeProvider theme="patient">

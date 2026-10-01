@@ -8,7 +8,17 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import * as Location from "expo-location";
+import * as Haptics from "expo-haptics";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ambulance, CircleAlert, User } from "lucide-react-native";
+import {
+  listMyAmbulanceFleet,
+  listMyDriverOffers,
+  listMyDriverTrips,
+  respondMyDriverOffer,
+  setMyDriverAvailability,
+} from "@startup/data-access";
 import { Button } from "@startup/mobile-ui";
 import {
   Body,
@@ -17,65 +27,179 @@ import {
   Heading,
   Metrics,
   PageHeader,
-  palette,
-  ui,
 } from "../../../components/DriverUI";
-import { emergency, useDriver } from "../../../stores/driver";
+import { palette, ui } from "../../../components/theme";
+import { supabase, useMobileSession } from "../../../services/supabase";
 
 export function HomeScreen() {
-  const d = useDriver();
-  const [remaining, setRemaining] = useState(15);
-  useEffect(() => {
-    if (d.stage !== "request") return;
-    const tick = () => {
-      const seconds = Math.max(
-        0,
-        Math.ceil(((d.deadline ?? 0) - Date.now()) / 1000)
-      );
-      setRemaining(seconds);
-      if (!seconds) d.reject();
-    };
-    tick();
-    const timer = setInterval(tick, 250);
-    return () => clearInterval(timer);
-  }, [d.stage, d.deadline, d.reject]);
-  const active = ["pickup", "arrived", "progress", "complete"].includes(
-    d.stage
+  const { profile } = useMobileSession();
+  const [now, setNow] = useState(Date.now());
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const client = useQueryClient();
+  const driverId = profile?.driver?.id;
+  
+  const fleet = useQuery({
+    queryKey: ["driver-fleet", driverId],
+    queryFn: () => listMyAmbulanceFleet(supabase!),
+    enabled: Boolean(supabase && driverId),
+  });
+
+  const offers = useQuery({
+    queryKey: ["driver-offers", driverId],
+    queryFn: () => listMyDriverOffers(supabase!),
+    enabled: Boolean(supabase && driverId),
+    refetchInterval: 15000,
+  });
+
+  const trips = useQuery({
+    queryKey: ["my-driver-trips", driverId],
+    queryFn: () => listMyDriverTrips(supabase!),
+    enabled: Boolean(supabase && driverId),
+    refetchInterval: 15000,
+  });
+
+  const vehicle =
+    fleet.data?.find((item) => item.desired_availability === "online") ??
+    fleet.data?.find((item) => item.ready_to_go_available);
+  
+  const online = vehicle?.desired_availability === "online";
+  
+  const active = trips.data?.find(
+    (item) => !["completed", "cancelled"].includes(item.status)
   );
-  const total = d.trips.reduce((sum, t) => sum + t.fare, 0);
+
+  const completedToday =
+    trips.data?.filter(
+      (item) =>
+        item.status === "completed" &&
+        item.completed_at &&
+        new Date(item.completed_at).toDateString() === new Date().toDateString()
+    ).length ?? 0;
+
+  const offer = offers.data?.find(
+    (item) =>
+      item.status === "pending" && new Date(item.expires_at).getTime() > now
+  );
+
+
+  const remaining = offer
+    ? Math.max(
+        0,
+        Math.ceil((new Date(offer.expires_at).getTime() - now) / 1000)
+      )
+    : 0;
+
+  useEffect(() => {
+    
+    if (!offer) return;
+    
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [offer?.id]);
+
+  async function changeAvailability(value: boolean) {
+    if (!supabase || !vehicle || busy) return;
+   
+    setBusy(true);
+    setMessage("");
+
+    try {
+      let latitude: number | undefined;
+      let longitude: number | undefined;
+
+      if (value) {
+        const permission = await Location.requestForegroundPermissionsAsync();
+        
+        if (!permission.granted)
+          throw new Error("Allow location to go Available.");
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        
+        try {
+          await Location.requestBackgroundPermissionsAsync();
+        } catch {
+          /* Foreground dispatch remains available when background access is denied. */
+        }
+      }
+
+      await setMyDriverAvailability(supabase, {
+        vehicleId: vehicle.vehicle_id,
+        online: value,
+        latitude,
+        longitude,
+      });
+
+      await client.invalidateQueries({ queryKey: ["driver-fleet", driverId] });
+    } catch (cause) {
+      setMessage(
+        cause instanceof Error
+          ? cause.message
+          : "Could not update availability."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function respond(accept: boolean) {
+    if (!supabase || !offer || busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      await respondMyDriverOffer(supabase, offer.id, accept);
+      void Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success
+      ).catch(() => {});
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["driver-offers", driverId] }),
+        client.invalidateQueries({ queryKey: ["my-driver-trips", driverId] }),
+      ]);
+      if (accept) router.push("/trip");
+    } catch {
+      setMessage(
+        "The request expired or is no longer available. Refresh and try again."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  
   return (
     <View style={ui.screen}>
       <PageHeader
         title="CLINZO Driver"
         subtitle={
-          d.online
+          online
             ? "Online — You will now receive rides"
             : "Offline — Switch online to receive rides"
         }
         right={
           <Switch
             accessibilityLabel="Receive emergency requests"
-            value={d.online}
-            disabled={active}
-            onValueChange={d.setOnline}
+            value={online}
+            disabled={
+              busy || !vehicle?.ready_to_go_available || Boolean(active)
+            }
+            onValueChange={(value) => void changeAvailability(value)}
             trackColor={{ false: "#075c65", true: "#075c65" }}
             thumbColor="white"
           />
         }
       />
       <Body>
-        {active && (
+        {active ? (
           <Button
             theme="driver"
-            label={
-              d.stage === "complete"
-                ? "View completed trip"
-                : "Return to active trip"
-            }
+            label="Return to active trip"
             onPress={() => router.push("/trip")}
           />
-        )}
-        {d.online && (
+        ) : null}
+        {online ? (
           <>
             <View style={styles.wait}>
               <View style={styles.dot} />
@@ -84,35 +208,38 @@ export function HomeScreen() {
               </Copy>
             </View>
             <Image
-              accessibilityLabel="Reference map of the driver location"
+              accessibilityLabel="Reference map; live route navigation is not connected"
               source={require("../../../../assets/figma/online-map.png")}
               style={styles.map}
             />
+            <Copy style={ui.caption}>
+              Reference map · live navigation is not connected
+            </Copy>
           </>
-        )}
+        ) : null}
         <Card>
           <Copy style={{ color: palette.muted }}>
-            {d.online ? "TODAY’S WORK SUMMARY" : "TODAY’S SUMMARY"}
+            {online ? "TODAY’S WORK SUMMARY" : "TODAY’S SUMMARY"}
           </Copy>
           <View style={ui.between}>
             <View>
-              <Copy style={styles.total}>₹{total.toLocaleString("en-IN")}</Copy>
+              <Copy style={styles.total}>—</Copy>
               <Copy style={ui.caption}>Total Earnings</Copy>
             </View>
             <View style={{ alignItems: "flex-end" }}>
-              <Copy style={styles.total}>{d.trips.length}</Copy>
+              <Copy style={styles.total}>{completedToday}</Copy>
               <Copy style={ui.caption}>Completed Trips</Copy>
             </View>
           </View>
         </Card>
         <Metrics
           items={[
-            [d.trips.length ? "100%" : "—", "Acceptance"],
+            ["—", "Acceptance"],
             ["—", "Rating"],
-            ["0.0h", "Online Hrs"],
+            ["—", "Online Hrs"],
           ]}
         />
-        {!d.online && !d.trips.length && (
+        {!online && completedToday === 0 ? (
           <Card>
             <View style={[ui.center, { paddingVertical: 10 }]}>
               <Ambulance size={42} color={palette.border} />
@@ -122,24 +249,28 @@ export function HomeScreen() {
               </Copy>
             </View>
           </Card>
-        )}
-        {d.online && !active && (
-          <View style={styles.preview}>
-            <Copy style={ui.caption}>Local preview · sample dispatch</Copy>
-            <Button
-              theme="driver"
-              variant="outline"
-              label="Preview emergency request"
-              onPress={d.request}
-            />
-          </View>
-        )}
+        ) : null}
+        {!vehicle ? (
+          <Card>
+            <Heading>Vehicle review required</Heading>
+            <Copy>
+              Add a vehicle and documents in Profile, then wait for company
+              approval before going Available.
+            </Copy>
+          </Card>
+        ) : null}
+        {offers.isError || trips.isError || fleet.isError ? (
+          <Copy accessibilityRole="alert">
+            Could not refresh requests or status.
+          </Copy>
+        ) : null}
+        {message ? <Copy accessibilityRole="alert">{message}</Copy> : null}
       </Body>
       <Modal
-        visible={d.stage === "request"}
+        visible={Boolean(offer)}
         transparent
         animationType="fade"
-        onRequestClose={d.reject}
+        onRequestClose={() => void respond(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.request}>
@@ -152,18 +283,33 @@ export function HomeScreen() {
               <View style={styles.avatar}>
                 <User color="white" />
               </View>
-              <Heading>{emergency.patient}</Heading>
+              <Heading>
+                {offer?.booking_type === "sos"
+                  ? "SOS request"
+                  : "Ambulance request"}
+              </Heading>
               <Copy style={[ui.badge, { marginLeft: "auto", maxWidth: 140 }]}>
-                Advanced Life Support
+                {offer?.capability_code}
               </Copy>
             </View>
-            <Address label="PICKUP" text={emergency.pickup} />
-            <Address label="HOSPITAL" text={emergency.hospital} />
+            <Address
+              label="PICKUP"
+              text={offer?.pickup_address ?? "Location provided in request"}
+            />
+            <Address
+              label="HOSPITAL"
+              text={offer?.destination_address ?? "Destination to be confirmed"}
+            />
             <Metrics
               items={[
-                ["4.6 km", "Distance"],
-                ["9 mins", "ETA"],
-                ["₹1,200", "Est. fare"],
+                [
+                  offer
+                    ? `${(offer.distance_meters / 1000).toFixed(1)} km`
+                    : "—",
+                  "Distance",
+                ],
+                ["—", "ETA"],
+                ["—", "Est. fare"],
               ]}
             />
             <View style={[ui.row, { marginTop: 20 }]}>
@@ -172,17 +318,15 @@ export function HomeScreen() {
                 variant="outline"
                 label="Reject"
                 style={ui.grow}
-                onPress={d.reject}
+                disabled={busy}
+                onPress={() => void respond(false)}
               />
               <Button
                 theme="driver"
                 label="Accept"
                 style={ui.grow}
-                onPress={() => {
-                  d.accept();
-                  if (useDriver.getState().stage === "pickup")
-                    router.push("/trip");
-                }}
+                disabled={busy}
+                onPress={() => void respond(true)}
               />
             </View>
           </View>
@@ -216,7 +360,6 @@ const styles = StyleSheet.create({
   },
   map: { width: "100%", height: 211, borderRadius: 12, resizeMode: "cover" },
   total: { fontSize: 28, lineHeight: 36, fontWeight: "700" },
-  preview: { gap: 8, marginTop: 12 },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.72)",

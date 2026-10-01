@@ -49,4 +49,9 @@ enabled = false
 enabled = false
 
 [functions.send-notification]
-enabled = false
+enabled = true
+verify_jwt = false
+
+[functions.online-video-token]
+enabled = true
+verify_jwt = true

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type Href } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { listClinicAppointments } from "@startup/data-access";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell, ChevronLeft, Search, X } from "lucide-react-native";
 import {
@@ -24,14 +26,12 @@ import {
   IconLabel,
   SafeAreaView,
   SearchInput,
-  Button,
 } from "@startup/mobile-ui";
-import { homeActions } from "../utils/HomeActions";
-import AmbulanceBanner from "../components/AmbulanceBanner";
-import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
-import PopularServices from "../components/PopularServices";
+import { HomeSearchResults } from "../components/HomeSearchResults";
+import { HomeFeedContent } from "../components/HomeFeedContent";
 import { NotificationDrawer } from "../../../components/NotificationDrawer";
 import { useTypewriterPlaceholder } from "../../../hooks/useTypewriterPlaceholder";
+import { supabase } from "../../../services/supabase";
 import {
   COLLAPSE_DISTANCE,
   CONTENT_TOP,
@@ -66,15 +66,63 @@ export function HomeScreen({
   onNotificationPress?: () => void;
 } = {}) {
   const { top: topInset } = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollYRef = useRef<Animated.Value | null>(null);
+  if (scrollYRef.current === null) {
+    scrollYRef.current = new Animated.Value(0);
+  }
+  const scrollY = scrollYRef.current;
   const searchInputRef = useRef<TextInput>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchPlaceholder = useTypewriterPlaceholder();
 
+  const appointments = useQuery({
+    queryKey: ["patient-clinic-appointments"],
+    queryFn: () => listClinicAppointments(supabase!),
+    enabled: Boolean(supabase),
+    refetchInterval: 15000,
+  });
+
+  const upcoming = appointments.data
+    ?.filter(
+      (item) =>
+        ["pending", "confirmed"].includes(item.status) &&
+        new Date(item.ends_at).getTime() >= Date.now()
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+    )[0];
+
   const { collapsedHeight, expandedHeaderStyle, searchStyle } =
     getHeaderAnimationStyles(scrollY, topInset);
+
+  const handleCloseSearch = useCallback(() => {
+    Keyboard.dismiss();
+    searchInputRef.current?.blur();
+
+    setIsSearchActive(false);
+    setSearchQuery("");
+
+    if (scrollYRef.current) {
+      Animated.timing(scrollYRef.current, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, []);
+
+  const handleOpenSearch = () => {
+    if (isSearchActive) return;
+    setIsSearchActive(true);
+    Animated.timing(scrollY, {
+      toValue: COLLAPSE_DISTANCE,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  };
 
   // Intercept Android hardware back press so hitting back navigation
   // returns to the home page instead of exiting the app
@@ -92,29 +140,7 @@ export function HomeScreen({
     );
 
     return () => backHandlerSubscription.remove();
-  }, [isSearchActive]);
-
-  const handleOpenSearch = () => {
-    if (isSearchActive) return;
-    setIsSearchActive(true);
-    Animated.timing(scrollY, {
-      toValue: COLLAPSE_DISTANCE,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handleCloseSearch = () => {
-    Keyboard.dismiss();
-    searchInputRef.current?.blur();
-    setIsSearchActive(false);
-    setSearchQuery("");
-    Animated.timing(scrollY, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  };
+  }, [isSearchActive, handleCloseSearch]);
 
   const handleSelectItem = (term: string) => {
     Keyboard.dismiss();
@@ -181,93 +207,22 @@ export function HomeScreen({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {!isSearchActive ? <>
-          <Button label="Book a live clinic visit" onPress={() => router.push("/(app)/clinic" as Href)} />
-          <Text style={{ color: colors.patient.textSecondary }}>Other home cards are design previews; live bookings appear in Clinic visits.</Text>
-        </> : null}
         {isSearchActive ? (
           <View style={styles.searchActiveContent}>
             {trimmedQuery ? (
-              <View style={styles.liveResultsContainer}>
-                {liveResults.length > 0 ? (
-                  liveResults.map((item) => (
-                    <Pressable
-                      key={item.title}
-                      accessibilityLabel={`${item.title}, ${item.type}`}
-                      accessibilityRole="button"
-                      onPress={() => handleSelectItem(item.title)}
-                      style={({ pressed }) => [
-                        styles.liveResultRow,
-                        pressed && styles.rowPressed,
-                      ]}
-                    >
-                      <Search
-                        color="#9ca3af"
-                        size={18}
-                        strokeWidth={1.8}
-                        style={styles.rowIcon}
-                      />
-                      <View style={styles.rowContent}>
-                        <Text style={styles.itemTitle}>{item.title}</Text>
-                        <Text style={styles.itemSubtitle}>{item.type}</Text>
-                      </View>
-                    </Pressable>
-                  ))
-                ) : (
-                  <View style={styles.emptyResults}>
-                    <Text style={styles.emptyText}>
-                      No results found for "{searchQuery}".
-                    </Text>
-                    <Pressable
-                      onPress={() => handleSelectItem(searchQuery.trim())}
-                      style={styles.searchAnywayButton}
-                    >
-                      <Text style={styles.searchAnywayText}>
-                        Search for "{searchQuery}"
-                      </Text>
-                    </Pressable>
-                  </View>
-                )}
-              </View>
+              <HomeSearchResults
+                liveResults={liveResults}
+                searchQuery={searchQuery}
+                onSelectItem={handleSelectItem}
+              />
             ) : null}
           </View>
         ) : (
-          <>
-            <View style={styles.actionsRow}>
-              {homeActions.map((action) => (
-                <IconLabel
-                  key={action.key}
-                  icon={action.icon}
-                  label={action.label}
-                  backgroundColor={colors.patient.primary}
-                  iconColor={colors.patient.surface}
-                  onPress={
-                    action.consultationType
-                      ? () =>
-                          router.push(
-                            getFindDoctorRoute(action.consultationType!)
-                          )
-                      : undefined
-                  }
-                  surfaceSize={52}
-                  surfaceRadius={16}
-                  iconSize={24}
-                  labelWidth={76}
-                  gap={8}
-                  labelNumberOfLines={2}
-                  labelStyle={styles.actionLabel}
-                />
-              ))}
-            </View>
-
-            <View style={styles.ambulanceBanner}>
-              <AmbulanceBanner
-                onBookPress={() => router.push("/ambulance" as unknown as Href)}
-              />
-            </View>
-            <UpcomingAppointmentCard />
-            <PopularServices />
-          </>
+          <HomeFeedContent
+            upcoming={upcoming}
+            isLoading={appointments.isLoading}
+            isError={appointments.isError}
+          />
         )}
       </FadedScrollView>
 

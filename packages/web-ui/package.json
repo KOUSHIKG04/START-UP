@@ -21,6 +21,7 @@
     "./styles/*": "./src/styles/*"
   },
   "dependencies": {
+    "@base-ui/react": "1.7.0",
     "@startup/design-tokens": "workspace:*",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.14.13",

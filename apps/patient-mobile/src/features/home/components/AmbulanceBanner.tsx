@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     backgroundColor: "#E6F7F6",
-    elevation: 8,
+    boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.12)",
   },
   content: {
     minWidth: 0,

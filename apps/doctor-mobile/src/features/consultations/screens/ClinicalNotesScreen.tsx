@@ -1,27 +1,119 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { FileText } from "lucide-react-native";
-import { Button, TextArea } from "@startup/mobile-ui";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { completeOnlineAppointment, listMyPracticeAppointments, transitionClinicAppointment } from "@startup/data-access";
+import { uuidSchema } from "@startup/contracts";
+import { Button, Input, TextArea } from "@startup/mobile-ui";
 import {
   DoctorScreen,
   Heading,
   Label,
   MissingPatient,
-  palette,
-  ui,
+  Panel,
 } from "../../../components/DoctorScreen";
+import { palette, ui } from "../../../components/theme";
+import { ConsultationForm } from "../../clinic/components/ConsultationForm";
 import { useVisit, visitRoute } from "../utils/consultation";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
 import { createConsultation } from "../../../data/demo";
+import { supabase } from "../../../services/supabase";
+
 export function ClinicalNotesScreen() {
+  const params = useLocalSearchParams<{
+    appointmentId?: string;
+    patientId?: string;
+    mode?: string;
+  }>();
+
+  const isLiveAppointment = Boolean(
+    params.appointmentId && uuidSchema.safeParse(params.appointmentId).success
+  );
+
+  const queryClient = useQueryClient();
+  const appointmentsQuery = useQuery({
+    queryKey: ["doctor-clinic-appointments", "all"],
+    queryFn: () => listMyPracticeAppointments(supabase!),
+    enabled: Boolean(supabase && isLiveAppointment),
+  });
+
+  const liveAppointment = appointmentsQuery.data?.find(
+    (item) => item.id === params.appointmentId
+  );
+
+  const [assessment, setAssessment] = useState("");
+  const [completeMessage, setCompleteMessage] = useState("");
+
+  const completeMutation = useMutation({
+    mutationFn: () => liveAppointment?.visit_mode === "online"
+      ? completeOnlineAppointment(supabase!, liveAppointment.id, assessment.trim())
+      : transitionClinicAppointment(supabase!, {
+        appointmentId: liveAppointment!.id,
+        expectedVersion: Number(liveAppointment!.row_version),
+        action: "complete",
+        note: assessment.trim() || null,
+      }),
+    onSuccess: () => {
+      setCompleteMessage("Consultation signed and completed.");
+      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+    },
+    onError: () => {
+      setCompleteMessage("Could not complete consultation. Check current status.");
+    },
+  });
+
+  // Demo fallback
   const { patient, appointment } = useVisit();
   const visits = useDoctorStore((s) => s.consultations);
   const update = useDoctorStore((s) => s.updateConsultation);
   const complete = useDoctorStore((s) => s.complete);
   const [confirm, setConfirm] = useState(false);
+
+  if (isLiveAppointment && liveAppointment) {
+    return (
+      <DoctorScreen
+        title={liveAppointment.patient_name}
+        subtitle={`${liveAppointment.facility_name} · Booking ${liveAppointment.public_code}`}
+      >
+        <ConsultationForm appointmentId={liveAppointment.id} />
+        {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
+          <View style={{ marginTop: 16, gap: 10 }}>
+            <Input
+              label="Signed assessment note"
+              value={assessment}
+              onChangeText={setAssessment}
+              multiline
+              placeholder="Enter clinical assessment before completing..."
+            />
+            <Button
+              theme="doctor"
+              label="Sign assessment and complete consultation"
+              disabled={completeMutation.isPending || !assessment.trim()}
+              onPress={() => completeMutation.mutate()}
+            />
+          </View>
+        ) : liveAppointment.status === "completed" ? (
+          <Panel style={{ marginTop: 16 }}>
+            <Label style={ui.success}>
+              This consultation has been completed and signed.
+            </Label>
+          </Panel>
+        ) : null}
+        {completeMessage ? (
+          <Label
+            style={completeMessage.startsWith("Could") ? ui.error : ui.success}
+          >
+            {completeMessage}
+          </Label>
+        ) : null}
+      </DoctorScreen>
+    );
+  }
+
   if (!patient || !appointment) return <MissingPatient />;
   const visit = visits[appointment.id] ?? createConsultation(patient.id);
+
   return (
     <DoctorScreen
       title={patient.name}

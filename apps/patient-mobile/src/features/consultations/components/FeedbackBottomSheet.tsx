@@ -34,20 +34,17 @@ export default function FeedbackBottomSheet({
     };
   }, []);
 
-  useEffect(() => {
-    if (!visible) {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      setSubmitted(false);
-      setFeedback("");
-    }
-  }, [visible]);
+  const handleClose = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setSubmitted(false);
+    setFeedback("");
+    onClose();
+  };
 
   const submit = () => {
     setSubmitted(true);
     timerRef.current = setTimeout(() => {
-      setSubmitted(false);
-      setFeedback("");
-      onClose();
+      handleClose();
       if (onSubmitSuccess) {
         onSubmitSuccess();
       } else {
@@ -59,7 +56,7 @@ export default function FeedbackBottomSheet({
   return (
     <Modal
       animationType="slide"
-      onRequestClose={submitted ? undefined : onClose}
+      onRequestClose={submitted ? undefined : handleClose}
       statusBarTranslucent
       transparent
       visible={visible}
@@ -73,7 +70,7 @@ export default function FeedbackBottomSheet({
           accessibilityLabel="Close feedback"
           accessibilityRole="button"
           disabled={submitted}
-          onPress={onClose}
+          onPress={handleClose}
           style={styles.backdrop}
         />
         <View style={styles.sheet}>

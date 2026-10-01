@@ -2,10 +2,10 @@ import { StyleSheet, Text, View } from "react-native";
 import { ChevronRight, MapPin } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, CardSeparator, Chip } from "@startup/mobile-ui";
-import { languages } from "../utils/doctorProfileConstants";
 import type { AboutDoctorProps } from "../types/doctor-profile";
+import { doctorLanguageName } from "../utils/doctorDisplay";
 
-export function AboutDoctor({ doctorName, onGoToSlots }: AboutDoctorProps) {
+export function AboutDoctor({ doctorName, bio, facilityName, facilityAddress, distanceMeters, languages, onGoToSlots }: AboutDoctorProps) {
   return (
     <View style={styles.container}>
       <Card
@@ -21,9 +21,7 @@ export function AboutDoctor({ doctorName, onGoToSlots }: AboutDoctorProps) {
         <View style={styles.aboutSection}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.bodyText}>
-            {doctorName} is an experienced General Physician focused on chronic
-            conditions, infectious diseases, preventive care, and clear guidance
-            for every patient.
+            {bio || `${doctorName} has not added a biography yet.`}
           </Text>
         </View>
 
@@ -39,10 +37,10 @@ export function AboutDoctor({ doctorName, onGoToSlots }: AboutDoctorProps) {
             />
             <View style={styles.hospitalCopy}>
               <Text style={styles.hospitalLine}>
-                <Text style={styles.hospitalName}>Apollo Hospitals, </Text>
-                <Text style={styles.hospitalAddress}>near Koramangala, Bengaluru, 560064</Text>
+                <Text style={styles.hospitalName}>{facilityName}, </Text>
+                <Text style={styles.hospitalAddress}>{facilityAddress}</Text>
               </Text>
-              <Text style={styles.secondaryText}>1.2 km from you</Text>
+              {distanceMeters !== null ? <Text style={styles.secondaryText}>{(distanceMeters / 1000).toFixed(1)} km from you</Text> : null}
             </View>
           </View>
         </View>
@@ -53,7 +51,7 @@ export function AboutDoctor({ doctorName, onGoToSlots }: AboutDoctorProps) {
           <Text style={styles.sectionTitle}>Languages</Text>
           <View style={styles.languageRow}>
             {languages.map((language) => (
-              <Chip key={language} label={language} style={styles.languageChip} />
+              <Chip key={language} label={doctorLanguageName(language)} style={styles.languageChip} />
             ))}
           </View>
         </View>

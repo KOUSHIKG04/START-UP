@@ -28,5 +28,18 @@ export const updateDoctorProfileSchema = z.object({
   languages: z.array(z.string().trim().regex(/^[a-z]{2,3}(-[a-z0-9]{2,8})*$/)).max(10),
 });
 
+export const ownedClinicLocationSchema = z.object({
+  facilityId: uuidSchema,
+  name: z.string().trim().min(2).max(160),
+  address: z.string().trim().min(5).max(500),
+  locality: z.string().trim().min(2).max(120),
+  city: z.string().trim().min(2).max(120),
+  state: z.string().trim().min(2).max(120),
+  pincode: z.string().regex(/^[0-9]{6}$/),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+});
+
 export type DoctorProfile = z.infer<typeof doctorProfileSchema>;
 export type UpdateDoctorProfileInput = z.infer<typeof updateDoctorProfileSchema>;
+export type OwnedClinicLocationInput = z.infer<typeof ownedClinicLocationSchema>;

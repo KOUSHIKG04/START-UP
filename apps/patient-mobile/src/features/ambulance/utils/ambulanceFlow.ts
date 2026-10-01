@@ -12,8 +12,8 @@ export type AmbulanceType = {
   id: "basic" | "advanced" | "icu";
   title: string;
   description: string;
-  fare: number;
-  eta: string;
+  fare: number | null;
+  eta: string | null;
 };
 
 export const ambulanceTypes: AmbulanceType[] = [
@@ -21,22 +21,22 @@ export const ambulanceTypes: AmbulanceType[] = [
     id: "basic",
     title: "Basic Life Support",
     description: "Oxygen and first aid",
-    fare: 500,
-    eta: "8 min",
+    fare: null,
+    eta: null,
   },
   {
     id: "advanced",
     title: "Advanced Life Support",
     description: "Cardiac monitor and defibrillator",
-    fare: 1200,
-    eta: "10 min",
+    fare: null,
+    eta: null,
   },
   {
     id: "icu",
     title: "Mobile ICU",
     description: "Full ICU setup and specialist",
-    fare: 2500,
-    eta: "15 min",
+    fare: null,
+    eta: null,
   },
 ];
 

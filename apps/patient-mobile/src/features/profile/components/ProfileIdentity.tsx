@@ -1,13 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { patientProfile } from "../utils/profileConstants";
 
 export function ProfileIdentity({
-  initials = patientProfile.initials,
-  name = patientProfile.name,
+  initials,
+  name,
 }: {
-  initials?: string;
-  name?: string;
+  initials: string;
+  name: string;
 }) {
   return (
     <View style={styles.identity}>

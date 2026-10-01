@@ -16,6 +16,8 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="family-profile" />
+      <Stack.Screen name="add-family-member" />
     </Stack>
   );
 }

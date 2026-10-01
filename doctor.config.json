@@ -1,0 +1,15 @@
+{
+  "$schema": "https://react.doctor/schema/config.json",
+  "projects": [
+    "company-admin",
+    "facility-portal",
+    "patient-mobile",
+    "doctor-mobile",
+    "driver-mobile",
+    "@startup/mobile-ui",
+    "@startup/web-ui"
+  ],
+  "ignore": {
+    "files": ["**/dist/**", "**/.expo/**", "**/.next/**", "**/node_modules/**"]
+  }
+}

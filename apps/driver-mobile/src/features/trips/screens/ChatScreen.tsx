@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import {
+  FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,15 +13,53 @@ import { router } from "expo-router";
 import { CheckCheck, Send } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { fontFamilies } from "@startup/design-tokens";
-import { Copy, PageHeader, palette, ui } from "../../../components/DriverUI";
+import { Copy, PageHeader } from "../../../components/DriverUI";
+import { palette, ui } from "../../../components/theme";
 import { useDriver } from "../../../stores/driver";
+
+interface DriverMessage {
+  id: string;
+  incoming: boolean;
+  text: string;
+  time: string;
+}
+
+const DriverMessageBubble = memo(function DriverMessageBubble({
+  message,
+}: {
+  message: DriverMessage;
+}) {
+  return (
+    <View
+      style={[
+        styles.bubble,
+        message.incoming ? styles.incoming : styles.outgoing,
+      ]}
+    >
+      <Copy>{message.text}</Copy>
+      <View style={styles.time}>
+        <Copy style={ui.caption}>{message.time}</Copy>
+        {!message.incoming && <CheckCheck size={14} color={palette.primary} />}
+      </View>
+    </View>
+  );
+});
+
+const ChatHeader = memo(function ChatHeader() {
+  return (
+    <Copy style={[ui.caption, { textAlign: "center", marginBottom: 4 }]}>
+      TODAY · EMERGENCY REQUEST
+    </Copy>
+  );
+});
+
 export function ChatScreen() {
   const messages = useDriver((s) => s.messages);
   const send = useDriver((s) => s.send);
   const stage = useDriver((s) => s.stage);
   const active = ["pickup", "arrived", "progress"].includes(stage);
   const [draft, setDraft] = useState("");
-  const scroll = useRef<ScrollView>(null);
+  const flatListRef = useRef<FlatList<DriverMessage>>(null);
   const insets = useSafeAreaInsets();
   const submit = (text: string) => {
     if (text.trim() && active) {
@@ -28,6 +67,14 @@ export function ChatScreen() {
       setDraft("");
     }
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: DriverMessage }) => (
+      <DriverMessageBubble message={item} />
+    ),
+    []
+  );
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -38,32 +85,17 @@ export function ChatScreen() {
         subtitle="Patient chat · local preview"
         onBack={() => router.back()}
       />
-      <ScrollView
-        ref={scroll}
-        onContentSizeChange={() =>
-          scroll.current?.scrollToEnd({ animated: true })
-        }
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(m) => m.id}
+        renderItem={renderItem}
+        ListHeaderComponent={<ChatHeader />}
         contentContainerStyle={styles.messages}
-      >
-        <Copy style={[ui.caption, { textAlign: "center", marginBottom: 4 }]}>
-          TODAY · EMERGENCY REQUEST
-        </Copy>
-        {messages.map((m) => (
-          <View
-            key={m.id}
-            style={[
-              styles.bubble,
-              m.incoming ? styles.incoming : styles.outgoing,
-            ]}
-          >
-            <Copy>{m.text}</Copy>
-            <View style={styles.time}>
-              <Copy style={ui.caption}>{m.time}</Copy>
-              {!m.incoming && <CheckCheck size={14} color={palette.primary} />}
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+        onContentSizeChange={() =>
+          flatListRef.current?.scrollToEnd({ animated: true })
+        }
+      />
       <View
         style={[
           styles.composer,

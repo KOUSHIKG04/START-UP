@@ -12,6 +12,7 @@ function first(value?: string | string[]) {
 export function appointmentFromParams(params: AppointmentParams): Appointment {
   return {
     id: first(params.id) ?? "#APT20260820",
+    backendId: first(params.backendId),
     doctorName: first(params.doctorName) ?? "Dr. Ananya Sharma",
     qualification:
       first(params.qualification) ?? "MBBS, MD (General Medicine)",

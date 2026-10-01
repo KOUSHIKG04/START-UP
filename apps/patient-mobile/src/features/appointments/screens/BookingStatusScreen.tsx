@@ -23,6 +23,7 @@ import AppointmentDetailsCard from "../components/AppointmentDetailsCard";
 import DoctorCard from "../../doctors/components/DoctorCard";
 import type {
   Appointment,
+  AppointmentStatus,
 } from "../types/appointment";
 import { consultationFlows } from "../utils/consultationFlow";
 import type { BookingStatusScreenProps } from "../types/booking-status";
@@ -33,7 +34,8 @@ export function BookingStatusScreen({
   onBackPress,
   onContinue,
 }: BookingStatusScreenProps) {
-  const [currentStatus, setCurrentStatus] = useState(status);
+  const [previewStatus, setPreviewStatus] = useState<AppointmentStatus | null>(null);
+  const currentStatus = previewStatus ?? status;
   const flow = consultationFlows[appointment.consultationType];
   const isApprovedOnline =
     currentStatus === "approved" && appointment.consultationType === "Online";
@@ -69,7 +71,7 @@ export function BookingStatusScreen({
           <AppointmentDetailsCard appointment={appointment} />
 
           {currentStatus === "pending" ? (
-            <PendingStatus onPreviewApproval={() => setCurrentStatus("approved")} />
+            <PendingStatus onPreviewApproval={appointment.backendId ? undefined : () => setPreviewStatus("approved")} />
           ) : null}
         </View>
 
@@ -138,7 +140,7 @@ export function BookingStatusScreen({
 function PendingStatus({
   onPreviewApproval,
 }: {
-  onPreviewApproval: () => void;
+  onPreviewApproval?: () => void;
 }) {
   return (
     <View style={styles.pendingCard}>
@@ -159,7 +161,7 @@ function PendingStatus({
           </Text>
         </View>
       </View>
-      <Button
+      {onPreviewApproval ? <Button
         label="Preview approved booking"
         onPress={onPreviewApproval}
         variant="outline"
@@ -173,7 +175,7 @@ function PendingStatus({
             strokeWidth={2}
           />
         }
-      />
+      /> : null}
     </View>
   );
 }

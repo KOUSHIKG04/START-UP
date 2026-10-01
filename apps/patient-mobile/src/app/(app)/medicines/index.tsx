@@ -1,6 +1,12 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MedicinesScreen } from "../../../features/medicines/screens/MedicinesScreen";
 
 export default function MedicinesRoute() {
-  return <MedicinesScreen onBackPress={() => router.back()} />;
+  const params = useLocalSearchParams<{ appointmentId?: string }>();
+  return (
+    <MedicinesScreen
+      appointmentId={params.appointmentId}
+      onBackPress={() => router.back()}
+    />
+  );
 }

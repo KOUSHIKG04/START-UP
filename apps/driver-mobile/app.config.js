@@ -1,0 +1,31 @@
+const { expo } = require("./app.json");
+
+const variant = process.env.APP_VARIANT ?? "development";
+
+if (!["development", "preview", "production"].includes(variant)) {
+  throw new Error(`Unsupported APP_VARIANT: ${variant}`);
+}
+
+const suffix =
+  variant === "production"
+    ? ""
+    : variant === "development"
+      ? ".dev"
+      : ".preview";
+
+const label =
+  variant === "production"
+    ? ""
+    : variant === "development"
+      ? " (Dev)"
+      : " (Preview)";
+
+module.exports = {
+  ...expo,
+  owner: "koushig07",
+  name: `${expo.name}${label}`,
+  scheme: `${expo.scheme}${suffix.replace(".", "-")}`,
+  extra: { ...expo.extra, eas: { ...expo.extra?.eas, projectId: "2bde3828-0493-4416-bd6f-18f4d2c98e78" } },
+  android: { ...expo.android, package: `com.clinzo.driver${suffix}` },
+  ios: { ...expo.ios, bundleIdentifier: `com.clinzo.driver${suffix}` },
+};

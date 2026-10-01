@@ -47,6 +47,15 @@ if ($UseCli) {
       @{ Name = "Clinic"; File = "clinic.cli-smoke.sql"; Result = "clinic_smoke_passed" },
       @{ Name = "Inventory"; File = "inventory.cli-smoke.sql"; Result = "inventory_smoke_passed" },
       @{ Name = "Ambulance"; File = "ambulance.cli-smoke.sql"; Result = "ambulance_smoke_passed" }
+      @{ Name = "Patient email"; File = "patient-email.cli-smoke.sql"; Result = "patient_email_smoke_passed" }
+      @{ Name = "Patient and doctor onboarding"; File = "onboarding.cli-smoke.sql"; Result = "onboarding_smoke_passed" }
+      @{ Name = "Mobile email and driver"; File = "mobile-email-driver.cli-smoke.sql"; Result = "mobile_email_driver_smoke_passed" }
+      @{ Name = "Doctor schedule"; File = "doctor-schedule.cli-smoke.sql"; Result = "doctor_schedule_smoke_passed" }
+      @{ Name = "Driver application"; File = "driver-application.cli-smoke.sql"; Result = "driver_application_smoke_passed" }
+      @{ Name = "Notifications"; File = "notifications.cli-smoke.sql"; Result = "notification_smoke_passed" }
+      @{ Name = "Push delivery"; File = "push-delivery.cli-smoke.sql"; Result = "push_delivery_smoke_passed" }
+      @{ Name = "Facility doctors"; File = "facility-doctors.cli-smoke.sql"; Result = "facility_doctors_smoke_passed" }
+      @{ Name = "Online consultation"; File = "../tooling/online-consultation.cli-smoke.sql"; Result = "online_consultation_smoke_passed" }
     )
     foreach ($smoke in $smokeTests) {
       $smokeSql = Join-Path $repoRoot "packages/database/tests/$($smoke.File)"

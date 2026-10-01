@@ -7,6 +7,7 @@ import {
 } from "@startup/data-access";
 import { Button, Input, SafeAreaView } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
+import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 
 export function LiveDoctorProfileScreen() {
   const client = useQueryClient();
@@ -19,6 +20,7 @@ export function LiveDoctorProfileScreen() {
   const [bio, setBio] = useState("");
   const [languages, setLanguages] = useState("");
   const [message, setMessage] = useState("");
+  const [editing, setEditing] = useState(false);
   useEffect(() => {
     if (!profile.data) return;
     setName(profile.data.full_name);
@@ -37,6 +39,7 @@ export function LiveDoctorProfileScreen() {
       }),
     onSuccess: async () => {
       setMessage("Profile saved.");
+      setEditing(false);
       await client.invalidateQueries({ queryKey: ["my-doctor-profile"] });
     },
     onError: (error) => setMessage(error.message),
@@ -62,19 +65,17 @@ export function LiveDoctorProfileScreen() {
               {profile.data.specialties.map((item) => item.name).join(", ") ||
                 "Awaiting verified specialty assignment"}
             </Text>
-            <Input label="Full name" value={name} onChangeText={setName} />
-            <Input label="Bio" value={bio} onChangeText={setBio} multiline />
-            <Input
-              label="Languages (codes separated by commas)"
-              value={languages}
-              onChangeText={setLanguages}
-              placeholder="en, hi"
-            />
-            <Button
-              label="Save profile"
-              disabled={save.isPending}
-              onPress={() => save.mutate()}
-            />
+            {editing ? <>
+              <Input label="Full name" value={name} onChangeText={setName} />
+              <Input label="Bio" value={bio} onChangeText={setBio} multiline />
+              <Input label="Languages (codes separated by commas)" value={languages} onChangeText={setLanguages} placeholder="en, hi" />
+              <Button label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => save.mutate()} />
+              <Button label="Cancel" variant="outline" disabled={save.isPending} onPress={() => { if (profile.data) { setName(profile.data.full_name); setBio(profile.data.bio ?? ""); setLanguages(profile.data.languages.join(", ")); } setEditing(false); setMessage(""); }} />
+            </> : <>
+              <Text>{profile.data.bio || "Add a bio to introduce yourself to patients."}</Text>
+              <Text>Languages: {profile.data.languages.join(", ") || "Not added"}</Text>
+              <Button label="Edit profile" onPress={() => setEditing(true)} />
+            </>}
             <Text style={styles.subtitle}>Associated facilities</Text>
             {profile.data.facilities.map((facility) => (
               <View key={facility.practice_id} style={styles.card}>
@@ -90,7 +91,7 @@ export function LiveDoctorProfileScreen() {
         <Button
           label="Sign out"
           variant="outline"
-          onPress={() => void supabase?.auth.signOut()}
+          onPress={() => void signOutWithPushCleanup()}
         />
       </ScrollView>
     </SafeAreaView>

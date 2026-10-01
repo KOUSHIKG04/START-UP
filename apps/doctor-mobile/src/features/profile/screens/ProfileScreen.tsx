@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Switch, View } from "react-native";
 import { router } from "expo-router";
 import {
@@ -8,19 +8,37 @@ import {
   CircleHelp,
   DollarSign,
   LogOut,
+  User,
   Star,
 } from "lucide-react-native";
 import { Button, Input } from "@startup/mobile-ui";
+import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getMyDoctorProfile,
+  listMyPracticeAppointments,
+  updateMyDoctorProfile,
+} from "@startup/data-access";
 import {
   DoctorScreen,
   Heading,
   Label,
-  palette,
   Panel,
-  ui,
 } from "../../../components/DoctorScreen";
+import { palette, ui } from "../../../components/theme";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
+import {
+  mobileSession,
+  supabase,
+  useMobileSession,
+} from "../../../services/supabase";
 const rows = [
+  {
+    title: "Edit profile",
+    icon: User,
+    color: "#087F78",
+    background: "#EFFFF9",
+  },
   {
     title: "My Ratings & Reviews",
     icon: Star,
@@ -53,13 +71,71 @@ const rows = [
   },
 ];
 export function ProfileScreen() {
+  const { session } = useMobileSession();
+  const client = useQueryClient();
+  const profile = useQuery({
+    queryKey: ["my-doctor-profile"],
+    queryFn: () => getMyDoctorProfile(supabase!),
+    enabled: Boolean(supabase),
+  });
+  const appointments = useQuery({
+    queryKey: ["doctor-clinic-appointments", "all"],
+    queryFn: () => listMyPracticeAppointments(supabase!),
+    enabled: Boolean(supabase),
+  });
   const [section, setSection] = useState<string | null>(null);
   const [logout, setLogout] = useState(false);
-  const [hospital, setHospital] = useState("Apollo Hospitals");
-  const [hospitalDraft, setHospitalDraft] = useState(hospital);
-  const notifications = useDoctorStore((s) => s.notifications);
-  const setNotifications = useDoctorStore((s) => s.setNotifications);
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [languages, setLanguages] = useState("");
+  const [editMessage, setEditMessage] = useState("");
+
+  useEffect(() => {
+    if (!profile.data) return;
+    setName(profile.data.full_name);
+    setBio(profile.data.bio ?? "");
+    setLanguages(profile.data.languages.join(", "));
+  }, [profile.data]);
+
+  const saveProfile = useMutation({
+    mutationFn: () =>
+      updateMyDoctorProfile(supabase!, {
+        fullName: name,
+        bio,
+        languages: languages
+          .split(",")
+          .map((item) => item.trim().toLowerCase())
+          .filter(Boolean),
+      }),
+
+    onSuccess: async () => {
+      setEditMessage("Profile saved.");
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["my-doctor-profile"] }),
+        mobileSession.refresh(),
+      ]);
+    },
+
+    onError: (cause) =>
+      setEditMessage(
+        cause instanceof Error ? cause.message : "Could not save profile."
+      ),
+  });
   const reset = useDoctorStore((s) => s.reset);
+  const years = profile.data
+    ? Math.max(
+        0,
+        new Date().getFullYear() -
+          Number(profile.data.practice_started_on.slice(0, 4))
+      )
+    : null;
+    
+  const patientsSeen = new Set(
+    appointments.data
+      ?.filter((item) => item.status === "completed")
+      .map((item) => item.patient_id) ?? []
+  ).size;
+
   return (
     <DoctorScreen
       title="My Profile"
@@ -88,23 +164,28 @@ export function ProfileScreen() {
               justifyContent: "center",
             }}
           >
-            <Heading style={{ fontSize: 30, color: "#087F78" }}>P</Heading>
+            <Heading style={{ fontSize: 30, color: "#087F78" }}>
+              {profile.data?.full_name?.charAt(0).toUpperCase() ?? "D"}
+            </Heading>
           </View>
           <View style={ui.flex}>
             <Heading style={{ fontSize: 18, color: palette.text }}>
-              Dr. Priya Sharma
+              {profile.data?.full_name ?? "Doctor"}
             </Heading>
-            <Label>General Physician</Label>
+            <Label>
+              {profile.data?.specialties.map((item) => item.name).join(", ") ||
+                "Specialty awaiting review"}
+            </Label>
             <Label muted style={{ fontSize: 12 }}>
-              MBBS, MD (Internal Medicine)
+              {profile.data?.registration_authority ?? "Registration pending"}
             </Label>
           </View>
         </View>
         <View style={ui.row}>
           {[
-            ["12 Yrs", "Experience"],
-            ["0", "Patients Seen"],
-            ["₹0.0k", "Earnings"],
+            [years === null ? "—" : `${years} Yrs`, "Experience"],
+            [String(patientsSeen), "Patients Seen"],
+            ["—", "Earnings"],
           ].map(([value, label]) => (
             <View
               key={label}
@@ -130,9 +211,14 @@ export function ProfileScreen() {
         }}
       >
         {[
-          ["Hospital", hospital],
-          ["Registration No.", "KMC–DR–001"],
-          ["Phone", "1234567876"],
+          [
+            "Hospital",
+            profile.data?.facilities
+              .map((item) => item.facility_name)
+              .join(", ") || "No linked facility",
+          ],
+          ["Registration No.", profile.data?.registration_number ?? "—"],
+          ["Phone", session?.user.phone || "Not linked"],
         ].map(([title, value], index) => (
           <View
             key={title}
@@ -175,7 +261,7 @@ export function ProfileScreen() {
                 ...ui.row,
                 minHeight: 64,
                 paddingHorizontal: 16,
-                borderBottomWidth: index < 4 ? 1 : 0,
+                borderBottomWidth: index < rows.length - 1 ? 1 : 0,
                 borderBottomColor: "#EEF4F5",
                 opacity: pressed ? 0.65 : 1,
               },
@@ -194,7 +280,7 @@ export function ProfileScreen() {
               <Icon color={color} size={21} />
             </View>
             <Label style={{ flex: 1 }}>{title}</Label>
-            {index === 0 && (
+            {title === "My Ratings & Reviews" && (
               <View
                 style={{
                   ...ui.row,
@@ -205,7 +291,7 @@ export function ProfileScreen() {
                 }}
               >
                 <Star size={13} color="#00B989" />
-                <Label style={{ color: "#00A77A", fontSize: 12 }}>4.9</Label>
+                <Label style={{ color: "#00A77A", fontSize: 12 }}>—</Label>
               </View>
             )}
             <ChevronRight color="#93A4B9" size={18} />
@@ -215,34 +301,55 @@ export function ProfileScreen() {
       {section && (
         <Panel>
           <Heading>{section}</Heading>
-          {section === "My Ratings & Reviews" && (
-            <Label muted>
-              4.9 is the Figma demo rating. No patient reviews are connected.
-            </Label>
-          )}
-          {section === "Earnings & Payouts" && (
-            <Label muted>
-              No payouts are connected in this demo. Profile earnings: ₹0.0k.
-            </Label>
-          )}
-          {section === "Hospital Settings" && (
+          {section === "Edit profile" && (
             <>
+              <Input label="Full name" value={name} onChangeText={setName} />
               <Input
-                label="Hospital name"
-                accessibilityLabel="Hospital name"
-                value={hospitalDraft}
-                onChangeText={setHospitalDraft}
-                containerStyle={ui.field}
+                label="About"
+                value={bio}
+                onChangeText={setBio}
+                multiline
+              />
+              <Input
+                label="Languages (codes separated by commas)"
+                value={languages}
+                onChangeText={setLanguages}
+                placeholder="en, hi"
               />
               <Button
                 theme="doctor"
-                label="Save hospital"
-                disabled={!hospitalDraft.trim()}
-                onPress={() => {
-                  setHospital(hospitalDraft.trim());
-                  setSection(null);
-                }}
+                label={saveProfile.isPending ? "Saving…" : "Save profile"}
+                disabled={saveProfile.isPending}
+                onPress={() => saveProfile.mutate()}
               />
+              {editMessage ? (
+                <Label
+                  style={
+                    editMessage === "Profile saved." ? ui.success : ui.error
+                  }
+                >
+                  {editMessage}
+                </Label>
+              ) : null}
+            </>
+          )}
+          {section === "My Ratings & Reviews" && (
+            <Label muted>Patient reviews are not connected yet.</Label>
+          )}
+          {section === "Earnings & Payouts" && (
+            <Label muted>Payout statements are not connected yet.</Label>
+          )}
+          {section === "Hospital Settings" && (
+            <>
+              {profile.data?.facilities.length ? (
+                profile.data.facilities.map((item) => (
+                  <Label key={item.practice_id}>
+                    {item.facility_name} · {item.address}
+                  </Label>
+                ))
+              ) : (
+                <Label muted>No facility linked yet.</Label>
+              )}
               <Button
                 theme="doctor"
                 variant="secondary"
@@ -253,22 +360,20 @@ export function ProfileScreen() {
           )}
           {section === "Notification Preferences" && (
             <View style={ui.between}>
-              <Label style={{ flex: 1 }}>
-                Appointment notifications (demo)
-              </Label>
+              <Label style={{ flex: 1 }}>Appointment notifications</Label>
               <Switch
                 accessibilityLabel="Appointment notifications"
-                value={notifications}
-                onValueChange={setNotifications}
+                value={false}
+                disabled
                 trackColor={{ false: "#D1D5DB", true: palette.primary }}
               />
+              <Label muted>Notification delivery is not connected yet.</Label>
             </View>
           )}
           {section === "Help & Support" && (
             <Label muted>
-              Use Scan QR to look up CLZ-0001. Home visit PIN: 1234. Notes,
-              messages, and schedules are saved only for the current app
-              session.
+              Your clinic or operator can provide support contact details. For
+              an emergency, call local emergency services.
             </Label>
           )}
         </Panel>
@@ -286,11 +391,8 @@ export function ProfileScreen() {
       />
       {logout && (
         <Panel>
-          <Heading>Reset the demo session?</Heading>
-          <Label>
-            There is no signed-in account. Resetting clears local notes,
-            prescriptions, messages, and schedule changes.
-          </Label>
+          <Heading>Sign out of your account?</Heading>
+          <Label>You can sign back in with the same verified account.</Label>
           <View style={ui.row}>
             <Button
               label="Cancel"
@@ -300,14 +402,13 @@ export function ProfileScreen() {
               onPress={() => setLogout(false)}
             />
             <Button
-              label="Reset demo"
+              label="Sign out"
               theme="doctor"
               style={ui.flex}
               onPress={() => {
                 reset();
+                void signOutWithPushCleanup();
                 setLogout(false);
-                setHospital("Apollo Hospitals");
-                setHospitalDraft("Apollo Hospitals");
                 router.replace("/");
               }}
             />

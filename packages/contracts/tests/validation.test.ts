@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { onboardingSchema, phoneSchema } from "../src/validation";
 import { clinicBookingSchema, clinicTransitionSchema } from "../src/clinic";
 import { updateBedInventorySchema } from "../src/facilities";
+import { driverRegistrationDetailsSchema, driverRegistrationSubmissionSchema } from "../src/driver-profile";
 
 const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
 
@@ -46,7 +47,7 @@ test("booking accepts stable IDs and a reason, never a caller-selected fee or ac
   expect(clinicBookingSchema.safeParse({ ...request, feeMinor: 1 }).success).toBe(false);
   expect(clinicBookingSchema.safeParse({ ...request, actorId: id }).success).toBe(false);
   expect(clinicBookingSchema.safeParse({ ...request, visitMode: "home" }).success).toBe(false);
-  expect(clinicBookingSchema.safeParse({ ...request, reason: " " }).success).toBe(false);
+  expect(clinicBookingSchema.safeParse({ ...request, reason: " " }).success).toBe(true);
 });
 
 test("phone sign-in and expected appointment version have bounded input", () => {
@@ -74,4 +75,20 @@ test("inventory edits preserve the count invariant and server-owned observation 
   expect(updateBedInventorySchema.safeParse({ ...request, expectedRowVersion: "-1" }).success).toBe(false);
   expect(updateBedInventorySchema.safeParse({ ...request, observedAt: "2030-01-01" }).success).toBe(false);
   expect(updateBedInventorySchema.safeParse({ ...request, actorId: id }).success).toBe(false);
+});
+
+test("driver registration accepts UI evidence without caller-selected approval or reviewed credentials", () => {
+  const details = {
+    fullName: "Sample Driver", contactPhone: "+919876543210", dateOfBirth: "1990-01-01",
+    city: "Bengaluru", consent: true,
+  };
+  expect(driverRegistrationDetailsSchema.safeParse(details).success).toBe(true);
+  expect(driverRegistrationDetailsSchema.safeParse({ ...details, licenseExpiresOn: "2030-01-01" }).success).toBe(false);
+  const documents = Object.fromEntries([
+    "aadhaar", "pan", "driving_licence", "vehicle_rc", "insurance", "fitness", "ambulance_image", "equipment_images",
+  ].map(kind => [kind, `fixture/${kind}.pdf`]));
+  const application = { capabilityCode: "BLS", registrationNumber: "KA01AB1001", documents };
+  expect(driverRegistrationSubmissionSchema.safeParse(application).success).toBe(true);
+  expect(driverRegistrationSubmissionSchema.safeParse({ ...application, documents: {} }).success).toBe(false);
+  expect(driverRegistrationSubmissionSchema.safeParse({ ...application, approved: true }).success).toBe(false);
 });

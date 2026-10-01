@@ -53,9 +53,14 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
           <Text style={styles.infoText}>Share this OTP when the doctor arrives.</Text>
         </View>
         <View style={styles.otpRow}>
-          {["4", "8", "2", "6"].map((digit, index) => (
-            <View key={`${digit}-${index}`} style={styles.otpCell}>
-              <Text style={styles.otpText}>{digit}</Text>
+          {[
+            { id: "otp-slot-1", digit: "4" },
+            { id: "otp-slot-2", digit: "8" },
+            { id: "otp-slot-3", digit: "2" },
+            { id: "otp-slot-4", digit: "6" },
+          ].map((slot) => (
+            <View key={slot.id} style={styles.otpCell}>
+              <Text style={styles.otpText}>{slot.digit}</Text>
             </View>
           ))}
         </View>

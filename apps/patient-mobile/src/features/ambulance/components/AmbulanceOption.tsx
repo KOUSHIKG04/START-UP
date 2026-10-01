@@ -3,7 +3,7 @@ import { Activity, HeartPulse, Siren } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { AmbulanceType } from "../utils/ambulanceConstants";
 
-export function getAmbulanceIcon(id: AmbulanceType["id"]) {
+function getAmbulanceIcon(id: AmbulanceType["id"]) {
   switch (id) {
     case "basic":
       return <Siren color="#008877" size={26} />;
@@ -50,9 +50,9 @@ export function AmbulanceOption({
       </View>
       <View style={styles.priceBlock}>
         <Text style={[styles.price, selected && styles.selectedPrice]}>
-          ₹{item.fare}
+          {item.fare === null ? "Fare pending" : `₹${item.fare}`}
         </Text>
-        <Text style={styles.eta}>ETA {item.eta}</Text>
+        <Text style={styles.eta}>ETA {item.eta ?? "pending"}</Text>
       </View>
     </Pressable>
   );

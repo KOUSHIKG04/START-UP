@@ -68,8 +68,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8F5F4",
     borderWidth: 1,
     borderColor: "#C8EDE9",
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   emergencyCardActive: {
     backgroundColor: "#FEF2F2",

@@ -62,6 +62,11 @@ BEGIN
     hospital_id,'BLS',gen_random_uuid()) INTO fixture_booking_id;
   IF fixture_booking_id IS NULL THEN RAISE EXCEPTION 'Ambulance booking failed'; END IF;
   EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent ni
+    JOIN clinzo.domain_event e ON e.id=ni.event_id
+    JOIN clinzo.driver d ON d.identity_id=ni.recipient_id
+    WHERE d.id=fixture_driver_id AND e.event_type='ambulance.dispatch_round_opened') THEN
+    RAISE EXCEPTION 'Driver dispatch notification missing'; END IF;
 
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',driver_auth::text,true);
@@ -76,6 +81,11 @@ BEGIN
   IF public.update_my_driver_location(fixture_shift_id,12.902,77.502,20,now(),gen_random_uuid(),1)
     IS DISTINCT FROM true THEN RAISE EXCEPTION 'Driver tracking update failed'; END IF;
   EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent ni
+    JOIN clinzo.domain_event e ON e.id=ni.event_id
+    JOIN clinzo.ambulance_booking b ON b.requested_by=ni.recipient_id
+    WHERE b.id=fixture_booking_id AND e.aggregate_id=b.id AND e.event_type='ambulance.assigned') THEN
+    RAISE EXCEPTION 'Patient assignment notification missing'; END IF;
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
   SELECT public.get_my_active_ambulance_tracking(fixture_booking_id) INTO tracking;
@@ -114,11 +124,45 @@ BEGIN
   IF public.complete_my_driver_trip(fixture_trip_id,completion_pin) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'Correct patient PIN did not complete trip'; END IF;
   EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent ni
+    JOIN clinzo.domain_event e ON e.id=ni.event_id
+    JOIN clinzo.ambulance_booking b ON b.requested_by=ni.recipient_id
+    WHERE b.id=fixture_booking_id AND e.aggregate_id=fixture_trip_id
+      AND e.event_type='ambulance.trip_completed') THEN
+    RAISE EXCEPTION 'Patient trip-completion notification missing'; END IF;
   IF NOT EXISTS(SELECT 1 FROM clinzo.trip t JOIN clinzo.ambulance_booking b ON b.id=t.booking_id
     JOIN clinzo.ambulance_assignment a ON a.id=t.assignment_id
     WHERE t.id=fixture_trip_id AND t.status='completed' AND t.pin_credential_version=1
       AND b.status='fulfilled' AND a.released_at IS NOT NULL) THEN
     RAISE EXCEPTION 'Trip completion state is inconsistent'; END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',driver_auth::text,true);
+  denied:=false;
+  BEGIN
+    PERFORM public.submit_my_ambulance_review(fixture_booking_id,5);
+  EXCEPTION WHEN insufficient_privilege THEN denied:=true;
+  END;
+  IF NOT denied THEN RAISE EXCEPTION 'Driver rated a patient trip'; END IF;
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
+  SELECT public.submit_my_ambulance_review(fixture_booking_id,5) INTO review_id;
+  EXECUTE 'RESET ROLE';
+  IF review_id IS NULL OR NOT EXISTS(SELECT 1 FROM clinzo.ambulance_review
+    WHERE id=review_id AND trip_id=fixture_trip_id AND service_rating=5
+      AND moderation_state='pending') THEN RAISE EXCEPTION 'Patient rating was not saved'; END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
+  IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_my_ambulance_bookings()) b
+    WHERE (b->>'id')::uuid=fixture_booking_id AND (b->>'review_rating')::integer=5) THEN
+    RAISE EXCEPTION 'Saved rating was not visible to patient'; END IF;
+  denied:=false;
+  BEGIN
+    PERFORM public.submit_my_ambulance_review(fixture_booking_id,1);
+  EXCEPTION WHEN unique_violation THEN denied:=true;
+  END;
+  IF NOT denied THEN RAISE EXCEPTION 'Duplicate trip rating was accepted'; END IF;
+  EXECUTE 'RESET ROLE';
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
   SELECT public.request_my_sos(patient_id,12.901,77.501,'Fixture emergency pickup',

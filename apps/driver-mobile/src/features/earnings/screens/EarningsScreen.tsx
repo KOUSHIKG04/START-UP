@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { Ambulance } from "lucide-react-native";
+import { useQuery } from "@tanstack/react-query";
+import { listMyDriverTrips } from "@startup/data-access";
 import {
   Body,
   Card,
@@ -8,20 +10,36 @@ import {
   Heading,
   Metrics,
   PageHeader,
-  palette,
-  ui,
 } from "../../../components/DriverUI";
-import { useDriver } from "../../../stores/driver";
+import { palette, ui } from "../../../components/theme";
+import { supabase, useMobileSession } from "../../../services/supabase";
 export function EarningsScreen({ history = false }: { history?: boolean }) {
-  const trips = useDriver((s) => s.trips);
+  const { profile } = useMobileSession();
+  
+  const trips = useQuery({
+    queryKey: ["my-driver-trips", profile?.driver?.id],
+    queryFn: () => listMyDriverTrips(supabase!),
+    enabled: Boolean(supabase && profile?.driver?.id),
+    refetchInterval: 15000,
+  });
+  
   const [period, setPeriod] = useState("Today");
+  
   const now = new Date();
+  
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
   if (period === "This Week")
     start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  
   if (period === "This Month") start.setDate(1);
-  const filtered = trips.filter((t) => t.completedAt >= start.getTime());
-  const total = filtered.reduce((sum, t) => sum + t.fare, 0);
+  const filtered =
+    trips.data?.filter(
+      (t) =>
+        t.status === "completed" &&
+        t.completed_at &&
+        new Date(t.completed_at).getTime() >= start.getTime()
+    ) ?? [];
   return (
     <View style={ui.screen}>
       <PageHeader
@@ -67,26 +85,30 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
             <Card>
               <Copy style={ui.caption}>{period.toUpperCase()} · TOTAL</Copy>
               <Copy style={{ fontSize: 32, lineHeight: 40, fontWeight: "700" }}>
-                ₹{total.toLocaleString("en-IN")}
+                —
               </Copy>
             </Card>
             <Metrics
               items={[
                 [`${filtered.length} completed`, "Trips"],
                 ["—", "Rating"],
-                [filtered.length ? "100%" : "—", "Acc. Rate"],
+                ["—", "Acc. Rate"],
               ]}
             />
           </>
         )}
         <Heading>Trip History ({period})</Heading>
+        {trips.isLoading ? <Copy>Loading trips…</Copy> : null}
+        {trips.isError ? (
+          <Copy accessibilityRole="alert">Could not load trip history.</Copy>
+        ) : null}
         {!filtered.length ? (
           <Card>
             <View style={[ui.center, { paddingVertical: 24 }]}>
               <Ambulance color={palette.primary} size={36} />
               <Heading>No completed trips yet</Heading>
               <Copy style={[ui.caption, { textAlign: "center" }]}>
-                Completed trips and their earnings will appear here.
+                Completed trips will appear here. Billing is not connected yet.
               </Copy>
             </View>
           </Card>
@@ -94,18 +116,19 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
           [...filtered].reverse().map((t) => (
             <Card key={t.id}>
               <View style={ui.between}>
-                <Heading>{t.patient}</Heading>
-                <Copy style={ui.metricValue}>
-                  ₹{t.fare.toLocaleString("en-IN")}
-                </Copy>
+                <Heading>{t.patient_name_snapshot ?? "Patient"}</Heading>
+                <Copy style={ui.metricValue}>—</Copy>
               </View>
-              <Copy style={ui.caption}>Sriramapura → Manipal Hospital</Copy>
+              <Copy style={ui.caption}>
+                {t.pickup_address ?? "Pickup"} →{" "}
+                {t.destination_address ?? "Destination"}
+              </Copy>
               <View style={ui.between}>
                 <Copy style={ui.caption}>
-                  {t.distance} · {t.duration} · ALS
+                  {t.public_code} · {t.status.replaceAll("_", " ")}
                 </Copy>
                 <Copy style={ui.caption}>
-                  {new Date(t.completedAt).toLocaleTimeString([], {
+                  {new Date(t.completed_at!).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}

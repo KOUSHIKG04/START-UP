@@ -2,7 +2,8 @@ import { Tabs, router, type Href } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { Home, Calendar, Calendars, User, ScanLine } from "lucide-react-native";
 import { BottomNavBar, type NavItem } from "@startup/mobile-ui";
-import { IconButton, palette } from "../../../components/DoctorScreen";
+import { IconButton } from "../../../components/DoctorScreen";
+import { palette } from "../../../components/theme";
 const items: NavItem[] = [
   { key: "index", label: "Home", icon: Home },
   { key: "appointments", label: "Appointments", icon: Calendar },

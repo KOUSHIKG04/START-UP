@@ -11,11 +11,11 @@ const migrationFolder = fileURLToPath(
 
 const tables = Object.values(schema).filter((value) => is(value, PgTable));
 describe("database model contract", () => {
-  test("all 83 domain tables are private and RLS-enabled", () => {
-    expect(tables).toHaveLength(83);
+  test("domain tables use RLS and only online chat is public for Realtime", () => {
+    expect(tables).toHaveLength(94);
     for (const table of tables) {
       const config = getTableConfig(table);
-      expect(config.schema).toBe("clinzo");
+      expect(config.schema ?? "public").toBe(config.name === "online_message" ? "public" : "clinzo");
       expect(config.enableRLS).toBe(true);
     }
   });
@@ -48,11 +48,18 @@ describe("database model contract", () => {
       migrationsFolder: migrationFolder,
     });
     expect(migrations.length).toBeGreaterThanOrEqual(2);
-    const text = migrations.flatMap((m) => m.sql).join("\n");
+    const text = readdirSync(migrationFolder)
+      .filter((name) => name.endsWith(".sql"))
+      .sort()
+      .map((name) => readFileSync(`${migrationFolder}/${name}`, "utf8"))
+      .join("\n");
     for (const table of tables) {
-      expect(text).toContain(
-        'CREATE TABLE "clinzo"."' + getTableConfig(table).name + '"'
-      );
+      const name = getTableConfig(table).name;
+      expect(
+        text.includes(`CREATE TABLE "clinzo"."${name}"`) ||
+        text.includes(`CREATE TABLE clinzo.${name}`) ||
+        (name === "online_message" && text.includes("CREATE TABLE public.online_message"))
+      ).toBe(true);
     }
     expect(text).toContain("CREATE EXTENSION IF NOT EXISTS postgis");
     expect(text).not.toContain('"extensions.geography(');

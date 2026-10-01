@@ -1,4 +1,11 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import * as Crypto from "expo-crypto";
+import { AudioSession, LiveKitRoom, VideoTrack, isTrackReference, registerGlobals, useRoomContext, useTracks } from "@livekit/react-native";
+import { Track } from "livekit-client";
+import { uuidSchema } from "@startup/contracts";
+import { getOnlineJoinContext, getOnlineVideoToken, listOnlineMessages, sendOnlineMessage, subscribeOnlineMessages } from "@startup/data-access";
+import { supabase, useMobileSession } from "../../../services/supabase";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +31,8 @@ import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { FadedScrollView, Input, SafeAreaView } from "@startup/mobile-ui";
 import type { Appointment } from "../../appointments/types/appointment";
 
+registerGlobals();
+
 export interface OnlineVisitFlowProps {
   appointment: Appointment;
   initialChat: boolean;
@@ -35,32 +44,61 @@ export function OnlineVisitFlow({
   appointment,
   initialChat,
   onBackPress,
-  onComplete,
 }: OnlineVisitFlowProps) {
   const [showChat, setShowChat] = useState(initialChat);
   const [message, setMessage] = useState("");
-  const [sentMessages, setSentMessages] = useState<string[]>([]);
+  const [sendError, setSendError] = useState("");
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
+  const appointmentId = appointment.backendId;
+  const live = uuidSchema.safeParse(appointmentId).success;
+  const { profile } = useMobileSession();
+  const queryClient = useQueryClient();
+  const context = useQuery({ queryKey: ["online-context", appointmentId],
+    queryFn: () => getOnlineJoinContext(supabase!, appointmentId!), enabled: Boolean(live && supabase) });
+  const messages = useQuery({ queryKey: ["online-messages", appointmentId],
+    queryFn: () => listOnlineMessages(supabase!, appointmentId!), enabled: Boolean(context.data && supabase) });
+  const token = useQuery({ queryKey: ["online-video-token", appointmentId],
+    queryFn: () => getOnlineVideoToken(supabase!, appointmentId!), enabled: Boolean(!showChat && context.data && supabase), staleTime: 5 * 60 * 1000 });
+  useEffect(() => {
+    if (!context.data || !supabase || !appointmentId) return;
+    return subscribeOnlineMessages(supabase, appointmentId, () => {
+      void queryClient.invalidateQueries({ queryKey: ["online-messages", appointmentId] });
+    });
+  }, [context.data?.appointment_id, appointmentId, queryClient]);
+  useEffect(() => {
+    if (showChat || !token.data) return;
+    void AudioSession.startAudioSession();
+    return () => { void AudioSession.stopAudioSession(); };
+  }, [showChat, token.data]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const nextMessage = message.trim();
-    if (!nextMessage) return;
-    setSentMessages((current) => [...current, nextMessage]);
-    setMessage("");
+    if (!nextMessage || !appointmentId || !supabase || !context.data) return;
+    try { await sendOnlineMessage(supabase, appointmentId, nextMessage, Crypto.randomUUID());
+      setMessage(""); setSendError(""); await queryClient.invalidateQueries({ queryKey: ["online-messages", appointmentId] }); }
+    catch (cause) { setSendError(cause instanceof Error ? cause.message : "Could not send message."); }
   };
 
+  if (!live) return <View style={styles.videoCallScreen}><Text>This appointment is not linked to a live online consultation.</Text></View>;
+  if (context.isLoading) return <View style={styles.videoCallScreen}><Text>Loading consultation…</Text></View>;
+  if (!context.data) return <View style={styles.videoCallScreen}><Text>Consultation is available after confirmation, near its scheduled time.</Text></View>;
+
   if (!showChat) {
+    if (token.isLoading) return <View style={styles.videoCallScreen}><Text>Connecting video…</Text></View>;
+    if (!token.data) return <View style={styles.videoCallScreen}><Text>{token.error instanceof Error ? token.error.message : "Video service is unavailable."}</Text></View>;
     return (
+      <LiveKitRoom serverUrl={token.data.serverUrl} token={token.data.participantToken} connect audio video>
       <VideoCallView
         appointment={appointment}
         cameraOff={cameraOff}
         muted={muted}
         onBackPress={onBackPress}
-        onCameraPress={() => setCameraOff((current) => !current)}
-        onEnd={onComplete}
-        onMutePress={() => setMuted((current) => !current)}
+        onEnd={onBackPress}
+        onCameraChange={setCameraOff}
+        onMuteChange={setMuted}
       />
+      </LiveKitRoom>
     );
   }
 
@@ -105,19 +143,16 @@ export function OnlineVisitFlow({
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.chatDay}>TODAY · SECURE CONSULTATION</Text>
-        <ChatBubble received text="Hello, please tell me how you are feeling today." time="10:12 AM" />
-        <ChatBubble text="I still have fever and body pain since yesterday." time="10:13 AM" />
-        <ChatBubble
-          received
-          text="I understand. Have you taken the prescribed medicine and checked your temperature?"
-          time="10:14 AM"
-        />
-        {sentMessages.map((sentMessage, index) => (
-          <ChatBubble key={`${sentMessage}-${index}`} text={sentMessage} time="now" />
+        {messages.isLoading ? <Text>Loading messages…</Text> : null}
+        {messages.isError ? <Text>Could not load messages.</Text> : null}
+        {(messages.data ?? []).map((item) => (
+          <ChatBubble key={item.id} received={item.sender_id !== profile?.identity_id}
+            text={item.body} time={new Date(item.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} />
         ))}
       </FadedScrollView>
 
       <View style={styles.chatInputArea}>
+        {sendError ? <Text accessibilityRole="alert">{sendError}</Text> : null}
         <View style={styles.quickReplies}>
           {["Feeling better", "Still unwell", "Start video call"].map((reply) => (
             <Pressable
@@ -147,7 +182,7 @@ export function OnlineVisitFlow({
             accessibilityLabel="Send message"
             accessibilityRole="button"
             disabled={!message.trim()}
-            onPress={sendMessage}
+            onPress={() => void sendMessage()}
             style={({ pressed }) => [
               styles.sendTrigger,
               !message.trim() ? styles.sendDisabled : undefined,
@@ -181,18 +216,32 @@ function VideoCallView({
   cameraOff,
   muted,
   onBackPress,
-  onCameraPress,
   onEnd,
-  onMutePress,
+  onCameraChange,
+  onMuteChange,
 }: {
   appointment: Appointment;
   cameraOff: boolean;
   muted: boolean;
   onBackPress: () => void;
-  onCameraPress: () => void;
   onEnd: () => void;
-  onMutePress: () => void;
+  onCameraChange: (off: boolean) => void;
+  onMuteChange: (muted: boolean) => void;
 }) {
+  const room = useRoomContext();
+  const tracks = useTracks([Track.Source.Camera]);
+  const remote = tracks.find((track) => isTrackReference(track) && !track.participant.isLocal);
+  const local = tracks.find((track) => isTrackReference(track) && track.participant.isLocal);
+  const changeCamera = async () => {
+    const next = !cameraOff;
+    await room.localParticipant.setCameraEnabled(!next);
+    onCameraChange(next);
+  };
+  const changeMute = async () => {
+    const next = !muted;
+    await room.localParticipant.setMicrophoneEnabled(!next);
+    onMuteChange(next);
+  };
   return (
     <View style={styles.videoCallScreen}>
       <SafeAreaView edges={["top"]} style={styles.videoSafeArea}>
@@ -205,17 +254,19 @@ function VideoCallView({
           <ChevronLeft color={colors.patient.primaryDark} size={28} />
         </Pressable>
         <View style={styles.remoteVideoPlaceholder}>
-          <UserRound color={colors.patient.primary} size={38} strokeWidth={1.6} />
-          <Text style={styles.videoDoctorName}>{appointment.doctorName}</Text>
+          {remote && isTrackReference(remote) ? <VideoTrack trackRef={remote} style={StyleSheet.absoluteFill} /> : <>
+            <UserRound color={colors.patient.primary} size={38} strokeWidth={1.6} />
+            <Text style={styles.videoDoctorName}>{appointment.doctorName}</Text>
+          </>}
         </View>
         <View style={styles.localVideoPreview}>
-          <UserRound color={colors.white} size={29} />
+          {local && isTrackReference(local) && !cameraOff ? <VideoTrack trackRef={local} style={StyleSheet.absoluteFill} /> : <UserRound color={colors.white} size={29} />}
         </View>
         <View style={styles.videoControls}>
-          <VideoControl accessibilityLabel={cameraOff ? "Turn camera on" : "Switch camera"} onPress={onCameraPress}>
+          <VideoControl accessibilityLabel={cameraOff ? "Turn camera on" : "Turn camera off"} onPress={() => void changeCamera()}>
             <Camera color={colors.white} size={25} />
           </VideoControl>
-          <VideoControl accessibilityLabel={muted ? "Unmute" : "Mute"} onPress={onMutePress}>
+          <VideoControl accessibilityLabel={muted ? "Unmute" : "Mute"} onPress={() => void changeMute()}>
             <Mic color={colors.white} size={27} />
           </VideoControl>
           <VideoControl accessibilityLabel="End consultation" danger onPress={onEnd}>

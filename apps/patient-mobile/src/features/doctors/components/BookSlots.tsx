@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
@@ -11,10 +11,7 @@ import {
   TimeSlot,
 } from "@startup/mobile-ui";
 import {
-  getDatesForMonth,
   months,
-  patientOptions,
-  timeSlots,
 } from "../utils/doctorProfileConstants";
 import type { BookSlotsProps } from "../types/doctor-profile";
 
@@ -23,13 +20,28 @@ export function BookSlots({
   consultationType,
   onBookAppointment,
   onGoToAbout,
+  slots,
+  patientOptions,
+  loading,
+  error,
+  busy,
 }: BookSlotsProps) {
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(10); // November (matches reference)
-  const [monthDates, setMonthDates] = useState(() => getDatesForMonth(10));
-  const [selectedDate, setSelectedDate] = useState("5-nov");
-  const [selectedTime, setSelectedTime] = useState("02:30 PM");
-  const [patient, setPatient] = useState("Self");
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(new Date().getMonth());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [patientId, setPatientId] = useState(patientOptions[0]?.id ?? "");
+
+  const monthDates = useMemo(() => {
+    const year = new Date().getFullYear();
+    const available = new Set(slots.map(slot => new Date(slot.starts_at).toLocaleDateString("en-CA")));
+    return Array.from({ length: new Date(year, selectedMonthIndex + 1, 0).getDate() }, (_, index) => {
+      const date = new Date(year, selectedMonthIndex, index + 1);
+      const key = date.toLocaleDateString("en-CA");
+      return { key, date: key, dayNumber: date.getDate(), day: date.toLocaleDateString("en-US", { weekday: "short" }), closed: !available.has(key) };
+    });
+  }, [slots, selectedMonthIndex]);
+  const dateSlots = slots.filter(slot => new Date(slot.starts_at).toLocaleDateString("en-CA") === selectedDate);
 
   const datesScrollRef = useRef<ScrollView>(null);
   const monthsScrollRef = useRef<ScrollView>(null);
@@ -37,45 +49,22 @@ export function BookSlots({
   useEffect(() => {
     const timer = setTimeout(() => {
       monthsScrollRef.current?.scrollTo({
-        x: Math.max(0, 10 * 85 - 80),
+        x: Math.max(0, selectedMonthIndex * 85 - 80),
         animated: false,
       });
-      const selIdx = monthDates.findIndex((d) => d.key === "5-nov");
-      if (selIdx >= 0) {
-        datesScrollRef.current?.scrollTo({
-          x: Math.max(0, selIdx * 54 - 110),
-          animated: false,
-        });
-      }
     }, 120);
     return () => clearTimeout(timer);
-  }, []);
+  }, [selectedMonthIndex]);
 
   const handleSelectMonth = (index: number) => {
     setSelectedMonthIndex(index);
-    const newDates = getDatesForMonth(index);
-    setMonthDates(newDates);
-
-    const targetKey = `5-${months[index].short.toLowerCase()}`;
-    const targetDate =
-      newDates.find((d) => d.key === targetKey && !d.closed) ??
-      newDates.find((d) => !d.closed) ??
-      newDates[0];
-    setSelectedDate(targetDate.key);
-
-    const selIdx = newDates.findIndex((d) => d.key === targetDate.key);
-    if (selIdx >= 0) {
-      setTimeout(() => {
-        datesScrollRef.current?.scrollTo({
-          x: Math.max(0, selIdx * 54 - 110),
-          animated: true,
-        });
-      }, 50);
-    }
+    setSelectedDate(null);
+    setSelectedTime(null);
   };
 
   const handleSelectDate = (key: string, idx: number) => {
     setSelectedDate(key);
+    setSelectedTime(null);
     datesScrollRef.current?.scrollTo({
       x: Math.max(0, idx * 54 - 110),
       animated: true,
@@ -143,7 +132,7 @@ export function BookSlots({
                 accessibilityRole="radio"
                 accessibilityState={{
                   selected,
-                  disabled: date.closed === true,
+                  disabled: date.closed,
                 }}
                 onPress={() => handleSelectDate(date.key, idx)}
                 style={[
@@ -178,30 +167,29 @@ export function BookSlots({
       <View style={styles.bookingSection}>
         <View style={styles.sectionHeadingRow}>
           <Text style={styles.sectionTitle}>Select time</Text>
-          <Text style={styles.availability}>5 slots available</Text>
+          <Text style={styles.availability}>{dateSlots.length} slots available</Text>
         </View>
         <View style={styles.slotGrid}>
-          {timeSlots.map((slot) => {
-            const selected = selectedTime === slot.time;
+          {dateSlots.map((slot) => {
+            const time = new Date(slot.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            const selected = selectedTime === slot.window_id;
             return (
               <TimeSlot
-                key={slot.time}
-                time={slot.time}
-                disabled={slot.disabled}
+                key={slot.window_id}
+                time={time}
+                disabled={false}
                 accessibilityRole="radio"
                 accessibilityState={{
                   selected,
-                  disabled: slot.disabled === true,
+                  disabled: false,
                 }}
-                onPress={() => setSelectedTime(slot.time)}
+                onPress={() => setSelectedTime(slot.window_id)}
                 style={[
                   styles.timeSlot,
                   selected ? styles.selectedTimeSlot : undefined,
-                  slot.disabled ? styles.disabledTimeSlot : undefined,
                 ]}
                 textStyle={[
                   selected ? styles.selectedTimeText : undefined,
-                  slot.disabled ? styles.disabledDateText : undefined,
                 ]}
               />
             );
@@ -212,19 +200,14 @@ export function BookSlots({
       <View style={styles.bookingSection}>
         <Text style={styles.sectionTitle}>For whom?</Text>
         <View style={styles.patientRow}>
-          {patientOptions.map((option) => {
-            const selected = patient === option;
-            return (
-              <Chip
-                key={option}
-                variant="radio"
-                selected={selected}
-                theme="patient"
-                label={option}
-                onPress={() => setPatient(option)}
-              />
-            );
-          })}
+          {patientOptions.map(option => <Chip
+            key={option.id}
+            variant="radio"
+            selected={patientId === option.id}
+            theme="patient"
+            label={option.label}
+            onPress={() => { if (option.verified) setPatientId(option.id); }}
+          />)}
         </View>
       </View>
 
@@ -255,18 +238,22 @@ export function BookSlots({
           containerStyle={styles.reasonInputContainer}
         />
       </View>
+      {loading ? <Text style={styles.availability}>Loading slots…</Text> : null}
+      {slots.length === 0 && !loading ? <Text style={styles.availability}>No clinic slots available yet.</Text> : null}
+      {error ? <Text accessibilityRole="alert" style={styles.availability}>{error}</Text> : null}
     </Card>
 
     <Button
       label="Book Appointment"
+      disabled={busy || !selectedTime || !patientId || consultationType !== "Clinic Visit"}
       onPress={() => {
-        const date =
-          monthDates.find((item) => item.key === selectedDate)?.date ??
-          selectedDate;
+        const selectedSlot = slots.find(slot => slot.window_id === selectedTime);
+        if (!selectedSlot) return;
         onBookAppointment({
-          date,
-          time: selectedTime,
-          patient,
+          date: new Date(selectedSlot.starts_at).toLocaleDateString(),
+          time: selectedSlot.window_id,
+          patient: patientOptions.find(option => option.id === patientId)?.label ?? "Self",
+          patientId,
           reason,
           consultationType,
           address,

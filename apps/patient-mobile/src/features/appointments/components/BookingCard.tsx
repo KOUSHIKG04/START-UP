@@ -32,11 +32,13 @@ import type { Appointment } from "../types/appointment";
 type BookingCardProps = {
   appointment: Appointment;
   onPress?: () => void;
+  statusLabel?: string;
 };
 
 export default function BookingCard({
   appointment,
   onPress,
+  statusLabel,
 }: BookingCardProps) {
   return (
     <Card
@@ -65,7 +67,7 @@ export default function BookingCard({
             ]}
           />
           <Text style={styles.statusText}>
-            {appointment.status === "approved" ? "Confirmed" : "Pending"}
+            {statusLabel ?? (appointment.status === "approved" ? "Confirmed" : "Pending")}
           </Text>
         </View>
       </View>
@@ -142,21 +144,21 @@ export default function BookingCard({
             label="Consultation Fee"
             value={appointment.fee}
           />
-          <DetailRow
+          {appointment.experience ? <DetailRow
             icon={<Stethoscope size={15} color="#C8EDE9" strokeWidth={2} />}
             label="Doctor Experience"
             value={appointment.experience}
-          />
-          <DetailRow
+          /> : null}
+          {appointment.rating ? <DetailRow
             icon={<Star size={15} color="#C8EDE9" strokeWidth={2} />}
             label="Doctor Rating"
             value={appointment.rating}
-          />
-          <DetailRow
+          /> : null}
+          {appointment.qualification ? <DetailRow
             icon={<UserRound size={15} color="#C8EDE9" strokeWidth={2} />}
             label="Qualification"
             value={appointment.qualification}
-          />
+          /> : null}
         </View>
 
         {onPress ? (

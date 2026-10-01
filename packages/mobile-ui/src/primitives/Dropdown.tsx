@@ -1,6 +1,7 @@
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import { useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useRef, useState, type ReactNode } from "react";
 import {
+  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -56,6 +57,97 @@ type TriggerPosition = {
 const OPTION_HEIGHT = 44;
 const MENU_GAP = 4;
 
+function calculateMenuPosition({
+  triggerPosition,
+  menuHeight,
+  menuWidth,
+  windowWidth,
+  windowHeight,
+}: {
+  triggerPosition?: TriggerPosition;
+  menuHeight: number;
+  menuWidth?: number;
+  windowWidth: number;
+  windowHeight: number;
+}) {
+  if (!triggerPosition) return { menuTop: 0, menuLeft: 12, targetWidth: 160 };
+
+  const shouldOpenAbove =
+    triggerPosition.y + triggerPosition.height + MENU_GAP + menuHeight > windowHeight;
+  const menuTop = shouldOpenAbove
+    ? Math.max(MENU_GAP, triggerPosition.y - menuHeight - MENU_GAP)
+    : triggerPosition.y + triggerPosition.height + MENU_GAP;
+  const targetWidth = menuWidth ?? Math.max(triggerPosition.width, 160);
+  const idealLeft =
+    triggerPosition.x + triggerPosition.width / 2 > windowWidth / 2
+      ? triggerPosition.x + triggerPosition.width - targetWidth
+      : triggerPosition.x;
+  const maxLeft = Math.max(12, windowWidth - targetWidth - 12);
+  const menuLeft = Math.max(12, Math.min(idealLeft, maxLeft));
+
+  return { menuTop, menuLeft, targetWidth };
+}
+
+const DropdownOptionRow = memo(function DropdownOptionRow({
+  option,
+  isSelected,
+  softColor,
+  textColor,
+  primaryTextColor,
+  primaryColor,
+  onSelect,
+}: {
+  option: DropdownOption;
+  isSelected: boolean;
+  softColor: string;
+  textColor: string;
+  primaryTextColor: string;
+  primaryColor: string;
+  onSelect: (option: DropdownOption) => void;
+}) {
+  const handlePress = () => onSelect(option);
+  return (
+    <Pressable
+      accessibilityLabel={option.label}
+      accessibilityRole="radio"
+      accessibilityState={{
+        selected: isSelected,
+        disabled: option.disabled === true,
+      }}
+      disabled={option.disabled}
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.option,
+        isSelected && { backgroundColor: softColor },
+        pressed && !option.disabled && styles.optionPressed,
+        option.disabled && styles.optionDisabled,
+      ]}
+    >
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.optionLabel,
+          { color: textColor },
+          isSelected && [
+            styles.optionLabelSelected,
+            { color: primaryTextColor },
+          ],
+          option.disabled && styles.disabledText,
+        ]}
+      >
+        {option.label}
+      </Text>
+      {isSelected ? (
+        <Check
+          color={primaryColor}
+          size={16}
+          strokeWidth={2.4}
+        />
+      ) : null}
+    </Pressable>
+  );
+});
+
 export function Dropdown({
   options,
   value,
@@ -99,31 +191,44 @@ export function Dropdown({
 
   const closeMenu = () => setIsOpen(false);
 
-  const selectOption = (option: DropdownOption) => {
-    if (option.disabled) return;
-    onValueChange(option.value);
-    closeMenu();
-  };
+  const selectOption = useCallback(
+    (option: DropdownOption) => {
+      if (option.disabled) return;
+      onValueChange(option.value);
+      closeMenu();
+    },
+    [onValueChange],
+  );
 
-  const shouldOpenAbove = triggerPosition
-    ? triggerPosition.y + triggerPosition.height + MENU_GAP + menuHeight >
-      windowHeight
-    : false;
+  const { menuTop, menuLeft, targetWidth } = calculateMenuPosition({
+    triggerPosition,
+    menuHeight,
+    menuWidth,
+    windowWidth,
+    windowHeight,
+  });
 
-  const menuTop = triggerPosition
-    ? shouldOpenAbove
-      ? Math.max(MENU_GAP, triggerPosition.y - menuHeight - MENU_GAP)
-      : triggerPosition.y + triggerPosition.height + MENU_GAP
-    : 0;
-
-  const targetWidth = menuWidth ?? Math.max(triggerPosition?.width ?? 160, 160);
-  const idealLeft = triggerPosition
-    ? triggerPosition.x + triggerPosition.width / 2 > windowWidth / 2
-      ? triggerPosition.x + triggerPosition.width - targetWidth
-      : triggerPosition.x
-    : 0;
-  const maxLeft = Math.max(12, windowWidth - targetWidth - 12);
-  const menuLeft = Math.max(12, Math.min(idealLeft, maxLeft));
+  const renderOption = useCallback(
+    ({ item }: { item: DropdownOption }) => (
+      <DropdownOptionRow
+        option={item}
+        isSelected={item.value === value}
+        softColor={themeColors.soft}
+        textColor={themeColors.text}
+        primaryTextColor={themeColors.primaryText}
+        primaryColor={themeColors.primary}
+        onSelect={selectOption}
+      />
+    ),
+    [
+      value,
+      themeColors.soft,
+      themeColors.text,
+      themeColors.primaryText,
+      themeColors.primary,
+      selectOption,
+    ],
+  );
 
   const displayValue =
     triggerLabel ??
@@ -215,59 +320,15 @@ export function Dropdown({
                 menuStyle,
               ]}
             >
-              <ScrollView
+              <FlatList
+                data={options as DropdownOption[]}
+                keyExtractor={(item) => item.value}
                 bounces={false}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.menuContent}
-              >
-                {options.map((option) => {
-                  const isSelected = option.value === value;
-
-                  return (
-                    <Pressable
-                      key={option.value}
-                      accessibilityLabel={option.label}
-                      accessibilityRole="radio"
-                      accessibilityState={{
-                        selected: isSelected,
-                        disabled: option.disabled === true,
-                      }}
-                      disabled={option.disabled}
-                      onPress={() => selectOption(option)}
-                      style={({ pressed }) => [
-                        styles.option,
-                        isSelected && { backgroundColor: themeColors.soft },
-                        pressed && !option.disabled && styles.optionPressed,
-                        option.disabled && styles.optionDisabled,
-                      ]}
-                    >
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.optionLabel,
-                          { color: themeColors.text },
-                          isSelected && [
-                            styles.optionLabelSelected,
-                            { color: themeColors.primaryText },
-                          ],
-                          option.disabled && styles.disabledText,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-
-                      {isSelected ? (
-                        <Check
-                          color={themeColors.primary}
-                          size={16}
-                          strokeWidth={2.4}
-                        />
-                      ) : null}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                renderItem={renderOption}
+              />
             </View>
           ) : null}
         </View>
@@ -354,11 +415,7 @@ const styles = StyleSheet.create({
     borderColor: colors.ui.menuBorder,
     borderRadius: 14,
     backgroundColor: colors.white,
-    shadowColor: colors.ui.menuShadow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
+    boxShadow: "0px 6px 16px rgba(5, 91, 86, 0.12)",
   },
   menuContent: {
     paddingVertical: 6,

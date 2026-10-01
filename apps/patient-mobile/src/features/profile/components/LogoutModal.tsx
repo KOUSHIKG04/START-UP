@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Modal, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button } from "@startup/mobile-ui";
+import { mobileSession, supabase } from "../../../services/supabase";
+import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 
 export function LogoutModal({
   visible,
@@ -11,6 +14,34 @@ export function LogoutModal({
   visible: boolean;
   onClose: () => void;
 }) {
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function signOut() {
+    if (!supabase) {
+      setError("Supabase is not configured on this device.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { error: signOutError } = (await signOutWithPushCleanup())!;
+      if (signOutError) throw signOutError;
+      queryClient.clear();
+      await mobileSession.refresh();
+      onClose();
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not sign out. Please try again."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Modal
       visible={visible}
@@ -28,6 +59,11 @@ export function LogoutModal({
             <Text style={styles.logoutModalSub}>
               Are you sure you want to log out of your Clinzo patient account?
             </Text>
+            {error ? (
+              <Text accessibilityRole="alert" style={styles.error}>
+                {error}
+              </Text>
+            ) : null}
           </View>
 
           <View style={styles.logoutActions}>
@@ -35,15 +71,14 @@ export function LogoutModal({
               label="Cancel"
               variant="secondary"
               onPress={onClose}
+              disabled={busy}
               style={styles.logoutCancelBtn}
             />
             <Button
-              label="Log Out"
+              label={busy ? "Signing out…" : "Log Out"}
               variant="primary"
-              onPress={() => {
-                onClose();
-                router.replace("/login");
-              }}
+              onPress={() => void signOut()}
+              disabled={busy}
               style={styles.logoutConfirmBtn}
               labelStyle={styles.logoutConfirmLabel}
             />
@@ -100,6 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     lineHeight: 18,
+  },
+  error: {
+    color: colors.danger,
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    textAlign: "center",
   },
   logoutActions: {
     flexDirection: "row",

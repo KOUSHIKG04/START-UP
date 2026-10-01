@@ -13,9 +13,13 @@ import { ActionButton } from "./ActionButton";
 export function PickupMap({
   destination,
   onConfirm,
+  address,
+  onAddressChange,
 }: {
   destination: string;
   onConfirm: () => void;
+  address: string;
+  onAddressChange: (value: string) => void;
 }) {
   return (
     <View style={styles.flex1}>
@@ -35,6 +39,8 @@ export function PickupMap({
           <Search color="#71818F" size={18} />
         </View>
         <TextInput
+          value={address}
+          onChangeText={onAddressChange}
           placeholder="Add Building , gate /Floor (Optional)"
           placeholderTextColor="#71818F"
           style={styles.buildingInput}

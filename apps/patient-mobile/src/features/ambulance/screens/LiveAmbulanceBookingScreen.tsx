@@ -15,6 +15,7 @@ import {
 import type { RequestAmbulanceBookingInput } from "@startup/contracts";
 import { Button, Header, Input, SafeAreaView } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
+import { LiveAmbulanceRequestsList } from "../components/LiveAmbulanceRequestsList";
 
 export function LiveAmbulanceBookingScreen({
   onBackPress,
@@ -51,10 +52,15 @@ export function LiveAmbulanceBookingScreen({
   const activeBooking = bookings.data?.find(
     (booking) => booking.status === "searching" || booking.status === "assigned"
   );
-  const pinVisible = activeBooking?.trip_status === "in_progress" ||
+  const pinVisible =
+    activeBooking?.trip_status === "in_progress" ||
     activeBooking?.trip_status === "arrived_at_destination";
   const verificationPin = useQuery({
-    queryKey: ["patient-completion-pin", profile?.patient_id, activeBooking?.id],
+    queryKey: [
+      "patient-completion-pin",
+      profile?.patient_id,
+      activeBooking?.id,
+    ],
     queryFn: () => getMyPatientVerificationPin(supabase!, profile!.patient_id!),
     enabled: Boolean(supabase && profile?.patient_id && pinVisible),
     staleTime: 0,
@@ -249,71 +255,21 @@ export function LiveAmbulanceBookingScreen({
         {activeBooking ? (
           <Text>You already have an active ambulance request.</Text>
         ) : null}
-        <Text style={styles.title}>My requests</Text>
-        <Button
-          label="Refresh status"
-          variant="outline"
-          onPress={() => void bookings.refetch()}
+        <LiveAmbulanceRequestsList
+          bookings={bookings.data}
+          isLoading={bookings.isLoading}
+          error={bookings.error}
+          onRefresh={() => void bookings.refetch()}
+          activeBookingId={activeBooking?.id}
+          trackingData={tracking.data}
+          pinVisible={pinVisible}
+          isPinLoading={verificationPin.isLoading}
+          pinData={verificationPin.data}
+          isRefreshPending={refreshDispatch.isPending}
+          onRefreshDispatch={(id) => refreshDispatch.mutate(id)}
+          isCancelPending={cancel.isPending}
+          onCancel={(b) => cancel.mutate(b)}
         />
-        {bookings.isLoading ? <Text>Loading requests…</Text> : null}
-        {bookings.error ? (
-          <Text accessibilityRole="alert">
-            Could not load your ambulance requests.
-          </Text>
-        ) : null}
-        {bookings.data?.map((booking) => (
-          <View key={booking.id} style={styles.card}>
-            <Text style={styles.name}>
-              {booking.public_code} · {booking.status}
-            </Text>
-            <Text>
-              {booking.capability_code} · {booking.pickup_address} →{" "}
-              {booking.destination_address}
-            </Text>
-            {booking.driver_name ? (
-              <Text>
-                Driver: {booking.driver_name} · {booking.vehicle_registration}
-              </Text>
-            ) : null}
-            {booking.trip_status ? (
-              <Text>Trip: {booking.trip_status}</Text>
-            ) : null}
-            {booking.id === activeBooking?.id && booking.status === "assigned" ? (
-              tracking.data ? <Text>
-                Driver location: {tracking.data.latitude.toFixed(5)}, {tracking.data.longitude.toFixed(5)} ·
-                updated {new Date(tracking.data.received_at).toLocaleTimeString()}
-              </Text> : <Text>Waiting for a current driver location.</Text>
-            ) : null}
-            {booking.id === activeBooking?.id && pinVisible ? (
-              <View style={styles.card}>
-                <Text style={styles.subtitle}>Your completion PIN</Text>
-                {verificationPin.isLoading ? <Text>Loading verification PIN…</Text> : null}
-                {verificationPin.data ? (
-                  <Text accessibilityLabel="Four-digit completion PIN" style={styles.pin}>
-                    {verificationPin.data}
-                  </Text>
-                ) : null}
-                <Text>Give this PIN to the driver only when you reach your destination.</Text>
-              </View>
-            ) : null}
-            {booking.status === "searching" ? (
-              <View style={styles.options}>
-                <Button
-                  label="Search again"
-                  variant="outline"
-                  disabled={refreshDispatch.isPending}
-                  onPress={() => refreshDispatch.mutate(booking.id)}
-                />
-                <Button
-                  label="Cancel request"
-                  variant="outline"
-                  disabled={cancel.isPending}
-                  onPress={() => cancel.mutate(booking)}
-                />
-              </View>
-            ) : null}
-          </View>
-        ))}
         {message ? <Text accessibilityRole="alert">{message}</Text> : null}
         {error ? (
           <Text accessibilityRole="alert" style={styles.error}>

@@ -1,16 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
   Dimensions,
+  FlatList,
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { listMyNotifications, markMyNotificationsRead } from "@startup/data-access";
 import {
   Bell,
   CalendarCheck,
@@ -21,6 +23,7 @@ import {
 } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Header } from "@startup/mobile-ui";
+import { supabase } from "../services/supabase";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -33,64 +36,133 @@ export type NotificationItem = {
   read: boolean;
 };
 
-const initialNotifications: NotificationItem[] = [
-  {
-    id: "1",
-    title: "Appointment Confirmed",
-    message: "Your clinic visit with Dr. Ananya Sharma is confirmed for Nov 5 at 02:30 PM.",
-    time: "10m ago",
-    type: "appointment",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Prescription Available",
-    message: "Dr. Sriram Reddy has uploaded your consultation prescription & medication notes.",
-    time: "2h ago",
-    type: "prescription",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Medicine Reminder",
-    message: "Time to take Paracetamol 650mg after lunch.",
-    time: "5h ago",
-    type: "medicine",
-    read: true,
-  },
-  {
-    id: "4",
-    title: "Queue Update",
-    message: "Token #7 is next in line at Apollo Hospitals.",
-    time: "Yesterday",
-    type: "queue",
-    read: true,
-  },
-  {
-    id: "5",
-    title: "Welcome to Clinzo",
-    message: "Easily book appointments, track home visits, and access your medical records.",
-    time: "3d ago",
-    type: "general",
-    read: true,
-  },
-];
-
 export type NotificationDrawerProps = {
   visible: boolean;
   onClose: () => void;
 };
 
+function renderIcon(type: NotificationItem["type"]) {
+  switch (type) {
+    case "appointment":
+      return <CalendarCheck color={colors.patient.primary} size={18} strokeWidth={2} />;
+    case "prescription":
+      return <FileText color="#0284C7" size={18} strokeWidth={2} />;
+    case "medicine":
+      return <Pill color="#D97706" size={18} strokeWidth={2} />;
+    case "queue":
+      return <Stethoscope color={colors.patient.primaryDark} size={18} strokeWidth={2} />;
+    default:
+      return <Bell color={colors.patient.accent} size={18} strokeWidth={2} />;
+  }
+}
+
+function getIconBg(type: NotificationItem["type"]) {
+  switch (type) {
+    case "appointment":
+      return "#E6F7F5";
+    case "prescription":
+      return "#E0F2FE";
+    case "medicine":
+      return "#FEF3C7";
+    case "queue":
+      return "#E6F5F4";
+    default:
+      return "#E8F8F4";
+  }
+}
+
+function NotificationCard({
+  item,
+  onPress,
+}: {
+  item: NotificationItem;
+  onPress: (id: string) => void;
+}) {
+  const handlePress = useCallback(() => {
+    onPress(item.id);
+  }, [item.id, onPress]);
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.notificationCard,
+        !item.read ? styles.unreadCard : undefined,
+        pressed ? styles.cardPressed : undefined,
+      ]}
+      onPress={handlePress}
+    >
+      <View
+        style={[
+          styles.iconContainer,
+          { backgroundColor: getIconBg(item.type) },
+        ]}
+      >
+        {renderIcon(item.type)}
+      </View>
+
+      <View style={styles.textContainer}>
+        <View style={styles.cardHeaderRow}>
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.itemTitle,
+              !item.read ? styles.unreadItemTitle : undefined,
+            ]}
+          >
+            {item.title}
+          </Text>
+          <Text style={styles.itemTime}>{item.time}</Text>
+        </View>
+        <Text style={styles.itemMessage}>{item.message}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps) {
   const insets = useSafeAreaInsets();
   const [showModal, setShowModal] = useState(visible);
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const slideAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const queryClient = useQueryClient();
+  const notificationsQuery = useQuery({
+    queryKey: ["my-notifications"],
+    queryFn: () => listMyNotifications(supabase!),
+    enabled: Boolean(supabase && showModal),
+  });
+  const markRead = useMutation({
+    mutationFn: (ids?: string[]) => markMyNotificationsRead(supabase!, ids),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["my-notifications"] }),
+  });
+  const notifications: NotificationItem[] = (notificationsQuery.data ?? []).map((item) => {
+    const status = item.safe_parameters.status;
+    const isAppointment = item.template_key.startsWith("appointment.");
+    const isAmbulance = item.template_key.startsWith("ambulance.");
+    return {
+      id: item.id,
+      title: isAppointment ? "Appointment update" : isAmbulance ? "Ambulance trip update" : item.template_key.startsWith("verification.") ? "Verification update" : "Notification",
+      message: typeof status === "string" ? `Status: ${status.replaceAll("_", " ")}` : "You have a new update.",
+      time: new Date(item.created_at).toLocaleDateString(),
+      type: isAppointment ? "appointment" as const : "general" as const,
+      read: item.is_read,
+    };
+  });
+  const slideAnimRef = useRef<Animated.Value | null>(null);
+  if (slideAnimRef.current === null) {
+    slideAnimRef.current = new Animated.Value(SCREEN_WIDTH);
+  }
+  const slideAnim = slideAnimRef.current;
+
+  const fadeAnimRef = useRef<Animated.Value | null>(null);
+  if (fadeAnimRef.current === null) {
+    fadeAnimRef.current = new Animated.Value(0);
+  }
+  const fadeAnim = fadeAnimRef.current;
+
+  if (visible && !showModal) {
+    setShowModal(true);
+  }
 
   useEffect(() => {
     if (visible) {
-      setShowModal(true);
       slideAnim.setValue(SCREEN_WIDTH);
       Animated.parallel([
         Animated.timing(slideAnim, {
@@ -120,53 +192,45 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
         setShowModal(false);
       });
     }
-  }, [visible]);
+  }, [visible, slideAnim, fadeAnim]);
+
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!visible) return;
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        onClose();
+        onCloseRef.current();
         return true;
       }
     );
     return () => backHandler.remove();
-  }, [visible, onClose]);
+  }, [visible]);
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+  const markAllAsRead = useCallback(() => {
+    markRead.mutate();
+  }, [markRead]);
 
-  const renderIcon = (type: NotificationItem["type"]) => {
-    switch (type) {
-      case "appointment":
-        return <CalendarCheck color={colors.patient.primary} size={18} strokeWidth={2} />;
-      case "prescription":
-        return <FileText color="#0284C7" size={18} strokeWidth={2} />;
-      case "medicine":
-        return <Pill color="#D97706" size={18} strokeWidth={2} />;
-      case "queue":
-        return <Stethoscope color={colors.patient.primaryDark} size={18} strokeWidth={2} />;
-      default:
-        return <Bell color={colors.patient.accent} size={18} strokeWidth={2} />;
-    }
-  };
+  const handleCardPress = useCallback(
+    (id: string) => {
+      const item = notifications.find((n) => n.id === id);
+      if (item && !item.read) {
+        markRead.mutate([id]);
+      }
+    },
+    [notifications, markRead]
+  );
 
-  const getIconBg = (type: NotificationItem["type"]) => {
-    switch (type) {
-      case "appointment":
-        return "#E6F7F5";
-      case "prescription":
-        return "#E0F2FE";
-      case "medicine":
-        return "#FEF3C7";
-      case "queue":
-        return "#E6F5F4";
-      default:
-        return "#E8F8F4";
-    }
-  };
+  const renderItem = useCallback(
+    ({ item }: { item: NotificationItem }) => (
+      <NotificationCard item={item} onPress={handleCardPress} />
+    ),
+    [handleCardPress]
+  );
 
   if (!showModal) return null;
 
@@ -181,10 +245,10 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
       <View style={styles.overlay}>
         <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
           <Pressable
-            accessibilityLabel="Close notifications"
+            accessibilityLabel="Close notification drawer"
             accessibilityRole="button"
-            onPress={onClose}
             style={StyleSheet.absoluteFill}
+            onPress={onClose}
           />
         </Animated.View>
 
@@ -192,27 +256,24 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
           style={[
             styles.drawer,
             {
+              paddingTop: insets.top,
               transform: [{ translateX: slideAnim }],
             },
           ]}
         >
           <Header
+            title="Notifications"
             app="patient"
-            title="Notification"
             onBackPress={onClose}
           />
 
           <View style={styles.drawerSubheader}>
             <Text style={styles.unreadCountText}>
-              {notifications.filter((n) => !n.read).length > 0
-                ? `${notifications.filter((n) => !n.read).length} new notification${
-                    notifications.filter((n) => !n.read).length > 1 ? "s" : ""
-                  }`
-                : "All caught up"}
+              {notifications.filter((n) => !n.read).length} unread
             </Text>
             {notifications.some((n) => !n.read) ? (
               <Pressable
-                accessibilityLabel="Mark all as read"
+                accessibilityLabel="Mark all notifications as read"
                 accessibilityRole="button"
                 onPress={markAllAsRead}
                 hitSlop={8}
@@ -222,54 +283,22 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
             ) : null}
           </View>
 
-          <ScrollView
+          <FlatList
+            data={notifications}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={[
               styles.listContent,
               { paddingBottom: Math.max(insets.bottom, 20) + 20 },
             ]}
             showsVerticalScrollIndicator={false}
-          >
-            {notifications.map((item) => (
-              <Pressable
-                key={item.id}
-                style={({ pressed }) => [
-                  styles.notificationCard,
-                  !item.read ? styles.unreadCard : undefined,
-                  pressed ? styles.cardPressed : undefined,
-                ]}
-                onPress={() => {
-                  setNotifications((prev) =>
-                    prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
-                  );
-                }}
-              >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: getIconBg(item.type) },
-                  ]}
-                >
-                  {renderIcon(item.type)}
-                </View>
-
-                <View style={styles.textContainer}>
-                  <View style={styles.cardHeaderRow}>
-                    <Text
-                      numberOfLines={1}
-                      style={[
-                        styles.itemTitle,
-                        !item.read ? styles.unreadItemTitle : undefined,
-                      ]}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text style={styles.itemTime}>{item.time}</Text>
-                  </View>
-                  <Text style={styles.itemMessage}>{item.message}</Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
+            ListHeaderComponent={
+              <>
+                {notificationsQuery.isError ? <Text accessibilityRole="alert" style={styles.itemMessage}>Could not load notifications.</Text> : null}
+                {!notificationsQuery.isError && notifications.length === 0 ? <Text style={styles.itemMessage}>No notifications yet.</Text> : null}
+              </>
+            }
+            renderItem={renderItem}
+          />
         </Animated.View>
       </View>
     </Modal>

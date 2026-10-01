@@ -1,15 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { patientProfile } from "../utils/profileConstants";
 
 export function ProfileStats({
-  age = patientProfile.age,
-  blood = patientProfile.blood,
-  bookings = patientProfile.bookings,
+  age,
+  blood,
+  bookings,
 }: {
-  age?: string;
-  blood?: string;
-  bookings?: string;
+  age: string;
+  blood: string;
+  bookings: string;
 }) {
   return (
     <View style={styles.stats}>

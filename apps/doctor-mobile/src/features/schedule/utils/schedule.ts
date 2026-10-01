@@ -25,6 +25,13 @@ export function scheduleError(schedule: Schedule): string | undefined {
     )
   )
     return "Enter valid charges between ₹0 and ₹100,000.";
+  if (
+    schedule.homeVisits &&
+    (!/^\d+(\.\d{1,2})?$/.test(schedule.homeRadius) ||
+      Number(schedule.homeRadius) <= 0 ||
+      Number(schedule.homeRadius) > 9999.99)
+  )
+    return "Enter a positive home-visit travel radius in km.";
 }
 export function previewSlots(schedule: Schedule): string[] {
   if (

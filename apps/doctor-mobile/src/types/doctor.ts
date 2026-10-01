@@ -45,6 +45,7 @@ export type Schedule = {
   autoAccept: boolean;
   autoLimit: number;
   homeVisits: boolean;
+  homeRadius: string;
   onlineFee: string;
   clinicFee: string;
   homeFee: string;

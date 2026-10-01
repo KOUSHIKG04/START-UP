@@ -21,3 +21,4 @@ export * from "./tracking";
 export * from "./trips";
 export * from "./bed-inventory";
 export * from "./onboarding";
+export * from "./verification";

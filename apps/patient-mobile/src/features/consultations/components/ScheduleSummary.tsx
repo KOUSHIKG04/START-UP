@@ -76,8 +76,7 @@ export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
 
 const styles = StyleSheet.create({
   doctorCard: {
-    ...shadows.card,
-    elevation: 3,
+    boxShadow: "0px 3px 12px rgba(0, 36, 41, 0.08)",
   },
   doctorHeaderRow: {
     flexDirection: "row",

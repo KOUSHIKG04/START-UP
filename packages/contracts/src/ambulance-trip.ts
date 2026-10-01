@@ -19,6 +19,8 @@ export const myDriverTripSchema = z.object({
   created_at: z.string(),
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
+  distance_meters: z.string().nullable(),
+  capability_code: z.enum(["BLS", "ALS", "NICU"]).nullable(),
   pickup_latitude: z.number(),
   pickup_longitude: z.number(),
   destination_latitude: z.number().nullable(),

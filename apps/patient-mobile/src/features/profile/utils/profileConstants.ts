@@ -1,13 +1,3 @@
-export const patientProfile = {
-  initials: "AS",
-  name: "Aditya Subramanya",
-  age: "28 yrs",
-  blood: "A+",
-  bookings: "12",
-  phone: "+91 98765 43210",
-  email: "aditya.subramanya@gmail.com",
-} as const;
-
 export const supportContacts = {
   phone: "1800-200-8899",
   email: "support@clinzo.health",

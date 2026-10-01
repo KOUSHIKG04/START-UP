@@ -50,6 +50,7 @@ export const doctor = clinzo
       ),
       public_code: text("public_code").notNull(),
       full_name: text("full_name").notNull(),
+      qualification: text("qualification"),
       bio: text("bio"),
       registration_authority: text("registration_authority").notNull(),
       registration_number: text("registration_number").notNull(),
@@ -278,6 +279,31 @@ export const doctorFacility = clinzo
   .enableRLS();
 export type DoctorFacility = typeof doctorFacility.$inferSelect;
 export type NewDoctorFacility = typeof doctorFacility.$inferInsert;
+
+export const doctorPresence = clinzo.table("doctor_presence", {
+  doctor_id: uuid("doctor_id").primaryKey().references((): AnyPgColumn => doctor.id, { onDelete: "restrict" }),
+  present: boolean("present").notNull().default(false),
+  changed_at: timestamp("changed_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+}).enableRLS();
+
+export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferences", {
+  doctor_facility_id: uuid("doctor_facility_id").primaryKey().references((): AnyPgColumn => doctorFacility.id, { onDelete: "restrict" }),
+  working_days: smallint("working_days").array().notNull(),
+  clinic_start: time("clinic_start").notNull(),
+  clinic_end: time("clinic_end").notNull(),
+  slot_minutes: smallint("slot_minutes").notNull(),
+  online_daily_limit: smallint("online_daily_limit").notNull(),
+  walkin_daily_limit: smallint("walkin_daily_limit").notNull(),
+  auto_accept: boolean("auto_accept").notNull().default(false),
+  auto_accept_limit: smallint("auto_accept_limit").notNull().default(0),
+  home_visits: boolean("home_visits").notNull().default(false),
+  home_radius_km: numeric("home_radius_km", { precision: 6, scale: 2 }),
+  online_fee_minor: integer("online_fee_minor"),
+  clinic_fee_minor: integer("clinic_fee_minor").notNull(),
+  home_fee_minor: integer("home_fee_minor"),
+  row_version: bigint("row_version", { mode: "bigint" }).notNull().default(sql`1`),
+  updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+}).enableRLS();
 
 export const practiceService = clinzo
   .table(

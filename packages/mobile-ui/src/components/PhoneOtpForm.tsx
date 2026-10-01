@@ -27,11 +27,24 @@ export function PhoneOtpForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(action: () => Promise<void>) {
+  async function handleSend() {
     setBusy(true);
     setError(null);
     try {
-      await action();
+      await onSend(phone);
+      setSent(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleVerify() {
+    setBusy(true);
+    setError(null);
+    try {
+      await onVerify(phone, code);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Please try again.");
     } finally {
@@ -81,7 +94,7 @@ export function PhoneOtpForm({
           <Button
             label="Verify and continue"
             disabled={busy || !!configurationError}
-            onPress={() => void submit(() => onVerify(phone, code))}
+            onPress={() => void handleVerify()}
           />
           <Button
             label="Use another number"
@@ -98,12 +111,7 @@ export function PhoneOtpForm({
         <Button
           label="Send sign-in code"
           disabled={busy || !!configurationError}
-          onPress={() =>
-            void submit(async () => {
-              await onSend(phone);
-              setSent(true);
-            })
-          }
+          onPress={() => void handleSend()}
         />
       )}
       {footer}

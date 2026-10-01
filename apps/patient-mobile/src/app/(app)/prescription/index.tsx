@@ -6,18 +6,19 @@ import {
 } from "../../../features/appointments/utils/appointmentParams";
 
 export default function PrescriptionRoute() {
-  const appointment = appointmentFromParams(
-    useLocalSearchParams<AppointmentParams>()
-  );
+  const params = useLocalSearchParams<AppointmentParams & { appointmentId?: string }>();
+  const appointment = appointmentFromParams(params);
+  const targetAppointmentId = params.appointmentId || appointment.id;
 
   return (
     <PrescriptionScreen
       appointment={appointment}
+      appointmentId={targetAppointmentId}
       onBackPress={() => router.back()}
       onViewMedicines={() =>
         router.push({
           pathname: "/medicines",
-          params: appointment,
+          params: { appointmentId: targetAppointmentId },
         } as unknown as Href)
       }
     />

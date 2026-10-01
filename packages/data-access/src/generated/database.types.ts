@@ -5,16 +5,55 @@ export type Database = {
     Tables: Record<string, never>;
     Views: Record<string, never>;
     Functions: {
+      publish_online_session: { Args: { p_practice_id: string; p_starts_at: string; p_ends_at: string; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string };
+      list_care_appointments: { Args: { p_practice_id?: string | null }; Returns: unknown };
+      get_online_join_context: { Args: { p_appointment_id: string }; Returns: unknown };
+      can_read_online_visit: { Args: { p_appointment_id: string }; Returns: boolean };
+      send_online_message: { Args: { p_appointment_id: string; p_client_nonce: string; p_body: string }; Returns: string };
+      list_online_messages: { Args: { p_appointment_id: string }; Returns: unknown };
+      start_online_appointment: { Args: { p_appointment_id: string }; Returns: string };
+      complete_online_appointment: { Args: { p_appointment_id: string; p_assessment: string }; Returns: string };
+      is_company_reviewer: { Args: Record<string, never>; Returns: boolean };
+      list_company_verification_cases: { Args: Record<string, never>; Returns: unknown };
+      get_company_verification_case: { Args: { p_case_id: string }; Returns: unknown };
+      review_company_verification_document: {
+        Args: { p_document_id: string; p_decision: string; p_reason?: string | null };
+        Returns: unknown;
+      };
+      finalize_company_verification: {
+        Args: { p_case_id: string; p_driver_details?: Record<string, unknown> | null };
+        Returns: unknown;
+      };
+      get_my_verification_case: { Args: { p_subject_type: string; p_subject_id: string }; Returns: unknown };
+      submit_my_facility_verification: {
+        Args: { p_facility_id: string; p_registration_number: string; p_certificate_path: string; p_operating_licence_path: string };
+        Returns: string;
+      };
       get_my_profile: { Args: Record<string, never>; Returns: unknown };
+      register_my_expo_push_token: { Args: { p_installation_id: string; p_token: string }; Returns: string };
+      revoke_my_expo_push_token: { Args: { p_installation_id: string }; Returns: void };
+      list_my_notifications: { Args: Record<string, never>; Returns: unknown };
+      mark_my_notifications_read: { Args: { p_ids?: string[] | null }; Returns: number };
       complete_onboarding: {
         Args: { p_kind: string; p_details: Record<string, unknown> };
         Returns: unknown;
       };
+      update_my_owned_clinic_location: {
+        Args: { p_facility_id: string; p_location: Record<string, unknown> };
+        Returns: unknown;
+      };
+      complete_patient_profile: { Args: { p_profile: Record<string, unknown> }; Returns: unknown };
+      add_my_family_profile: { Args: { p_profile: Record<string, unknown> }; Returns: string };
+      list_my_family_profiles: { Args: Record<string, never>; Returns: unknown };
+      get_my_patient_profile_detail: { Args: Record<string, never>; Returns: unknown };
+      submit_my_doctor_claim: { Args: { p_claim: Record<string, unknown> }; Returns: boolean };
+      has_my_doctor_claim: { Args: Record<string, never>; Returns: boolean };
       create_driver_invitation: {
         Args: { p_organization_id: string; p_phone: string };
         Returns: string;
       };
       list_my_practices: { Args: Record<string, never>; Returns: unknown };
+      list_my_facility_doctors: { Args: Record<string, never>; Returns: unknown };
       list_my_clinic_sessions: { Args: { p_practice_id: string }; Returns: unknown };
       list_public_hospitals: { Args: { p_latitude?: number | null; p_longitude?: number | null; p_limit?: number }; Returns: unknown };
       request_ambulance_booking: {
@@ -23,6 +62,7 @@ export type Database = {
         Returns: string;
       };
       list_my_ambulance_bookings: { Args: Record<string, never>; Returns: unknown };
+      submit_my_ambulance_review: { Args: { p_booking_id: string; p_rating: number }; Returns: string };
       cancel_my_ambulance_booking: { Args: { p_booking_id: string; p_expected_version: number }; Returns: string };
       refresh_my_ambulance_dispatch: { Args: { p_booking_id: string }; Returns: number };
       list_my_driver_offers: { Args: Record<string, never>; Returns: unknown };
@@ -42,6 +82,12 @@ export type Database = {
         Returns: string;
       };
       list_my_ambulance_fleet: { Args: Record<string, never>; Returns: unknown };
+      get_my_driver_profile: { Args: Record<string, never>; Returns: unknown };
+      get_my_driver_registration_application: { Args: Record<string, never>; Returns: unknown };
+      save_my_driver_registration_details: { Args: { p_details: Record<string, unknown> }; Returns: unknown };
+      submit_my_driver_registration_application: { Args: { p_vehicle: Record<string, unknown>; p_documents: Record<string, string> }; Returns: unknown };
+      update_my_driver_profile: { Args: { p_profile: Record<string, unknown> }; Returns: unknown };
+      submit_my_driver_vehicle: { Args: { p_details: Record<string, unknown>; p_documents: Record<string, string> }; Returns: string };
       set_my_driver_availability: {
         Args: { p_vehicle_id: string; p_online: boolean; p_latitude?: number | null; p_longitude?: number | null };
         Returns: string | null;
@@ -152,6 +198,10 @@ export type Database = {
         Returns: unknown;
       };
       get_my_doctor_profile: { Args: Record<string, never>; Returns: unknown };
+      get_my_doctor_presence: { Args: Record<string, never>; Returns: boolean };
+      set_my_doctor_presence: { Args: { p_present: boolean }; Returns: boolean };
+      get_my_schedule_preferences: { Args: { p_practice_id: string }; Returns: unknown };
+      save_my_schedule_preferences: { Args: { p_practice_id: string; p_settings: Record<string, unknown>; p_expected_version: number }; Returns: unknown };
       update_my_doctor_profile: {
         Args: { p_full_name: string; p_bio: string | null; p_languages: string[] };
         Returns: unknown;

@@ -1,1 +1,1 @@
-export { LiveDoctorProfileScreen as default } from "../../../../features/profile/screens/LiveDoctorProfileScreen";
+export { ProfileScreen as default } from "../../../../features/profile/screens/ProfileScreen";

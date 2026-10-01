@@ -1,1 +1,1 @@
-export { LiveDriverStatusScreen as default } from "../../../features/home/screens/LiveDriverStatusScreen";
+export { HomeScreen as default } from "../../../features/home/screens/HomeScreen";

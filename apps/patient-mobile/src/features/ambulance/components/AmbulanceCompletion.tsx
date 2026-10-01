@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
-import { ambulanceTrip } from "../utils/ambulanceConstants";
+import type { MyAmbulanceBooking } from "@startup/contracts";
 
 const experienceRatings = [
   { emoji: "😞", label: "Very poor" },
@@ -29,25 +29,30 @@ const experienceRatings = [
 
 export function AmbulanceCompletion({
   onGoHome,
+  booking,
+  onSubmitRating,
 }: {
   onGoHome: () => void;
+  booking: MyAmbulanceBooking;
+  onSubmitRating: (rating: number) => Promise<void>;
 }) {
   const [rating, setRating] = useState<number>();
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
-  const ratingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ratingSubmitted, setRatingSubmitted] = useState(booking.review_rating !== null);
+  const [ratingPending, setRatingPending] = useState(false);
+  const [ratingError, setRatingError] = useState("");
 
-  useEffect(() => {
-    return () => {
-      if (ratingTimerRef.current) clearTimeout(ratingTimerRef.current);
-    };
-  }, []);
-
-  const handleRatingSubmit = () => {
+  const handleRatingSubmit = async () => {
     if (rating === undefined || ratingSubmitted) return;
-    setRatingSubmitted(true);
-    ratingTimerRef.current = setTimeout(() => {
-      onGoHome();
-    }, 2000);
+    setRatingPending(true);
+    setRatingError("");
+    try {
+      await onSubmitRating(rating + 1);
+      setRatingSubmitted(true);
+    } catch (cause) {
+      setRatingError(cause instanceof Error ? cause.message : "Could not submit rating.");
+    } finally {
+      setRatingPending(false);
+    }
   };
 
   return (
@@ -74,8 +79,7 @@ export function AmbulanceCompletion({
             Your Ambulance Journey is Completed
           </Text>
           <Text style={styles.centeredDescription}>
-            Patient safely handed over to {ambulanceTrip.dropoff.split(",")[0]}{" "}
-            emergency care team.
+            Your trip to {booking.destination_address ?? "the destination"} is complete.
           </Text>
         </View>
 
@@ -100,16 +104,16 @@ export function AmbulanceCompletion({
               <Building2 color={colors.patient.primaryDark} size={18} />
               <Text style={styles.secondaryText}>Hospital</Text>
             </View>
-            <Text style={styles.summaryValue}>{ambulanceTrip.dropoff}</Text>
+            <Text style={styles.summaryValue}>{booking.destination_address ?? "Destination unavailable"}</Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <UserRound color={colors.patient.primaryDark} size={18} />
-              <Text style={styles.secondaryText}>Paramedic</Text>
+              <Text style={styles.secondaryText}>Driver</Text>
             </View>
             <Text style={styles.summaryValue}>
-              {ambulanceTrip.driver} ({ambulanceTrip.vehicle})
+              {booking.driver_name ?? "Driver details unavailable"} ({booking.vehicle_registration ?? "Vehicle unavailable"})
             </Text>
           </View>
 
@@ -118,7 +122,7 @@ export function AmbulanceCompletion({
               <ShieldCheck color={colors.patient.primaryDark} size={18} />
               <Text style={styles.secondaryText}>Service</Text>
             </View>
-            <Text style={styles.summaryValue}>{ambulanceTrip.service}</Text>
+            <Text style={styles.summaryValue}>{booking.capability_code}</Text>
           </View>
 
           <View style={styles.summaryRowLast}>
@@ -126,7 +130,7 @@ export function AmbulanceCompletion({
               <ReceiptText color={colors.patient.primaryDark} size={18} />
               <Text style={styles.secondaryText}>Total Fare</Text>
             </View>
-            <Text style={styles.summaryValueTotal}>₹{ambulanceTrip.fare} (Paid)</Text>
+            <Text style={styles.summaryValueTotal}>Fare pending</Text>
           </View>
         </Card>
       </View>
@@ -151,7 +155,7 @@ export function AmbulanceCompletion({
                 accessibilityLabel={item.label}
                 accessibilityRole="button"
                 accessibilityState={{ selected: rating === index }}
-                disabled={ratingSubmitted}
+                disabled={ratingSubmitted || ratingPending}
                 onPress={() => setRating(index)}
                 style={({ pressed }) => [
                   styles.ratingButton,
@@ -168,8 +172,8 @@ export function AmbulanceCompletion({
             <Button
               label="Submit"
               variant="outline"
-              disabled={rating === undefined}
-              onPress={handleRatingSubmit}
+              disabled={rating === undefined || ratingPending}
+              onPress={() => void handleRatingSubmit()}
               style={[
                 styles.experienceSubmitButton,
                 rating !== undefined && styles.experienceSubmitButtonActive,
@@ -184,10 +188,11 @@ export function AmbulanceCompletion({
                 strokeWidth={2.4}
               />
               <Text style={styles.ratingSubmittedText}>
-                Submitted • Returning home...
+                Submitted
               </Text>
             </View>
           )}
+          {ratingError ? <Text accessibilityRole="alert" style={styles.ratingSubmittedText}>{ratingError}</Text> : null}
         </Card>
 
         {/* Go to Home Button */}
@@ -292,8 +297,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.white,
     overflow: "hidden",
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   summaryHeading: {
     flexDirection: "row",
@@ -355,8 +359,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E5EB",
     borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   feedbackTitle: {
     color: colors.patient.text,
@@ -422,8 +425,7 @@ const styles = StyleSheet.create({
   goHomeButton: {
     minHeight: 52,
     borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   goHomeButtonLabel: {
     fontSize: 15,

@@ -3,6 +3,11 @@ import { RecordsScreen } from "../../../../features/records/screens/RecordsScree
 
 export default function RecordsRoute() {
   return (
-    <RecordsScreen onBackPress={() => router.navigate("/")} />
+    <RecordsScreen
+      onBackPress={() => router.navigate("/")}
+      onViewRecord={(appointmentId) =>
+        router.push({ pathname: "/prescription", params: { appointmentId } })
+      }
+    />
   );
 }

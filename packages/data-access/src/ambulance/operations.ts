@@ -49,6 +49,19 @@ export async function listMyAmbulanceBookings(client: AppSupabaseClient) {
   return myAmbulanceBookingSchema.array().parse(data);
 }
 
+export async function submitMyAmbulanceReview(
+  client: AppSupabaseClient,
+  bookingId: string,
+  rating: number
+) {
+  const { data, error } = await client.rpc("submit_my_ambulance_review", {
+    p_booking_id: uuidSchema.parse(bookingId),
+    p_rating: rating,
+  });
+  if (error) throw error;
+  return uuidSchema.parse(data);
+}
+
 export async function cancelMyAmbulanceBooking(
   client: AppSupabaseClient,
   input: CancelAmbulanceBookingInput

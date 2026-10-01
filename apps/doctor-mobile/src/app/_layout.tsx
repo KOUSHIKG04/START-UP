@@ -11,9 +11,9 @@ import {
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
+import { signOutWithPushCleanup, useDeviceNotifications } from "../features/notifications/deviceNotifications";
 import {
   mobileSession,
-  supabase,
   useMobileSession,
 } from "../services/supabase";
 
@@ -22,6 +22,7 @@ export const unstable_settings = { initialRouteName: "(app)" };
 export default function RootLayout() {
   const [loaded, error] = useFonts(albertSansFonts);
   const auth = useMobileSession();
+  useDeviceNotifications(auth.profile?.identity_id);
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync();
   }, [loaded, error]);
@@ -45,7 +46,7 @@ export default function RootLayout() {
         <Button
           label="Sign out"
           variant="outline"
-          onPress={() => void supabase?.auth.signOut()}
+          onPress={() => void signOutWithPushCleanup()}
         />
       </View>
     );

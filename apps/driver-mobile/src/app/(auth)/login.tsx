@@ -1,13 +1,23 @@
 import { router } from "expo-router";
 import { DevPasswordForm, PhoneOtpForm } from "@startup/mobile-ui";
-import { sendPhoneOtp, signInWithDevPassword, verifyPhoneOtp } from "@startup/data-access";
-import { devPasswordLoginEnabled, mobileSession, supabase } from "../../services/supabase";
+import {
+  sendPhoneOtp,
+  signInWithDevPassword,
+  signUpWithDevPassword,
+  verifyPhoneOtp,
+} from "@startup/data-access";
+import {
+  devPasswordLoginEnabled,
+  mobileSession,
+  supabase,
+} from "../../services/supabase";
 
 export default function LoginRoute() {
   async function finishSignIn() {
     await mobileSession.refresh();
-    const profile = mobileSession.getSnapshot().profile;
-    router.replace(profile?.driver ? "/(app)/(tabs)/home" : "/onboarding");
+    router.replace(
+      mobileSession.getSnapshot().profile?.driver ? "/(app)" : "/onboarding"
+    );
   }
 
   if (devPasswordLoginEnabled) {
@@ -18,6 +28,15 @@ export default function LoginRoute() {
         onSignIn={async (email, password) => {
           await signInWithDevPassword(supabase!, email, password);
           await finishSignIn();
+        }}
+        onSignUp={async (email, password) => {
+          const session = await signUpWithDevPassword(
+            supabase!,
+            email,
+            password
+          );
+          if (session) await finishSignIn();
+          return Boolean(session);
         }}
       />
     );

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { BackHandler, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getMyPatientProfileDetail,
+  listClinicAppointments,
+  listMyFamilyProfiles,
+} from "@startup/data-access";
 import {
   Bell,
   CalendarDays,
@@ -12,15 +18,34 @@ import { Card, FadedScrollView, Header } from "@startup/mobile-ui";
 import { NotificationDrawer } from "../../../components/NotificationDrawer";
 import {
   ProfileIdentity,
-  ProfilePinCard,
   ProfileStats,
   SettingsView,
 } from "../components/index";
-import { patientProfile } from "../utils/profileConstants";
+import { supabase, useMobileSession } from "../../../services/supabase";
 import type { ProfileScreenProps } from "../types/profile";
 
 export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
-  const [currentView, setCurrentView] = useState<"profile" | "settings">("profile");
+  const { profile } = useMobileSession();
+  const detail = useQuery({
+    queryKey: ["my-patient-profile-detail", profile?.patient_id],
+    queryFn: () => getMyPatientProfileDetail(supabase!),
+    enabled: Boolean(supabase && profile?.patient_id),
+  });
+  const family = useQuery({
+    queryKey: ["my-family-profiles", profile?.patient_id],
+    queryFn: () => listMyFamilyProfiles(supabase!),
+    enabled: Boolean(supabase && profile?.patient_id),
+  });
+  const bookings = useQuery({
+    queryKey: ["patient-clinic-appointments"],
+    queryFn: () => listClinicAppointments(supabase!),
+    enabled: Boolean(supabase && profile?.patient_id),
+  });
+  const name =
+    detail.data?.full_name ?? profile?.display_name ?? "Your profile";
+  const [currentView, setCurrentView] = useState<"profile" | "settings">(
+    "profile"
+  );
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Hardware back button handling
@@ -32,7 +57,10 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
       }
       return false;
     };
-    const sub = BackHandler.addEventListener("hardwareBackPress", onHardwareBack);
+    const sub = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onHardwareBack
+    );
     return () => sub.remove();
   }, [currentView]);
 
@@ -44,11 +72,7 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
   // Render Main Profile Page
   return (
     <View style={styles.screen}>
-      <Header
-        title="Profile"
-        app="patient"
-        onBackPress={onBackPress}
-      />
+      <Header title="Profile" app="patient" onBackPress={onBackPress} />
       <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -56,16 +80,74 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
       >
         {/* Profile Avatar & Name - Cleanly below header */}
         <ProfileIdentity
-          initials={patientProfile.initials}
-          name={patientProfile.name}
+          initials={name
+            .split(/\s+/)
+            .slice(0, 2)
+            .map((part) => part[0])
+            .join("")
+            .toUpperCase()}
+          name={name}
         />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Edit profile"
+          onPress={() => router.push("/(app)/edit-profile")}
+          style={styles.editButton}
+        >
+          <Text style={styles.editText}>Edit profile</Text>
+        </Pressable>
 
         {/* Stats Row */}
         <ProfileStats
-          age={patientProfile.age}
-          blood={patientProfile.blood}
-          bookings={patientProfile.bookings}
+          age={
+            detail.data?.age_years === null ||
+            detail.data?.age_years === undefined
+              ? "—"
+              : `${detail.data.age_years} yrs`
+          }
+          blood={detail.data?.blood_group ?? "—"}
+          bookings={String(bookings.data?.length ?? 0)}
         />
+        <Card
+          variant="outlined"
+          borderRadius={radius.md}
+          borderWidth={1}
+          borderColor="#E0E5EB"
+          backgroundColor={colors.white}
+          padding={16}
+          style={styles.cardNoShadow}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add family member"
+            onPress={() => router.push("/(app)/family-profile")}
+            style={styles.actionRow}
+          >
+            <View style={styles.iconCircle}>
+              <Text style={styles.familyIcon}>+</Text>
+            </View>
+            <View style={styles.copyCol}>
+              <Text style={styles.rowTitle}>Family members</Text>
+              <Text style={styles.rowSubtitle}>Add a family profile</Text>
+            </View>
+            <ChevronRight color="#8EA0B4" size={18} />
+          </Pressable>
+          {family.data?.map((member) => (
+            <View key={member.id} style={styles.familyRow}>
+              <Text style={styles.rowTitle}>
+                {member.full_name} · {member.relation}
+              </Text>
+              <Text style={styles.rowSubtitle}>
+                {member.verified ? "Verified" : "Awaiting verification"}
+              </Text>
+            </View>
+          ))}
+          {family.error ? (
+            <Text accessibilityRole="alert" style={styles.rowSubtitle}>
+              Family profiles are unavailable right now.
+            </Text>
+          ) : null}
+        </Card>
 
         {/* 1. SEPARATE CARD: My Bookings */}
         <Card
@@ -81,7 +163,10 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
             accessibilityRole="button"
             accessibilityLabel="My Bookings"
             onPress={() => router.navigate("/appointments")}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.iconCircle}>
               <CalendarDays color={colors.patient.primaryDark} size={18} />
@@ -93,7 +178,7 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
               </Text>
             </View>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{patientProfile.bookings}</Text>
+              <Text style={styles.badgeText}>{bookings.data?.length ?? 0}</Text>
             </View>
             <ChevronRight color="#8EA0B4" size={18} />
           </Pressable>
@@ -113,7 +198,10 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
             accessibilityRole="button"
             accessibilityLabel="Notifications"
             onPress={() => setNotificationsOpen(true)}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.iconCircle}>
               <Bell color={colors.patient.primaryDark} size={18} />
@@ -125,16 +213,13 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
               </Text>
             </View>
             <View style={styles.newBadge}>
-              <Text style={styles.newBadgeText}>3 New</Text>
+              <Text style={styles.newBadgeText}>0 New</Text>
             </View>
             <ChevronRight color="#8EA0B4" size={18} />
           </Pressable>
         </Card>
 
-        {/* 3. SEPARATE CARD: Set Security PIN */}
-        <ProfilePinCard />
-
-        {/* 4. SEPARATE CARD: Settings (Opens Settings Page) */}
+        {/* Settings */}
         <Card
           variant="outlined"
           borderRadius={radius.md}
@@ -148,7 +233,10 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
             accessibilityRole="button"
             accessibilityLabel="Settings"
             onPress={() => setCurrentView("settings")}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.iconCircle}>
               <SettingsIcon color={colors.patient.primaryDark} size={18} />
@@ -244,4 +332,29 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   pressed: { opacity: 0.72 },
+  editButton: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.patient.primaryDark,
+  },
+  editText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.medium,
+    fontSize: 14,
+  },
+  familyIcon: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.bold,
+    fontSize: 25,
+  },
+  familyRow: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 10,
+    marginTop: 10,
+    gap: 3,
+  },
 });

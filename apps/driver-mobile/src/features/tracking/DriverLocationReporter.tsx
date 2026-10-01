@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 import { useQuery } from "@tanstack/react-query";
 import { listMyAmbulanceFleet, updateMyDriverLocation } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../services/supabase";
+import { startDriverBackgroundLocation, stopDriverBackgroundLocation } from "./backgroundLocationTask";
 
 export function DriverLocationReporter() {
   const { profile } = useMobileSession();
@@ -14,7 +15,10 @@ export function DriverLocationReporter() {
   const shiftId = fleet.data?.find((vehicle) => vehicle.desired_availability === "online")?.active_shift_id;
 
   useEffect(() => {
-    if (!shiftId || !supabase) return;
+    if (!shiftId || !supabase) {
+      void stopDriverBackgroundLocation().catch(() => {});
+      return;
+    }
     const client = supabase;
     let disposed = false;
     let inFlight = false;
@@ -57,8 +61,9 @@ export function DriverLocationReporter() {
       if (disposed) subscription.remove();
       else void sample();
     })();
+    void startDriverBackgroundLocation().catch(() => {});
     const timer = setInterval(() => { void sample(); }, 45000);
-    return () => { disposed = true; clearInterval(timer); subscription?.remove(); };
+    return () => { disposed = true; clearInterval(timer); subscription?.remove(); void stopDriverBackgroundLocation().catch(() => {}); };
   }, [shiftId]);
   return null;
 }

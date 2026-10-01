@@ -54,6 +54,14 @@ export const driver = clinzo
         }),
       public_code: text("public_code").notNull(),
       full_name: text("full_name").notNull(),
+      date_of_birth: date("date_of_birth", { mode: "string" }),
+      city: text("city"),
+      contact_phone: text("contact_phone"),
+      profile_photo_path: text("profile_photo_path"),
+      verification_consent_at: timestamp("verification_consent_at", {
+        withTimezone: true,
+        mode: "date",
+      }),
       license_number: text("license_number").notNull(),
       license_expires_on: date("license_expires_on", {
         mode: "string",
@@ -70,6 +78,16 @@ export const driver = clinzo
       index("driver_organization_id_idx").on(table.organization_id),
       check("driver_ck_1", sql.raw("row_version > 0")),
       check(
+        "driver_city_length",
+        sql.raw("city IS NULL OR length(city) BETWEEN 2 AND 120")
+      ),
+      check(
+        "driver_contact_phone_format",
+        sql.raw(
+          "contact_phone IS NULL OR contact_phone ~ '^\\+[1-9][0-9]{7,14}$'"
+        )
+      ),
+      check(
         "driver_ck_2",
         sql.raw(
           "\"verification_status\" IN ('pending', 'verified', 'suspended')"
@@ -80,6 +98,70 @@ export const driver = clinzo
   .enableRLS();
 export type Driver = typeof driver.$inferSelect;
 export type NewDriver = typeof driver.$inferInsert;
+
+// Pending evidence from the `main` driver onboarding UI. Approval creates a
+// separate driver/fleet record only through the future trusted review boundary.
+export const driverRegistrationApplication = clinzo
+  .table(
+    "driver_registration_application",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      identity_id: uuid("identity_id")
+        .notNull()
+        .references((): AnyPgColumn => identity.id, { onDelete: "restrict" }),
+      full_name: text("full_name").notNull(),
+      contact_phone: text("contact_phone").notNull(),
+      date_of_birth: date("date_of_birth", { mode: "string" }).notNull(),
+      city: text("city").notNull(),
+      profile_photo_path: text("profile_photo_path"),
+      consent_at: timestamp("consent_at", {
+        withTimezone: true,
+        mode: "date",
+      }).notNull(),
+      capability_code: text("capability_code", {
+        enum: ["BLS", "ALS", "NICU"],
+      }),
+      registration_number: text("registration_number"),
+      documents: jsonb("documents")
+        .$type<Record<string, string>>()
+        .notNull()
+        .default(sql`'{}'::jsonb`),
+      status: text("status", {
+        enum: ["details_saved", "submitted", "approved", "rejected"],
+      })
+        .notNull()
+        .default("details_saved"),
+      submitted_at: timestamp("submitted_at", {
+        withTimezone: true,
+        mode: "date",
+      }),
+      created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+      updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+      row_version: bigint("row_version", { mode: "bigint" })
+        .notNull()
+        .default(sql`1`),
+    },
+    (table) => [
+      uniqueIndex("driver_registration_application_identity_uq").on(
+        table.identity_id
+      ),
+      check(
+        "driver_registration_application_row_version_ck",
+        sql.raw("row_version > 0")
+      ),
+      check(
+        "driver_registration_application_phone_ck",
+        sql.raw("contact_phone ~ '^\\+[1-9][0-9]{7,14}$'")
+      ),
+    ]
+  )
+  .enableRLS();
+export type DriverRegistrationApplication =
+  typeof driverRegistrationApplication.$inferSelect;
 
 export const vehicle = clinzo
   .table(
@@ -116,6 +198,47 @@ export const vehicle = clinzo
   .enableRLS();
 export type Vehicle = typeof vehicle.$inferSelect;
 export type NewVehicle = typeof vehicle.$inferInsert;
+
+export const driverDocument = clinzo
+  .table(
+    "driver_document",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      driver_id: uuid("driver_id")
+        .notNull()
+        .references((): AnyPgColumn => driver.id, { onDelete: "restrict" }),
+      vehicle_id: uuid("vehicle_id")
+        .notNull()
+        .references((): AnyPgColumn => vehicle.id, { onDelete: "restrict" }),
+      kind: text("kind", {
+        enum: [
+          "aadhaar",
+          "pan",
+          "driving_licence",
+          "vehicle_rc",
+          "insurance",
+          "fitness",
+          "ambulance_image",
+          "equipment_images",
+        ],
+      }).notNull(),
+      storage_path: text("storage_path").notNull(),
+      created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+    },
+    (table) => [
+      uniqueIndex("driver_document_vehicle_kind_uq").on(
+        table.vehicle_id,
+        table.kind
+      ),
+      uniqueIndex("driver_document_storage_path_uq").on(table.storage_path),
+      index("driver_document_driver_id_idx").on(table.driver_id),
+    ]
+  )
+  .enableRLS();
+export type DriverDocument = typeof driverDocument.$inferSelect;
+export type NewDriverDocument = typeof driverDocument.$inferInsert;
 
 export const capability = clinzo
   .table(
@@ -192,17 +315,39 @@ export const vehicleReviewRequest = clinzo
     "vehicle_review_request",
     {
       id: uuid("id").primaryKey().defaultRandom(),
-      created_at: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-      updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-      row_version: bigint("row_version", { mode: "bigint" }).notNull().default(sql`1`),
-      driver_id: uuid("driver_id").notNull().references(() => driver.id, { onDelete: "restrict" }),
-      vehicle_id: uuid("vehicle_id").notNull().references(() => vehicle.id, { onDelete: "restrict" }),
-      capability_id: uuid("capability_id").notNull().references(() => capability.id, { onDelete: "restrict" }),
+      created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+      updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+      row_version: bigint("row_version", { mode: "bigint" })
+        .notNull()
+        .default(sql`1`),
+      driver_id: uuid("driver_id")
+        .notNull()
+        .references(() => driver.id, { onDelete: "restrict" }),
+      vehicle_id: uuid("vehicle_id")
+        .notNull()
+        .references(() => vehicle.id, { onDelete: "restrict" }),
+      capability_id: uuid("capability_id")
+        .notNull()
+        .references(() => capability.id, { onDelete: "restrict" }),
       equipment_notes: text("equipment_notes").notNull(),
       crew_notes: text("crew_notes").notNull(),
-      status: text("status", { enum: ["pending", "approved", "rejected", "revoked"] }).notNull().default("pending"),
-      reviewed_at: timestamp("reviewed_at", { withTimezone: true, mode: "date" }),
-      approved_until: timestamp("approved_until", { withTimezone: true, mode: "date" }),
+      status: text("status", {
+        enum: ["pending", "approved", "rejected", "revoked"],
+      })
+        .notNull()
+        .default("pending"),
+      reviewed_at: timestamp("reviewed_at", {
+        withTimezone: true,
+        mode: "date",
+      }),
+      approved_until: timestamp("approved_until", {
+        withTimezone: true,
+        mode: "date",
+      }),
       reviewer_reference: text("reviewer_reference"),
       evidence_reference: text("evidence_reference"),
       review_note: text("review_note"),
@@ -212,13 +357,30 @@ export const vehicleReviewRequest = clinzo
         .on(table.driver_id, table.vehicle_id, table.capability_id)
         .where(sql`status='pending'`),
       index("vehicle_review_approved_idx")
-        .on(table.driver_id, table.vehicle_id, table.capability_id, table.approved_until)
+        .on(
+          table.driver_id,
+          table.vehicle_id,
+          table.capability_id,
+          table.approved_until
+        )
         .where(sql`status='approved'`),
       check("vehicle_review_request_row_version_check", sql`row_version > 0`),
-      check("vehicle_review_request_equipment_notes_check", sql`length(equipment_notes) BETWEEN 10 AND 1000`),
-      check("vehicle_review_request_crew_notes_check", sql`length(crew_notes) BETWEEN 10 AND 1000`),
-      check("vehicle_review_request_status_check", sql`status IN ('pending','approved','rejected','revoked')`),
-      check("vehicle_review_decision_ck", sql`(status='pending' AND reviewed_at IS NULL AND approved_until IS NULL) OR (status='approved' AND reviewed_at IS NOT NULL AND approved_until > reviewed_at) OR (status IN ('rejected','revoked') AND reviewed_at IS NOT NULL AND approved_until IS NULL)`),
+      check(
+        "vehicle_review_request_equipment_notes_check",
+        sql`length(equipment_notes) BETWEEN 10 AND 1000`
+      ),
+      check(
+        "vehicle_review_request_crew_notes_check",
+        sql`length(crew_notes) BETWEEN 10 AND 1000`
+      ),
+      check(
+        "vehicle_review_request_status_check",
+        sql`status IN ('pending','approved','rejected','revoked')`
+      ),
+      check(
+        "vehicle_review_decision_ck",
+        sql`(status='pending' AND reviewed_at IS NULL AND approved_until IS NULL) OR (status='approved' AND reviewed_at IS NOT NULL AND approved_until > reviewed_at) OR (status IN ('rejected','revoked') AND reviewed_at IS NOT NULL AND approved_until IS NULL)`
+      ),
     ]
   )
   .enableRLS();

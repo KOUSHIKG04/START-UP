@@ -6,7 +6,7 @@ export const clinicBookingSchema = z
     patientId: uuidSchema,
     windowId: uuidSchema,
     practiceServiceId: uuidSchema,
-    reason: z.string().trim().min(1).max(1000),
+    reason: z.string().trim().max(1000),
     idempotencyKey: uuidSchema,
   })
   .strict();
@@ -106,6 +106,7 @@ export const revokeClinicUnavailabilitySchema = z.object({
 
 export const clinicAppointmentSchema = z.object({
   id: uuidSchema,
+  visit_mode: z.enum(["clinic", "online", "home"]),
   public_code: z.string(),
   status: z.enum([
     "pending",
@@ -119,6 +120,11 @@ export const clinicAppointmentSchema = z.object({
   row_version: z.string(),
   patient_id: uuidSchema,
   patient_name: z.string(),
+  patient_public_code: z.string(),
+  patient_gender: z.string().nullable(),
+  patient_age_years: z.number().int().nullable(),
+  patient_blood_group: z.string().nullable(),
+  service_name: z.string(),
   doctor_name: z.string(),
   facility_name: z.string(),
   reason: z.string().nullable(),

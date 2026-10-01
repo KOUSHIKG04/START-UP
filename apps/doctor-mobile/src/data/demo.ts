@@ -124,6 +124,7 @@ export const initialSchedule: Schedule = {
   autoAccept: true,
   autoLimit: 10,
   homeVisits: false,
+  homeRadius: "",
   onlineFee: "500",
   clinicFee: "700",
   homeFee: "1500",

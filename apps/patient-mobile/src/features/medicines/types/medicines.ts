@@ -1,3 +1,5 @@
 import type { PatientScreenProps } from "../../../types/screen";
 
-export type MedicinesScreenProps = PatientScreenProps;
+export type MedicinesScreenProps = PatientScreenProps & {
+  appointmentId?: string;
+};

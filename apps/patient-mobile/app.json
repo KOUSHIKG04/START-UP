@@ -26,7 +26,11 @@
     },
     "plugins": [
       "expo-router",
+      "expo-notifications",
+      "expo-maps",
       "expo-localization",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc",
       [
         "expo-location",
         {

@@ -18,6 +18,7 @@ import {
   check,
   foreignKey,
   primaryKey,
+  pgTable,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import {
@@ -328,3 +329,22 @@ export const followupRecommendation = clinzo
 export type FollowupRecommendation = typeof followupRecommendation.$inferSelect;
 export type NewFollowupRecommendation =
   typeof followupRecommendation.$inferInsert;
+
+// Realtime publication requires a table in the exposed public schema. Writes
+// remain restricted to the send_online_message RPC; participants can only read.
+export const onlineMessage = pgTable(
+  "online_message",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    appointment_id: uuid("appointment_id").notNull().references(() => appointment.id, { onDelete: "restrict" }),
+    sender_id: uuid("sender_id").notNull().references(() => identity.id, { onDelete: "restrict" }),
+    client_nonce: uuid("client_nonce").notNull(),
+    body: text("body").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("online_message_appointment_id_sender_id_client_nonce_key").on(table.appointment_id, table.sender_id, table.client_nonce),
+    index("online_message_thread_idx").on(table.appointment_id, table.created_at, table.id),
+    check("online_message_body_check", sql`length(trim(${table.body})) BETWEEN 1 AND 2000`),
+  ],
+).enableRLS();

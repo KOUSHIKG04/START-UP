@@ -25,8 +25,18 @@
     "scheme": "clinzo-driver",
     "plugins": [
       "expo-router",
+      "expo-notifications",
       "expo-document-picker",
-      ["expo-location", { "locationWhenInUsePermission": "Clinzo uses your location while you are available for ambulance requests." }],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Clinzo uses your location while you are available for ambulance requests.",
+          "locationAlwaysAndWhenInUsePermission": "Clinzo shares your location during an active ambulance shift so dispatch and patients can track the trip when the app is in the background.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
       "expo-localization"
     ]
   }

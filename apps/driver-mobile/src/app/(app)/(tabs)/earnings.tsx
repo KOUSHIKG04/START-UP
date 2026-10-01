@@ -1,1 +1,1 @@
-export { LiveDriverStatusScreen as default } from "../../../features/home/screens/LiveDriverStatusScreen";
+export { EarningsScreen as default } from "../../../features/earnings/screens/EarningsScreen";

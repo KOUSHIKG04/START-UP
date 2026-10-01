@@ -141,11 +141,18 @@ export async function listClinicAppointments(
   client: AppSupabaseClient,
   practiceId?: string
 ) {
-  const { data, error } = await client.rpc("list_clinic_appointments", {
+  const { data, error } = await client.rpc("list_care_appointments", {
     p_practice_id: practiceId ? uuidSchema.parse(practiceId) : null,
   });
   if (error) throw error;
   return clinicAppointmentSchema.array().parse(data);
+}
+
+export async function listMyPracticeAppointments(client: AppSupabaseClient) {
+  const practices = await listMyPractices(client);
+  const groups = await Promise.all(practices.map(practice => listClinicAppointments(client, practice.practice_id)));
+  return [...new Map(groups.flat().map(item => [item.id, item])).values()]
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
 }
 
 export async function transitionClinicAppointment(

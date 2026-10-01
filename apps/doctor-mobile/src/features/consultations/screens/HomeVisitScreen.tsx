@@ -9,10 +9,9 @@ import {
   Heading,
   Label,
   MissingPatient,
-  palette,
   Panel,
-  ui,
 } from "../../../components/DoctorScreen";
+import { palette, ui } from "../../../components/theme";
 import { useVisit, visitRoute } from "../utils/consultation";
 export function HomeVisitScreen() {
   const { patient, appointment } = useVisit();

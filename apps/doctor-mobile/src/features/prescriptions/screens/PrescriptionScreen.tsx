@@ -3,19 +3,19 @@ import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
 import { Plus } from "lucide-react-native";
 import {
-  Choice,
   DoctorScreen,
   Heading,
   Label,
   MissingPatient,
-  palette,
   Panel,
-  ui,
 } from "../../../components/DoctorScreen";
+import { palette, ui } from "../../../components/theme";
 import { useVisit } from "../../consultations/utils/consultation";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
 import { createConsultation } from "../../../data/demo";
 import type { Medicine } from "../../../types/doctor";
+import { MedicineCard } from "../components/MedicineCard";
+import { MedicineEditor } from "../components/MedicineEditor";
 
 const emptyMedicine = (): Medicine => ({
   id: `medicine-${Date.now()}`,
@@ -24,6 +24,7 @@ const emptyMedicine = (): Medicine => ({
   meals: [0, 0, 0],
   days: "5",
 });
+
 export function PrescriptionScreen() {
   const { patient, appointment } = useVisit();
   const visits = useDoctorStore((s) => s.consultations);
@@ -34,9 +35,37 @@ export function PrescriptionScreen() {
   if (!patient || !appointment) return <MissingPatient />;
   const visit = visits[appointment.id] ?? createConsultation(patient.id);
   const readOnly = visit.signed || visit.completed;
+
   const changeMedicines = (medicines: Medicine[]) => {
     if (!readOnly) update(appointment.id, patient.id, { medicines });
   };
+
+  const handleUpdateTiming = (medicineId: string, timing: Medicine["timing"]) => {
+    changeMedicines(
+      visit.medicines.map((m) => (m.id === medicineId ? { ...m, timing } : m))
+    );
+  };
+
+  const handleUpdateDose = (medicineId: string, mealIndex: number) => {
+    changeMedicines(
+      visit.medicines.map((m) => {
+        if (m.id !== medicineId) return m;
+        const meals = [...m.meals] as Medicine["meals"];
+        meals[mealIndex] = (meals[mealIndex] + 1) % 3;
+        return { ...m, meals };
+      })
+    );
+  };
+
+  const handleRemove = (medicineId: string) => {
+    changeMedicines(visit.medicines.filter((m) => m.id !== medicineId));
+  };
+
+  const handleStartEdit = (medicine: Medicine) => {
+    setEditing({ ...medicine, meals: [...medicine.meals] });
+    setError("");
+  };
+
   const saveMedicine = () => {
     if (!editing) return;
     if (
@@ -58,6 +87,7 @@ export function PrescriptionScreen() {
     setEditing(null);
     setError("");
   };
+
   const sign = () => {
     if (!visit.medicines.length) {
       setError("Add at least one medicine before signing.");
@@ -74,6 +104,7 @@ export function PrescriptionScreen() {
     setError("");
     setConfirm(true);
   };
+
   return (
     <DoctorScreen
       title="Write prescription"
@@ -85,118 +116,15 @@ export function PrescriptionScreen() {
         </Label>
       )}
       {visit.medicines.map((medicine) => (
-        <Panel key={medicine.id} style={{ gap: 14 }}>
-          <View style={[ui.between, { flexWrap: "wrap" }]}>
-            <Heading style={{ color: palette.text, fontSize: 14 }}>
-              {medicine.name}
-            </Heading>
-            <View style={{ ...ui.row, gap: 4 }}>
-              {(["Before food", "After food"] as const).map((timing) => (
-                <Button
-                  key={timing}
-                  variant="ghost"
-                  theme="doctor"
-                  disabled={readOnly}
-                  label={timing}
-                  labelStyle={{
-                    fontSize: 11,
-                    color:
-                      medicine.timing === timing ? palette.dark : palette.muted,
-                    textDecorationLine:
-                      medicine.timing === timing ? "underline" : "none",
-                  }}
-                  style={{ paddingHorizontal: 6 }}
-                  onPress={() =>
-                    changeMedicines(
-                      visit.medicines.map((m) =>
-                        m.id === medicine.id ? { ...m, timing } : m
-                      )
-                    )
-                  }
-                />
-              ))}
-            </View>
-          </View>
-          <View style={ui.divider} />
-          <View
-            style={{
-              ...ui.row,
-              paddingVertical: 16,
-              backgroundColor: palette.subtle,
-              borderRadius: 12,
-            }}
-          >
-            {["Breakfast", "Lunch", "Dinner"].map((meal, index) => (
-              <View
-                key={meal}
-                style={{ flex: 1, gap: 10, alignItems: "center" }}
-              >
-                <Label muted style={{ fontSize: 12 }}>
-                  {meal}
-                </Label>
-                <Button
-                  theme="doctor"
-                  variant="outline"
-                  label={String(medicine.meals[index])}
-                  accessibilityLabel={`${medicine.name}, ${meal}, ${medicine.meals[index]} tablets. Tap to change dose.`}
-                  disabled={readOnly}
-                  style={{
-                    minWidth: 44,
-                    borderColor: medicine.meals[index]
-                      ? palette.dark
-                      : palette.border,
-                    backgroundColor: "white",
-                  }}
-                  onPress={() =>
-                    changeMedicines(
-                      visit.medicines.map((m) => {
-                        if (m.id !== medicine.id) return m;
-                        const meals = [...m.meals] as Medicine["meals"];
-                        meals[index] = (meals[index] + 1) % 3;
-                        return { ...m, meals };
-                      })
-                    )
-                  }
-                />
-              </View>
-            ))}
-          </View>
-          <Label
-            style={{ color: palette.dark, fontSize: 12, textAlign: "center" }}
-          >
-            {medicine.meals.join(" – ")} tablets ·{" "}
-            {medicine.meals.filter(Boolean).length} times daily ·{" "}
-            {medicine.days} days
-          </Label>
-          {!readOnly && (
-            <>
-              <View style={ui.divider} />
-              <View style={ui.between}>
-                <Button
-                  variant="ghost"
-                  theme="doctor"
-                  label="Edit"
-                  accessibilityLabel={`Edit ${medicine.name}`}
-                  onPress={() => {
-                    setEditing({ ...medicine, meals: [...medicine.meals] });
-                    setError("");
-                  }}
-                />
-                <Button
-                  variant="ghost"
-                  label="Remove"
-                  accessibilityLabel={`Remove ${medicine.name}`}
-                  labelStyle={{ color: palette.danger }}
-                  onPress={() =>
-                    changeMedicines(
-                      visit.medicines.filter((m) => m.id !== medicine.id)
-                    )
-                  }
-                />
-              </View>
-            </>
-          )}
-        </Panel>
+        <MedicineCard
+          key={medicine.id}
+          medicine={medicine}
+          readOnly={readOnly}
+          onEdit={handleStartEdit}
+          onRemove={handleRemove}
+          onUpdateTiming={handleUpdateTiming}
+          onUpdateDose={handleUpdateDose}
+        />
       ))}
       {!visit.medicines.length && (
         <Panel>
@@ -207,77 +135,16 @@ export function PrescriptionScreen() {
         </Panel>
       )}
       {editing && !readOnly && (
-        <Panel>
-          <Heading>
-            {visit.medicines.some((m) => m.id === editing.id)
-              ? "Edit medicine"
-              : "Add medicine"}
-          </Heading>
-          <Input
-            label="Medicine name and strength"
-            accessibilityLabel="Medicine name and strength"
-            value={editing.name}
-            onChangeText={(name) => setEditing({ ...editing, name })}
-            containerStyle={ui.field}
-          />
-          <Input
-            label="Duration (days)"
-            accessibilityLabel="Duration in days"
-            keyboardType="number-pad"
-            value={editing.days}
-            onChangeText={(days) => setEditing({ ...editing, days })}
-            containerStyle={ui.field}
-          />
-          <View style={ui.wrap}>
-            {(["Before food", "After food"] as const).map((timing) => (
-              <Choice
-                key={timing}
-                label={timing}
-                selected={editing.timing === timing}
-                onPress={() => setEditing({ ...editing, timing })}
-              />
-            ))}
-          </View>
-          <View style={ui.row}>
-            {["Breakfast", "Lunch", "Dinner"].map((meal, index) => (
-              <Input
-                key={meal}
-                label={meal}
-                accessibilityLabel={`${meal} dose`}
-                keyboardType="number-pad"
-                maxLength={1}
-                value={String(editing.meals[index])}
-                containerStyle={ui.flex}
-                onChangeText={(value) => {
-                  const meals = [...editing.meals] as Medicine["meals"];
-                  meals[index] = Math.min(
-                    9,
-                    Number(value.replace(/\D/g, "")) || 0
-                  );
-                  setEditing({ ...editing, meals });
-                }}
-              />
-            ))}
-          </View>
-          <View style={ui.row}>
-            <Button
-              label="Cancel"
-              variant="secondary"
-              theme="doctor"
-              onPress={() => {
-                setEditing(null);
-                setError("");
-              }}
-              style={ui.flex}
-            />
-            <Button
-              label="Save medicine"
-              theme="doctor"
-              onPress={saveMedicine}
-              style={ui.flex}
-            />
-          </View>
-        </Panel>
+        <MedicineEditor
+          isEditingExisting={visit.medicines.some((m) => m.id === editing.id)}
+          medicine={editing}
+          onChange={setEditing}
+          onCancel={() => {
+            setEditing(null);
+            setError("");
+          }}
+          onSave={saveMedicine}
+        />
       )}
       {!readOnly && !editing && (
         <Button

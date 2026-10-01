@@ -23,20 +23,20 @@ import SectionHeader from "../../../components/SectionHeader";
 import { router } from "expo-router";
 
 export type UpcomingAppointmentCardProps = {
-  doctorName?: string;
+  doctorName: string;
   specialization?: string;
-  date?: string;
-  time?: string;
+  date: string;
+  time: string;
   onCardPress?: () => void;
   onReschedulePress?: () => void;
   onViewProfilePress?: () => void;
 };
 
 export default function UpcomingAppointmentCard({
-  doctorName = "Dr. Ananya Sharma",
-  specialization = "General Physician",
-  date = "Aug 18, Sunday",
-  time = "8:30 PM – 9:00 PM",
+  doctorName,
+  specialization = "Clinic visit",
+  date,
+  time,
   onCardPress,
   onReschedulePress,
   onViewProfilePress,
@@ -106,8 +106,8 @@ export default function UpcomingAppointmentCard({
           />
         </CardContent>
 
-        <CardFooter gap={14} style={styles.cardFooter}>
-          <Button
+        {onReschedulePress || onViewProfilePress ? <CardFooter gap={14} style={styles.cardFooter}>
+          {onReschedulePress ? <Button
             hitSlop={4}
             label="Re-schedule"
             onPress={onReschedulePress}
@@ -115,8 +115,8 @@ export default function UpcomingAppointmentCard({
             labelStyle={styles.actionLabel}
             theme="patient"
             variant="secondary"
-          />
-          <Button
+          /> : null}
+          {onViewProfilePress ? <Button
             hitSlop={4}
             label="View Profile"
             onPress={onViewProfilePress}
@@ -124,8 +124,8 @@ export default function UpcomingAppointmentCard({
             labelStyle={styles.actionLabel}
             theme="patient"
             variant="secondary"
-          />
-        </CardFooter>
+          /> : null}
+        </CardFooter> : null}
       </Card>
     </View>
   );

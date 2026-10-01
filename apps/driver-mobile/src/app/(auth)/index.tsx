@@ -3,5 +3,9 @@ import { useMobileSession } from "../../services/supabase";
 
 export default function AuthIndex() {
   const { session, profile } = useMobileSession();
-  return <Redirect href={!session ? "/login" : profile?.driver ? "/home" : "/onboarding"} />;
+  return (
+    <Redirect
+      href={!session ? "/welcome" : profile?.driver ? "/(app)" : "/onboarding"}
+    />
+  );
 }

@@ -2,26 +2,27 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Clock3, Heart, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { hospitalSuggestions } from "../utils/ambulanceConstants";
 
 export function Suggestions({
   query,
   onSelect,
   onClose,
+  hospitals,
 }: {
   query?: string;
   onSelect: (name: string) => void;
   onClose?: () => void;
+  hospitals: { id: string; name: string; address: string; distance_meters: number | null }[];
 }) {
-  const [favorite, setFavorite] = useState<string>("Victoria Hospital");
+  const [favorite, setFavorite] = useState<string>("");
 
-  const filtered = hospitalSuggestions.filter(([name, address]) => {
+  const filtered = hospitals.filter(({ name, address }) => {
     if (!query || !query.trim()) return true;
     const q = query.toLowerCase();
     return name.toLowerCase().includes(q) || address.toLowerCase().includes(q);
   });
 
-  const list = filtered.length > 0 ? filtered : hospitalSuggestions;
+  const list = filtered;
 
   return (
     <View style={styles.suggestionsContainer}>
@@ -39,11 +40,11 @@ export function Suggestions({
       </View>
 
       <View style={styles.suggestionsList}>
-        {list.map(([name, address]) => {
+        {list.map(({ id, name, address, distance_meters }) => {
           const isFav = favorite === name;
           return (
             <Pressable
-              key={name}
+              key={id}
               onPress={() => onSelect(name)}
               style={({ pressed }) => [
                 styles.suggestionCard,
@@ -63,7 +64,7 @@ export function Suggestions({
                 <View style={styles.suggestionMetaRow}>
                   <Clock3 color="#087F78" size={12} />
                   <Text style={styles.suggestionMetaText}>
-                    Open 24/7 • 4 min away
+                    {distance_meters === null ? "Distance unavailable" : `${(distance_meters / 1000).toFixed(1)} km away`}
                   </Text>
                 </View>
               </View>

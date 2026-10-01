@@ -1,11 +1,11 @@
 import {
-  Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  Share,
+  Alert,
 } from "react-native";
 import {
   Clock3,
@@ -20,10 +20,8 @@ import {
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 import type { TrackingStage } from "../types/ambulance";
-import {
-  ambulanceTrip,
-  trackingMapImage,
-} from "../utils/ambulanceConstants";
+import type { ActiveAmbulanceTracking, MyAmbulanceBooking } from "@startup/contracts";
+import { DriverTrackingMap } from "./DriverTrackingMap";
 import { EmergencyModeCard } from "./EmergencyModeCard";
 
 export function Tracking({
@@ -32,12 +30,18 @@ export function Tracking({
   onEmergencyChange,
   onCancel,
   onProceedToPayment,
+  booking,
+  location,
+  completionPin,
 }: {
   stage: TrackingStage;
   emergency: boolean;
   onEmergencyChange: (value: boolean) => void;
   onCancel: () => void;
   onProceedToPayment?: () => void;
+  booking: MyAmbulanceBooking;
+  location: ActiveAmbulanceTracking | null;
+  completionPin: string | null;
 }) {
   if (stage === "hospital") {
     return (
@@ -45,6 +49,8 @@ export function Tracking({
         emergency={emergency}
         onEmergencyChange={onEmergencyChange}
         onProceedToPayment={onProceedToPayment}
+        booking={booking}
+        location={location}
       />
     );
   }
@@ -60,11 +66,7 @@ export function Tracking({
       </Text>
 
       <View style={styles.mapFrame}>
-        <Image
-          source={trackingMapImage}
-          resizeMode="cover"
-          style={styles.trackingMap}
-        />
+        <DriverTrackingMap location={location} style={styles.trackingMap} />
       </View>
 
       <View
@@ -81,7 +83,7 @@ export function Tracking({
         <Text style={styles.statusText}>
           {arrived
             ? "Ambulance reached your pickup location"
-            : "Driver is on the way • Arriving in 5 min"}
+            : location ? `Driver location updated ${new Date(location.received_at).toLocaleTimeString()}` : "Driver is on the way • Location pending"}
         </Text>
       </View>
 
@@ -91,13 +93,13 @@ export function Tracking({
         style={styles.emergencyCardReset}
       />
 
-      <PinRow />
+      <PinRow pin={completionPin} />
 
-      <DriverCard name={ambulanceTrip.driver} />
+      <DriverCard name={booking.driver_name ?? "Driver assignment pending"} vehicle={booking.vehicle_registration} service={booking.capability_code} rating={booking.driver_rating} />
 
-      <TripCard eta="9 min" distance="4.6 km" title="Trip Details" />
+      <TripCard booking={booking} title="Trip Details" />
 
-      {arrived ? <TripControls /> : null}
+      {arrived ? <TripControls location={location} /> : null}
 
       <SafetyCard />
 
@@ -116,10 +118,14 @@ function HospitalJourney({
   emergency,
   onEmergencyChange,
   onProceedToPayment,
+  booking,
+  location,
 }: {
   emergency: boolean;
   onEmergencyChange: (value: boolean) => void;
   onProceedToPayment?: () => void;
+  booking: MyAmbulanceBooking;
+  location: ActiveAmbulanceTracking | null;
 }) {
   return (
     <ScrollView
@@ -137,14 +143,10 @@ function HospitalJourney({
       </View>
 
       <View style={styles.liveMapWrap}>
-        <Image
-          source={trackingMapImage}
-          resizeMode="cover"
-          style={styles.liveMap}
-        />
+        <DriverTrackingMap location={location} style={styles.liveMap} />
         <View style={styles.liveBadge}>
           <View style={styles.liveWhiteDot} />
-          <Text style={styles.liveText}>LIVE ROUTE</Text>
+          <Text style={styles.liveText}>{location ? "LOCATION RECEIVED" : "LOCATION PENDING"}</Text>
         </View>
       </View>
 
@@ -154,15 +156,11 @@ function HospitalJourney({
         style={styles.emergencyCardReset}
       />
 
-      <TripCard
-        eta="7 min"
-        distance="3.2 km"
-        title="Hospital Destination"
-      />
+      <TripCard booking={booking} title="Hospital Destination" />
 
-      <DriverCard name={ambulanceTrip.driver} />
+      <DriverCard name={booking.driver_name ?? "Driver assignment pending"} vehicle={booking.vehicle_registration} service={booking.capability_code} rating={booking.driver_rating} />
 
-      <TripControls />
+      <TripControls location={location} />
 
       <SafetyCard />
 
@@ -179,7 +177,7 @@ function HospitalJourney({
   );
 }
 
-function PinRow() {
+function PinRow({ pin }: { pin: string | null }) {
   return (
     <Card
       variant="outlined"
@@ -194,12 +192,12 @@ function PinRow() {
       <View style={styles.otpNotice}>
         <Info color={colors.patient.primaryDark} size={20} />
         <Text style={styles.infoText}>
-          Share this OTP when the ambulance driver arrives.
+          Share this PIN with the driver only when you reach your destination.
         </Text>
       </View>
       <View style={styles.otpRow}>
-        {ambulanceTrip.pin.split("").map((digit, index) => (
-          <View key={`${digit}-${index}`} style={styles.otpCell}>
+        {Array.from({ length: 4 }, (_, index) => pin?.[index] ?? "").map((digit, index) => (
+          <View key={index} style={styles.otpCell}>
             <Text style={styles.otpText}>{digit}</Text>
           </View>
         ))}
@@ -208,7 +206,7 @@ function PinRow() {
   );
 }
 
-function DriverCard({ name }: { name: string }) {
+function DriverCard({ name, vehicle, service, rating }: { name: string; vehicle: string | null; service: string; rating: string | null }) {
   return (
     <Card
       variant="outlined"
@@ -227,15 +225,15 @@ function DriverCard({ name }: { name: string }) {
           <Text style={styles.driverName}>{name}</Text>
           <View style={styles.ratingBadge}>
             <Star color="#F59E0B" fill="#F59E0B" size={11} />
-            <Text style={styles.driverRating}>{ambulanceTrip.rating}</Text>
+            <Text style={styles.driverRating}>{rating ?? "—"}</Text>
           </View>
         </View>
         <Text style={styles.vehicle}>
-          {ambulanceTrip.vehicle} • {ambulanceTrip.service}
+          {vehicle ?? "Vehicle details pending"} • {service}
         </Text>
       </View>
       <Pressable
-        onPress={() => void Linking.openURL("tel:9876543210")}
+        onPress={() => Alert.alert("Driver contact unavailable", "The driver phone number is not available for this booking yet.")}
         style={({ pressed }) => [styles.callButton, pressed && styles.pressed]}
         accessibilityRole="button"
         accessibilityLabel="Call driver"
@@ -248,12 +246,10 @@ function DriverCard({ name }: { name: string }) {
 
 function TripCard({
   title,
-  eta,
-  distance,
+  booking,
 }: {
   title: string;
-  eta: string;
-  distance: string;
+  booking: MyAmbulanceBooking;
 }) {
   return (
     <Card
@@ -272,17 +268,17 @@ function TripCard({
 
       <View style={styles.statsRow}>
         <View style={styles.stat}>
-          <Text style={styles.statValue}>{eta}</Text>
+          <Text style={styles.statValue}>Pending</Text>
           <Text style={styles.statLabel}>ETA</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
-          <Text style={styles.statValue}>{distance}</Text>
+          <Text style={styles.statValue}>Pending</Text>
           <Text style={styles.statLabel}>Distance</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
-          <Text style={styles.statValue}>₹{ambulanceTrip.fare}</Text>
+          <Text style={styles.statValue}>Pending</Text>
           <Text style={styles.statLabel}>Est. Fare</Text>
         </View>
       </View>
@@ -300,8 +296,8 @@ function TripCard({
           </View>
           <View style={styles.stopTextContent}>
             <Text style={styles.routeLabel}>PICKUP LOCATION</Text>
-            <Text style={styles.routeAddress}>{ambulanceTrip.pickup}</Text>
-            <Text style={styles.routeSubtext}>Current patient location</Text>
+            <Text style={styles.routeAddress}>{booking.pickup_address ?? "Pickup location pending"}</Text>
+            <Text style={styles.routeSubtext}>Confirmed pickup</Text>
           </View>
         </View>
 
@@ -314,10 +310,8 @@ function TripCard({
           </View>
           <View style={styles.stopTextContent}>
             <Text style={styles.routeLabel}>HOSPITAL DESTINATION</Text>
-            <Text style={styles.routeAddress}>{ambulanceTrip.dropoff}</Text>
-            <Text style={styles.routeSubtext}>
-              Emergency & Trauma Care Entrance
-            </Text>
+            <Text style={styles.routeAddress}>{booking.destination_address ?? "Hospital pending"}</Text>
+            <Text style={styles.routeSubtext}>Selected destination</Text>
           </View>
         </View>
       </View>
@@ -326,13 +320,13 @@ function TripCard({
 
       <View style={styles.serviceRow}>
         <Text style={styles.serviceLabel}>Ambulance Service</Text>
-        <Text style={styles.serviceValue}>{ambulanceTrip.service}</Text>
+        <Text style={styles.serviceValue}>{booking.capability_code}</Text>
       </View>
     </Card>
   );
 }
 
-function TripControls() {
+function TripControls({ location }: { location: ActiveAmbulanceTracking | null }) {
   return (
     <Card
       variant="outlined"
@@ -349,7 +343,10 @@ function TripControls() {
         variant="secondary"
         theme="patient"
         leftIcon={<Share2 color={colors.patient.primaryDark} size={16} />}
-        onPress={() => {}}
+        onPress={() => {
+          if (!location) { Alert.alert("Location pending", "A current driver location is not available yet."); return; }
+          void Share.share({ message: `Ambulance location: https://maps.google.com/?q=${location.latitude},${location.longitude}` });
+        }}
         style={styles.shareButton}
         labelStyle={styles.shareText}
       />
@@ -396,8 +393,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E5EB",
     backgroundColor: colors.patient.surface,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   trackingMap: {
     width: "100%",
@@ -412,8 +408,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: radius.md,
     borderWidth: 1,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   statusBannerWay: {
     backgroundColor: colors.patient.surface,
@@ -436,8 +431,7 @@ const styles = StyleSheet.create({
   },
   centeredCard: {
     alignItems: "center",
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   otpNotice: {
     width: "100%",
@@ -480,8 +474,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   avatar: {
     width: 46,
@@ -694,8 +687,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.patient.surface,
     borderWidth: 1,
     borderColor: "#C8EDE9",
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   wellnessIcon: {
     width: 36,
@@ -718,8 +710,7 @@ const styles = StyleSheet.create({
   cancelButton: {
     minHeight: 52,
     borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   cancelLabel: {
     fontSize: 15,
@@ -727,8 +718,7 @@ const styles = StyleSheet.create({
   proceedButton: {
     minHeight: 52,
     borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   reachingHeader: {
     alignItems: "center",
@@ -768,8 +758,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E5EB",
     backgroundColor: colors.patient.surface,
-    elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: "none",
   },
   liveMap: {
     width: "100%",
