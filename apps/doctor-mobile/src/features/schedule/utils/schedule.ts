@@ -4,20 +4,28 @@ export function minutes(value: string): number {
   const [hour, minute] = value.split(":").map(Number);
   return hour * 60 + minute;
 }
+/** 24:00 is only a valid exclusive end boundary, never a slot start. */
+export function endMinutes(value: string): number {
+  return value === "24:00" ? 24 * 60 : minutes(value);
+}
 export function formatTime(value: number) {
   const hour = Math.floor(value / 60);
   return `${String(hour % 12 || 12).padStart(2, "0")}:${String(value % 60).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
 }
 export function scheduleError(schedule: Schedule): string | undefined {
+  if (!Number.isInteger(schedule.duration) || schedule.duration < 5 || schedule.duration > 120) return "Enter a clinic slot duration from 5 to 120 minutes.";
+  if (!Number.isInteger(schedule.onlineDuration) || schedule.onlineDuration < 5 || schedule.onlineDuration > 120) return "Enter an online slot duration from 5 to 120 minutes.";
+  if (!Number.isInteger(schedule.homeDuration) || schedule.homeDuration < 30 || schedule.homeDuration > 120) return "Enter a home-visit slot duration from 30 to 120 minutes.";
+  if (![schedule.online, schedule.walkIn, schedule.autoLimit].every(value => Number.isInteger(value) && value >= 0 && value <= 100)) return "Enter daily limits from 0 to 100.";
   if (!schedule.days.length) return "Select at least one working day.";
   if (
     !Number.isFinite(minutes(schedule.start)) ||
-    !Number.isFinite(minutes(schedule.end))
+    !Number.isFinite(endMinutes(schedule.end))
   )
-    return "Enter clinic hours in 24-hour HH:MM format.";
-  if (minutes(schedule.end) <= minutes(schedule.start))
+    return "Enter clinic hours as HH:MM; the end may be 24:00.";
+  if (endMinutes(schedule.end) <= minutes(schedule.start))
     return "End time must be after start time.";
-  if (minutes(schedule.end) - minutes(schedule.start) < schedule.duration)
+  if (endMinutes(schedule.end) - minutes(schedule.start) < schedule.duration)
     return "Clinic hours must fit at least one appointment slot.";
   if (
     [schedule.onlineFee, schedule.clinicFee, schedule.homeFee].some(
@@ -34,18 +42,32 @@ export function scheduleError(schedule: Schedule): string | undefined {
     return "Enter a positive home-visit travel radius in km.";
 }
 export function previewSlots(schedule: Schedule): string[] {
+  return previewTimeBlock(schedule.start, schedule.end, schedule.duration);
+}
+
+export function previewTimeBlock(start: string, end: string, duration: number): string[] {
+  return slotStartTimes(start, end, duration).map((slot) => formatTime(minutes(slot)));
+}
+
+export function slotStartTimes(start: string, end: string, duration: number): string[] {
   if (
-    !Number.isFinite(minutes(schedule.start)) ||
-    !Number.isFinite(minutes(schedule.end)) ||
-    schedule.duration < 10
+    !Number.isFinite(minutes(start)) ||
+    !Number.isFinite(endMinutes(end)) ||
+    !Number.isInteger(duration) || duration < 5 || duration > 120
   )
     return [];
   const result: string[] = [];
   for (
-    let time = minutes(schedule.start);
-    time + schedule.duration <= minutes(schedule.end);
-    time += schedule.duration
+    let time = minutes(start);
+    time + duration <= endMinutes(end);
+    time += duration
   )
-    result.push(formatTime(time));
+    result.push(`${String(Math.floor(time / 60)).padStart(2, "0")}:${String(time % 60).padStart(2, "0")}`);
   return result;
+}
+
+export function toggleSelectedSlot(slots: string[], slot: string, limit: number): string[] {
+  if (slots.includes(slot)) return slots.filter(item => item !== slot);
+  if (!Number.isInteger(limit) || limit <= slots.length) return slots;
+  return [...slots, slot];
 }

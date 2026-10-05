@@ -6,8 +6,12 @@ DECLARE
   doctor_auth uuid := gen_random_uuid(); patient_auth uuid := gen_random_uuid(); stranger_auth uuid := gen_random_uuid();
   suffix text := replace(gen_random_uuid()::text,'-','');
   doctor_profile jsonb; patient_profile jsonb; practice_id uuid; patient_id uuid;
-  online_session_id uuid; service_id uuid; slot jsonb; appointment_id uuid; message_id uuid;
+  online_session_id uuid; service_id uuid; slot jsonb; second_slot jsonb;
+  clinic_session_id uuid; clinic_service_id uuid; clinic_slot jsonb; clinic_second_slot jsonb;
+  clinic_appointment_id uuid; clinic_second_appointment_id uuid;
+  appointment_id uuid; second_appointment_id uuid; second_version bigint; message_id uuid;
   starts_at timestamptz := date_trunc('minute',now()) + interval '10 minutes';
+  clinic_starts_at timestamptz := (date_trunc('day',now() AT TIME ZONE 'UTC') + interval '2 days 10 hours') AT TIME ZONE 'UTC';
   context jsonb; listed jsonb; denied boolean := false;
 BEGIN
   INSERT INTO auth.users(id,instance_id,aud,role,phone,phone_confirmed_at) VALUES
@@ -36,14 +40,18 @@ BEGIN
     'auto_accept',false,'auto_accept_limit',0,'home_visits',false,
     'online_fee_minor',30000,'clinic_fee_minor',25000,'home_fee_minor',null),0);
   online_session_id := public.publish_online_session(practice_id,starts_at,starts_at+interval '30 minutes',15,30000,'INR');
+  clinic_session_id := public.publish_clinic_session(practice_id,clinic_starts_at,clinic_starts_at+interval '30 minutes',15,25000,'INR');
+  PERFORM public.set_clinic_auto_confirm_limit(clinic_session_id,1,1);
   EXECUTE 'RESET ROLE';
   service_id := (SELECT ps.id FROM clinzo.practice_service ps JOIN clinzo.session_service ss
     ON ss.practice_service_id=ps.id WHERE ss.session_id=online_session_id);
+  clinic_service_id := (SELECT ps.id FROM clinzo.practice_service ps JOIN clinzo.session_service ss
+    ON ss.practice_service_id=ps.id WHERE ss.session_id=clinic_session_id);
   IF NOT EXISTS(SELECT 1 FROM clinzo.practice_service WHERE id=service_id AND code LIKE 'online-%') THEN
     RAISE EXCEPTION 'Online service missing'; END IF;
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
-  PERFORM public.set_clinic_auto_confirm_limit(online_session_id,1,2);
+  PERFORM public.set_clinic_auto_confirm_limit(online_session_id,1,1);
   BEGIN
     PERFORM public.publish_online_session(practice_id,starts_at+interval '30 minutes',
       starts_at+interval '45 minutes',15,30000,'INR');
@@ -58,9 +66,47 @@ BEGIN
   IF slot IS NULL THEN RAISE EXCEPTION 'Online slot not discoverable'; END IF;
   appointment_id := public.book_clinic_appointment(patient_id,(slot->>'window_id')::uuid,service_id,
     'Online fixture consultation',gen_random_uuid());
+  SELECT x INTO second_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice_id,service_id)) x
+    WHERE x->>'window_id' <> slot->>'window_id' LIMIT 1;
+  IF second_slot IS NULL THEN RAISE EXCEPTION 'Second online time unavailable'; END IF;
+  second_appointment_id := public.book_clinic_appointment(patient_id,(second_slot->>'window_id')::uuid,service_id,
+    'Second online fixture consultation',gen_random_uuid());
+  SELECT x INTO clinic_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice_id,clinic_service_id)) x LIMIT 1;
+  IF clinic_slot IS NULL THEN RAISE EXCEPTION 'Clinic slot not discoverable'; END IF;
+  clinic_appointment_id := public.book_clinic_appointment(patient_id,(clinic_slot->>'window_id')::uuid,clinic_service_id,
+    'Clinic fixture consultation',gen_random_uuid());
+  SELECT x INTO clinic_second_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice_id,clinic_service_id)) x
+    WHERE x->>'window_id' <> clinic_slot->>'window_id' LIMIT 1;
+  IF clinic_second_slot IS NULL THEN RAISE EXCEPTION 'Second clinic time unavailable'; END IF;
+  clinic_second_appointment_id := public.book_clinic_appointment(patient_id,(clinic_second_slot->>'window_id')::uuid,clinic_service_id,
+    'Second clinic fixture consultation',gen_random_uuid());
   EXECUTE 'RESET ROLE';
   IF NOT EXISTS(SELECT 1 FROM clinzo.appointment WHERE id=appointment_id AND visit_mode='online' AND status='confirmed') THEN
     RAISE EXCEPTION 'Online booking did not confirm'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM clinzo.appointment WHERE id=second_appointment_id AND visit_mode='online' AND status='pending') THEN
+    RAISE EXCEPTION 'Second online booking should await doctor approval'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM clinzo.appointment WHERE id=clinic_appointment_id AND visit_mode='clinic' AND status='confirmed')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.appointment WHERE id=clinic_second_appointment_id AND visit_mode='clinic' AND status='pending') THEN
+    RAISE EXCEPTION 'Clinic auto-confirm/request split is incorrect'; END IF;
+  IF EXISTS(SELECT 1 FROM clinzo.domain_event WHERE aggregate_id=appointment_id AND event_type='appointment.requested')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.domain_event WHERE aggregate_id=appointment_id AND event_type='appointment.auto_confirmed')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.domain_event WHERE aggregate_id=second_appointment_id AND event_type='appointment.requested')
+    OR EXISTS(SELECT 1 FROM clinzo.domain_event WHERE aggregate_id=second_appointment_id AND event_type='appointment.auto_confirmed') THEN
+    RAISE EXCEPTION 'Auto-confirm/request event routing is incorrect'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=appointment_id::text
+      AND template_key='appointment.auto_confirmed')
+    OR EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=appointment_id::text
+      AND template_key='appointment.requested')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=second_appointment_id::text
+      AND template_key='appointment.requested') THEN
+    RAISE EXCEPTION 'Auto-confirm/request notifications are incorrect'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=clinic_appointment_id::text
+      AND template_key='appointment.auto_confirmed')
+    OR EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=clinic_appointment_id::text
+      AND template_key='appointment.requested')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.notification_intent WHERE safe_parameters->>'appointment_id'=clinic_second_appointment_id::text
+      AND template_key='appointment.requested') THEN
+    RAISE EXCEPTION 'Clinic auto-confirm/request notifications are incorrect'; END IF;
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
   context := public.get_online_join_context(appointment_id);
@@ -84,6 +130,16 @@ BEGIN
   IF context->>'role'<>'doctor' THEN RAISE EXCEPTION 'Doctor could not join'; END IF;
   IF jsonb_array_length(public.list_online_messages(appointment_id))<>1 THEN
     RAISE EXCEPTION 'Doctor could not read patient chat'; END IF;
+  EXECUTE 'RESET ROLE';
+  SELECT row_version INTO second_version FROM clinzo.appointment WHERE id=second_appointment_id;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
+  PERFORM public.transition_clinic_appointment(second_appointment_id,second_version,'approve');
+  EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.appointment WHERE id=second_appointment_id AND status='confirmed') THEN
+    RAISE EXCEPTION 'Doctor could not accept the pending online request'; END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
   PERFORM public.start_online_appointment(appointment_id);
   EXECUTE 'RESET ROLE';
   IF NOT EXISTS(SELECT 1 FROM clinzo.consultation c WHERE c.appointment_id=smoke.appointment_id AND c.status='active') THEN

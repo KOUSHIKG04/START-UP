@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDisplayDate } from "@startup/contracts";
 import {
   ActivityIndicator,
   Pressable,
@@ -71,12 +72,7 @@ export function PrescriptionScreen({
   };
 
   const formatDate = (isoString?: string | null) => {
-    if (!isoString) return new Date().toLocaleDateString();
-    return new Date(isoString).toLocaleDateString([], {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    return formatDisplayDate(isoString ?? new Date());
   };
 
   return (

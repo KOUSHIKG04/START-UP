@@ -27,6 +27,12 @@
       "expo-router",
       "expo-notifications",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Doctor to capture your clinic location during profile setup."
+        }
+      ],
+      [
         "expo-camera",
         {
           "recordAudioAndroid": false,

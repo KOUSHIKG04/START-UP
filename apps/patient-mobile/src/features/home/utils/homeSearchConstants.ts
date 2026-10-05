@@ -3,7 +3,7 @@ import type { Href } from "expo-router";
 export type SearchItem = {
   id: string;
   title: string;
-  type: "Speciality" | "Symptom";
+  type: "Speciality" | "Symptom" | "Doctor";
 };
 
 export const DEFAULT_SEARCH_CITY = "Bangalore";

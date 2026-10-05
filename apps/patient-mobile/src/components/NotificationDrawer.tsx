@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMyNotifications, markMyNotificationsRead } from "@startup/data-access";
+import { formatDisplayDate } from "@startup/contracts";
 import {
   Bell,
   CalendarCheck,
@@ -138,9 +139,11 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
     const isAmbulance = item.template_key.startsWith("ambulance.");
     return {
       id: item.id,
-      title: isAppointment ? "Appointment update" : isAmbulance ? "Ambulance trip update" : item.template_key.startsWith("verification.") ? "Verification update" : "Notification",
+      title: item.template_key === "appointment.requested" ? "Appointment requested"
+        : item.template_key === "appointment.auto_confirmed" || item.template_key === "appointment.approve" ? "Appointment confirmed"
+        : isAppointment ? "Appointment update" : isAmbulance ? "Ambulance trip update" : item.template_key.startsWith("verification.") ? "Verification update" : "Notification",
       message: typeof status === "string" ? `Status: ${status.replaceAll("_", " ")}` : "You have a new update.",
-      time: new Date(item.created_at).toLocaleDateString(),
+      time: formatDisplayDate(item.created_at),
       type: isAppointment ? "appointment" as const : "general" as const,
       read: item.is_read,
     };

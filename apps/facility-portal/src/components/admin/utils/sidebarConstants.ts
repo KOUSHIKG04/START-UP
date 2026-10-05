@@ -47,15 +47,3 @@ export const navItems = [
     icon: FileCheck2,
   },
 ];
-
-export const sidebarBrand = {
-  name: "MediCare Hospital",
-  subtitle: "admin console",
-} as const;
-export const sidebarUser = {
-  name: "Dr. Sarah Jenkins",
-  role: "Chief Admin",
-  initials: "SJ",
-  avatar:
-    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=120",
-} as const;

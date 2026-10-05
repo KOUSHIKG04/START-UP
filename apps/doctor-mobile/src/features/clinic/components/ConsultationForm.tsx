@@ -7,7 +7,7 @@ import {
   recordConsultationDiagnosis,
   recordConsultationVital,
 } from "@startup/data-access";
-import { prescriptionMedicineSchema } from "@startup/contracts";
+import { parseDisplayDate, prescriptionMedicineSchema } from "@startup/contracts";
 import type {
   IssuePrescriptionInput,
   RecordVitalInput,
@@ -113,7 +113,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
     mutationFn: () =>
       recommendConsultationFollowup(supabase!, {
         appointmentId,
-        date: followupDate,
+        date: parseDisplayDate(followupDate) ?? followupDate,
         timezone,
         reason: followupReason,
       }),
@@ -139,8 +139,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       instructions,
       dose_quantity: Number(doseQuantity),
       dose_unit: doseUnit,
-      starts_on: startsOn,
-      ends_on: endsOn,
+      starts_on: parseDisplayDate(startsOn) ?? startsOn,
+      ends_on: parseDisplayDate(endsOn) ?? endsOn,
       timings: selectedMeals.map((meal_anchor) => ({
         meal_anchor,
         meal_relation: mealRelation,
@@ -232,12 +232,12 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       />
       <Input label="Dose unit" value={doseUnit} onChangeText={setDoseUnit} />
       <Input
-        label="Start date (YYYY-MM-DD)"
+        label="Start date (DD-MM-YYYY)"
         value={startsOn}
         onChangeText={setStartsOn}
       />
       <Input
-        label="End date (YYYY-MM-DD)"
+        label="End date (DD-MM-YYYY)"
         value={endsOn}
         onChangeText={setEndsOn}
       />
@@ -301,7 +301,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
 
       <Text style={styles.heading}>Follow-up</Text>
       <Input
-        label="Suggested date (YYYY-MM-DD)"
+        label="Suggested date (DD-MM-YYYY)"
         value={followupDate}
         onChangeText={setFollowupDate}
       />
@@ -319,7 +319,13 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
           !followupDate ||
           followupReason.trim().length < 2
         }
-        onPress={() => followup.mutate()}
+        onPress={() => {
+          if (!parseDisplayDate(followupDate)) {
+            setError("Enter the follow-up date as DD-MM-YYYY.");
+            return;
+          }
+          followup.mutate();
+        }}
       />
       {message ? <Text accessibilityRole="alert">{message}</Text> : null}
       {error ? (

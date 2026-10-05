@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AcceptPendingAppointmentButton } from "../components/AcceptPendingAppointmentButton";
-import type { BedInventoryProjection, ClinicAppointment } from "@startup/contracts";
+import { formatDisplayDate, formatDisplayDateTime, type BedInventoryProjection, type ClinicAppointment } from "@startup/contracts";
 import {
   Search,
   Calendar,
@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 import {
-  doctors,
   scheduleDays,
 } from "../utils/dashboardConstants";
 import { wards as wardStyles } from "../utils/dashboardConstants";
@@ -20,16 +19,18 @@ export default function DashboardScreen({
   doctorAction,
   inventory,
   appointments,
+  weeklyDoctors,
   loadError,
   acceptAppointment,
 }: {
   doctorAction: ReactNode;
   inventory: BedInventoryProjection[];
   appointments: ClinicAppointment[];
+  weeklyDoctors: { id: string; name: string; speciality: string; days: boolean[] }[];
   loadError?: string;
   acceptAppointment: (input: unknown) => Promise<{ error: string | null }>;
 }) {
-  const wards = inventory.map((item, index) => {
+  const wards = inventory.filter(item => item.configured).map((item, index) => {
     const style = wardStyles[index % wardStyles.length];
     return {
       ...style,
@@ -41,7 +42,7 @@ export default function DashboardScreen({
     };
   });
 
-  const capacity = inventory.reduce((sum, item) => sum + item.total, 0);
+  const capacity = inventory.filter(item => item.configured).reduce((sum, item) => sum + item.total, 0);
   
   const pendingRequests = appointments
     .filter((item) => item.status === "pending")
@@ -81,7 +82,7 @@ export default function DashboardScreen({
               suppressHydrationWarning
               className="text-[13px] font-semibold text-[#475569] whitespace-nowrap"
             >
-              {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}
+              {formatDisplayDate(new Date(), "Asia/Kolkata")}
             </span>
           </div>
         </div>
@@ -160,7 +161,7 @@ export default function DashboardScreen({
               </div>
             );
           })}
-          {wards.length === 0 && <p className="text-[13px] text-[#475569]">No bed inventory is configured for this facility.</p>}
+          {!loadError && wards.length === 0 && <p className="text-[13px] text-[#475569]">{inventory.length === 0 ? "This facility does not offer patient beds." : "Set initial counts in Bed Management before availability is shown."}</p>}
         </div>
       </div>
 
@@ -202,9 +203,9 @@ export default function DashboardScreen({
 
 
                 <div className="divide-y divide-[#e2e8f0]">
-                  {doctors.map((doc) => (
+                  {weeklyDoctors.map((doc) => (
                     <div
-                      key={doc.name}
+                      key={doc.id}
                       className="px-4 py-3 flex items-center hover:bg-slate-50 transition-colors"
                     >
                       <div className="w-[180px] shrink-0 leading-tight">
@@ -236,6 +237,7 @@ export default function DashboardScreen({
                       </div>
                     </div>
                   ))}
+                  {weeklyDoctors.length === 0 && <p className="px-4 py-5 text-[13px] text-[#64748b]">No doctors are associated with this facility yet.</p>}
                 </div>
               </div>
             </div>
@@ -269,7 +271,7 @@ export default function DashboardScreen({
                     </p>
                   </div>
                   <span className="bg-[#eff6ff] text-[#3b82f6] text-[11px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap">
-                    {new Date(request.starts_at).toLocaleString()}
+                    {formatDisplayDateTime(request.starts_at, "Asia/Kolkata")}
                   </span>
                 </div>
                 <div className="mt-4 flex items-center justify-between">

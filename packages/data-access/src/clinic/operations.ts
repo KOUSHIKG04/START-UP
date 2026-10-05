@@ -2,6 +2,8 @@ import {
   clinicBookingSchema,
   clinicTransitionSchema,
   publishClinicSessionSchema,
+  publishDoctorServiceSessionSchema,
+  publishSelectedDoctorSlotsSchema,
   clinicSlotSchema,
   clinicPracticeSchema,
   clinicSessionSchema,
@@ -10,6 +12,7 @@ import {
   uuidSchema,
   clinicCheckinTokenSchema,
   clinicUnavailabilitySchema,
+  doctorDailySlotUsageSchema,
   addClinicUnavailabilitySchema,
   revokeClinicUnavailabilitySchema,
 } from "@startup/contracts";
@@ -17,6 +20,8 @@ import type {
   ClinicBookingInput,
   ClinicTransitionInput,
   PublishClinicSessionInput,
+  PublishDoctorServiceSessionInput,
+  PublishSelectedDoctorSlotsInput,
   SetClinicAutoConfirmLimitInput,
   AddClinicUnavailabilityInput,
   RevokeClinicUnavailabilityInput,
@@ -33,6 +38,16 @@ export async function listMyClinicSessions(client: AppSupabaseClient, practiceId
   const { data, error } = await client.rpc("list_my_clinic_sessions", { p_practice_id: uuidSchema.parse(practiceId) });
   if (error) throw error;
   return clinicSessionSchema.array().parse(data);
+}
+
+export async function getMyDoctorDailySlotUsage(client: AppSupabaseClient, practiceId: string, localDay: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDay)) throw new Error("Choose a valid date.");
+  const { data, error } = await client.rpc("get_my_doctor_daily_slot_usage", {
+    p_practice_id: uuidSchema.parse(practiceId),
+    p_local_day: localDay,
+  });
+  if (error) throw error;
+  return doctorDailySlotUsageSchema.parse(data);
 }
 
 export async function setClinicAutoConfirmLimit(client: AppSupabaseClient, input: SetClinicAutoConfirmLimitInput) {
@@ -91,6 +106,41 @@ export async function publishClinicSession(
   return uuidSchema.parse(data);
 }
 
+export async function publishDoctorServiceSession(
+  client: AppSupabaseClient,
+  input: PublishDoctorServiceSessionInput,
+) {
+  const request = publishDoctorServiceSessionSchema.parse(input);
+  const { data, error } = await client.rpc("publish_doctor_service_session", {
+    p_practice_id: request.practiceId,
+    p_mode: request.mode,
+    p_starts_at: request.startsAt,
+    p_ends_at: request.endsAt,
+    p_slot_minutes: request.slotMinutes,
+    p_fee_minor: request.feeMinor,
+    p_currency: request.currency,
+  });
+  if (error) throw error;
+  return uuidSchema.parse(data);
+}
+
+export async function publishSelectedDoctorSlots(
+  client: AppSupabaseClient,
+  input: PublishSelectedDoctorSlotsInput,
+) {
+  const request = publishSelectedDoctorSlotsSchema.parse(input);
+  const { data, error } = await client.rpc("publish_selected_doctor_slots", {
+    p_practice_id: request.practiceId,
+    p_mode: request.mode,
+    p_slot_starts: request.slotStarts,
+    p_slot_minutes: request.slotMinutes,
+    p_fee_minor: request.feeMinor,
+    p_currency: request.currency,
+  });
+  if (error) throw error;
+  return uuidSchema.array().parse(data);
+}
+
 export async function listClinicSlots(
   client: AppSupabaseClient,
   after = new Date(),
@@ -111,11 +161,14 @@ export async function listClinicSlots(
 export async function listPracticeClinicSlots(
   client: AppSupabaseClient,
   practiceId: string,
-  serviceId?: string
+  serviceId?: string,
+  limit = 100,
 ) {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Invalid slot limit");
   const { data, error } = await client.rpc("list_practice_clinic_slots", {
     p_practice_id: uuidSchema.parse(practiceId),
     p_service_id: serviceId ? uuidSchema.parse(serviceId) : null,
+    p_limit: limit,
   });
   if (error) throw error;
   return clinicSlotSchema.array().parse(data);

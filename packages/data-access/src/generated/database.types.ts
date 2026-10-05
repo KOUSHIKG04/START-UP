@@ -5,6 +5,9 @@ export type Database = {
     Tables: Record<string, never>;
     Views: Record<string, never>;
     Functions: {
+      publish_doctor_service_session: { Args: { p_practice_id: string; p_mode: string; p_starts_at: string; p_ends_at: string; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string };
+      publish_selected_doctor_slots: { Args: { p_practice_id: string; p_mode: string; p_slot_starts: string[]; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string[] };
+      get_my_doctor_daily_slot_usage: { Args: { p_practice_id: string; p_local_day: string }; Returns: unknown };
       publish_online_session: { Args: { p_practice_id: string; p_starts_at: string; p_ends_at: string; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string };
       list_care_appointments: { Args: { p_practice_id?: string | null }; Returns: unknown };
       get_online_join_context: { Args: { p_appointment_id: string }; Returns: unknown };
@@ -16,6 +19,8 @@ export type Database = {
       is_company_reviewer: { Args: Record<string, never>; Returns: boolean };
       list_company_verification_cases: { Args: Record<string, never>; Returns: unknown };
       get_company_verification_case: { Args: { p_case_id: string }; Returns: unknown };
+      list_company_doctor_facility_requests: { Args: { p_case_id: string }; Returns: unknown };
+      get_company_facility_bed_declaration: { Args: { p_case_id: string }; Returns: unknown };
       review_company_verification_document: {
         Args: { p_document_id: string; p_decision: string; p_reason?: string | null };
         Returns: unknown;
@@ -47,6 +52,17 @@ export type Database = {
       list_my_family_profiles: { Args: Record<string, never>; Returns: unknown };
       get_my_patient_profile_detail: { Args: Record<string, never>; Returns: unknown };
       submit_my_doctor_claim: { Args: { p_claim: Record<string, unknown> }; Returns: boolean };
+      submit_my_doctor_claim_for_facility: { Args: { p_claim: Record<string, unknown>; p_facility_id: string }; Returns: string };
+      register_my_care_facility: { Args: { p_registration: Record<string, unknown> }; Returns: string };
+      list_bed_type_catalog: { Args: Record<string, never>; Returns: unknown };
+      list_registered_care_facilities: { Args: Record<string, never>; Returns: unknown };
+      request_my_doctor_facility: { Args: { p_facility_id: string }; Returns: string };
+      list_my_doctor_facility_requests: { Args: Record<string, never>; Returns: unknown };
+      list_my_facility_doctor_requests: { Args: Record<string, never>; Returns: unknown };
+      decide_my_facility_doctor_request: { Args: { p_request_id: string; p_approve: boolean; p_reason?: string | null }; Returns: unknown };
+      invite_doctor_to_my_facility: { Args: { p_facility_id: string; p_doctor_code: string; p_name: string; p_specialization?: string | null; p_phone?: string | null }; Returns: string };
+      respond_to_my_facility_invitation: { Args: { p_request_id: string; p_accept: boolean }; Returns: unknown };
+      submit_my_doctor_degree: { Args: { p_degree_path: string }; Returns: boolean };
       has_my_doctor_claim: { Args: Record<string, never>; Returns: boolean };
       create_driver_invitation: {
         Args: { p_organization_id: string; p_phone: string };

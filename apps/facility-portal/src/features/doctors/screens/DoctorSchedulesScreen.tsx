@@ -3,19 +3,22 @@
 import * as React from "react";
 import {
   scheduleTabs,
-  scheduleDateLabel,
 } from "../utils/doctorSchedulesConstants";
+import { formatDisplayDate, type FacilityDoctorRosterItem } from "@startup/contracts";
+import { facilitySchedule, type PracticeSession } from "../utils/facilitySchedule";
 import { Bell, Calendar } from "lucide-react";
 import { DoctorSchedulesStats } from "../components/DoctorSchedulesStats";
 import { DoctorShiftGantt } from "../components/DoctorShiftGantt";
 import { DoctorAssignmentsTable } from "../components/DoctorAssignmentsTable";
 
-export default function DoctorSchedulesScreen() {
+export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: { doctors: FacilityDoctorRosterItem[]; sessions: PracticeSession[]; loadError?: string }) {
   const [activeTab, setActiveTab] =
     React.useState<(typeof scheduleTabs)[number]>("Today");
+  const schedule = facilitySchedule(doctors, sessions);
 
   return (
     <div className="flex flex-col gap-6 pb-12">
+      {loadError && <p role="alert" className="text-[13px] text-red-700">{loadError}</p>}
       {/* TopBar (Figma 840:56) */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -43,20 +46,20 @@ export default function DoctorSchedulesScreen() {
               suppressHydrationWarning
               className="text-[13px] font-semibold text-[#475569] whitespace-nowrap"
             >
-              {scheduleDateLabel}
+              {formatDisplayDate(new Date(), "Asia/Kolkata")}
             </span>
           </div>
         </div>
       </div>
 
       {/* 4 Stat Cards Row */}
-      <DoctorSchedulesStats />
+      <DoctorSchedulesStats scheduleSummary={schedule.summary} />
 
       {/* Doctor Shift Schedule Gantt Card */}
-      <DoctorShiftGantt activeTab={activeTab} onTabChange={setActiveTab} />
+      <DoctorShiftGantt activeTab={activeTab} onTabChange={setActiveTab} departments={schedule.departments} />
 
       {/* Today's Doctor Assignments */}
-      <DoctorAssignmentsTable />
+      <DoctorAssignmentsTable assignments={schedule.assignments} />
     </div>
   );
 }

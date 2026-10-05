@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { File } from "expo-file-system";
+import { formatDisplayDate, parseDisplayDate } from "@startup/contracts";
 import {
   getMyDriverProfile,
   updateMyDriverProfile,
@@ -18,12 +19,9 @@ import {
 } from "../../services/supabase";
 
 function toBirthDate(value: string): string {
-  const parts = value
-    .trim()
-    .match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4})$/);
-  return parts
-    ? `${parts[3]}-${parts[2].padStart(2, "0")}-${parts[1].padStart(2, "0")}`
-    : value.trim();
+  const iso = parseDisplayDate(value);
+  if (!iso) throw new Error("Enter the date of birth as DD-MM-YYYY.");
+  return iso;
 }
 
 export default function EditDriverProfile() {
@@ -52,7 +50,7 @@ export default function EditDriverProfile() {
   const profile: DriverProfile = {
     name: saved.full_name,
     mobile: saved.contact_phone ?? "",
-    dob: saved.date_of_birth ?? "",
+    dob: saved.date_of_birth ? formatDisplayDate(saved.date_of_birth) : "",
     city: saved.city ?? "",
   };
   async function save(value: DriverProfile) {

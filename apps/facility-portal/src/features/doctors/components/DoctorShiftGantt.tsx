@@ -1,17 +1,19 @@
 import * as React from "react";
 import {
-  deptSchedules,
   scheduleTabs,
   scheduleTimeLabels,
   shiftStyles,
 } from "../utils/doctorSchedulesConstants";
+import type { DeptSchedule } from "../types/doctorSchedules";
 
 export function DoctorShiftGantt({
   activeTab,
   onTabChange,
+  departments,
 }: {
   activeTab: (typeof scheduleTabs)[number];
   onTabChange: (tab: (typeof scheduleTabs)[number]) => void;
+  departments: DeptSchedule[];
 }) {
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
@@ -75,7 +77,7 @@ export function DoctorShiftGantt({
 
           {/* Department Rows */}
           <div className="divide-y divide-[#e2e8f0]">
-            {deptSchedules.map((dept) => (
+            {departments.map((dept) => (
               <div
                 key={dept.department}
                 className="grid grid-cols-7 items-center py-3 min-h-[52px] hover:bg-slate-50/50 transition-colors"
@@ -110,6 +112,7 @@ export function DoctorShiftGantt({
                 </div>
               </div>
             ))}
+            {departments.length === 0 && <p className="px-4 py-5 text-[13px] text-[#64748b]">No published doctor shifts today.</p>}
           </div>
         </div>
       </div>

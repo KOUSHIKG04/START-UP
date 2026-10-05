@@ -2,12 +2,14 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@startup/data-access";
 import { getSupabaseConfig } from "./config";
+import { facilityPortalAuthCookie } from "./cookie";
 
 export async function updateSession(request: NextRequest) {
   const config = getSupabaseConfig();
   if (!config) return NextResponse.next({ request });
   let response = NextResponse.next({ request });
   const client = createServerClient<Database>(config.url, config.key, {
+    cookieOptions: { name: facilityPortalAuthCookie },
     cookies: {
       getAll() {
         return request.cookies.getAll();

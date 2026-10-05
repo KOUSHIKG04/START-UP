@@ -1,6 +1,6 @@
 import {
-  verificationCaseSchema, verificationQueueItemSchema,
-  type VerificationCase, type VerificationQueueItem,
+  companyDoctorFacilityRequestSchema, companyFacilityBedDeclarationSchema, verificationCaseSchema, verificationQueueItemSchema,
+  type CompanyDoctorFacilityRequest, type CompanyFacilityBedDeclaration, type VerificationCase, type VerificationQueueItem,
 } from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
@@ -20,6 +20,20 @@ export async function getCompanyVerificationCase(client: AppSupabaseClient, id: 
   const { data, error } = await client.rpc("get_company_verification_case", { p_case_id: id });
   if (error) throw error;
   return data == null ? null : verificationCaseSchema.parse(data);
+}
+
+export async function listCompanyDoctorFacilityRequests(client: AppSupabaseClient, caseId: string): Promise<CompanyDoctorFacilityRequest[]> {
+  const { data,error } = await client.rpc("list_company_doctor_facility_requests", {p_case_id:caseId});
+  if (error) throw error;
+  return companyDoctorFacilityRequestSchema.array().parse(data);
+}
+
+export async function getCompanyFacilityBedDeclaration(client: AppSupabaseClient, caseId: string): Promise<CompanyFacilityBedDeclaration | null> {
+  const { data, error } = await client.rpc("get_company_facility_bed_declaration", { p_case_id: caseId });
+  // Keep the existing review page usable while the migration is being applied.
+  if (error?.code === "PGRST202") return null;
+  if (error) throw error;
+  return data == null ? null : companyFacilityBedDeclarationSchema.parse(data);
 }
 
 export async function reviewCompanyVerificationDocument(

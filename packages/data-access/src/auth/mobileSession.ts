@@ -19,6 +19,7 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     error: client ? null : "Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
   };
   const listeners = new Set<() => void>();
+  let started = false;
   const emit = (next: MobileSessionState) => {
     state = next;
     listeners.forEach((listener) => listener());
@@ -49,10 +50,19 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     }
   }
 
-  if (client) {
+  function start() {
+    if (!client || started) return;
+    started = true;
     void client.auth.getSession().then(({ data, error }) => {
       if (error) emit({ loading: false, session: null, profile: null, error: error.message });
       else void refresh(data.session);
+    }).catch((error: unknown) => {
+      emit({
+        loading: false,
+        session: null,
+        profile: null,
+        error: error instanceof Error ? error.message : "Could not restore your session.",
+      });
     });
     // Supabase auth callbacks must not await another Supabase call.
     client.auth.onAuthStateChange((event, session) => {
@@ -65,6 +75,9 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     getSnapshot: () => state,
     subscribe(listener: () => void) {
       listeners.add(listener);
+      // useSyncExternalStore subscribes after the component commits. Starting
+      // Auth here avoids publishing session updates during the first render.
+      start();
       return () => listeners.delete(listener);
     },
     refresh: () => client?.auth.getSession().then(({ data }) => refresh(data.session)),

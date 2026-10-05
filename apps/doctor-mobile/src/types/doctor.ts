@@ -40,6 +40,8 @@ export type Schedule = {
   start: string;
   end: string;
   duration: number;
+  onlineDuration: number;
+  homeDuration: number;
   online: number;
   walkIn: number;
   autoAccept: boolean;

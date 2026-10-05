@@ -35,6 +35,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { parseDisplayDate } from "@startup/contracts";
 
 export type DriverProfile = {
   name: string;
@@ -230,26 +231,15 @@ export function DetailsScreen({
       return setError(
         "Enter a 10-digit mobile number, with an optional +91 prefix."
       );
-    const birthParts = form.dob
-      .trim()
-      .match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4})$/);
-    const birthDate = birthParts
-      ? new Date(
-          Number(birthParts[3]),
-          Number(birthParts[2]) - 1,
-          Number(birthParts[1])
-        )
-      : new Date(form.dob);
+    const birthIso = parseDisplayDate(form.dob);
+    const birthDate = birthIso ? new Date(`${birthIso}T12:00:00`) : new Date(NaN);
     if (
       Number.isNaN(birthDate.getTime()) ||
       birthDate >= new Date() ||
-      birthDate.getFullYear() < 1900 ||
-      (birthParts &&
-        (birthDate.getDate() !== Number(birthParts[1]) ||
-          birthDate.getMonth() !== Number(birthParts[2]) - 1))
+      birthDate.getFullYear() < 1900
     )
       return setError(
-        "Enter a valid date of birth, for example 14 / 06 / 1990."
+        "Enter a valid date of birth, for example 14-06-1990."
       );
     if (!consent)
       return setError("Agree to verification and safety checks to continue.");
@@ -325,7 +315,7 @@ export function DetailsScreen({
             label="Date of birth"
             value={form.dob}
             onChangeText={(v) => change("dob", v)}
-            placeholder="DD / MM / YYYY"
+            placeholder="DD-MM-YYYY"
             containerStyle={s.inputContainer}
             style={s.input}
           />

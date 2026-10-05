@@ -122,7 +122,7 @@ export const appointment = clinzo
       uniqueIndex("appointment_uq_1").on(table.public_code),
       uniqueIndex("appointment_uq_2").on(table.replaces_appointment_id),
       uniqueIndex("appointment_active_uq_1")
-        .on(table.patient_id, table.session_id)
+        .on(table.patient_id, table.window_id)
         .where(
           sql.raw(
             "status IN ('pending','confirmed','in_consultation','completed','no_show')"

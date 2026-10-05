@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, Switch, View } from "react-native";
 import { router } from "expo-router";
 import {
@@ -11,13 +11,17 @@ import {
   User,
   Star,
 } from "lucide-react-native";
-import { Button, Input } from "@startup/mobile-ui";
+import { Button, Chip } from "@startup/mobile-ui";
+import { doctorLanguageName } from "@startup/contracts";
 import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getMyDoctorProfile,
   listMyPracticeAppointments,
-  updateMyDoctorProfile,
+  listRegisteredCareFacilities,
+  listMyDoctorFacilityRequests,
+  requestMyDoctorFacility,
+  respondToMyFacilityInvitation,
 } from "@startup/data-access";
 import {
   DoctorScreen,
@@ -28,7 +32,6 @@ import {
 import { palette, ui } from "../../../components/theme";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
 import {
-  mobileSession,
   supabase,
   useMobileSession,
 } from "../../../services/supabase";
@@ -71,56 +74,27 @@ const rows = [
   },
 ];
 export function ProfileScreen() {
-  const { session } = useMobileSession();
+  const { session, profile: sessionProfile } = useMobileSession();
   const client = useQueryClient();
   const profile = useQuery({
-    queryKey: ["my-doctor-profile"],
+    queryKey: ["my-doctor-profile", sessionProfile?.doctor?.id],
     queryFn: () => getMyDoctorProfile(supabase!),
-    enabled: Boolean(supabase),
+    enabled: Boolean(supabase && sessionProfile?.doctor?.id),
   });
   const appointments = useQuery({
     queryKey: ["doctor-clinic-appointments", "all"],
     queryFn: () => listMyPracticeAppointments(supabase!),
     enabled: Boolean(supabase),
   });
+  const registeredFacilities = useQuery({queryKey:["registered-care-facilities"],queryFn:()=>listRegisteredCareFacilities(supabase!),enabled:Boolean(supabase)});
+  const associationRequests = useQuery({queryKey:["my-doctor-facility-requests"],queryFn:()=>listMyDoctorFacilityRequests(supabase!),enabled:Boolean(supabase)});
+  const [selectedFacilityId,setSelectedFacilityId] = useState("");
+  const [facilityPickerOpen,setFacilityPickerOpen] = useState(false);
+  const [associationMessage,setAssociationMessage] = useState("");
+  const requestFacility = useMutation({mutationFn:()=>requestMyDoctorFacility(supabase!,selectedFacilityId),onSuccess:async()=>{setAssociationMessage("Request sent to the facility. Clinzo credential review is separate.");setFacilityPickerOpen(false);await client.invalidateQueries({queryKey:["my-doctor-facility-requests"]});},onError:(error)=>setAssociationMessage(error.message)});
+  const respondInvitation = useMutation({mutationFn:({id,accept}:{id:string;accept:boolean})=>respondToMyFacilityInvitation(supabase!,id,accept),onSuccess:async()=>{setAssociationMessage("Invitation response saved.");await Promise.all([client.invalidateQueries({queryKey:["my-doctor-facility-requests"]}),client.invalidateQueries({queryKey:["my-doctor-profile"]})]);},onError:(error)=>setAssociationMessage(error.message)});
   const [section, setSection] = useState<string | null>(null);
   const [logout, setLogout] = useState(false);
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [languages, setLanguages] = useState("");
-  const [editMessage, setEditMessage] = useState("");
-
-  useEffect(() => {
-    if (!profile.data) return;
-    setName(profile.data.full_name);
-    setBio(profile.data.bio ?? "");
-    setLanguages(profile.data.languages.join(", "));
-  }, [profile.data]);
-
-  const saveProfile = useMutation({
-    mutationFn: () =>
-      updateMyDoctorProfile(supabase!, {
-        fullName: name,
-        bio,
-        languages: languages
-          .split(",")
-          .map((item) => item.trim().toLowerCase())
-          .filter(Boolean),
-      }),
-
-    onSuccess: async () => {
-      setEditMessage("Profile saved.");
-      await Promise.all([
-        client.invalidateQueries({ queryKey: ["my-doctor-profile"] }),
-        mobileSession.refresh(),
-      ]);
-    },
-
-    onError: (cause) =>
-      setEditMessage(
-        cause instanceof Error ? cause.message : "Could not save profile."
-      ),
-  });
   const reset = useDoctorStore((s) => s.reset);
   const years = profile.data
     ? Math.max(
@@ -203,6 +177,16 @@ export function ProfileScreen() {
           ))}
         </View>
       </View>
+      <Panel>
+        <Heading style={{ fontSize: 13 }}>Languages</Heading>
+        {profile.data?.languages.length ? (
+          <View style={ui.wrap}>
+            {Array.from(new Set(profile.data.languages.map(doctorLanguageName))).map(language => (
+              <Chip key={language} label={language} theme="doctor" />
+            ))}
+          </View>
+        ) : <Label muted>No languages added yet.</Label>}
+      </Panel>
       <View
         style={{
           borderRadius: 14,
@@ -253,6 +237,10 @@ export function ProfileScreen() {
             accessibilityRole="button"
             accessibilityLabel={title}
             onPress={() => {
+              if (title === "Edit profile") {
+                router.push("/edit-profile");
+                return;
+              }
               setSection(section === title ? null : title);
               setLogout(false);
             }}
@@ -301,38 +289,6 @@ export function ProfileScreen() {
       {section && (
         <Panel>
           <Heading>{section}</Heading>
-          {section === "Edit profile" && (
-            <>
-              <Input label="Full name" value={name} onChangeText={setName} />
-              <Input
-                label="About"
-                value={bio}
-                onChangeText={setBio}
-                multiline
-              />
-              <Input
-                label="Languages (codes separated by commas)"
-                value={languages}
-                onChangeText={setLanguages}
-                placeholder="en, hi"
-              />
-              <Button
-                theme="doctor"
-                label={saveProfile.isPending ? "Saving…" : "Save profile"}
-                disabled={saveProfile.isPending}
-                onPress={() => saveProfile.mutate()}
-              />
-              {editMessage ? (
-                <Label
-                  style={
-                    editMessage === "Profile saved." ? ui.success : ui.error
-                  }
-                >
-                  {editMessage}
-                </Label>
-              ) : null}
-            </>
-          )}
           {section === "My Ratings & Reviews" && (
             <Label muted>Patient reviews are not connected yet.</Label>
           )}
@@ -350,6 +306,13 @@ export function ProfileScreen() {
               ) : (
                 <Label muted>No facility linked yet.</Label>
               )}
+              {associationRequests.data?.map(item=><View key={item.id}><Label>{item.facility_name}: {item.initiated_by === "facility" && item.status === "pending" ? "invited you" : item.status}{item.rejection_reason ? ` — ${item.rejection_reason}` : ""}</Label>{item.initiated_by === "facility" && item.status === "pending" ? <View style={ui.between}><Button theme="doctor" label="Accept" disabled={respondInvitation.isPending} onPress={()=>respondInvitation.mutate({id:item.id,accept:true})} /><Button theme="doctor" variant="secondary" label="Decline" disabled={respondInvitation.isPending} onPress={()=>respondInvitation.mutate({id:item.id,accept:false})} /></View> : null}</View>)}
+              <Label>Registered hospital or clinic</Label>
+              <Pressable accessibilityRole="button" accessibilityLabel="Select registered hospital or clinic" onPress={()=>setFacilityPickerOpen(!facilityPickerOpen)} style={ui.between}><Label>{registeredFacilities.data?.find(item=>item.id===selectedFacilityId)?.name ?? "Select facility"}</Label><ChevronRight color="#93A4B9" size={18} /></Pressable>
+              {facilityPickerOpen && registeredFacilities.data?.map(item=><Pressable key={item.id} accessibilityRole="button" onPress={()=>{setSelectedFacilityId(item.id);setFacilityPickerOpen(false);}}><Label>{item.name} · {item.address}</Label></Pressable>)}
+              {!registeredFacilities.isLoading && !registeredFacilities.data?.length && <Label muted>No company-verified facility is registered yet.</Label>}
+              <Button theme="doctor" label={requestFacility.isPending ? "Sending…" : "Request association"} disabled={!selectedFacilityId || requestFacility.isPending} onPress={()=>requestFacility.mutate()} />
+              {associationMessage ? <Label>{associationMessage}</Label> : null}
               <Button
                 theme="doctor"
                 variant="secondary"

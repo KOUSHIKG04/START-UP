@@ -15,6 +15,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  unique,
   check,
   foreignKey,
   primaryKey,
@@ -280,6 +281,24 @@ export const doctorFacility = clinzo
 export type DoctorFacility = typeof doctorFacility.$inferSelect;
 export type NewDoctorFacility = typeof doctorFacility.$inferInsert;
 
+export const doctorFacilityRequest = clinzo.table("doctor_facility_request", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  doctor_id: uuid("doctor_id").notNull().references(() => doctor.id, { onDelete: "restrict" }),
+  facility_id: uuid("facility_id").notNull().references(() => facility.id, { onDelete: "restrict" }),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  reviewed_at: timestamp("reviewed_at", { withTimezone: true }),
+  reviewed_by: uuid("reviewed_by").references(() => identity.id),
+  rejection_reason: text("rejection_reason"),
+  initiated_by: text("initiated_by", { enum: ["doctor", "facility"] }).notNull().default("doctor"),
+}, table => [
+  unique("doctor_facility_request_unique").on(table.doctor_id, table.facility_id),
+  index("doctor_facility_request_facility_pending_idx").on(table.facility_id, table.created_at).where(sql`status = 'pending'`),
+  check("doctor_facility_request_rejection_ck", sql`status <> 'rejected' OR length(trim(coalesce(rejection_reason,''))) BETWEEN 5 AND 500`),
+]).enableRLS();
+export type DoctorFacilityRequest = typeof doctorFacilityRequest.$inferSelect;
+
 export const doctorPresence = clinzo.table("doctor_presence", {
   doctor_id: uuid("doctor_id").primaryKey().references((): AnyPgColumn => doctor.id, { onDelete: "restrict" }),
   present: boolean("present").notNull().default(false),
@@ -292,6 +311,8 @@ export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferenc
   clinic_start: time("clinic_start").notNull(),
   clinic_end: time("clinic_end").notNull(),
   slot_minutes: smallint("slot_minutes").notNull(),
+  online_slot_minutes: smallint("online_slot_minutes").notNull(),
+  home_slot_minutes: smallint("home_slot_minutes").notNull(),
   online_daily_limit: smallint("online_daily_limit").notNull(),
   walkin_daily_limit: smallint("walkin_daily_limit").notNull(),
   auto_accept: boolean("auto_accept").notNull().default(false),

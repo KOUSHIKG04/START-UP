@@ -22,6 +22,7 @@ export * from "./ambulance/tracking";
 export * from "./ambulance/sos";
 export * from "./facilities/operations";
 export * from "./facilities/doctors";
+export * from "./facilities/association";
 export type { Database } from "./generated/database.types";
 export * from "./verification/operations";
 export * from "./verification/my-case";

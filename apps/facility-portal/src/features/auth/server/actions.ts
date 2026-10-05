@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
+import { getFacilityAccess } from "@/server/auth/facilityAccess";
 
 export type LoginState = { error: string | null };
 
@@ -37,7 +38,8 @@ export async function signIn(
   if (error)
     return { error: "Sign-in failed. Check your credentials and try again." };
   
-  redirect("/bed-management");
+  const access = await getFacilityAccess();
+  redirect(access.approved ? "/dashboard" : "/facility-verification");
 }
 
 export async function signOut() {

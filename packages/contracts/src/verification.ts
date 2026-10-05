@@ -30,3 +30,9 @@ export const verificationDecisionSchema = z.discriminatedUnion("decision", [
 ]);
 export type VerificationQueueItem = z.infer<typeof verificationQueueItemSchema>;
 export type VerificationCase = z.infer<typeof verificationCaseSchema>;
+export const companyDoctorFacilityRequestSchema = z.object({
+  facility_name: z.string(), facility_kind: z.enum(["hospital", "clinic"]),
+  facility_address: z.string(), initiated_by: z.enum(["doctor", "facility"]),
+  status: z.enum(["pending", "approved", "rejected"]), practice_active: z.boolean(),
+});
+export type CompanyDoctorFacilityRequest = z.infer<typeof companyDoctorFacilityRequestSchema>;

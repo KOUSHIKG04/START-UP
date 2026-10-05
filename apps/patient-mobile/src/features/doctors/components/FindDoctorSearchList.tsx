@@ -7,6 +7,7 @@ import {
   type ImageSourcePropType,
 } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
+import { Search } from "lucide-react-native";
 
 interface CategoryItem {
   key: string;
@@ -17,19 +18,41 @@ interface CategoryItem {
 
 export function FindDoctorSearchList({
   filteredCategories,
+  doctorMatches,
   searchQuery,
   onSelectCategory,
+  onSelectDoctor,
   onSearchAnyway,
 }: {
   filteredCategories: readonly CategoryItem[];
+  doctorMatches: readonly { id: string; name: string }[];
   searchQuery: string;
   onSelectCategory: (categoryKey: string, categoryLabel: string) => void;
+  onSelectDoctor: (doctorName: string) => void;
   onSearchAnyway: (query: string) => void;
 }) {
   return (
     <View style={styles.searchActiveList}>
-      {filteredCategories.length > 0 ? (
-        filteredCategories.map((category) => (
+      {doctorMatches.length > 0 || filteredCategories.length > 0 ? (
+        <>
+          {doctorMatches.map((doctor) => (
+            <Pressable
+              key={doctor.id}
+              accessibilityRole="button"
+              accessibilityLabel={`${doctor.name}, Doctor`}
+              onPress={() => onSelectDoctor(doctor.name)}
+              style={({ pressed }) => [styles.categoryRow, pressed && styles.categoryRowPressed]}
+            >
+              <View style={styles.doctorIcon}>
+                <Search color={colors.patient.primaryDark} size={22} />
+              </View>
+              <View style={styles.categoryRowContent}>
+                <Text style={styles.categoryRowTitle}>{doctor.name}</Text>
+                <Text style={styles.categoryRowSubtitle}>Doctor</Text>
+              </View>
+            </Pressable>
+          ))}
+          {filteredCategories.map((category) => (
           <Pressable
             key={category.key}
             accessibilityRole="button"
@@ -59,7 +82,8 @@ export function FindDoctorSearchList({
               <Text style={styles.categoryRowSubtitle}>Speciality</Text>
             </View>
           </Pressable>
-        ))
+          ))}
+        </>
       ) : (
         <View style={styles.emptyResults}>
           <Text style={styles.emptyText}>
@@ -81,8 +105,7 @@ export function FindDoctorSearchList({
 
 const styles = StyleSheet.create({
   searchActiveList: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 4,
   },
   categoryRow: {
     flexDirection: "row",
@@ -99,6 +122,14 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     marginRight: 14,
+  },
+  doctorIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    marginRight: 14,
+    alignItems: "center",
+    justifyContent: "center",
   },
   categoryRowContent: {
     flex: 1,

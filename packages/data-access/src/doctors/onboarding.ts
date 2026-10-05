@@ -1,9 +1,17 @@
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
-export type DoctorClaim = { ageYears: number; gender: string; specialty: string; language: string; facilityName: string; email?: string; phone: string; licensePath: string };
+export type DoctorClaim = { ageYears: number; gender: string; specialty: string; language: string; facilityName: string; facilityId?: string; email?: string; phone: string; licensePath: string; degreePath: string };
 
 export async function submitMyDoctorClaim(client: AppSupabaseClient, claim: DoctorClaim) {
-  const { error } = await client.rpc("submit_my_doctor_claim", { p_claim: { age_years: claim.ageYears, gender: claim.gender, specialty: claim.specialty, language: claim.language, facility_name: claim.facilityName, email: claim.email ?? "", phone: claim.phone, license_path: claim.licensePath } });
+  const p_claim = { age_years: claim.ageYears, gender: claim.gender, specialty: claim.specialty, language: claim.language, facility_name: claim.facilityName, email: claim.email ?? "", phone: claim.phone, license_path: claim.licensePath, degree_path: claim.degreePath };
+  const { error } = claim.facilityId
+    ? await client.rpc("submit_my_doctor_claim_for_facility", { p_claim, p_facility_id: claim.facilityId })
+    : await client.rpc("submit_my_doctor_claim", { p_claim });
+  if (error) throw error;
+}
+
+export async function submitMyDoctorDegree(client: AppSupabaseClient, degreePath: string) {
+  const { error } = await client.rpc("submit_my_doctor_degree", { p_degree_path: degreePath });
   if (error) throw error;
 }
 

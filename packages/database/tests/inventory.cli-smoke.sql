@@ -49,6 +49,9 @@ BEGIN
   IF facility_id IS NULL OR bed_type_id IS NULL OR portal_bed_type_id IS NULL THEN
     RAISE EXCEPTION 'Inventory fixture setup failed';
   END IF;
+  -- Inventory is available only after company approval. This fixture tests
+  -- inventory behavior after that approval, without persisting the change.
+  UPDATE clinzo.facility SET verification_status='verified' WHERE id=facility_id;
 
   INSERT INTO auth.users(id,instance_id,aud,role,email,email_confirmed_at)
     VALUES

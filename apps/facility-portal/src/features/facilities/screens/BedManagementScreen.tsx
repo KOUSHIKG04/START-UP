@@ -2,6 +2,8 @@
 
 import { useBedManagement } from "../hooks/useBedManagement";
 import type { BedInventoryProjection } from "@startup/contracts";
+import { InitialBedCountsForm } from "../components/InitialBedCountsForm";
+import { bedManagementDateFormatter } from "../utils/bedManagementDate";
 import {
   Search,
   Bell,
@@ -13,13 +15,6 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 export default function BedManagementScreen({ inventory, loadError }: { inventory: BedInventoryProjection[]; loadError?: string }) {
   const {
@@ -36,7 +31,7 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
     pendingId,
     saveError,
   } = useBedManagement(inventory);
-  const bedManagementDateLabel = dateFormatter.format(new Date());
+  const bedManagementDateLabel = bedManagementDateFormatter.format(new Date());
 
   return (
     <div className="flex flex-col gap-6 pb-12">
@@ -47,8 +42,9 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
             Bed Management
           </h1>
           <p className="text-[13px] text-[#475569] mt-0.5">
-            Monitor and manage hospital bed allocation
+            Monitor and manage facility bed allocation
           </p>
+          {!loadError && inventory.length === 0 && <p className="text-[13px] text-[#475569] mt-1">This facility does not offer patient beds.</p>}
         </div>
 
         <div className="flex items-center gap-3">
@@ -241,6 +237,7 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
                       </div>
                     </td>
 
+                    {!dept.configured ? <td colSpan={4} className="py-3.5 px-3"><InitialBedCountsForm row={dept} /></td> : <>
                     {/* Total Beds */}
                     <td className="py-3.5 px-3 text-center font-medium text-[#0f172a]">
                       {dept.total}
@@ -292,6 +289,7 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
                         </span>
                       </div>
                     </td>
+                    </>}
                   </tr>
                 );
               })}

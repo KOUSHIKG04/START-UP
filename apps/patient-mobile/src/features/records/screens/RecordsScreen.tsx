@@ -8,6 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react-native";
 import { listMyClinicalRecords } from "@startup/data-access";
+import { formatDisplayDate } from "@startup/contracts";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Card, FadedScrollView, Header } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
@@ -70,7 +71,7 @@ export function RecordsScreen({
                 <Text style={styles.doctor}>{record.doctor_name}</Text>
                 <Text style={styles.detail}>{record.facility_name}</Text>
                 <Text style={styles.detail}>
-                  {new Date(record.started_at).toLocaleDateString()} ·{" "}
+                  {formatDisplayDate(record.started_at)} ·{" "}
                   {record.appointment_code}
                 </Text>
                 <Text style={styles.detail}>

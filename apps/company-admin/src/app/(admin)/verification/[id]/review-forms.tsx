@@ -80,20 +80,20 @@ export function FinalizeAction({
           />
           <Field
             name="license_expires_on"
-            label="Driving licence expiry"
-            type="date"
+            label="Driving licence expiry (DD-MM-YYYY)"
+            placeholder="DD-MM-YYYY"
             required
           />
           <Field
             name="inspection_expires_on"
-            label="Vehicle inspection expiry"
-            type="date"
+            label="Vehicle inspection expiry (DD-MM-YYYY)"
+            placeholder="DD-MM-YYYY"
             required
           />
           <Field
             name="capability_approved_until"
-            label="Capability approval until"
-            type="datetime-local"
+            label="Capability approval until (DD-MM-YYYY HH:mm)"
+            placeholder="DD-MM-YYYY HH:mm"
             required
           />
           <Field name="vehicle_label" label="Vehicle display name" />
@@ -121,17 +121,19 @@ function Field({
   name,
   label,
   type = "text",
+  placeholder,
   required = false,
 }: {
   name: string;
   label: string;
   type?: string;
+  placeholder?: string;
   required?: boolean;
 }) {
   return (
     <div className="space-y-1">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} required={required} />
+      <Input id={name} name={name} type={type} placeholder={placeholder} required={required} />
     </div>
   );
 }

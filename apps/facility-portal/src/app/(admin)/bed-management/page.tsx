@@ -10,12 +10,14 @@ import { BedManagementScreen } from "@/features/facilities";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { redirect } from "next/navigation";
+import { requireApprovedFacility } from "@/server/auth/facilityAccess";
 
 export default async function BedManagementPage({
   searchParams,
 }: {
   searchParams: Promise<{ facility?: string }>;
 }) {
+  await requireApprovedFacility();
   if (!getSupabaseConfig()) redirect("/login");
 
   const client = await createClient();

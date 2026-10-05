@@ -12,7 +12,7 @@ const migrationFolder = fileURLToPath(
 const tables = Object.values(schema).filter((value) => is(value, PgTable));
 describe("database model contract", () => {
   test("domain tables use RLS and only online chat is public for Realtime", () => {
-    expect(tables).toHaveLength(94);
+    expect(tables).toHaveLength(96);
     for (const table of tables) {
       const config = getTableConfig(table);
       expect(config.schema ?? "public").toBe(config.name === "online_message" ? "public" : "clinzo");
@@ -27,6 +27,13 @@ describe("database model contract", () => {
     expect(config.uniqueConstraints.some((c) => c.nullsNotDistinct)).toBe(true);
   });
   test("protects active appointments and driver/vehicle/booking exclusivity", () => {
+    const activeAppointmentIndex = getTableConfig(schema.appointment).indexes.find(
+      (index) => index.config.name === "appointment_active_uq_1"
+    );
+    expect(activeAppointmentIndex?.config.columns.map((column) => "name" in column ? column.name : null)).toEqual([
+      "patient_id",
+      "window_id",
+    ]);
     expect(
       getTableConfig(schema.appointment).indexes.filter(
         (i) => i.config.unique && i.config.where

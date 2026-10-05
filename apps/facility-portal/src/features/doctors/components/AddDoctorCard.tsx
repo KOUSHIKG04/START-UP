@@ -16,7 +16,7 @@ export function AddDoctorCard({
   onViewAll,
   showOuterHeader = true,
 }: AddDoctorCardProps) {
-  const { formData, setFormData, isSubmitted, handleSubmit } =
+  const { formData, setFormData, isSubmitted, handleSubmit, busy, error, facilities, facilityId, setFacilityId } =
     useAddDoctorForm(onSuccess);
 
   return (
@@ -54,14 +54,15 @@ export function AddDoctorCard({
           <div className="py-8 flex flex-col items-center justify-center text-center gap-2">
             <CheckCircle2 className="size-10 text-[#07595d] animate-in zoom-in-75 duration-200" />
             <p className="text-[15px] font-bold text-[#0f172a]">
-              Doctor Saved Successfully!
+              Invitation sent to doctor
             </p>
             <p className="text-[12px] text-[#64748b]">
-              Added to active hospital roster and schedules.
+              The doctor must accept. Clinzo must verify credentials before practice.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+            {facilities.length > 1 && <div className="flex flex-col gap-1.5"><label htmlFor="add-doctor-facility" className="text-[13px] font-medium text-[#5c6678]">Hospital / Clinic</label><select id="add-doctor-facility" value={facilityId || facilities[0]?.facilityId} onChange={event=>setFacilityId(event.target.value)} className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px]">{facilities.map(item=><option key={item.facilityId} value={item.facilityId}>{item.facilityName}</option>)}</select></div>}
             {/* Doctor Name */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="add-doctor-name" className="text-[13px] font-medium text-[#5c6678]">
@@ -134,10 +135,12 @@ export function AddDoctorCard({
             {/* Save Doctor Button */}
             <Button
               type="submit"
+              disabled={busy || !facilities.length}
               className="mt-2 bg-[#07595d] hover:bg-[#064e52] text-white font-semibold text-[14px] h-11 rounded-[8px] w-full cursor-pointer shadow-xs transition-colors"
             >
-              Save Doctor
+              {busy ? "Sending…" : "Save Doctor"}
             </Button>
+            {error && <p role="alert" className="text-[12px] text-red-700">{error}</p>}
           </form>
         )}
 

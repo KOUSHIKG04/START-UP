@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
+import { parseDisplayDate } from "@startup/contracts";
 import { Plus } from "lucide-react-native";
 import {
   DoctorScreen,
@@ -93,12 +94,8 @@ export function PrescriptionScreen() {
       setError("Add at least one medicine before signing.");
       return;
     }
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(visit.followUp) ||
-      !Number.isFinite(Date.parse(visit.followUp)) ||
-      new Date(visit.followUp).toISOString().slice(0, 10) !== visit.followUp
-    ) {
-      setError("Enter a valid follow-up date as YYYY-MM-DD.");
+    if (!parseDisplayDate(visit.followUp)) {
+      setError("Enter a valid follow-up date as DD-MM-YYYY.");
       return;
     }
     setError("");
@@ -162,7 +159,7 @@ export function PrescriptionScreen() {
         <Input
           label="Follow-up date"
           accessibilityLabel="Follow-up date"
-          placeholder="YYYY-MM-DD"
+          placeholder="DD-MM-YYYY"
           value={visit.followUp}
           editable={!readOnly}
           containerStyle={ui.field}
@@ -171,7 +168,7 @@ export function PrescriptionScreen() {
           }
         />
         <Label muted style={{ fontSize: 12 }}>
-          Clinic visit · Date format: YYYY-MM-DD
+          Clinic visit · Date format: DD-MM-YYYY
         </Label>
       </Panel>
       {!!error && <Label style={ui.error}>{error}</Label>}

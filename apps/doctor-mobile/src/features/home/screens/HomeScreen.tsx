@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell, MapPin, ArrowRight } from "lucide-react-native";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMyDoctorPresence, listMyNotifications, listMyPracticeAppointments, listMyPractices, setMyDoctorPresence } from "@startup/data-access";
+import { getMyDoctorPresence, getMyDoctorProfile, listMyNotifications, listMyPracticeAppointments, listMyPractices, setMyDoctorPresence } from "@startup/data-access";
+import { formatDisplayDateTime } from "@startup/contracts";
 import { FadedScrollView } from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
 import { PatientCard } from "../../patients/components/PatientCard";
@@ -20,6 +21,7 @@ export function HomeScreen() {
   const presenceBusyRef = useRef(false);
   const client = useQueryClient();
   const practices = useQuery({ queryKey: ["my-practices"], queryFn: () => listMyPractices(supabase!), enabled: Boolean(supabase) });
+  const doctorProfile = useQuery({ queryKey: ["my-doctor-profile", profile?.doctor?.id], queryFn: () => getMyDoctorProfile(supabase!), enabled: Boolean(supabase && profile?.doctor?.id) });
   const appointments = useQuery({ queryKey: ["doctor-clinic-appointments", "all"], queryFn: () => listMyPracticeAppointments(supabase!), enabled: Boolean(supabase), refetchInterval: 15000 });
   const presence = useQuery({ queryKey: ["my-doctor-presence"], queryFn: () => getMyDoctorPresence(supabase!), enabled: Boolean(supabase && profile?.doctor?.id) });
   const notifications = useQuery({ queryKey: ["my-notifications"], queryFn: () => listMyNotifications(supabase!), enabled: Boolean(supabase && showNotifications) });
@@ -35,7 +37,7 @@ export function HomeScreen() {
   }
   return <View style={ui.screen}>
     <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-      <View style={ui.flex}><Heading style={{ color: palette.dark, fontSize: 16 }}>Good Morning! {profile?.display_name ?? "Doctor"}</Heading><View style={ui.row}><MapPin size={14} color={palette.dark} /><Label style={{ color: palette.dark, fontSize: 13 }}>{practices.data?.[0]?.facility_name ?? "Your clinic"}</Label></View></View>
+      <View style={ui.flex}><Heading style={{ color: palette.dark, fontSize: 16 }}>Good Morning! {doctorProfile.data?.full_name ?? "Doctor"}</Heading><View style={ui.row}><MapPin size={14} color={palette.dark} /><Label style={{ color: palette.dark, fontSize: 13 }}>{practices.data?.[0]?.facility_name ?? "Your clinic"}</Label></View></View>
       <IconButton label="Notifications" onPress={() => setShowNotifications(!showNotifications)} style={{ backgroundColor: palette.surface }}><Bell size={19} color={palette.primary} /></IconButton>
     </View>
     <FadedScrollView edgeColor="white" contentContainerStyle={[styles.content, { paddingBottom: 130 + insets.bottom }]}>
@@ -43,7 +45,7 @@ export function HomeScreen() {
         {notifications.isLoading ? <Label muted>Loading notifications…</Label> : null}
         {notifications.isError ? <Label style={ui.error}>Could not load notifications.</Label> : null}
         {notifications.data?.length === 0 ? <Label muted>No notifications yet.</Label> : null}
-        {notifications.data?.map(item => <View key={item.id}><Label>{item.template_key.startsWith("appointment.") ? "Appointment update" : item.template_key.replaceAll(".", " ")}</Label><Label muted>{typeof item.safe_parameters.status === "string" ? `Status: ${item.safe_parameters.status.replaceAll("_", " ")} · ` : ""}{new Date(item.created_at).toLocaleString()}</Label></View>)}
+        {notifications.data?.map(item => <View key={item.id}><Label>{item.template_key === "appointment.requested" ? "Appointment requested" : item.template_key === "appointment.auto_confirmed" || item.template_key === "appointment.approve" ? "Appointment confirmed" : item.template_key.startsWith("appointment.") ? "Appointment update" : item.template_key.replaceAll(".", " ")}</Label><Label muted>{typeof item.safe_parameters.status === "string" ? `Status: ${item.safe_parameters.status.replaceAll("_", " ")} · ` : ""}{formatDisplayDateTime(item.created_at)}</Label></View>)}
       </Panel> : null}
       <View style={ui.row}>{[[String(todayAppointments.length), "Appointments"], [String(waiting), "In Queue"], ["—", "Today’s Earnings"]].map(([value, title], index) => <View key={title} style={styles.stat}><Heading style={{ fontSize: 24, lineHeight: 30, color: index === 1 ? palette.text : index === 2 ? "#22A86B" : palette.accent }}>{value}</Heading><Label muted style={styles.caption}>{title}</Label></View>)}</View>
       <View style={[ui.between, { marginTop: 12 }]}><Heading>Today’s Appointment</Heading><IconButton label="See all appointments" onPress={() => router.navigate("/appointments")} style={{ width: 80 }}><View style={{ ...ui.row, gap: 4 }}><Label style={{ color: palette.dark, fontSize: 13 }}>See all</Label><ArrowRight size={15} color={palette.dark} /></View></IconButton></View>

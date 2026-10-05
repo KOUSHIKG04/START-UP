@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { DoctorTable } from "../components/DoctorTable";
 import { AddDoctorCard } from "../components/AddDoctorCard";
+import { FacilityDoctorRequests } from "../components/FacilityDoctorRequests";
 
 export default function DoctorManagementScreen() {
   const {
@@ -51,6 +52,8 @@ export default function DoctorManagementScreen() {
           </div>
         </div>
       </div>
+
+      <FacilityDoctorRequests onChange={() => void refetch()} />
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

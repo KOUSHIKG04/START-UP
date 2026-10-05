@@ -24,6 +24,19 @@ export const publishClinicSessionSchema = z
   })
   .strict();
 
+export const publishDoctorServiceSessionSchema = publishClinicSessionSchema.extend({
+  mode: z.enum(["clinic", "online", "home"]),
+});
+export type PublishDoctorServiceSessionInput = z.infer<typeof publishDoctorServiceSessionSchema>;
+
+export const publishSelectedDoctorSlotsSchema = publishClinicSessionSchema
+  .omit({ startsAt: true, endsAt: true })
+  .extend({
+    mode: z.enum(["clinic", "online", "home"]),
+    slotStarts: z.array(z.iso.datetime({ offset: true })).min(1).max(100),
+  });
+export type PublishSelectedDoctorSlotsInput = z.infer<typeof publishSelectedDoctorSlotsSchema>;
+
 export const clinicTransitionSchema = z
   .object({
     appointmentId: uuidSchema,
@@ -68,6 +81,7 @@ export const clinicPracticeSchema = z.object({
 
 export const clinicSessionSchema = z.object({
   id: uuidSchema,
+  service_mode: z.enum(["clinic", "online", "home"]),
   starts_at: z.string(),
   ends_at: z.string(),
   timezone: z.string(),

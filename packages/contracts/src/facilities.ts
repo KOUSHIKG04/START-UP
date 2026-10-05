@@ -7,6 +7,50 @@ export interface InventoryFacility {
   facilityKind: "hospital" | "clinic";
 }
 
+export const registeredCareFacilitySchema = z.object({
+  id: uuidSchema, name: z.string(), kind: z.enum(["hospital", "clinic"]), address: z.string(),
+});
+export type RegisteredCareFacility = z.infer<typeof registeredCareFacilitySchema>;
+
+export const doctorFacilityRequestSchema = z.object({
+  id: uuidSchema, facility_id: uuidSchema, facility_name: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  initiated_by: z.enum(["doctor", "facility"]),
+  rejection_reason: z.string().nullable(), created_at: z.iso.datetime({ offset: true }),
+});
+export type DoctorFacilityRequest = z.infer<typeof doctorFacilityRequestSchema>;
+
+export const facilityDoctorRequestSchema = doctorFacilityRequestSchema.extend({
+  doctor_id: uuidSchema, doctor_name: z.string(), doctor_code: z.string(),
+  credential_status: z.enum(["pending", "verified", "suspended"]),
+});
+export type FacilityDoctorRequest = z.infer<typeof facilityDoctorRequestSchema>;
+
+export const registerCareFacilitySchema = z.object({
+  name: z.string().trim().min(2).max(160), kind: z.enum(["hospital", "clinic"]),
+  address: z.string().trim().min(5).max(500),
+  locality: z.string().trim().min(2).max(120),
+  city: z.string().trim().min(2).max(120),
+  state: z.string().trim().min(2).max(120),
+  pincode: z.string().regex(/^[0-9]{6}$/),
+  latitude: z.number().finite().min(-90).max(90), longitude: z.number().finite().min(-180).max(180),
+  offersBeds: z.boolean(),
+  bedTypeCodes: z.array(z.string().min(1)).max(20),
+}).superRefine((value, context) => {
+  if (value.offersBeds !== (value.bedTypeCodes.length > 0) ||
+      new Set(value.bedTypeCodes).size !== value.bedTypeCodes.length) {
+    context.addIssue({ code: "custom", path: ["bedTypeCodes"], message: "Select distinct bed categories only when beds are offered." });
+  }
+});
+export type RegisterCareFacilityInput = z.infer<typeof registerCareFacilitySchema>;
+
+export const bedTypeCatalogSchema = z.object({ code: z.string(), name: z.string() });
+export type BedTypeCatalogItem = z.infer<typeof bedTypeCatalogSchema>;
+export const companyFacilityBedDeclarationSchema = z.object({
+  offers_beds: z.boolean().nullable(), bed_types: z.array(z.string()),
+});
+export type CompanyFacilityBedDeclaration = z.infer<typeof companyFacilityBedDeclarationSchema>;
+
 /** Counts reported by a facility; no admission or reservation guarantee. */
 export interface BedInventoryProjection {
   inventoryId: string | null;

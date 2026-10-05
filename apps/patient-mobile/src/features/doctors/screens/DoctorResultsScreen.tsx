@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { router, type Href } from "expo-router";
+import { router, useFocusEffect, type Href } from "expo-router";
 import * as Location from "expo-location";
 import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
@@ -9,6 +9,7 @@ import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import { Dropdown, FadedScrollView, Header } from "@startup/mobile-ui";
 import DoctorCard from "../components/DoctorCard";
 import { filterOptions } from "../utils/doctorResultsConstants";
+import { resolveDoctorSearch, uniqueDoctorPractices } from "../utils/doctorSearch";
 import type { DoctorResultsScreenProps } from "../types/doctor-results";
 import { formatConsultationFee } from "../utils/doctorDisplay";
 import { supabase } from "../../../services/supabase";
@@ -25,16 +26,19 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
   const query = useQuery({
     queryKey: ["public-practices", symptom, coordinates],
     queryFn: () => searchPublicPractices(supabase!, {
-      query: symptom === "your symptoms" ? undefined : symptom,
+      ...resolveDoctorSearch(symptom),
       latitude: coordinates?.latitude,
       longitude: coordinates?.longitude,
       limit: 50,
     }),
     enabled: Boolean(supabase),
+    refetchInterval: 30_000,
   });
-  const practices = useMemo(() => (query.data ?? []).filter(item => consultationType === "Online"
-    ? item.service_code.startsWith("online-")
-    : !item.service_code.startsWith("online-")).sort((a, b) => {
+  useFocusEffect(useCallback(() => {
+    void query.refetch();
+  }, [query.refetch]));
+  const practices = useMemo(() => uniqueDoctorPractices(query.data ?? [], consultationType === "Online"
+    ? "online" : consultationType === "Home Visit" ? "home" : "clinic").sort((a, b) => {
     const difference = filter === "fee" ? Number(a.fee_minor) - Number(b.fee_minor)
       : filter === "rating" ? Number(a.rating ?? -1) - Number(b.rating ?? -1)
       : filter === "experience" ? a.experience_years - b.experience_years
@@ -60,7 +64,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
   }, [requestLocation]);
 
   return <View style={styles.screen}>
-    <Header title={`Specialists for ${symptom}`} app="patient" onBackPress={onBackPress} titleStyle={styles.headerTitle} />
+    <Header title={symptom === "your symptoms" ? "All doctors" : `Specialists for ${symptom}`} app="patient" onBackPress={onBackPress} titleStyle={styles.headerTitle} />
     <View style={styles.topSection}>
       <View style={styles.headingRow}>
         <View style={styles.headingCopy}><Text style={styles.title}>Doctors available for your care</Text></View>
@@ -78,8 +82,8 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
       {query.isLoading ? <Text style={styles.message}>Searching verified doctors…</Text> : null}
       {query.isError ? <Text accessibilityRole="alert" style={styles.message}>Could not search doctors. Reopen this page to retry.</Text> : null}
       {practices.length === 0 && !query.isLoading && !query.isError ? <View style={styles.empty}>
-        <Text style={styles.emptyTitle}>No doctors available yet</Text>
-        <Text style={styles.message}>Doctors appear here after their clinic is verified and they publish a service.</Text>
+        <Text style={styles.emptyTitle}>{symptom === "your symptoms" ? "No doctors available yet" : "No doctors match this search"}</Text>
+        <Text style={styles.message}>{symptom === "your symptoms" ? "Doctors appear here after their clinic is verified and they publish a service." : "Try another symptom, category, or browse all available doctors."}</Text>
       </View> : null}
       <View style={styles.list}>{practices.map((practice) => <DoctorCard
         key={practice.practice_service_id}

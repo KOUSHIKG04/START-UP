@@ -4,7 +4,7 @@ import { router, type Href } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "react-native-qrcode-svg";
 import { issueClinicCheckinToken, listClinicAppointments, transitionClinicAppointment } from "@startup/data-access";
-import type { ClinicAppointment } from "@startup/contracts";
+import { formatDisplayDate, type ClinicAppointment } from "@startup/contracts";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import { Button, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
 import BookingCard from "../components/BookingCard";
@@ -23,7 +23,7 @@ function asCard(item: ClinicAppointment): Appointment {
     qualification: "",
     specialty: item.facility_name,
     consultationType: item.visit_mode === "online" ? "Online" : item.visit_mode === "home" ? "Home Visit" : "Clinic Visit",
-    date: start.toLocaleDateString(),
+    date: formatDisplayDate(start),
     time: start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
     hospital: item.facility_name,
     location: item.facility_name,
@@ -101,7 +101,7 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
                     id: item.public_code,
                     doctorName: item.doctor_name,
                     hospital: item.facility_name,
-                    date: new Date(item.starts_at).toLocaleDateString(),
+                    date: formatDisplayDate(item.starts_at),
                   },
                 } as unknown as Href)
               }

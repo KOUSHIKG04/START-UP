@@ -1,52 +1,99 @@
 import { View, Pressable } from "react-native";
-import { Button, Input } from "@startup/mobile-ui";
+import { Button, Chip, FadedScrollView, Input } from "@startup/mobile-ui";
 import { Heading, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { formatTime, minutes } from "../utils/schedule";
-import type { ClinicSession, ClinicUnavailability } from "@startup/contracts";
+import { endMinutes, formatTime, minutes, slotStartTimes } from "../utils/schedule";
+import { formatDisplayDateTime, parseDisplayDate, type ClinicSession, type ClinicUnavailability } from "@startup/contracts";
 
 export function PublishSessionPanel({
   publishDate,
   onPublishDateChange,
   busy,
   disabled,
+  disabledReason,
+  publishIssue,
   onPublish,
   onPublishOnline,
+  onPublishHome,
   onlineDisabled,
+  homeDisabled,
+  selectedSlots,
+  remainingSlots,
+  usedSlots,
+  dailyLimits,
+  dailyUsageReady,
+  dailyUsageError,
+  slotMinutes,
+  onToggleSlot,
+  windows,
+  onWindowChange,
 }: {
   publishDate: string;
   onPublishDateChange: (date: string) => void;
   busy: boolean;
   disabled: boolean;
+  disabledReason: string | null;
+  publishIssue: { mode: "clinic" | "online" | "home"; message: string } | null;
   onPublish: () => void;
   onPublishOnline: () => void;
+  onPublishHome: () => void;
   onlineDisabled: boolean;
+  homeDisabled: boolean;
+  selectedSlots: Record<"clinic" | "online" | "home", string[]>;
+  remainingSlots: Record<"clinic" | "online" | "home", number>;
+  usedSlots: { clinic: number; online: number } | undefined;
+  dailyLimits: { clinic: number; online: number };
+  dailyUsageReady: boolean;
+  dailyUsageError: boolean;
+  slotMinutes: Record<"clinic" | "online" | "home", number>;
+  onToggleSlot: (mode: "clinic" | "online" | "home", slot: string) => void;
+  windows: Record<"clinic" | "online" | "home", { start: string; end: string }>;
+  onWindowChange: (mode: "clinic" | "online" | "home", part: "start" | "end", value: string) => void;
 }) {
   return (
     <Panel>
-      <Heading style={{ fontSize: 13 }}>Publish clinic date</Heading>
+      <Heading style={{ fontSize: 13 }}>Publish appointment slots</Heading>
       <Label muted>
-        Saved preferences become bookable after you publish a date.
+        Saving working hours does not publish bookings. Choose a future date, tap the exact clinic, online or home-visit times, then publish that service. Only future published times appear in the Patient App.
       </Label>
       <Input
-        label="Date (YYYY-MM-DD)"
+        label="Date (DD-MM-YYYY)"
         value={publishDate}
         onChangeText={onPublishDateChange}
-        placeholder="YYYY-MM-DD"
+        placeholder="DD-MM-YYYY"
       />
-      <Button
-        theme="doctor"
-        label="Publish clinic slots"
-        disabled={busy || disabled}
-        onPress={onPublish}
-      />
-      <Button
-        theme="doctor"
-        variant="outline"
-        label="Publish online slots"
-        disabled={busy || disabled || onlineDisabled}
-        onPress={onPublishOnline}
-      />
+      {disabledReason ? <Label muted>{disabledReason}</Label> : null}
+      {(["clinic", "online", "home"] as const).map(mode => {
+        const available = slotStartTimes(windows[mode].start, windows[mode].end, slotMinutes[mode]);
+        const isoDate = parseDisplayDate(publishDate);
+        const futureAvailable = available.some(slot => isoDate && new Date(`${isoDate}T${slot}:00`) > new Date());
+        const limitReached = mode !== "home" && dailyUsageReady && selectedSlots[mode].length >= remainingSlots[mode];
+        const publishedLimitReached = mode !== "home" && dailyUsageReady && remainingSlots[mode] === 0;
+        return <View key={mode} style={{ gap: 8 }}>
+          <Heading style={{ fontSize: 13 }}>{mode === "clinic" ? "Clinic visit" : mode === "online" ? "Online consultation" : "Home visit"}</Heading>
+          <Label muted>{slotMinutes[mode]} minutes per {mode === "home" ? "home visit" : "appointment"}</Label>
+          <View style={ui.row}>
+            <Input label="Start (HH:mm)" value={windows[mode].start} onChangeText={value => onWindowChange(mode, "start", value)} containerStyle={ui.flex} />
+            <Input label="End (HH:mm)" value={windows[mode].end} onChangeText={value => onWindowChange(mode, "end", value)} containerStyle={ui.flex} />
+          </View>
+          <Label muted>
+            Slot preview · tap a time pill to select it ({selectedSlots[mode].length} selected)
+            {isoDate && available.length > 0 && !futureAvailable ? " · all times in this block have passed; choose a future date or later hours" : null}
+            {mode === "online" && onlineDisabled ? " · increase online daily limit" : null}
+            {mode === "home" && homeDisabled ? " · enable home visits and save schedule" : null}
+            {mode !== "home" && isoDate ? dailyUsageReady ? publishedLimitReached ? ` · ${usedSlots?.[mode] ?? 0} of ${dailyLimits[mode]} daily slots already published` : limitReached ? " · selection fills the remaining daily slots" : ` · ${Math.max(0, remainingSlots[mode] - selectedSlots[mode].length)} remaining for this date` : dailyUsageError ? " · could not check daily limit; retry this screen" : " · checking daily limit…" : null}
+          </Label>
+          <FadedScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 2 }}>
+            {available.map(slot => { const selected = selectedSlots[mode].includes(slot); const atLimit = !selected && (mode === "home" ? selectedSlots[mode].length >= 100 : !dailyUsageReady || limitReached); const past = Boolean(isoDate && new Date(`${isoDate}T${slot}:00`) <= new Date()); const pillDisabled = busy || disabled || atLimit || (!selected && past); return <Chip key={slot} label={formatTime(minutes(slot))} theme="doctor" selected={selected} disabled={pillDisabled} accessibilityRole="checkbox" accessibilityState={{ checked: selected }} accessibilityHint={selected ? "Tap to remove this time from publication" : past ? "This time has already started" : pillDisabled ? "Daily slot limit reached or schedule unavailable" : "Tap to include this time when publishing"} onPress={() => onToggleSlot(mode, slot)} style={{ minHeight: 48, paddingHorizontal: 14, borderWidth: 1, borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primary : pillDisabled ? palette.subtle : palette.surface }} labelStyle={{ color: selected ? palette.white : pillDisabled ? palette.muted : palette.header, fontSize: 13 }} />; })}
+            {!available.length ? <Label muted>Enter valid start and end times.</Label> : null}
+          </FadedScrollView>
+          <Button theme="doctor" variant={mode === "clinic" ? undefined : "outline"}
+            label={`Publish ${selectedSlots[mode].length} ${mode === "online" ? "online" : mode === "home" ? "home visit" : "clinic"} slots`}
+            disabled={busy}
+            onPress={mode === "clinic" ? onPublish : mode === "online" ? onPublishOnline : onPublishHome} />
+          {publishIssue?.mode === mode ? <Label style={ui.error}>{publishIssue.message}</Label> : null}
+        </View>
+      })}
     </Panel>
   );
 }
@@ -75,9 +122,9 @@ export function PublishedSessionsPanel({
       {sessions?.map((session) => (
         <View key={session.id} style={{ gap: 8 }}>
           <View style={ui.between}>
-            <Label>{new Date(session.starts_at).toLocaleString()}</Label>
+            <Label>{formatDisplayDateTime(session.starts_at, session.timezone)}</Label>
             <Label muted>
-              {session.state} · {session.hard_capacity} slots
+              {session.service_mode === "online" ? "Online" : session.service_mode === "home" ? "Home visit" : "Clinic"} · {new Date(session.ends_at) <= new Date() ? "past" : session.state} · {session.hard_capacity} slots
             </Label>
           </View>
           <Input
@@ -140,7 +187,7 @@ export function UnavailableTimePanel({
     <Panel>
       <Heading style={{ fontSize: 13 }}>Unavailable time</Heading>
       <Input
-        label="Date (YYYY-MM-DD)"
+        label="Date (DD-MM-YYYY)"
         value={leaveDate}
         onChangeText={onLeaveDateChange}
       />
@@ -175,8 +222,8 @@ export function UnavailableTimePanel({
         .map((item) => (
           <View key={item.id} style={{ gap: 6 }}>
             <Label>
-              {new Date(item.starts_at).toLocaleString()} –{" "}
-              {new Date(item.ends_at).toLocaleString()}
+              {formatDisplayDateTime(item.starts_at)} –{" "}
+              {formatDisplayDateTime(item.ends_at)}
             </Label>
             <Label muted>{item.reason}</Label>
             <Button
@@ -229,7 +276,7 @@ export function ConsultationChargesPanel({
         </View>
       ))}
       <Label muted style={{ fontSize: 12 }}>
-        The clinic charge is used when you publish clinic slots. Online and home visit booking are not connected yet.
+        These charges are used when you publish each service's slots.
       </Label>
     </Panel>
   );
@@ -306,7 +353,7 @@ export function ClinicHoursPanel({
         <Heading style={{ fontSize: 13 }}>Clinic Hours</Heading>
         <Label style={{ color: palette.primary, fontSize: 13 }}>
           {timeValid
-            ? `${formatTime(minutes(start))} – ${formatTime(minutes(end))}`
+            ? `${formatTime(minutes(start))} – ${end === "24:00" ? "12:00 AM (next day)" : formatTime(endMinutes(end))}`
             : "Enter valid hours"}
         </Label>
       </View>

@@ -20,7 +20,7 @@ export function FindDoctorCategories({
 
   return (
     <>
-      <View style={styles.section}>
+      <View>
         <Text style={styles.symptomsTitle}>Most searched symptoms</Text>
         <View style={styles.chipList}>
           {symptoms.map((symptom) => {
@@ -44,7 +44,7 @@ export function FindDoctorCategories({
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View>
         <Text style={styles.sectionTitle}>Browse by categories</Text>
         <View style={styles.categoryGrid}>
           {visibleCategories.map((category) => (
@@ -95,10 +95,6 @@ export function FindDoctorCategories({
 }
 
 const styles = StyleSheet.create({
-  section: {
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
   symptomsTitle: {
     fontFamily: fontFamilies.bold,
     fontSize: 16,

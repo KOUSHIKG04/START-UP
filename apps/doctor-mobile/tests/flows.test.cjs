@@ -14,7 +14,7 @@ require.extensions[".ts"] = (module, filename) => {
   module._compile(result.outputText, filename);
 };
 const { initialSchedule } = require("../src/data/demo.ts");
-const { scheduleError, previewSlots } = require("../src/features/schedule/utils/schedule.ts");
+const { endMinutes, minutes, scheduleError, previewSlots, slotStartTimes } = require("../src/features/schedule/utils/schedule.ts");
 const { lookupPatient } = require("../src/features/patients/utils/patientLookup.ts");
 const { useDoctorStore } = require("../src/stores/useDoctorStore.ts");
 
@@ -38,6 +38,15 @@ test("invalid times, fees and no working days are rejected", () => {
   assert.ok(scheduleError({ ...initialSchedule, clinicFee: "-1" }));
   assert.ok(scheduleError({ ...initialSchedule, days: [] }));
   assert.equal(scheduleError(initialSchedule), undefined);
+});
+
+test("24:00 is an end-of-day boundary, never a start time", () => {
+  assert.equal(endMinutes("24:00"), 1440);
+  assert.ok(Number.isNaN(minutes("24:00")));
+  assert.equal(scheduleError({ ...initialSchedule, start: "23:00", end: "24:00", duration: 30 }), undefined);
+  assert.deepEqual(slotStartTimes("23:00", "24:00", 30), ["23:00", "23:30"]);
+  assert.deepEqual(slotStartTimes("24:00", "24:00", 30), []);
+  assert.ok(scheduleError({ ...initialSchedule, end: "24:01" }));
 });
 test("QR lookup accepts supported IDs and refuses arbitrary payloads", () => {
   assert.equal(lookupPatient(" clz-0001 ").name, "Meera Sharma");

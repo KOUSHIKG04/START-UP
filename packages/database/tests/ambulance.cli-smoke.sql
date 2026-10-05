@@ -19,6 +19,7 @@ BEGIN
     VALUES(hospital_org,'HOS-'||gen_random_uuid()::text,'Fixture Hospital','hospital','Fixture Hospital Road',
       extensions.ST_SetSRID(extensions.ST_MakePoint(77.51,12.91),4326)::extensions.geography)
     RETURNING id INTO hospital_id;
+  UPDATE clinzo.facility SET verification_status='verified' WHERE id=hospital_id;
 
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);

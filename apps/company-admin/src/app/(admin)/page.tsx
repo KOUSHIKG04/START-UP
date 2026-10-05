@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listCompanyVerificationCases } from "@startup/data-access";
+import { formatDisplayDate } from "@startup/contracts";
 import { requireReviewer } from "@/lib/reviewer";
 import { Button } from "@startup/web-ui/components/ui/button";
 import { StatusBadge } from "@/features/verification/status-badge";
@@ -72,7 +73,7 @@ export default async function OverviewPage() {
                     <p className="font-medium">{item.subject_name}</p>
                     <p className="text-muted-foreground text-sm capitalize">
                       {item.subject_type} ·{" "}
-                      {new Date(item.submitted_at).toLocaleDateString("en-IN")}
+                      {formatDisplayDate(item.submitted_at, "Asia/Kolkata")}
                     </p>
                   </div>
                   <StatusBadge status={item.status} />

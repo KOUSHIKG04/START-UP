@@ -25,7 +25,13 @@ module.exports = {
   owner: "koushig07",
   name: `${expo.name}${label}`,
   scheme: `${expo.scheme}${suffix.replace(".", "-")}`,
-  extra: { ...expo.extra, eas: { ...expo.extra?.eas, projectId: "2bde3828-0493-4416-bd6f-18f4d2c98e78" } },
+  extra: {
+    ...expo.extra,
+    eas: {
+      ...expo.extra?.eas,
+      projectId: "2bde3828-0493-4416-bd6f-18f4d2c98e78",
+    },
+  },
   android: { ...expo.android, package: `com.clinzo.driver${suffix}` },
   ios: { ...expo.ios, bundleIdentifier: `com.clinzo.driver${suffix}` },
 };

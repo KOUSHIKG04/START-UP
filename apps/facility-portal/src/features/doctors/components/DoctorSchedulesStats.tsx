@@ -1,8 +1,7 @@
 import * as React from "react";
 import { Contact, Check, Activity, AlertTriangle } from "lucide-react";
-import { scheduleSummary } from "../utils/doctorSchedulesConstants";
 
-export function DoctorSchedulesStats() {
+export function DoctorSchedulesStats({ scheduleSummary }: { scheduleSummary: { total: number; available: number; surgery: number | null; emergency: number | null } }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Doctors */}
@@ -53,10 +52,10 @@ export function DoctorSchedulesStats() {
         </div>
         <div className="flex items-baseline gap-2">
           <h3 className="text-[28px] font-bold text-[#0f172a] leading-none">
-            {scheduleSummary.surgery}
+            {scheduleSummary.surgery ?? "—"}
           </h3>
           <span className="text-[12px] text-[#ef4444] font-medium">
-            Active operations
+            {scheduleSummary.surgery === null ? "Not tracked" : "Active operations"}
           </span>
         </div>
       </div>
@@ -73,9 +72,9 @@ export function DoctorSchedulesStats() {
         </div>
         <div className="flex items-baseline gap-2">
           <h3 className="text-[28px] font-bold text-[#f59e0b] leading-none">
-            {scheduleSummary.emergency}
+            {scheduleSummary.emergency ?? "—"}
           </h3>
-          <span className="text-[12px] text-[#64748b]">On-call / Trauma</span>
+          <span className="text-[12px] text-[#64748b]">{scheduleSummary.emergency === null ? "Not tracked" : "On-call / Trauma"}</span>
         </div>
       </div>
     </div>

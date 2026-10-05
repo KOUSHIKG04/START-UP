@@ -15,6 +15,7 @@ import { CheckCircle2, FileUp } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { submitMyDriverVehicle } from "@startup/data-access";
 import type { DriverDocumentKind } from "@startup/contracts";
+import { parseDisplayDate } from "@startup/contracts";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { supabase, useMobileSession } from "../../services/supabase";
 
@@ -80,7 +81,7 @@ export default function DriverDocuments() {
     if (
       !registration.trim() ||
       !label.trim() ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(expiry) ||
+      !parseDisplayDate(expiry) ||
       equipment.trim().length < 10 ||
       crew.trim().length < 10
     ) {
@@ -125,7 +126,7 @@ export default function DriverDocuments() {
         vehicle: {
           registrationNumber: registration,
           displayLabel: label,
-          inspectionExpiresOn: expiry,
+          inspectionExpiresOn: parseDisplayDate(expiry)!,
           capabilityCode: capability,
           equipmentNotes: equipment,
           crewNotes: crew,
@@ -185,7 +186,7 @@ export default function DriverDocuments() {
           "Vehicle registration"
         )}
         {field("Vehicle name", label, setLabel, "Name shown to dispatch")}
-        {field("Inspection expiry", expiry, setExpiry, "YYYY-MM-DD")}
+        {field("Inspection expiry", expiry, setExpiry, "DD-MM-YYYY")}
         <Text style={styles.section}>Upload documents</Text>
         <Text style={styles.hint}>
           PDF, JPG or PNG · 10 MB maximum per file

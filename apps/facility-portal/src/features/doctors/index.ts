@@ -4,3 +4,4 @@ export { AddDoctorAction } from "./components/AddDoctorAction";
 export { DoctorTable } from "./components/DoctorTable";
 export { doctorColumns } from "./components/doctorColumns";
 export { useDoctorDirectory, useDoctors, doctorApi } from "./hooks/useDoctorDirectory";
+export { facilitySchedule, type PracticeSession } from "./utils/facilitySchedule";

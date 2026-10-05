@@ -6,7 +6,7 @@ import { homeActions } from "../utils/HomeActions";
 import AmbulanceBanner from "./AmbulanceBanner";
 import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
 import PopularServices from "./PopularServices";
-import type { ClinicAppointment } from "@startup/contracts";
+import { formatDisplayDate, type ClinicAppointment } from "@startup/contracts";
 
 function getFindDoctorRoute(consultationType: string) {
   return {
@@ -63,7 +63,7 @@ export function HomeFeedContent({
         <UpcomingAppointmentCard
           doctorName={upcoming.doctor_name}
           specialization={upcoming.facility_name}
-          date={new Date(upcoming.starts_at).toLocaleDateString()}
+          date={formatDisplayDate(upcoming.starts_at)}
           time={new Date(upcoming.starts_at).toLocaleTimeString([], {
             hour: "numeric",
             minute: "2-digit",
@@ -91,11 +91,10 @@ export function HomeFeedContent({
 const styles = StyleSheet.create({
   actionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "flex-start",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    gap: 8,
+    marginTop: 2,
   },
   actionLabel: {
     textAlign: "center",
@@ -103,7 +102,7 @@ const styles = StyleSheet.create({
     color: colors.patient.text,
   },
   ambulanceBanner: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    marginTop: 10,
+    alignItems: "center",
   },
 });

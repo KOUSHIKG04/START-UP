@@ -16,13 +16,13 @@ import {
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@startup/web-ui/components/ui/avatar";
 
-import { navItems, sidebarBrand, sidebarUser } from "./utils/sidebarConstants";
+import { navItems } from "./utils/sidebarConstants";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ facilityName, userName, ...props }: React.ComponentProps<typeof Sidebar> & { facilityName: string; userName: string }) {
   const pathname = usePathname();
+  const initials = userName.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <Sidebar
@@ -36,10 +36,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div className="flex flex-col leading-tight whitespace-nowrap">
             <span className="text-[14px] font-bold text-[#07595d] tracking-tight">
-              {sidebarBrand.name}
+              {facilityName}
             </span>
             <span className="text-[9px] font-semibold text-[#94a3b8] tracking-[0.5px] uppercase">
-              {sidebarBrand.subtitle}
+              admin console
             </span>
           </div>
         </Link>
@@ -83,17 +83,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="p-2.5 mt-auto">
         <div className="flex items-center gap-2.5 p-2 rounded-lg bg-[#f8fafc] border border-slate-100">
           <Avatar className="size-7 rounded-full border border-slate-200">
-            <AvatarImage src={sidebarUser.avatar} alt={sidebarUser.name} />
             <AvatarFallback className="bg-[#07595d] text-white text-[11px] font-semibold">
-              {sidebarUser.initials}
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0 leading-tight">
             <span className="text-[12px] font-semibold text-[#0f172a] truncate">
-              {sidebarUser.name}
+              {userName}
             </span>
             <span className="text-[10px] text-[#475569] truncate">
-              {sidebarUser.role}
+              Facility admin
             </span>
           </div>
         </div>

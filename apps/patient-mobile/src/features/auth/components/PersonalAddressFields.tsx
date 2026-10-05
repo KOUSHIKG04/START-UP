@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { Controller, type Control } from "react-hook-form";
 import { ChevronDown } from "lucide-react-native";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import { AddressSheet } from "./AddressSheet";
 import { emptyAddress } from "./addressTypes";
 import type { ProfileFormValues } from "./ProfileForm";

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@startup/web-ui/components/data-table";
-import type { VerificationQueueItem } from "@startup/contracts";
+import { formatDisplayDate, type VerificationQueueItem } from "@startup/contracts";
 import { StatusBadge } from "./status-badge";
 
 const columns: ColumnDef<VerificationQueueItem, unknown>[] = [
@@ -29,7 +29,7 @@ const columns: ColumnDef<VerificationQueueItem, unknown>[] = [
     accessorKey: "submitted_at",
     header: "Submitted",
     cell: ({ row }) =>
-      new Date(row.original.submitted_at).toLocaleDateString("en-IN"),
+      formatDisplayDate(row.original.submitted_at, "Asia/Kolkata"),
   },
   { accessorKey: "document_count", header: "Documents" },
   {

@@ -110,6 +110,7 @@ foreach ($account in $accounts) {
     $result = Invoke-Api "$baseUri/rest/v1/rpc/complete_patient_profile" 'Post' $userHeaders @{ p_profile=$profile }
     if (-not $result.patient_id) { throw "Patient profile missing for $email" }
   } elseif ($account.kind -eq 'doctor') {
+    $existingDoctorProfile = Invoke-Api "$baseUri/rest/v1/rpc/get_my_doctor_profile" 'Post' $userHeaders @{}
     $details = @{ full_name=$account.name; registration_authority="Karnataka Medical Council";
       registration_number="TEST-KMC-$number"; practice_started_on=$account.started;
       clinic_name="$($account.name) Test Clinic"; address="MG Road, Bengaluru, Karnataka 560001";
@@ -124,9 +125,11 @@ foreach ($account in $accounts) {
         locality='MG Road'; city='Bengaluru'; state='Karnataka'; pincode='560001';
         latitude=$details.latitude; longitude=$details.longitude }
     })
-    [void](Invoke-Api "$baseUri/rest/v1/rpc/update_my_doctor_profile" 'Post' $userHeaders @{
-      p_full_name=$account.name; p_bio="Test physician in $($account.specialty). Development fixture only.";
-      p_languages=$account.languages })
+    if (-not $existingDoctorProfile) {
+      [void](Invoke-Api "$baseUri/rest/v1/rpc/update_my_doctor_profile" 'Post' $userHeaders @{
+        p_full_name=$account.name; p_bio="Test physician in $($account.specialty). Development fixture only.";
+        p_languages=$account.languages })
+    }
     if (-not $result.doctor.id) { throw "Doctor profile missing for $email" }
   } else {
     $application = Invoke-Api "$baseUri/rest/v1/rpc/get_my_driver_registration_application" 'Post' $userHeaders @{}

@@ -12,7 +12,7 @@ Each implemented feature exposes its supported entry points through `index.ts`.
 | --- | --- |
 | `src/app` | Next.js routes, layouts, metadata, loading and error boundaries |
 | `src/app/(admin)` | Thin route adapters and one shared admin layout |
-| `src/app/(auth)` | Login route adapter, outside the admin shell |
+| `src/app/(auth)` | Login, signup and facility-verification route adapters, outside the admin shell |
 | `src/features/dashboard` | Existing dashboard screen and future dashboard operations |
 | `src/features/auth` | Login screen, form component and login constants |
 | `src/features/doctors` | Doctor directory, schedules, add-doctor UI, feature hooks, types and constants |
@@ -28,12 +28,13 @@ Each implemented feature exposes its supported entry points through `index.ts`.
 | `src/lib` | Small cross-feature helpers and future browser client configuration |
 | `src/providers` | Client providers, added only when an integration needs them |
 
-Route groups do not add URL segments. The admin layout now verifies a Supabase
-session and redirects unauthenticated visitors to `/login`; facility RPCs still
-authorize each read/write by membership. The web portal uses email/password Auth,
-with cookie refresh in `src/proxy.ts`. Bed management reads and writes scoped
-aggregate inventory. Dashboard metrics, appointment rows, doctor screens and the
-add-doctor form remain demo-only; they must not be treated as persisted records.
+Route groups do not add URL segments. The admin routes require an authenticated
+account with a company-verified facility. Accounts without approval go to
+`/facility-verification` to register, submit their registration certificate and
+operating licence, or wait for review. Facility RPCs still authorize each
+operation by membership; bed inventory also requires a verified facility at the
+database boundary. The portal uses email/password Auth with cookie refresh in
+`src/proxy.ts`.
 
 | URL | Feature screen |
 | --- | --- |

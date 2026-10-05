@@ -55,6 +55,11 @@ if ($UseCli) {
       @{ Name = "Notifications"; File = "notifications.cli-smoke.sql"; Result = "notification_smoke_passed" }
       @{ Name = "Push delivery"; File = "push-delivery.cli-smoke.sql"; Result = "push_delivery_smoke_passed" }
       @{ Name = "Facility doctors"; File = "facility-doctors.cli-smoke.sql"; Result = "facility_doctors_smoke_passed" }
+      @{ Name = "Facility association"; File = "facility-association.cli-smoke.sql"; Result = "facility_association_smoke_passed" }
+      @{ Name = "Company verification"; File = "company-verification.cli-smoke.sql"; Result = "company_verification_smoke_passed" }
+      @{ Name = "General Physician discovery"; File = "../tooling/general-physician-discovery.cli-smoke.sql"; Result = "general_physician_discovery_smoke_passed" }
+      @{ Name = "Specialty discovery"; File = "../tooling/specialty-discovery.cli-smoke.sql"; Result = "specialty_discovery_smoke_passed" }
+      @{ Name = "Facility bed declaration"; File = "facility-bed-declaration.cli-smoke.sql"; Result = "facility_bed_declaration_smoke_passed" }
       @{ Name = "Online consultation"; File = "../tooling/online-consultation.cli-smoke.sql"; Result = "online_consultation_smoke_passed" }
     )
     foreach ($smoke in $smokeTests) {

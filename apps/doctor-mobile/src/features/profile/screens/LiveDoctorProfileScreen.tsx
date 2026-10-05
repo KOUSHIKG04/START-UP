@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDisplayDate } from "@startup/contracts";
 import {
   getMyDoctorProfile,
   updateMyDoctorProfile,
@@ -59,7 +60,7 @@ export function LiveDoctorProfileScreen() {
               Registration: {profile.data.registration_authority} ·{" "}
               {profile.data.registration_number}
             </Text>
-            <Text>Practicing since {profile.data.practice_started_on}</Text>
+            <Text>Practicing since {formatDisplayDate(profile.data.practice_started_on)}</Text>
             <Text>
               Specialties:{" "}
               {profile.data.specialties.map((item) => item.name).join(", ") ||

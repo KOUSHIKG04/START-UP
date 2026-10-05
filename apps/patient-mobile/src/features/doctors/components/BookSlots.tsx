@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
+import { formatDisplayDate } from "@startup/contracts";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import {
   Button,
@@ -15,6 +16,10 @@ import {
 } from "../utils/doctorProfileConstants";
 import type { BookSlotsProps } from "../types/doctor-profile";
 
+function localDateKey(value: Date): string {
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+}
+
 export function BookSlots({
   address,
   consultationType,
@@ -26,22 +31,34 @@ export function BookSlots({
   error,
   busy,
 }: BookSlotsProps) {
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(new Date().getMonth());
+  const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [patientId, setPatientId] = useState(patientOptions[0]?.id ?? "");
+  const selectedPatientIsVerified = patientOptions.some(option => option.id === patientId && option.verified);
 
+  useEffect(() => {
+    if (selectedPatientIsVerified) return;
+    setPatientId(patientOptions.find(option => option.verified)?.id ?? "");
+  }, [patientOptions, selectedPatientIsVerified]);
+
+  const today = useMemo(() => new Date(), []);
+  const monthOptions = useMemo(() => Array.from({ length: 12 }, (_, offset) => {
+    const date = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    return { offset, name: months[date.getMonth()].name };
+  }), [today]);
   const monthDates = useMemo(() => {
-    const year = new Date().getFullYear();
-    const available = new Set(slots.map(slot => new Date(slot.starts_at).toLocaleDateString("en-CA")));
-    return Array.from({ length: new Date(year, selectedMonthIndex + 1, 0).getDate() }, (_, index) => {
-      const date = new Date(year, selectedMonthIndex, index + 1);
-      const key = date.toLocaleDateString("en-CA");
-      return { key, date: key, dayNumber: date.getDate(), day: date.toLocaleDateString("en-US", { weekday: "short" }), closed: !available.has(key) };
+    const selectedMonth = new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1);
+    const todayKey = localDateKey(today);
+    return Array.from({ length: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0).getDate() }, (_, index) => {
+      const date = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), index + 1);
+      const key = localDateKey(date);
+      return { key, dayNumber: date.getDate(), day: date.toLocaleDateString("en-US", { weekday: "short" }), closed: key < todayKey };
     });
-  }, [slots, selectedMonthIndex]);
-  const dateSlots = slots.filter(slot => new Date(slot.starts_at).toLocaleDateString("en-CA") === selectedDate);
+  }, [today, selectedMonthOffset]);
+  const dateSlots = slots.filter(slot => localDateKey(new Date(slot.starts_at)) === selectedDate);
+  const selectedSlot = dateSlots.find(slot => slot.window_id === selectedTime);
 
   const datesScrollRef = useRef<ScrollView>(null);
   const monthsScrollRef = useRef<ScrollView>(null);
@@ -49,15 +66,19 @@ export function BookSlots({
   useEffect(() => {
     const timer = setTimeout(() => {
       monthsScrollRef.current?.scrollTo({
-        x: Math.max(0, selectedMonthIndex * 85 - 80),
+        x: Math.max(0, selectedMonthOffset * 85 - 80),
+        animated: false,
+      });
+      datesScrollRef.current?.scrollTo({
+        x: selectedMonthOffset === 0 ? Math.max(0, (today.getDate() - 1) * 62 - 110) : 0,
         animated: false,
       });
     }, 120);
     return () => clearTimeout(timer);
-  }, [selectedMonthIndex]);
+  }, [selectedMonthOffset, today]);
 
   const handleSelectMonth = (index: number) => {
-    setSelectedMonthIndex(index);
+    setSelectedMonthOffset(index);
     setSelectedDate(null);
     setSelectedTime(null);
   };
@@ -91,15 +112,15 @@ export function BookSlots({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.monthsStrip}
         >
-          {months.map((m) => {
-            const isSelected = m.index === selectedMonthIndex;
+          {monthOptions.map((m) => {
+            const isSelected = m.offset === selectedMonthOffset;
             return (
               <Chip
-                key={m.name}
+                key={m.offset}
                 label={m.name}
                 selected={isSelected}
                 accessibilityState={{ selected: isSelected }}
-                onPress={() => handleSelectMonth(m.index)}
+                onPress={() => handleSelectMonth(m.offset)}
                 style={[
                   styles.monthChip,
                   isSelected ? styles.selectedMonthChip : undefined,
@@ -167,7 +188,7 @@ export function BookSlots({
       <View style={styles.bookingSection}>
         <View style={styles.sectionHeadingRow}>
           <Text style={styles.sectionTitle}>Select time</Text>
-          <Text style={styles.availability}>{dateSlots.length} slots available</Text>
+          <Text style={styles.availability}>{dateSlots.length} slots available{selectedDate ? ` · ${formatDisplayDate(selectedDate)}` : ""}</Text>
         </View>
         <View style={styles.slotGrid}>
           {dateSlots.map((slot) => {
@@ -239,18 +260,18 @@ export function BookSlots({
         />
       </View>
       {loading ? <Text style={styles.availability}>Loading slots…</Text> : null}
-      {slots.length === 0 && !loading ? <Text style={styles.availability}>No clinic slots available yet.</Text> : null}
+      {slots.length === 0 && !loading && !error ? <Text style={styles.availability}>No upcoming {consultationType === "Online" ? "online" : consultationType === "Home Visit" ? "home-visit" : "clinic"} times are available. Please check again later.</Text> : null}
+      {selectedDate && dateSlots.length === 0 && slots.length > 0 ? <Text style={styles.availability}>No available times on this date. Choose another date.</Text> : null}
       {error ? <Text accessibilityRole="alert" style={styles.availability}>{error}</Text> : null}
     </Card>
 
     <Button
       label="Book Appointment"
-      disabled={busy || !selectedTime || !patientId || consultationType !== "Clinic Visit"}
+      disabled={busy || !selectedSlot || !selectedPatientIsVerified || consultationType === "Home Visit"}
       onPress={() => {
-        const selectedSlot = slots.find(slot => slot.window_id === selectedTime);
         if (!selectedSlot) return;
         onBookAppointment({
-          date: new Date(selectedSlot.starts_at).toLocaleDateString(),
+          date: formatDisplayDate(selectedSlot.starts_at),
           time: selectedSlot.window_id,
           patient: patientOptions.find(option => option.id === patientId)?.label ?? "Self",
           patientId,

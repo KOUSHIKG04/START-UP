@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCompanyVerificationCase } from "@startup/data-access";
+import { getCompanyFacilityBedDeclaration, getCompanyVerificationCase, listCompanyDoctorFacilityRequests } from "@startup/data-access";
+import { formatDisplayDate, formatDisplayDateTime } from "@startup/contracts";
 import { requireReviewer } from "@/lib/reviewer";
 import { StatusBadge } from "@/features/verification/status-badge";
 import { DocumentActions, FinalizeAction } from "./review-forms";
 
 const documentNames: Record<string, string> = {
   medical_registration: "Medical registration certificate",
+  medical_degree: "Medical degree certificate",
   registration_certificate: "Registration certificate",
   operating_licence: "Operating licence",
   aadhaar: "Aadhaar",
@@ -27,12 +29,20 @@ export default async function CaseDetail({
   const [{ id }, client] = await Promise.all([params, requireReviewer()]);
   const item = await getCompanyVerificationCase(client, id);
   if (!item) notFound();
+  const facilityRequests = item.subject_type === "doctor"
+    ? await listCompanyDoctorFacilityRequests(client, id) : [];
+  const bedDeclaration = item.subject_type === "facility"
+    ? await getCompanyFacilityBedDeclaration(client, id) : null;
   const current = item.documents.filter(
     (document) => document.status !== "superseded"
   );
-  const allApproved =
-    current.length > 0 &&
-    current.every((document) => document.status === "approved");
+  const requiredKinds = item.subject_type === "doctor"
+    ? ["medical_registration", "medical_degree"]
+    : item.subject_type === "facility"
+      ? ["registration_certificate", "operating_licence"]
+      : ["aadhaar", "pan", "driving_licence", "vehicle_rc", "insurance", "fitness", "ambulance_image", "equipment_images"];
+  const missingKinds = requiredKinds.filter(kind => !current.some(document => document.kind === kind));
+  const allApproved = missingKinds.length === 0 && current.every(document => document.status === "approved");
   const details = item.doctor ?? item.facility ?? item.driver;
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -52,7 +62,7 @@ export default async function CaseDetail({
               ? "Hospital / clinic"
               : item.subject_type}{" "}
             verification · Submitted{" "}
-            {new Date(item.submitted_at).toLocaleDateString("en-IN")}
+            {formatDisplayDate(item.submitted_at, "Asia/Kolkata")}
           </p>
         </div>
         <StatusBadge status={item.status} />
@@ -72,6 +82,8 @@ export default async function CaseDetail({
             ))}
         </dl>
       </section>
+      {item.subject_type === "doctor" && <section className="bg-card rounded-xl border p-5"><h2 className="font-semibold">Hospital / clinic association</h2>{facilityRequests.length ? <ul className="mt-3 space-y-3 text-sm">{facilityRequests.map((request,index)=><li key={`${request.facility_name}-${index}`} className="rounded-lg border p-3"><strong>{request.facility_name}</strong> · {request.facility_kind}<p className="text-muted-foreground">{request.facility_address}</p><p>Requested by {request.initiated_by}; facility decision: {request.status}; practice {request.practice_active ? "active" : "not active"}</p></li>)}</ul> : <p className="text-muted-foreground mt-2 text-sm">No registered facility request. A solo doctor may operate their own clinic after credential approval.</p>}</section>}
+      {bedDeclaration && <section className="bg-card rounded-xl border p-5"><h2 className="font-semibold">Declared bed services</h2><p className="mt-2 text-sm">{bedDeclaration.offers_beds === null ? "Not declared by this existing facility" : bedDeclaration.offers_beds ? "Beds offered" : "Beds not offered"}</p>{bedDeclaration.bed_types.length > 0 && <p className="mt-1 text-sm text-muted-foreground">{bedDeclaration.bed_types.join(", ")}</p>}</section>}
       <section className="space-y-3">
         <div>
           <h2 className="font-semibold">Documents</h2>
@@ -89,7 +101,7 @@ export default async function CaseDetail({
                 </h3>
                 <p className="text-muted-foreground text-xs">
                   Version {document.version} · Submitted{" "}
-                  {new Date(document.submitted_at).toLocaleDateString("en-IN")}
+                  {formatDisplayDate(document.submitted_at, "Asia/Kolkata")}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -133,7 +145,7 @@ export default async function CaseDetail({
             <FinalizeAction caseId={id} subjectType={item.subject_type} />
           ) : (
             <p className="text-muted-foreground text-sm">
-              Review all pending or rejected documents first.
+              {missingKinds.length ? `Awaiting ${missingKinds.map(kind => documentNames[kind] ?? kind.replaceAll("_", " ")).join(", ")}.` : "Review all pending or rejected documents first."}
             </p>
           )}
         </section>
@@ -151,7 +163,7 @@ export default async function CaseDetail({
                   {event.action.replaceAll("_", " ")}
                 </span>
                 <time className="text-muted-foreground">
-                  {new Date(event.created_at).toLocaleString("en-IN")}
+                  {formatDisplayDateTime(event.created_at, "Asia/Kolkata")}
                 </time>
               </div>
               {event.reason && (

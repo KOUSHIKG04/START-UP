@@ -4,8 +4,10 @@ export const doctorScheduleSettingsSchema = z
   .object({
     workingDays: z.array(z.number().int().min(1).max(7)).min(1).max(7),
     clinicStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
-    clinicEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    clinicEnd: z.string().regex(/^(?:([01]\d|2[0-3]):[0-5]\d|24:00)$/),
     slotMinutes: z.number().int().min(5).max(120),
+    onlineSlotMinutes: z.number().int().min(5).max(120),
+    homeSlotMinutes: z.number().int().min(30).max(120),
     onlineDailyLimit: z.number().int().min(0).max(100),
     walkinDailyLimit: z.number().int().min(0).max(100),
     autoAccept: z.boolean(),
@@ -32,6 +34,8 @@ export const doctorSchedulePreferencesSchema = z.object({
   clinic_start: z.string(),
   clinic_end: z.string(),
   slot_minutes: z.number().int(),
+  online_slot_minutes: z.number().int(),
+  home_slot_minutes: z.number().int(),
   online_daily_limit: z.number().int(),
   walkin_daily_limit: z.number().int(),
   auto_accept: z.boolean(),
@@ -47,3 +51,9 @@ export const doctorSchedulePreferencesSchema = z.object({
 export type DoctorScheduleSettings = z.input<
   typeof doctorScheduleSettingsSchema
 >;
+
+export const doctorDailySlotUsageSchema = z.object({
+  clinic: z.number().int().nonnegative(),
+  online: z.number().int().nonnegative(),
+  home: z.number().int().nonnegative(),
+});

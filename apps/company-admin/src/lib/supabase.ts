@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@startup/data-access";
+import { companyAdminAuthCookie } from "./supabase-cookie";
 
 export async function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -13,6 +14,7 @@ export async function createClient() {
   const jar = await cookies();
 
   return createServerClient<Database>(url, key, {
+    cookieOptions: { name: companyAdminAuthCookie },
     cookies: {
       getAll: () => jar.getAll(),
       setAll: (items) => {

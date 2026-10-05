@@ -1,5 +1,7 @@
 import { DoctorManagementScreen } from "@/features/doctors";
+import { requireApprovedFacility } from "@/server/auth/facilityAccess";
 
-export default function DoctorManagementPage() {
+export default async function DoctorManagementPage() {
+  await requireApprovedFacility();
   return <DoctorManagementScreen />;
 }

@@ -3,8 +3,24 @@ import { onboardingSchema, phoneSchema } from "../src/validation";
 import { clinicBookingSchema, clinicTransitionSchema } from "../src/clinic";
 import { updateBedInventorySchema } from "../src/facilities";
 import { driverRegistrationDetailsSchema, driverRegistrationSubmissionSchema } from "../src/driver-profile";
+import { formatDisplayDate, parseDisplayDate } from "../src/dates";
+import { doctorScheduleSettingsSchema } from "../src/doctor-schedule";
 
 const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
+
+test("display dates round-trip without changing the ISO database date", () => {
+  expect(parseDisplayDate("05-10-2026")).toBe("2026-10-05");
+  expect(formatDisplayDate("2026-10-05")).toBe("05-10-2026");
+  expect(parseDisplayDate("29-02-2024")).toBe("2024-02-29");
+  expect(parseDisplayDate("29-02-2026")).toBeNull();
+  expect(parseDisplayDate("2026-10-05")).toBeNull();
+});
+
+test("doctor schedule accepts 24:00 only as an end-of-day boundary", () => {
+  expect(doctorScheduleSettingsSchema.shape.clinicEnd.safeParse("24:00").success).toBe(true);
+  expect(doctorScheduleSettingsSchema.shape.clinicStart.safeParse("24:00").success).toBe(false);
+  expect(doctorScheduleSettingsSchema.shape.clinicEnd.safeParse("24:01").success).toBe(false);
+});
 
 test("onboarding never accepts a caller-selected role or organization", () => {
   expect(onboardingSchema.safeParse({

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { searchPublicPractices } from "@startup/data-access";
+import { supabase } from "../../../services/supabase";
 import {
   Animated,
   BackHandler,
@@ -23,7 +26,6 @@ import {
   spacing,
 } from "@startup/design-tokens";
 import {
-  Button,
   Chip,
   FadedScrollView,
   SafeAreaView,
@@ -57,6 +59,7 @@ export function FindDoctorScreen({
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const searchInputRef = useRef<TextInput>(null);
 
   const { top: topInset } = useSafeAreaInsets();
@@ -124,6 +127,18 @@ export function FindDoctorScreen({
     : categories.slice(0, 8);
 
   const trimmedQuery = searchQuery.trim().toLowerCase();
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  const doctorQuery = useQuery({
+    queryKey: ["find-doctor-suggestions", debouncedQuery],
+    queryFn: () => searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
+    enabled: isSearchActive && Boolean(supabase) && debouncedQuery.length >= 2,
+  });
+  const doctorMatches = [...new Map((doctorQuery.data ?? [])
+    .filter(item => item.doctor_name.toLowerCase().includes(trimmedQuery))
+    .map(item => [item.doctor_id, { id: item.doctor_id, name: item.doctor_name }])).values()];
   const filteredCategories = trimmedQuery
     ? categories.filter(
         (c) =>
@@ -290,7 +305,12 @@ export function FindDoctorScreen({
         ) : (
           <FindDoctorSearchList
             filteredCategories={filteredCategories}
+            doctorMatches={doctorMatches}
             searchQuery={searchQuery}
+            onSelectDoctor={(name) => {
+              handleCloseSearch();
+              router.push(getDoctorResultsRoute(name, consultationType));
+            }}
             onSelectCategory={(_key, label) => {
               handleCloseSearch();
               router.push(getDoctorResultsRoute(label, consultationType));

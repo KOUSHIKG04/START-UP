@@ -63,8 +63,8 @@ export default function LoginScreen() {
       return;
     }
 
-    if (password.length < 12) {
-      setError("Use a password with at least 12 characters.");
+    if (password.length < 8) {
+      setError("Use a password with at least 8 characters.");
       return;
     }
 
@@ -147,6 +147,7 @@ export default function LoginScreen() {
                   autoComplete="email"
                   keyboardType="email-address"
                   placeholder="your@email.com"
+                  placeholderTextColor={colors.ui.cardDescription}
                   value={email}
                   onChangeText={setEmail}
                   style={styles.input}
@@ -159,6 +160,7 @@ export default function LoginScreen() {
                   }
                   secureTextEntry
                   placeholder="Password"
+                  placeholderTextColor={colors.ui.cardDescription}
                   value={password}
                   onChangeText={setPassword}
                   style={styles.input}
@@ -170,6 +172,7 @@ export default function LoginScreen() {
                     autoComplete="new-password"
                     secureTextEntry
                     placeholder="Confirm password"
+                    placeholderTextColor={colors.ui.cardDescription}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     style={styles.input}

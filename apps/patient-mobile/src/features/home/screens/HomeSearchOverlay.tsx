@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { searchPublicPractices } from "@startup/data-access";
+import { supabase } from "../../../services/supabase";
 import {
   Keyboard,
   Modal,
@@ -32,10 +35,23 @@ export function HomeSearchOverlay({
   selectedCity = DEFAULT_SEARCH_CITY,
 }: HomeSearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [recents, setRecents] = useState<SearchItem[]>(() => [...INITIAL_RECENTS]);
 
   const trimmedQuery = query.trim().toLowerCase();
-  const searchResults = filterSearchDirectory(query);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [query]);
+  const doctorQuery = useQuery({
+    queryKey: ["patient-search-doctors", debouncedQuery],
+    queryFn: () => searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
+    enabled: visible && Boolean(supabase) && debouncedQuery.length >= 2,
+  });
+  const doctorResults: SearchItem[] = [...new Map((doctorQuery.data ?? [])
+    .filter(item => item.doctor_name.toLowerCase().includes(trimmedQuery))
+    .map(item => [item.doctor_id, { id: `doctor-${item.doctor_id}`, title: item.doctor_name, type: "Doctor" as const }])).values()];
+  const searchResults = [...doctorResults, ...filterSearchDirectory(query)];
 
   const handleClose = () => {
     Keyboard.dismiss();

@@ -27,6 +27,13 @@ coverage/
 test-results/
 playwright-report/
 tests/
+!packages/database/tests/
+packages/database/tests/*
+!packages/database/tests/onboarding.cli-smoke.sql
+!packages/database/tests/doctor-schedule.cli-smoke.sql
+!packages/database/tests/company-verification.cli-smoke.sql
+!packages/database/tests/facility-association.cli-smoke.sql
+!packages/database/tests/facility-bed-declaration.cli-smoke.sql
 
 # Scripts
 scripts/

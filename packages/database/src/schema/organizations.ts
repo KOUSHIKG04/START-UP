@@ -99,6 +99,7 @@ export const facility = clinzo
         enum: ["pending", "verified", "suspended"],
       }).notNull().default("pending"),
       registration_number: text("registration_number"),
+      bed_service_declared: boolean("bed_service_declared"),
     },
     (table) => [
       uniqueIndex("facility_uq_1").on(table.public_code),

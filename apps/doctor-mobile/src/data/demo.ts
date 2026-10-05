@@ -119,6 +119,8 @@ export const initialSchedule: Schedule = {
   start: "09:00",
   end: "17:00",
   duration: 30,
+  onlineDuration: 30,
+  homeDuration: 60,
   online: 8,
   walkIn: 5,
   autoAccept: true,

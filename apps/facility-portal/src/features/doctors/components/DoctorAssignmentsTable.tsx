@@ -1,12 +1,12 @@
 import * as React from "react";
-import { todayAssignments } from "../utils/doctorSchedulesConstants";
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@startup/web-ui/components/ui/avatar";
 
-export function DoctorAssignmentsTable() {
+type Assignment = { id: string; name: string; department: string; shiftTime: string; status: "On Duty" | "On Call" | "In Surgery"; contact: string };
+
+export function DoctorAssignmentsTable({ assignments }: { assignments: Assignment[] }) {
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
       <div className="pb-4 border-b border-[#e2e8f0]">
@@ -31,16 +31,15 @@ export function DoctorAssignmentsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e2e8f0]">
-            {todayAssignments.map((doc) => (
+            {assignments.map((doc) => (
               <tr
-                key={doc.name}
+                key={doc.id}
                 className="hover:bg-slate-50/70 transition-colors"
               >
                 {/* Doctor Name with Avatar */}
                 <td className="py-3.5 px-3">
                   <div className="flex items-center gap-3 font-semibold text-[#0f172a]">
                     <Avatar className="size-8 rounded-full border border-slate-200">
-                      <AvatarImage src={doc.avatar} alt={doc.name} />
                       <AvatarFallback className="bg-slate-100 text-slate-700 text-xs font-semibold">
                         {doc.name.charAt(0)}
                       </AvatarFallback>
@@ -85,12 +84,11 @@ export function DoctorAssignmentsTable() {
 
                 {/* Action */}
                 <td className="py-3.5 px-3 text-right">
-                  <button className="text-[13px] font-semibold text-[#3b82f6] hover:underline cursor-pointer">
-                    Edit
-                  </button>
+                  <span className="text-[13px] text-[#64748b]">Managed in Doctor App</span>
                 </td>
               </tr>
             ))}
+            {assignments.length === 0 && <tr><td colSpan={6} className="px-3 py-5 text-[#64748b]">No published doctor assignments today.</td></tr>}
           </tbody>
         </table>
       </div>

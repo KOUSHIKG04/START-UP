@@ -8,16 +8,9 @@ import { Search, Calendar, ChevronDown, Plus } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
 
 import type { AppointmentPeriod } from "../types/appointments";
-import { defaultAppointmentPeriod } from "../utils/appointmentsConstants";
+import { defaultAppointmentPeriod, appointmentsDateFormatter } from "../utils/appointmentsConstants";
 import { AppointmentsSummaryCards } from "../components/AppointmentsSummaryCards";
 import { AppointmentsTable } from "../components/AppointmentsTable";
-
-const appointmentsDateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 export default function AppointmentsScreen({
   appointments,
