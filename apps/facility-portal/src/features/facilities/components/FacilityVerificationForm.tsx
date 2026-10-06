@@ -34,7 +34,6 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   const [facilityPincode,setFacilityPincode] = useState("");
   const [facilityLocation,setFacilityLocation] = useState<FacilityLocation | null>(null);
   const [locating,setLocating] = useState(false);
-  const [locationMessage,setLocationMessage] = useState("");
   const [offersBeds,setOffersBeds] = useState<boolean | null>(null);
   const [bedTypeCodes,setBedTypeCodes] = useState<string[]>([]);
   const [bedTypes,setBedTypes] = useState<BedTypeCatalogItem[]>([]);
@@ -47,14 +46,13 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   const licenceRef = useRef<File | null>(null);
   const [status,setStatus] = useState<Status | null>(null);
   const [statusLoading,setStatusLoading] = useState(facilities.length > 0);
-  const [message,setMessage] = useState("");
   const [busy,setBusy] = useState(false);
   useEffect(() => {
     if (facilities.length) return;
     let active = true;
     void listBedTypeCatalog(createBrowserSupabaseClient())
       .then(items => { if (active) setBedTypes(items); })
-      .catch(() => { if (active) setBedTypesError("Could not load bed categories. Refresh and try again."); });
+      .catch(() => { if (active) { setBedTypesError("Could not load bed categories. Refresh and try again."); toast.add({ title: "Could not load bed categories", description: "Refresh and try again.", type: "error" }); } });
     return () => { active = false; };
   }, [facilities.length]);
   const loadStatus = useCallback(async (id: string) => {
@@ -68,16 +66,15 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   }, []);
   async function checkStatus() {
     setStatusLoading(true);
-    setMessage("");
     try {
       const current = await loadStatus(activeFacilityId);
       if (current?.status === "verified") {
         router.replace("/dashboard");
       } else {
-        setMessage("Company verification is still pending. Check again after the reviewer verifies the facility.");
+        toast.add({ title: "Company verification is still pending", description: "Check again after the reviewer verifies the facility.", type: "info" });
       }
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Could not check verification status. Try again.");
+      toast.add({ title: "Could not check verification status", description: cause instanceof Error ? cause.message : "Try again.", type: "error" });
     } finally {
       setStatusLoading(false);
     }
@@ -89,7 +86,7 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
     void client.rpc("get_my_verification_case", { p_subject_type: "facility", p_subject_id: activeFacilityId })
       .then(({ data, error }) => {
         if (!active) return;
-        if (error) setMessage("Could not load verification status.");
+        if (error) toast.add({ title: "Could not load verification status", type: "error" });
         else setStatus(data as Status | null);
         setStatusLoading(false);
       });
@@ -102,11 +99,10 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
     const certificate = certificateRef.current;
     const licence = licenceRef.current;
     if (!activeFacilityId || !certificate || !licence) {
-      setMessage("Choose a facility and both documents.");
       toast.add({ title: "Missing documents", description: "Choose a facility and both documents.", type: "warning" });
       return;
     }
-    setBusy(true); setMessage("");
+    setBusy(true);
     try {
       const client = createBrowserSupabaseClient();
       const { data: user, error: authError } = await client.auth.getUser();
@@ -129,11 +125,9 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
       await loadStatus(activeFacilityId);
       certificateRef.current = null; licenceRef.current = null;
       form.reset();
-      setMessage("Submitted for company review.");
       toast.add({ title: "Submitted for company review", type: "success" });
     } catch (cause) {
       const errorMessage = cause instanceof Error ? cause.message : "Submission failed. Try again.";
-      setMessage(errorMessage);
       toast.add({ title: "Submission failed", description: errorMessage, type: "error" });
     }
     finally { setBusy(false); }
@@ -142,10 +136,10 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   async function register(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (offersBeds === null || (offersBeds && bedTypeCodes.length === 0)) {
-      setMessage("Choose whether beds are offered, then select the offered categories.");
+      toast.add({ title: "Complete bed services", description: "Choose whether beds are offered, then select the offered categories.", type: "warning" });
       return;
     }
-    setRegistering(true); setMessage("");
+    setRegistering(true);
     try {
       const location = facilityLocation ?? await getFacilityLocation();
       const address = [facilityAddress,facilityLocality,facilityCity,facilityState,facilityPincode]
@@ -162,13 +156,12 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
       router.refresh();
     } catch (cause) {
       const text = cause instanceof Error ? cause.message : "Could not register the facility. Allow location access while at the facility.";
-      setMessage(text); toast.add({title:"Registration failed",description:text,type:"error"});
+      toast.add({title:"Registration failed",description:text,type:"error"});
     } finally { setRegistering(false); }
   }
 
   async function useCurrentLocation() {
     setLocating(true);
-    setLocationMessage("");
     try {
       const location = await getFacilityLocation();
       setFacilityLocation(location);
@@ -187,12 +180,12 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
         setFacilityCity(current => current.trim() ? current : result.city ?? "");
         setFacilityState(current => current.trim() ? current : result.state ?? "");
         setFacilityPincode(current => current.trim() ? current : result.pincode ?? "");
-        setLocationMessage("Location captured. Check each address field and fill any missing details.");
+        toast.add({ title: "Location captured", description: "Check each address field and fill any missing details.", type: "success" });
       } else {
-        setLocationMessage(result.error ?? "Location captured. Enter the facility address manually.");
+        toast.add({ title: "Location captured", description: result.error ?? "Enter the facility address manually.", type: "info" });
       }
     } catch (cause) {
-      setLocationMessage(cause instanceof Error ? cause.message : "Could not capture location.");
+      toast.add({ title: "Could not capture location", description: cause instanceof Error ? cause.message : "Try again.", type: "error" });
     } finally {
       setLocating(false);
     }
@@ -223,17 +216,15 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
       <Input id="facility-pincode" placeholder="6-digit pincode" value={facilityPincode} onChange={event => setFacilityPincode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required />
     </div>
     <Button type="button" variant="outline" onClick={useCurrentLocation} disabled={locating || registering}>{locating ? "Getting location…" : "Use current location"}</Button>
-    {locationMessage && <p role="status" className="text-xs text-muted-foreground">{locationMessage}</p>}
   </div>;
 
   return <div className="space-y-5">
-    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}{bedTypesError && <p role="alert" className="text-sm text-destructive">{bedTypesError}</p>}<Button disabled={registering || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button>{message && <p role="alert" className="text-sm text-destructive">{message}</p>}</form> : statusLoading ? <p role="status" className="text-sm">Loading verification status…</p> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button>{message && <p role="status" className="mt-3 text-sm text-muted-foreground">{message}</p>}</section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
+    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}<Button disabled={registering || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button></form> : statusLoading ? <p role="status" className="text-sm">Loading verification status…</p> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button></section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
       <div className="space-y-2"><Label htmlFor="facility">Facility</Label><select id="facility" value={activeFacilityId} onChange={(event) => { setFacilityId(event.target.value); setStatus(null); setStatusLoading(true); }} className="h-10 w-full rounded-md border bg-background px-3 text-sm">{facilities.map((facility) => <option key={facility.facility_id} value={facility.facility_id}>{facility.facility_name}</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="registration">Registration number</Label><Input id="registration" value={registration} onChange={(event) => setRegistration(event.target.value)} minLength={4} maxLength={120} required /></div>
       <div className="space-y-2"><Label htmlFor="certificate">Registration certificate</Label><Input id="certificate" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => { certificateRef.current = event.target.files?.[0] ?? null; }} required /><p className="text-xs text-muted-foreground">PDF, JPG or PNG, up to 10 MB.</p></div>
       <div className="space-y-2"><Label htmlFor="licence">Operating licence</Label><Input id="licence" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => { licenceRef.current = event.target.files?.[0] ?? null; }} required /></div>
       <Button disabled={busy}>{busy ? "Uploading…" : "Submit for verification"}</Button>
-      {message && <p role="status" className="text-sm">{message}</p>}
     </form>}
     {status && <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Review status: {status.status.replaceAll("_"," ")}</h2><ul className="mt-3 space-y-2 text-sm">{status.documents.map((document) => <li key={document.kind}><strong className="capitalize">{document.kind.replaceAll("_"," ")}</strong> — {document.status}{document.rejection_reason && <p className="text-destructive">{document.rejection_reason}</p>}</li>)}</ul></section>}
   </div>;

@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
   Pressable,
@@ -44,7 +45,8 @@ export default function DriverDocuments() {
   const [picked, setPicked] = useState<Picked>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  
+  useToastFeedback({ error });
+
   async function choose(kind: DriverDocumentKind) {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -67,8 +69,8 @@ export default function DriverDocuments() {
       setError("Could not select the file.");
     }
   }
-  
-  
+
+
   async function submit() {
     if (!supabase || !session) {
       setError("Sign in to continue.");
@@ -88,7 +90,7 @@ export default function DriverDocuments() {
       setError("Complete the vehicle, inspection, equipment and crew details.");
       return;
     }
-    
+
     setBusy(true);
     setError("");
 
@@ -145,7 +147,7 @@ export default function DriverDocuments() {
       setBusy(false);
     }
   }
-  
+
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
@@ -229,11 +231,7 @@ export default function DriverDocuments() {
           setCrew,
           "Describe crew qualifications"
         )}
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {error}
-          </Text>
-        ) : null}
+
         <Pressable
           accessibilityRole="button"
           disabled={busy}

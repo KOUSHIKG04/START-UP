@@ -9,10 +9,9 @@ import type { ClinicAppointment, ClinicTransitionInput } from "@startup/contract
 import type { VisitMode } from "../../../types/doctor";
 import { modeLabels } from "../../../data/demo";
 import { PatientCard } from "../../patients/components/PatientCard";
-import { Button, Input } from "@startup/mobile-ui";
+import { Button, Input, useToast } from "@startup/mobile-ui";
 import { Choice, DoctorScreen, Heading, IconButton, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { ConsultationForm } from "../../clinic/components/ConsultationForm";
 import { supabase } from "../../../services/supabase";
 
 type Action = ClinicTransitionInput["action"];
@@ -57,8 +56,8 @@ export function AppointmentsScreen() {
   const [filter, setFilter] = useState<"all" | VisitMode>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const appointments = useQuery({
     queryKey: ["doctor-clinic-appointments", "all"],
     queryFn: () => listMyPracticeAppointments(supabase!),
@@ -81,8 +80,8 @@ export function AppointmentsScreen() {
       action,
       note: ["reject", "hold", "complete"].includes(action) ? notes[item.id]?.trim() ?? null : null,
     }),
-    onSuccess: () => { void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); setMessage("Appointment updated."); void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }); },
-    onError: () => setMessage("Could not update the appointment. Refresh and check its current status."),
+    onSuccess: (_result, { action }) => { void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); const feedback = action === "approve" ? "Appointment confirmed." : "Appointment updated."; showToast({ title: feedback, type: "success" }); void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }); },
+    onError: () => { const feedback = "Could not update the appointment. Refresh and check its current status."; showToast({ title: "Update failed", message: feedback, type: "error" }); },
   });
   const days = useMemo(() => {
     const startOfWeek = new Date();
@@ -99,7 +98,7 @@ export function AppointmentsScreen() {
     });
   }, [week]);
   const visible = appointments.data?.filter((item) => dayKey(new Date(item.starts_at)) === date && (filter === "all" || filter === item.visit_mode)) ?? [];
-  const act = (item: ClinicAppointment, action: Action) => { setMessage(""); transition.mutate({ item, action }); };
+  const act = (item: ClinicAppointment, action: Action) => transition.mutate({ item, action });
 
   const renderDay = useCallback(
     ({ item }: { item: DayItem }) => (
@@ -137,9 +136,9 @@ export function AppointmentsScreen() {
     {visible.map((item) => <View key={item.id} style={{ gap: 8 }}><PatientCard appointment={item} onOpen={() => setExpandedId(expandedId === item.id ? null : item.id)} />{expandedId === item.id ? <Panel>
       <Label muted>{new Date(item.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {item.facility_name}</Label>
       <Label muted>Booking {item.public_code} · {item.status.replaceAll("_", " ")}</Label>
-      {item.queue_state ? <Label muted>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · #${item.ticket_number}` : ""}</Label> : null}
+      {item.visit_mode === "clinic" && item.queue_state ? <Label muted>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · #${item.ticket_number}` : ""}</Label> : null}
       {item.reason ? <Label muted>Reason: {item.reason}</Label> : null}
-      {item.status === "pending" || item.status === "in_consultation" || item.queue_state === "waiting" || item.queue_state === "called" ? <Input label={item.status === "in_consultation" ? "Signed assessment" : "Reason for rejection or hold"} value={notes[item.id] ?? ""} onChangeText={(value) => setNotes((current) => ({ ...current, [item.id]: value }))} multiline /> : null}
+      {item.status === "pending" || item.queue_state === "waiting" || item.queue_state === "called" ? <Input label="Reason for rejection or hold" value={notes[item.id] ?? ""} onChangeText={(value) => setNotes((current) => ({ ...current, [item.id]: value }))} multiline /> : null}
       {item.status === "pending" ? <View style={ui.row}>
         <Button theme="doctor" label="Accept" disabled={transition.isPending} onPress={() => act(item, "approve")} />
         <Button theme="doctor" variant="outline" label="Reject" disabled={transition.isPending || !notes[item.id]?.trim()} onPress={() => act(item, "reject")} />
@@ -148,17 +147,16 @@ export function AppointmentsScreen() {
         <Button theme="doctor" label="Join video consultation" onPress={() => router.push({ pathname: "/online-consultation", params: { appointmentId: item.id, patientId: item.patient_id, mode: "online" } })} />
         <Button theme="doctor" variant="outline" label="Open chat" onPress={() => router.push({ pathname: "/chat", params: { appointmentId: item.id, patientId: item.patient_id, mode: "online" } })} />
       </View> : null}
-      {item.visit_mode === "clinic" && item.status === "confirmed" && item.queue_state === "awaiting_arrival" ? <Button theme="doctor" label="Check in" disabled={transition.isPending} onPress={() => act(item, "check_in")} /> : null}
+      {item.visit_mode === "clinic" && item.status === "confirmed" && item.queue_state === "awaiting_arrival" ? <Button theme="doctor" label="Scan patient check-in QR" onPress={() => router.push("/scan-qr")} /> : null}
       {item.status === "confirmed" && item.queue_state === "waiting" ? <Button theme="doctor" label="Call patient" disabled={transition.isPending} onPress={() => act(item, "call")} /> : null}
       {item.status === "confirmed" && ["waiting", "called"].includes(item.queue_state ?? "") ? <Button theme="doctor" variant="outline" label="Hold" disabled={transition.isPending || !notes[item.id]?.trim()} onPress={() => act(item, "hold")} /> : null}
       {item.status === "confirmed" && item.queue_state === "held" ? <Button theme="doctor" variant="outline" label="Return to queue" disabled={transition.isPending} onPress={() => act(item, "resume")} /> : null}
       {item.status === "confirmed" && item.queue_state === "called" && item.can_consult ? <Button theme="doctor" label="Start consultation" disabled={transition.isPending} onPress={() => act(item, "start")} /> : null}
-      {item.visit_mode === "clinic" && item.status === "in_consultation" && item.can_consult ? <><ConsultationForm appointmentId={item.id} /><Button theme="doctor" label="Sign assessment and complete" disabled={transition.isPending || !notes[item.id]?.trim()} onPress={() => act(item, "complete")} /></> : null}
+      {item.visit_mode === "clinic" && item.status === "in_consultation" && item.can_consult ? <Button theme="doctor" label="Consultation details" onPress={() => router.push({ pathname: "/clinical-notes", params: { appointmentId: item.id, patientId: item.patient_id, mode: "clinic" } })} /> : null}
       {item.visit_mode === "online" && item.status === "in_consultation" && item.can_consult ? <Button theme="doctor" label="Clinical notes" onPress={() => router.push({ pathname: "/clinical-notes", params: { appointmentId: item.id, patientId: item.patient_id, mode: "online" } })} /> : null}
     </Panel> : null}</View>)}
     {date && visible.length === 0 && !appointments.isLoading && !appointments.isError ? <Panel><Heading>No appointments</Heading><Label muted>{filter === "home" ? "This visit type is not connected to live scheduling yet." : `No ${filter === "online" ? "online" : "clinic"} appointments match this day.`}</Label></Panel> : null}
     {!date ? <Panel><Label muted>Choose a day to see appointments.</Label></Panel> : null}
-    {message ? <Label style={message.startsWith("Could") ? ui.error : ui.success}>{message}</Label> : null}
   </DoctorScreen>;
 }
 

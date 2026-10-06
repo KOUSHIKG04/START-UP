@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ export default function ReviewStatus() {
   const [submitted, setSubmitted] = useState<boolean | null>(null);
   const [review, setReview] = useState<MyVerificationCase | null>(null);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [uploading, setUploading] = useState(false);
   const mounted = useRef(false);
   const checking = useRef(false);
@@ -72,7 +74,6 @@ export default function ReviewStatus() {
     <Text style={styles.title}>Thank You!</Text>
     <Text style={styles.description}>{profile?.doctor?.status === "suspended" ? "Your account needs support before you can practise." : submitted === false ? "Complete your credential submission to start verification." : review?.status === "needs_resubmission" ? "A document needs a clearer replacement before verification can continue." : needsDegree ? "Upload your degree certificate to complete document review." : review?.status === "under_review" && review.documents.every(document => document.status === "approved") ? "Your documents are approved. Awaiting final Clinzo Company Admin verification." : "Please Wait Until We Verify Your Profile"}</Text>
     {review?.documents.filter((document) => document.status === "rejected").map((document) => <Text key={document.kind} style={styles.error}>{document.kind.replaceAll("_"," ")}: {document.rejection_reason}</Text>)}
-    {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     <View style={styles.actions}>{submitted === false || needsRegistrationReplacement ? <OnboardingButton label={submitted === false ? "Complete profile" : "Replace document"} onPress={() => router.push("/onboarding")} /> : <OnboardingButton variant="outline" label="Check status" onPress={() => void refresh()} />}{needsDegree ? <View style={styles.degreeAction}><OnboardingButton label={uploading ? "Uploading degree…" : "Upload degree certificate"} disabled={uploading} onPress={() => void uploadDegree()} /></View> : null}</View>
     <Pressable accessibilityRole="button" onPress={() => void signOutWithPushCleanup()} style={styles.signOut}><Text style={styles.signOutText}>Sign out</Text></Pressable>
   </View></OnboardingShell>;

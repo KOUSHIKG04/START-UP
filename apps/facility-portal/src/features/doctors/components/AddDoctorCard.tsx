@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import { useAddDoctorForm } from "../hooks/useAddDoctorForm";
 import { addDoctorPlaceholders } from "../utils/addDoctorConstants";
 import { UserCheck, CheckCircle2 } from "lucide-react";
@@ -18,6 +20,9 @@ export function AddDoctorCard({
 }: AddDoctorCardProps) {
   const { formData, setFormData, isSubmitted, handleSubmit, busy, error, facilities, facilityId, setFacilityId } =
     useAddDoctorForm(onSuccess);
+  useEffect(() => {
+    if (error) toast.add({ title: "Could not invite doctor", description: error, type: "error" });
+  }, [error]);
 
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs w-full max-w-[480px]">
@@ -140,7 +145,6 @@ export function AddDoctorCard({
             >
               {busy ? "Sending…" : "Save Doctor"}
             </Button>
-            {error && <p role="alert" className="text-[12px] text-red-700">{error}</p>}
           </form>
         )}
 

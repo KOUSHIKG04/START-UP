@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import * as Crypto from "expo-crypto";
@@ -43,6 +44,7 @@ export function LiveAmbulanceBookingScreen({
     queryFn: () => listPublicHospitals(supabase!, pickup ?? undefined),
     enabled: !!supabase,
   });
+  useToastFeedback({ error: error || (hospitals.isError ? "Could not load hospitals. Try again." : ""), success: message });
   const bookings = useQuery({
     queryKey: ["my-ambulance-bookings"],
     queryFn: () => listMyAmbulanceBookings(supabase!),
@@ -212,11 +214,6 @@ export function LiveAmbulanceBookingScreen({
         </View>
         <Text style={styles.subtitle}>Destination hospital</Text>
         {hospitals.isLoading ? <Text>Loading hospitals…</Text> : null}
-        {hospitals.error ? (
-          <Text accessibilityRole="alert">
-            Could not load hospitals. Try again.
-          </Text>
-        ) : null}
         {hospitals.data?.length === 0 ? (
           <Text>No active hospitals are available in the directory yet.</Text>
         ) : null}
@@ -270,12 +267,7 @@ export function LiveAmbulanceBookingScreen({
           isCancelPending={cancel.isPending}
           onCancel={(b) => cancel.mutate(b)}
         />
-        {message ? <Text accessibilityRole="alert">{message}</Text> : null}
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {error}
-          </Text>
-        ) : null}
+
       </ScrollView>
     </SafeAreaView>
   );

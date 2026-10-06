@@ -48,11 +48,6 @@ export function DocumentActions({
       <Button name="decision" value="approved" disabled={pending}>
         Approve
       </Button>
-      {state.error && (
-        <p role="alert" className="text-destructive basis-full text-sm">
-          {state.error}
-        </p>
-      )}
     </form>
   );
 }
@@ -108,11 +103,6 @@ export function FinalizeAction({
       <Button disabled={pending}>
         {pending ? "Verifying…" : `Verify ${subjectType}`}
       </Button>
-      {state.error && (
-        <p role="alert" className="text-destructive text-sm">
-          {state.error}
-        </p>
-      )}
     </form>
   );
 }

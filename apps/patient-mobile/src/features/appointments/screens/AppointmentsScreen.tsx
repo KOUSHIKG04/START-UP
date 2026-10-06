@@ -1,12 +1,13 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import QRCode from "react-native-qrcode-svg";
+import QRCode from "react-qr-code";
 import { issueClinicCheckinToken, listClinicAppointments, transitionClinicAppointment } from "@startup/data-access";
 import { formatDisplayDate, type ClinicAppointment } from "@startup/contracts";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { Button, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Button, Chip, FadedScrollView, Header, useToast } from "@startup/mobile-ui";
 import BookingCard from "../components/BookingCard";
 import type { Appointment } from "../types/appointment";
 import type { AppointmentsScreenProps, BookingFilter } from "../types/appointments";
@@ -35,6 +36,7 @@ function asCard(item: ClinicAppointment): Appointment {
 }
 
 export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
+  const { showToast } = useToast();
   const [filter, setFilter] = useState<BookingFilter>("Clinic Visit");
   const [error, setError] = useState("");
   const [qr, setQr] = useState<{ appointmentId: string; token: string } | null>(null);
@@ -45,6 +47,7 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
     enabled: Boolean(supabase),
     refetchInterval: 15000,
   });
+  useToastFeedback({ error: error || (appointments.isError ? "Could not load bookings. Reopen this page to retry." : "") });
   useEffect(() => {
     if (!qr) return;
     const timer = setTimeout(() => setQr(null), 5 * 60 * 1000);
@@ -56,7 +59,7 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
       expectedVersion: Number(item.row_version),
       action: "cancel",
     }),
-    onSuccess: () => { setError(""); void queryClient.invalidateQueries({ queryKey: ["patient-clinic-appointments"] }); },
+    onSuccess: () => { setError(""); showToast({ title: "Booking cancelled", type: "success" }); void queryClient.invalidateQueries({ queryKey: ["patient-clinic-appointments"] }); },
     onError: () => setError("Could not cancel this booking. Refresh and try again."),
   });
   const issueQr = useMutation({
@@ -64,6 +67,7 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
     onSuccess: (result) => {
       setQr(result);
       setError("");
+      showToast({ title: "Check-in QR ready", message: "Show it to the clinic within five minutes.", type: "success" });
       void queryClient.invalidateQueries({ queryKey: ["patient-clinic-appointments"] });
     },
     onError: () => setError("Check-in QR is available on your clinic day. Try again then."),
@@ -77,7 +81,6 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
       </ScrollView>
       {filter === "Clinic Visit" || filter === "Online" ? <>
         {appointments.isLoading ? <Text style={styles.description}>Loading your bookings…</Text> : null}
-        {appointments.isError ? <Text accessibilityRole="alert" style={styles.description}>Could not load bookings. Reopen this page to retry.</Text> : null}
         {appointments.data?.filter(item => item.visit_mode === (filter === "Online" ? "online" : "clinic")).length === 0 ? <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>No {filter === "Online" ? "online" : "clinic"} bookings yet</Text>
           <Text style={styles.emptyDescription}>Find a verified doctor and choose an available slot.</Text>
@@ -85,7 +88,7 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
         </View> : null}
         {appointments.data?.filter(item => item.visit_mode === (filter === "Online" ? "online" : "clinic")).map((item) => <View key={item.id} style={styles.listItem}>
           <BookingCard appointment={asCard(item)} statusLabel={item.status.replaceAll("_", " ")} onPress={item.visit_mode === "online" && ["pending", "confirmed", "in_consultation"].includes(item.status) ? () => router.push({ pathname: "/booking-status", params: asCard(item) } as unknown as Href) : undefined} />
-          {item.queue_state ? <Text style={styles.description}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
+          {item.visit_mode === "clinic" && item.queue_state ? <Text style={styles.description}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
           {item.visit_mode === "clinic" && item.status === "confirmed" && item.queue_state === "awaiting_arrival" ? <Button label="Show check-in QR" variant="outline" disabled={issueQr.isPending} onPress={() => issueQr.mutate(item.id)} /> : null}
           {item.visit_mode === "online" && ["confirmed", "in_consultation"].includes(item.status) ? <Button label="Join consultation" onPress={() => router.push({ pathname: "/visit-session", params: { ...asCard(item), mode: "online-video" } } as unknown as Href)} /> : null}
           {qr?.appointmentId === item.id ? <View style={styles.qr}><QRCode value={qr.token} size={220} /><Text>Show this to the clinic. It expires in five minutes.</Text></View> : null}
@@ -108,7 +111,6 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
             />
           ) : null}
         </View>)}
-        {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       </> : <View style={styles.emptyState}>
         <Text style={styles.emptyTitle}>No {filter.toLowerCase()} bookings yet</Text>
         <Text style={styles.emptyDescription}>This booking type is not connected yet.</Text>

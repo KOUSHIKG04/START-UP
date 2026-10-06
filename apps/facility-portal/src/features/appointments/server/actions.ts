@@ -55,6 +55,8 @@ export async function changePortalAppointment(
       return { error: "This appointment changed. Refresh and try again." };
     if (code === "42501")
       return { error: "You do not have access to this appointment or action." };
+    if (code === "22023" && parsed.data.action === "approve")
+      return { error: "This request has expired or its appointment slot has started. Refresh to see current requests." };
     return {
       error: "Could not update this appointment. Refresh and try again.",
     };

@@ -163,16 +163,21 @@ function LiveVideoStage({ appointmentId, patientName, patientId }: { appointment
   const local = tracks.find((track) => isTrackReference(track) && track.participant.isLocal);
   const [muted, setMuted] = useState(false);
   const [front, setFront] = useState(true);
+  const [switchingCamera, setSwitchingCamera] = useState(false);
   const [ending, setEnding] = useState(false);
   const [deviceError, setDeviceError] = useState("");
   const notesRoute = { pathname: "/clinical-notes", params: { appointmentId, patientId, mode: "online" } } as const;
   const switchCamera = async () => {
+    if (switchingCamera) return;
+    setSwitchingCamera(true);
     try {
       const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track as LocalVideoTrack | undefined;
-      if (track) await track.restartTrack({ facingMode: front ? "environment" : "user" });
+      if (!track) throw new Error("Camera track unavailable");
+      await track.mediaStreamTrack.applyConstraints({ facingMode: front ? "environment" : "user" });
       setFront(!front);
       setDeviceError("");
     } catch { setDeviceError("Camera could not be switched."); }
+    finally { setSwitchingCamera(false); }
   };
   const toggleMic = async () => {
     try { await room.localParticipant.setMicrophoneEnabled(muted); setMuted(!muted); setDeviceError(""); }
@@ -198,7 +203,7 @@ function LiveVideoStage({ appointmentId, patientName, patientId }: { appointment
     </View>
     {deviceError ? <Label style={ui.error}>{deviceError}</Label> : null}
     <View style={styles.controls}>
-      <IconButton label="Switch camera preview" style={styles.control} onPress={() => void switchCamera()}><SwitchCamera size={27} color="white" /></IconButton>
+      <IconButton label={front ? "Switch to back camera" : "Switch to front camera"} style={styles.control} disabled={switchingCamera || !local} onPress={() => void switchCamera()}><SwitchCamera size={27} color="white" /></IconButton>
       <IconButton label={muted ? "Unmute microphone" : "Mute microphone"} style={[styles.control, muted && { backgroundColor: palette.dark }]} onPress={() => void toggleMic()}>{muted ? <MicOff size={25} color="white" /> : <Mic size={25} color="white" />}</IconButton>
       <IconButton label="Chat with patient" style={styles.control} onPress={() => router.push({ pathname: "/chat", params: { appointmentId, patientId, mode: "online" } })}><MessageCircle size={25} color="white" /></IconButton>
       <IconButton label="End consultation call" style={[styles.control, { backgroundColor: palette.danger }]} onPress={() => setEnding(true)}><PhoneOff size={26} color="white" /></IconButton>

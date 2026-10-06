@@ -10,6 +10,7 @@ import {
   FadedScrollView,
   Input,
   TimeSlot,
+  useToastFeedback,
 } from "@startup/mobile-ui";
 import {
   months,
@@ -31,6 +32,7 @@ export function BookSlots({
   error,
   busy,
 }: BookSlotsProps) {
+  useToastFeedback({ error: error ?? "" });
   const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -262,7 +264,6 @@ export function BookSlots({
       {loading ? <Text style={styles.availability}>Loading slots…</Text> : null}
       {slots.length === 0 && !loading && !error ? <Text style={styles.availability}>No upcoming {consultationType === "Online" ? "online" : consultationType === "Home Visit" ? "home-visit" : "clinic"} times are available. Please check again later.</Text> : null}
       {selectedDate && dateSlots.length === 0 && slots.length > 0 ? <Text style={styles.availability}>No available times on this date. Choose another date.</Text> : null}
-      {error ? <Text accessibilityRole="alert" style={styles.availability}>{error}</Text> : null}
     </Card>
 
     <Button

@@ -8,6 +8,8 @@ import {
   albertSansFonts,
   SafeAreaProvider,
   MobileThemeProvider,
+  ToastProvider,
+  useToast,
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
@@ -17,6 +19,12 @@ import { signOutWithPushCleanup, useDeviceNotifications } from "../features/noti
 void SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = { initialRouteName: "(app)" };
+
+function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
+  const { showToast } = useToast();
+  useDeviceNotifications(identityId, showToast);
+  return null;
+}
 
 const navTheme = {
   ...DefaultTheme,
@@ -29,7 +37,6 @@ const navTheme = {
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(albertSansFonts);
   const auth = useMobileSession();
-  useDeviceNotifications(auth.profile?.identity_id);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -50,6 +57,8 @@ export default function RootLayout() {
   return (
     <MobileThemeProvider theme="patient">
       <SafeAreaProvider>
+        <ToastProvider>
+        <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
         <QueryProvider>
           <ThemeProvider value={navTheme}>
             <View style={styles.root}>
@@ -68,6 +77,7 @@ export default function RootLayout() {
             </View>
           </ThemeProvider>
         </QueryProvider>
+        </ToastProvider>
       </SafeAreaProvider>
     </MobileThemeProvider>
   );

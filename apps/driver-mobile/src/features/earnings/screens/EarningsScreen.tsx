@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import { Ambulance } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { listMyDriverTrips } from "@startup/data-access";
+import { useToastFeedback } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -22,6 +23,7 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
     enabled: Boolean(supabase && profile?.driver?.id),
     refetchInterval: 15000,
   });
+  useToastFeedback({ error: trips.isError ? "Could not load trip history." : "" });
   
   const [period, setPeriod] = useState("Today");
   
@@ -99,9 +101,6 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
         )}
         <Heading>Trip History ({period})</Heading>
         {trips.isLoading ? <Copy>Loading trips…</Copy> : null}
-        {trips.isError ? (
-          <Copy accessibilityRole="alert">Could not load trip history.</Copy>
-        ) : null}
         {!filtered.length ? (
           <Card>
             <View style={[ui.center, { paddingVertical: 24 }]}>

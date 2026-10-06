@@ -139,7 +139,20 @@ test.skipIf(!enabled)(
           );
         };
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'approve')`;
-        await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'check_in')`;
+        await expect(tx.savepoint(async (sp) => {
+          await sp`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'check_in')`;
+        })).rejects.toMatchObject({ code: "22023" });
+        await tx`reset role`;
+        await tx`set local role authenticated`;
+        await tx`select set_config('request.jwt.claim.sub',${patientAuthId},true)`;
+        const [issued] = await tx`select public.issue_clinic_checkin_token(${appointmentId}::uuid) as token`;
+        expect(issued?.token).toBeTruthy();
+        await tx`reset role`;
+        await tx`set local role authenticated`;
+        await tx`select set_config('request.jwt.claim.sub',${doctorAuthId},true)`;
+        const [redeemed] = await tx`select public.redeem_clinic_checkin_token(${issued.token}::text) as appointment_id`;
+        expect(redeemed?.appointment_id).toBe(appointmentId);
+        await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'call')`;
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'start')`;
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'complete','Signed fixture assessment')`;
         const [completed] =

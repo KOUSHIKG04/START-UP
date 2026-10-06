@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,14 +12,15 @@ export default function DriverVerifyOtp() {
   const [seconds, setSeconds] = useState(30);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const input = useRef<TextInput>(null);
-  
+
   useEffect(() => {
     if (seconds <= 0) return;
     const timer = setTimeout(() => setSeconds((current) => current - 1), 1000);
     return () => clearTimeout(timer);
   }, [seconds]);
-  
+
   async function verify(value: string) {
     if (!supabase || !phone || value.length !== 6 || busy) return;
     setBusy(true);
@@ -38,7 +40,7 @@ export default function DriverVerifyOtp() {
       setBusy(false);
     }
   }
-  
+
   async function resend() {
     if (!supabase || !phone || seconds > 0) return;
     try {
@@ -51,7 +53,7 @@ export default function DriverVerifyOtp() {
       );
     }
   }
-  
+
   return (
     <View style={styles.screen}>
       <Pressable accessibilityRole="button" onPress={() => router.back()}>
@@ -88,11 +90,7 @@ export default function DriverVerifyOtp() {
             style={styles.hiddenInput}
           />
         </Pressable>
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {error}
-          </Text>
-        ) : null}
+
         <Pressable
           accessibilityRole="button"
           disabled={seconds > 0 || busy}

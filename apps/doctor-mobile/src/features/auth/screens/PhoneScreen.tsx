@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -14,6 +15,7 @@ export default function PhoneScreen() {
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
 
   async function submit() {
     if (!supabase) {
@@ -35,7 +37,7 @@ export default function PhoneScreen() {
     } finally {
       setBusy(false);
     }
-    
+
   }
 
 
@@ -59,11 +61,7 @@ export default function PhoneScreen() {
             style={styles.input}
           />
         </View>
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {error}
-          </Text>
-        ) : null}
+
         <View style={styles.action}>
           <OnboardingButton
             label={busy ? "Sending…" : "Send OTP"}

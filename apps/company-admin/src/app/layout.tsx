@@ -43,7 +43,7 @@ export default function RootLayout({
       <body className="min-h-screen font-sans" suppressHydrationWarning>
         <QueryProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <Toaster />
+          <Toaster timeout={12000} />
         </QueryProvider>
       </body>
     </html>

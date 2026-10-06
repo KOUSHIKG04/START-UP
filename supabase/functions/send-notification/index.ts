@@ -23,6 +23,12 @@ function notificationCopy(delivery: PushDelivery) {
     };
   }
   if (delivery.template_key.startsWith("appointment.")) {
+    if (delivery.template_key === "appointment.check_in") {
+      return {
+        title: "Patient arrived at clinic",
+        body: "A checked-in patient is waiting in your clinic queue.",
+      };
+    }
     const status = delivery.safe_parameters.status;
     const confirmed = delivery.template_key === "appointment.auto_confirmed" || delivery.template_key === "appointment.approve";
     const requested = delivery.template_key === "appointment.requested";

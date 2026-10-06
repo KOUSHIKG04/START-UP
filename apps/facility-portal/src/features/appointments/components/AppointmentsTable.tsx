@@ -17,12 +17,6 @@ import {
 import type { AppointmentPeriod } from "../types/appointments";
 import { appointmentPeriods } from "../utils/appointmentsConstants";
 
-const appointmentTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "UTC",
-});
-
 export interface AppointmentsPaginationData {
   range: string;
   total: number;
@@ -32,6 +26,7 @@ export interface AppointmentsPaginationData {
 }
 
 export function AppointmentsTable({
+  now,
   pageRows,
   pending,
   onAct,
@@ -42,6 +37,7 @@ export function AppointmentsTable({
   onFilterPeriodChange,
   bookingDateLabel,
 }: {
+  now: number;
   pageRows: ClinicAppointment[];
   pending: boolean;
   onAct: (item: ClinicAppointment, action: "approve" | "reject") => void;
@@ -121,16 +117,24 @@ export function AppointmentsTable({
             {pageRows.map((item) => {
               const start = new Date(item.starts_at);
               const end = new Date(item.ends_at);
+              const appointmentTimeFormatter = new Intl.DateTimeFormat("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: item.timezone,
+              });
+              const expiredPending = item.status === "pending" &&
+                (start.getTime() <= now ||
+                  (item.request_expires_at !== null && new Date(item.request_expires_at).getTime() <= now));
               const row = {
                 id: item.id,
-                queueNo: item.ticket_number?.toString() ?? "—",
+                queueNo: item.visit_mode === "clinic" ? item.ticket_number?.toString() ?? "—" : "—",
                 patientId: item.patient_public_code,
                 patientName: item.patient_name,
                 patientAvatar: undefined,
                 doctorName: item.doctor_name,
                 department: item.service_name,
                 time: `${appointmentTimeFormatter.format(start)} - ${appointmentTimeFormatter.format(end)}`,
-                mode: "In-Person",
+                mode: item.visit_mode === "online" ? "Video" : item.visit_mode === "home" ? "Home Visit" : "In-Person",
                 status:
                   item.status.charAt(0).toUpperCase() + item.status.slice(1),
               };
@@ -187,7 +191,7 @@ export function AppointmentsTable({
                   {/* Mode */}
                   <td className="px-3 py-3.5">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f1f5f9] px-2.5 py-1 text-[12px] font-medium text-[#334155]">
-                      {row.mode === "In-Person" ? (
+                      {row.mode !== "Video" ? (
                         <User className="size-3.5 text-[#64748b]" />
                       ) : (
                         <Video className="size-3.5 text-blue-500" />
@@ -198,12 +202,13 @@ export function AppointmentsTable({
 
                   {/* Status */}
                   <td className="px-3 py-3.5">
-                    {row.status === "Pending" && (
+                    {row.status === "Pending" && !expiredPending && (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fff7ed] px-2.5 py-1 text-[12px] font-medium text-[#f97316]">
                         <span className="size-1.5 rounded-full bg-[#f97316]" />
                         Pending
                       </span>
                     )}
+                    {expiredPending && <span className="inline-flex items-center rounded-full bg-[#f1f5f9] px-2.5 py-1 text-[12px] font-medium text-[#334155]">Expired request</span>}
                     {row.status === "Confirmed" && (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] px-2.5 py-1 text-[12px] font-medium text-blue-600">
                         <span className="size-1.5 rounded-full bg-blue-600" />
@@ -237,7 +242,7 @@ export function AppointmentsTable({
                   {/* Actions */}
                   <td className="px-3 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      {row.status === "Pending" && (
+                      {row.status === "Pending" && !expiredPending && (
                         <>
                           <button
                             disabled={pending}

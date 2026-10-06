@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,15 @@ const vitalUnits: Record<RecordVitalInput["code"], string> = {
   weight_kg: "kg",
   height_cm: "cm",
 };
+const vitalLabels: Record<RecordVitalInput["code"], string> = {
+  temperature_c: "Temperature",
+  pulse_bpm: "Pulse",
+  spo2_percent: "Oxygen saturation",
+  systolic_mmhg: "Systolic blood pressure",
+  diastolic_mmhg: "Diastolic blood pressure",
+  weight_kg: "Weight",
+  height_cm: "Height",
+};
 
 type Medicine = IssuePrescriptionInput["items"][number];
 type DraftMedicine = Medicine & { draftId: string };
@@ -34,9 +44,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [vitalCode, setVitalCode] =
-    useState<RecordVitalInput["code"]>("temperature_c");
-  const [vitalValue, setVitalValue] = useState("");
+  useToastFeedback({ error, success: message });
+  const [vitalValues, setVitalValues] = useState<Partial<Record<RecordVitalInput["code"], string>>>({});
   const [diagnosis, setDiagnosis] = useState("");
   const [medicineName, setMedicineName] = useState("");
   const [strength, setStrength] = useState("");
@@ -57,17 +66,17 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
     Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 
   const vital = useMutation({
-    mutationFn: () =>
+    mutationFn: (code: RecordVitalInput["code"]) =>
       recordConsultationVital(supabase!, {
         appointmentId,
-        code: vitalCode,
-        value: Number(vitalValue),
-        unit: vitalUnits[vitalCode],
+        code,
+        value: Number(vitalValues[code]),
+        unit: vitalUnits[code],
       }),
-    onSuccess: () => {
-      setVitalValue("");
+    onSuccess: (_result: unknown, code: RecordVitalInput["code"]) => {
+      setVitalValues((current) => ({ ...current, [code]: "" }));
       setError("");
-      setMessage("Vital saved.");
+      setMessage(`${vitalLabels[code]} saved.`);
       void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
     },
     onError: () =>
@@ -170,32 +179,24 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
     <View style={styles.group}>
       <Text style={styles.heading}>Consultation details</Text>
       <Text>Record vitals and diagnosis before signing the assessment.</Text>
-      <View style={styles.wrap}>
-        {(Object.keys(vitalUnits) as RecordVitalInput["code"][]).map((code) => (
+      {(Object.keys(vitalUnits) as RecordVitalInput["code"][]).map((code) => (
+        <View key={code} style={styles.vitalRow}>
+          <View style={styles.vitalInput}>
+            <Input
+              label={`${vitalLabels[code]} (${vitalUnits[code]})`}
+              value={vitalValues[code] ?? ""}
+              onChangeText={(value) => setVitalValues((current) => ({ ...current, [code]: value }))}
+              keyboardType="decimal-pad"
+            />
+          </View>
           <Button
-            key={code}
-            label={code.replaceAll("_", " ")}
-            variant={vitalCode === code ? "primary" : "outline"}
-            onPress={() => setVitalCode(code)}
+            label="Save"
+            variant="outline"
+            disabled={vital.isPending || !Number.isFinite(Number(vitalValues[code])) || Number(vitalValues[code]) <= 0}
+            onPress={() => vital.mutate(code)}
           />
-        ))}
-      </View>
-      <Input
-        label={`Vital value (${vitalUnits[vitalCode]})`}
-        value={vitalValue}
-        onChangeText={setVitalValue}
-        keyboardType="decimal-pad"
-      />
-      <Button
-        label="Save vital"
-        variant="outline"
-        disabled={
-          vital.isPending ||
-          !Number.isFinite(Number(vitalValue)) ||
-          Number(vitalValue) <= 0
-        }
-        onPress={() => vital.mutate()}
-      />
+        </View>
+      ))}
       <Input
         label="Primary diagnosis"
         value={diagnosis}
@@ -272,14 +273,15 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         )}
       </View>
       <Button
-        label="Add medicine to draft"
+        label={items.length ? "Add another medicine" : "Add medicine to draft"}
         variant="outline"
+        disabled={items.length >= 20}
         onPress={addMedicine}
       />
-      {items.map((item) => (
+      {items.map((item, index) => (
         <View key={item.draftId} style={styles.draft}>
           <Text>
-            {item.medicine_name} {item.strength} ·{" "}
+            {index + 1}. {item.medicine_name} {item.strength} ·{" "}
             {item.timings.map((timing) => timing.meal_anchor).join(", ")}
           </Text>
           <Button
@@ -294,7 +296,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         </View>
       ))}
       <Button
-        label="Sign prescription"
+        label={`Sign prescription (${items.length} ${items.length === 1 ? "medicine" : "medicines"})`}
         disabled={prescription.isPending || items.length === 0}
         onPress={() => prescription.mutate()}
       />
@@ -327,12 +329,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
           followup.mutate();
         }}
       />
-      {message ? <Text accessibilityRole="alert">{message}</Text> : null}
-      {error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {error}
-        </Text>
-      ) : null}
+
     </View>
   );
 }
@@ -341,6 +338,8 @@ const styles = StyleSheet.create({
   group: { gap: 10, marginTop: 8 },
   heading: { fontSize: 18, fontWeight: "600", marginTop: 12 },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  vitalRow: { flexDirection: "row", alignItems: "flex-end", gap: 8 },
+  vitalInput: { flex: 1 },
   draft: {
     borderWidth: 1,
     borderColor: "#D8E4E8",

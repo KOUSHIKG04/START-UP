@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ export function LogoutModal({
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
 
   async function signOut() {
     if (!supabase) {
@@ -59,11 +61,7 @@ export function LogoutModal({
             <Text style={styles.logoutModalSub}>
               Are you sure you want to log out of your Clinzo patient account?
             </Text>
-            {error ? (
-              <Text accessibilityRole="alert" style={styles.error}>
-                {error}
-              </Text>
-            ) : null}
+
           </View>
 
           <View style={styles.logoutActions}>

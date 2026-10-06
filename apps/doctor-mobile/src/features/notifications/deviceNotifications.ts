@@ -7,6 +7,7 @@ import * as Crypto from "expo-crypto";
 import * as Device from "expo-device";
 import type { NotificationResponse } from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
+import type { ToastInput } from "@startup/mobile-ui";
 import { registerMyExpoPushToken, revokeMyExpoPushToken } from "@startup/data-access";
 import { supabase } from "../../services/supabase";
 
@@ -18,7 +19,7 @@ const Notifications: typeof import("expo-notifications") | null = isRunningInExp
 
 Notifications?.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowBanner: true, shouldShowList: true,
+    shouldShowBanner: false, shouldShowList: false,
     shouldPlaySound: false, shouldSetBadge: false,
   }),
 });
@@ -55,11 +56,15 @@ function openNotification(response: NotificationResponse) {
   else if (route === "/chat") router.push("/chat");
 }
 
-export function useDeviceNotifications(identityId: string | undefined) {
+export function useDeviceNotifications(identityId: string | undefined, showToast: (input: ToastInput) => void) {
   useEffect(() => {
     if (!identityId || !Notifications || Platform.OS === "web") return;
     const tokenListener = Notifications.addPushTokenListener(() => { void register().catch(() => {}); });
     const responseListener = Notifications.addNotificationResponseReceivedListener(openNotification);
+    const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
+      const { title, body } = notification.request.content;
+      showToast({ title: title ?? "Notification", message: body ?? undefined, type: title?.toLowerCase().includes("confirmed") ? "success" : "info" });
+    });
     void register().catch(() => {});
     void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response) {
@@ -67,8 +72,8 @@ export function useDeviceNotifications(identityId: string | undefined) {
         void Notifications.clearLastNotificationResponseAsync();
       }
     }).catch(() => {});
-    return () => { tokenListener?.remove(); responseListener.remove(); };
-  }, [identityId]);
+    return () => { tokenListener?.remove(); responseListener.remove(); foregroundListener.remove(); };
+  }, [identityId, showToast]);
 }
 
 export async function signOutWithPushCleanup() {

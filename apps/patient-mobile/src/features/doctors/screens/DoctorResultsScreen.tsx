@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
 import { ArrowDown, ArrowUp } from "lucide-react-native";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { Dropdown, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Dropdown, FadedScrollView, Header, useToastFeedback } from "@startup/mobile-ui";
 import DoctorCard from "../components/DoctorCard";
 import { filterOptions } from "../utils/doctorResultsConstants";
 import { resolveDoctorSearch, uniqueDoctorPractices } from "../utils/doctorSearch";
@@ -34,6 +34,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     enabled: Boolean(supabase),
     refetchInterval: 30_000,
   });
+  useToastFeedback({ error: locationError || (query.isError ? "Could not search doctors. Reopen this page to retry." : "") });
   useFocusEffect(useCallback(() => {
     void query.refetch();
   }, [query.refetch]));
@@ -78,9 +79,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     </View>
     <FadedScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {locating ? <Text style={styles.message}>Finding your location…</Text> : null}
-      {locationError ? <Text accessibilityRole="alert" style={styles.message}>{locationError}</Text> : null}
       {query.isLoading ? <Text style={styles.message}>Searching verified doctors…</Text> : null}
-      {query.isError ? <Text accessibilityRole="alert" style={styles.message}>Could not search doctors. Reopen this page to retry.</Text> : null}
       {practices.length === 0 && !query.isLoading && !query.isError ? <View style={styles.empty}>
         <Text style={styles.emptyTitle}>{symptom === "your symptoms" ? "No doctors available yet" : "No doctors match this search"}</Text>
         <Text style={styles.message}>{symptom === "your symptoms" ? "Doctors appear here after their clinic is verified and they publish a service." : "Try another symptom, category, or browse all available doctors."}</Text>

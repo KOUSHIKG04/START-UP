@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
   Image,
@@ -30,6 +31,7 @@ export default function LoginScreen() {
   const [confirmationPending, setConfirmationPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
 
 
   async function signIn() {
@@ -179,11 +181,7 @@ export default function LoginScreen() {
                     editable={!busy}
                   />
                 ) : null}
-                {error ? (
-                  <Text accessibilityRole="alert" style={styles.error}>
-                    {error}
-                  </Text>
-                ) : null}
+
                 <OnboardingButton
                   label={
                     busy

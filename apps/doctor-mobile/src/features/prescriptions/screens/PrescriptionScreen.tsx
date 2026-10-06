@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
@@ -32,6 +33,7 @@ export function PrescriptionScreen() {
   const update = useDoctorStore((s) => s.updateConsultation);
   const [editing, setEditing] = useState<Medicine | null>(null);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [confirm, setConfirm] = useState(false);
   if (!patient || !appointment) return <MissingPatient />;
   const visit = visits[appointment.id] ?? createConsultation(patient.id);
@@ -171,7 +173,6 @@ export function PrescriptionScreen() {
           Clinic visit · Date format: DD-MM-YYYY
         </Label>
       </Panel>
-      {!!error && <Label style={ui.error}>{error}</Label>}
       {!readOnly && !editing && (
         <Button label="Sign & send to patient" theme="doctor" onPress={sign} />
       )}

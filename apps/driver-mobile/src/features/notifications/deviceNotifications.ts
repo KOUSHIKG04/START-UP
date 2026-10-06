@@ -7,6 +7,7 @@ import * as Crypto from "expo-crypto";
 import * as Device from "expo-device";
 import type { NotificationResponse } from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
+import type { ToastInput } from "@startup/mobile-ui";
 import {
   registerMyExpoPushToken,
   revokeMyExpoPushToken,
@@ -20,8 +21,8 @@ const Notifications: typeof import("expo-notifications") | null =
 
 Notifications?.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
+    shouldShowBanner: false,
+    shouldShowList: false,
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
@@ -71,7 +72,7 @@ function openNotification(response: NotificationResponse) {
   else if (route === "/chat") router.push("/chat");
 }
 
-export function useDeviceNotifications(identityId: string | undefined) {
+export function useDeviceNotifications(identityId: string | undefined, showToast: (input: ToastInput) => void) {
   useEffect(() => {
     if (!identityId || !Notifications || Platform.OS === "web") return;
     const tokenListener = Notifications.addPushTokenListener(() => {
@@ -79,6 +80,10 @@ export function useDeviceNotifications(identityId: string | undefined) {
     });
     const responseListener =
       Notifications.addNotificationResponseReceivedListener(openNotification);
+    const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
+      const { title, body } = notification.request.content;
+      showToast({ title: title ?? "Notification", message: body ?? undefined, type: title?.toLowerCase().includes("confirmed") ? "success" : "info" });
+    });
     void register().catch(() => {});
     void Notifications.getLastNotificationResponseAsync()
       .then((response) => {
@@ -91,8 +96,9 @@ export function useDeviceNotifications(identityId: string | undefined) {
     return () => {
       tokenListener?.remove();
       responseListener.remove();
+      foregroundListener.remove();
     };
-  }, [identityId]);
+  }, [identityId, showToast]);
 }
 
 export async function signOutWithPushCleanup() {

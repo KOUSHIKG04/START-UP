@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import { useRouter } from "next/navigation";
 import type { BedInventoryProjection } from "@startup/contracts";
 import { saveBedInventory } from "../server/actions";
@@ -8,7 +9,6 @@ import { saveBedInventory } from "../server/actions";
 export function InitialBedCountsForm({ row }: { row: BedInventoryProjection }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [error, setError] = useState("");
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -16,14 +16,13 @@ export function InitialBedCountsForm({ row }: { row: BedInventoryProjection }) {
     form.set("facilityId", row.facilityId);
     form.set("bedTypeId", row.bedTypeId);
     form.set("expectedRowVersion", "0");
-    setError("");
     startTransition(async () => {
       try {
         const result = await saveBedInventory(form);
-        if (result.error) setError(result.error);
-        else router.refresh();
+        if (result.error) toast.add({ title: "Could not save bed counts", description: result.error, type: "error" });
+        else { toast.add({ title: "Bed counts saved", type: "success" }); router.refresh(); }
       } catch {
-        setError("Could not save the counts. Refresh and try again.");
+        toast.add({ title: "Could not save bed counts", description: "Check your connection and try again.", type: "error" });
       }
     });
   }
@@ -37,6 +36,5 @@ export function InitialBedCountsForm({ row }: { row: BedInventoryProjection }) {
     <button type="submit" disabled={pending} className="rounded-md bg-primary px-3 py-1.5 font-semibold text-primary-foreground disabled:opacity-50">
       {pending ? "Saving…" : "Set initial counts"}
     </button>
-    {error && <span role="alert" className="text-red-600">{error}</span>}
   </form>;
 }

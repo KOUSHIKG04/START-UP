@@ -8,6 +8,8 @@ import {
   albertSansFonts,
   SafeAreaProvider,
   MobileThemeProvider,
+  ToastProvider,
+  useToast,
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
@@ -21,10 +23,14 @@ import {
 
 void SplashScreen.preventAutoHideAsync();
 export const unstable_settings = { initialRouteName: "(auth)" };
+function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
+  const { showToast } = useToast();
+  useDeviceNotifications(identityId, showToast);
+  return null;
+}
 export default function RootLayout() {
   const [loaded, error] = useFonts(albertSansFonts);
   const auth = useMobileSession();
-  useDeviceNotifications(auth.profile?.identity_id);
   
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync();
@@ -54,6 +60,8 @@ export default function RootLayout() {
   return (
     <MobileThemeProvider theme="driver">
       <SafeAreaProvider>
+        <ToastProvider>
+        <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
         <QueryProvider>
           {auth.profile?.driver?.id ? <DriverLocationReporter /> : null}
           <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -74,6 +82,7 @@ export default function RootLayout() {
             <StatusBar style="light" />
           </View>
         </QueryProvider>
+        </ToastProvider>
       </SafeAreaProvider>
     </MobileThemeProvider>
   );

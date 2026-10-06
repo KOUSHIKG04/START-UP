@@ -14,6 +14,7 @@ import { SelectDropdown } from "./SelectDropdown";
 import { AddressSheet, type PatientAddress } from "./AddressSheet";
 import { emptyAddress } from "./addressTypes";
 import { OnboardingButton, OnboardingShell } from "./OnboardingShell";
+import { useToastFeedback } from "@startup/mobile-ui";
 
 import { BloodGroupSelector } from "./BloodGroupSelector";
 import { FamilyRelationFields } from "./FamilyRelationFields";
@@ -178,6 +179,7 @@ export function ProfileForm({
     errors.age?.message ||
     errors.bloodGroup?.message ||
     errors.phone?.message;
+  useToastFeedback({ error: displayError });
 
   return (
     <OnboardingShell onBack={() => router.back()} bottomArt={false} scroll>
@@ -296,11 +298,6 @@ export function ProfileForm({
           />
         )}
 
-        {displayError ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {displayError}
-          </Text>
-        ) : null}
 
         <View style={styles.save}>
           <OnboardingButton

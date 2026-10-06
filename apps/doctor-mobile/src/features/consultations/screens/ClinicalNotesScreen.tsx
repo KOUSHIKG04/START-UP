@@ -76,7 +76,9 @@ export function ClinicalNotesScreen() {
         title={liveAppointment.patient_name}
         subtitle={`${liveAppointment.facility_name} · Booking ${liveAppointment.public_code}`}
       >
-        <ConsultationForm appointmentId={liveAppointment.id} />
+        {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
+          <ConsultationForm appointmentId={liveAppointment.id} />
+        ) : null}
         {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
           <View style={{ marginTop: 16, gap: 10 }}>
             <Input
@@ -109,6 +111,10 @@ export function ClinicalNotesScreen() {
         ) : null}
       </DoctorScreen>
     );
+  }
+
+  if (isLiveAppointment) {
+    return <DoctorScreen title="Consultation details"><Panel><Label muted>{appointmentsQuery.isLoading ? "Loading consultation…" : appointmentsQuery.isError ? "Could not load this consultation. Try again." : "This consultation is unavailable for your account."}</Label></Panel></DoctorScreen>;
   }
 
   if (!patient || !appointment) return <MissingPatient />;

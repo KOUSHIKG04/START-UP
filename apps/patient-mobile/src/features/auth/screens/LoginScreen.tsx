@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
   Image,
@@ -37,6 +38,7 @@ export default function LoginScreen() {
   const [confirmationPending, setConfirmationPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
 
   async function signIn() {
     if (!supabase) {
@@ -197,7 +199,6 @@ export default function LoginScreen() {
             confirmPassword={confirmPassword}
             onConfirmPasswordChange={setConfirmPassword}
             busy={busy}
-            error={error}
             onSubmit={() => void (emailMode === "signup" ? signUp() : signIn())}
             onSwitchEmailMode={switchEmailMode}
           />
@@ -207,7 +208,6 @@ export default function LoginScreen() {
             <ProdAuthChoices
               onContinueWithGoogle={() => void continueWithGoogle()}
               onContinueWithPhone={() => router.push("/phone")}
-              error={error}
             />
           </>
         )}

@@ -19,7 +19,7 @@ import {
   respondMyDriverOffer,
   setMyDriverAvailability,
 } from "@startup/data-access";
-import { Button } from "@startup/mobile-ui";
+import { Button, useToast, useToastFeedback } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -35,8 +35,8 @@ export function HomeScreen() {
   const { profile } = useMobileSession();
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
   const client = useQueryClient();
+  const { showToast } = useToast();
   const driverId = profile?.driver?.id;
   
   const fleet = useQuery({
@@ -58,6 +58,7 @@ export function HomeScreen() {
     enabled: Boolean(supabase && driverId),
     refetchInterval: 15000,
   });
+  useToastFeedback({ error: offers.isError || trips.isError || fleet.isError ? "Could not refresh requests or status." : "" });
 
   const vehicle =
     fleet.data?.find((item) => item.desired_availability === "online") ??
@@ -102,7 +103,6 @@ export function HomeScreen() {
     if (!supabase || !vehicle || busy) return;
    
     setBusy(true);
-    setMessage("");
 
     try {
       let latitude: number | undefined;
@@ -135,12 +135,10 @@ export function HomeScreen() {
       });
 
       await client.invalidateQueries({ queryKey: ["driver-fleet", driverId] });
+      showToast({ title: value ? "You are available" : "You are offline", type: "success" });
     } catch (cause) {
-      setMessage(
-        cause instanceof Error
-          ? cause.message
-          : "Could not update availability."
-      );
+      const feedback = cause instanceof Error ? cause.message : "Could not update availability.";
+      showToast({ title: "Availability update failed", message: feedback, type: "error" });
     } finally {
       setBusy(false);
     }
@@ -149,7 +147,6 @@ export function HomeScreen() {
   async function respond(accept: boolean) {
     if (!supabase || !offer || busy) return;
     setBusy(true);
-    setMessage("");
     try {
       await respondMyDriverOffer(supabase, offer.id, accept);
       void Haptics.notificationAsync(
@@ -159,11 +156,11 @@ export function HomeScreen() {
         client.invalidateQueries({ queryKey: ["driver-offers", driverId] }),
         client.invalidateQueries({ queryKey: ["my-driver-trips", driverId] }),
       ]);
+      showToast({ title: accept ? "Request accepted" : "Request declined", type: "success" });
       if (accept) router.push("/trip");
     } catch {
-      setMessage(
-        "The request expired or is no longer available. Refresh and try again."
-      );
+      const feedback = "The request expired or is no longer available. Refresh and try again.";
+      showToast({ title: "Request unavailable", message: feedback, type: "error" });
     } finally {
       setBusy(false);
     }
@@ -259,12 +256,6 @@ export function HomeScreen() {
             </Copy>
           </Card>
         ) : null}
-        {offers.isError || trips.isError || fleet.isError ? (
-          <Copy accessibilityRole="alert">
-            Could not refresh requests or status.
-          </Copy>
-        ) : null}
-        {message ? <Copy accessibilityRole="alert">{message}</Copy> : null}
       </Body>
       <Modal
         visible={Boolean(offer)}

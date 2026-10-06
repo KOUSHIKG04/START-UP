@@ -1,16 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { signIn } from "@/lib/auth-actions";
 import { Button } from "@startup/web-ui/components/ui/button";
 import { Input } from "@startup/web-ui/components/ui/input";
 import { Label } from "@startup/web-ui/components/ui/label";
+import { toast } from "@startup/web-ui/components/ui/toast";
 
-export function LoginForm() {
+export function LoginForm({ serverError }: { serverError?: string }) {
   
   const [state, action, pending] = useActionState(signIn, {
     error: null as string | null,
   });
+  useEffect(() => {
+    if (state.error) toast.add({ title: "Sign in failed", description: state.error, type: "error" });
+  }, [state.error]);
+  useEffect(() => {
+    if (serverError) toast.add({ title: "Sign in unavailable", description: serverError, type: "error" });
+  }, [serverError]);
 
   return (
     <form action={action} className="mt-7 space-y-5">
@@ -34,11 +41,6 @@ export function LoginForm() {
           required
         />
       </div>
-      {state.error && (
-        <p role="alert" className="text-destructive text-sm">
-          {state.error}
-        </p>
-      )}
       <Button className="w-full" disabled={pending}>
         {pending ? "Signing in…" : "Sign in"}
       </Button>

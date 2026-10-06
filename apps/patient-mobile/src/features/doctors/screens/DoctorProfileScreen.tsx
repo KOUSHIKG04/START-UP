@@ -7,26 +7,25 @@ import * as Location from "expo-location";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { bookClinicAppointment, getMyPatientProfileDetail, getPublicPracticeBio, listClinicAppointments, listMyFamilyProfiles, listPracticeClinicSlots, searchPublicPractices } from "@startup/data-access";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import { FadedScrollView, Header } from "@startup/mobile-ui";
+import { FadedScrollView, Header, useToast, useToastFeedback } from "@startup/mobile-ui";
 import DoctorCard from "../components/DoctorCard";
 import { AboutDoctor, BookSlots, HomeVisitAddress, OnlineConsultation, ProfileTabs } from "../components/index";
 import type { ProfileTab } from "../utils/doctorProfileConstants";
 import { consultationFlows } from "../../appointments/utils/consultationFlow";
 import type { ConsultationType } from "../../appointments/types/appointment";
 import { supabase, useMobileSession } from "../../../services/supabase";
-import { schedulePatientLocalNotification } from "../../notifications/deviceNotifications";
 import { formatConsultationFee } from "../utils/doctorDisplay";
 
 export function DoctorProfileScreen({ practiceId, serviceId, consultationType }: { practiceId: string; serviceId: string; consultationType: string }) {
   const { profile } = useMobileSession();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<ProfileTab>("about");
   const [overrideConsultationType, setOverrideConsultationType] = useState<ConsultationType | null>(null);
   const selectedConsultationType = overrideConsultationType ?? (consultationType as ConsultationType);
   const [addressDraft, setAddressDraft] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState(() => Crypto.randomUUID());
-  const [error, setError] = useState("");
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   useEffect(() => {
     if (coordinates) return;
@@ -47,6 +46,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     enabled: Boolean(supabase && practiceId),
     refetchInterval: 30_000,
   });
+  useToastFeedback({ error: practiceQuery.isError ? "Could not load this doctor." : "" });
   const onlinePractice = practiceQuery.data?.find(item => item.practice_id === practiceId && item.service_code.startsWith("online-"));
   const servicePrefix = selectedConsultationType === "Online" ? "online-" : selectedConsultationType === "Home Visit" ? "home-" : "clinic-";
   const matchingServices = practiceQuery.data?.filter(item => item.practice_id === practiceId && item.service_code.startsWith(servicePrefix)) ?? [];
@@ -107,13 +107,12 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
         queryClient.setQueryData(["patient-clinic-appointments"], appointments);
         const booked = appointments.find((item) => item.id === appointmentId);
         if (booked?.status === "confirmed") {
-          return schedulePatientLocalNotification("Appointment confirmed", `Your ${booked.visit_mode === "online" ? "online consultation" : "clinic visit"} is confirmed.`);
+          showToast({ title: "Appointment confirmed", message: `Your ${booked.visit_mode === "online" ? "online consultation" : "clinic visit"} is confirmed.`, type: "success" });
         }
         if (booked?.status === "pending") {
-          return schedulePatientLocalNotification("Appointment requested", `Your ${booked.visit_mode === "online" ? "online consultation" : "clinic visit"} request is waiting for the doctor to accept it.`);
+          showToast({ title: "Appointment requested", message: "Waiting for the doctor to accept it.", type: "info" });
         }
-      }).catch(() => {});
-      setError("");
+      }).catch(() => showToast({ title: "Appointment booked", message: "Open Appointments to check its current status.", type: "info" }));
       setIdempotencyKey(Crypto.randomUUID());
       void queryClient.invalidateQueries({ queryKey: ["clinic-slots"] });
       void queryClient.invalidateQueries({ queryKey: ["patient-clinic-appointments"] });
@@ -121,9 +120,10 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     },
     onError: cause => {
       const message = cause && typeof cause === "object" && "message" in cause && typeof cause.message === "string" ? cause.message : "";
-      setError(message.includes("already booked this time") ? "You already booked this time. Choose another slot."
+      const feedback = message.includes("already booked this time") ? "You already booked this time. Choose another slot."
         : message.includes("Slot is full") || message.includes("Slot no longer available") ? "This slot is no longer available. Choose another time."
-        : "Could not request this appointment. Reopen the slots and try again.");
+        : "Could not request this appointment. Reopen the slots and try again.";
+      showToast({ title: "Booking failed", message: feedback, type: "error" });
     },
   });
 
@@ -136,7 +136,6 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     />
     <FadedScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       {practiceQuery.isLoading ? <Text style={styles.message}>Loading doctor…</Text> : null}
-      {practiceQuery.isError ? <Text accessibilityRole="alert" style={styles.message}>Could not load this doctor.</Text> : null}
       {!practice && !practiceQuery.isLoading && !practiceQuery.isError ? <Text style={styles.message}>This practice is not available.</Text> : null}
       {practice ? <>
         <DoctorCard
@@ -185,11 +184,10 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
                   ...(familyQuery.data ?? []).map((member) => ({ id: member.id, label: member.verified ? member.full_name : `${member.full_name} (pending verification)`, verified: member.verified })),
                 ]}
                 loading={slotsQuery.isLoading}
-                error={error || (slotsQuery.isError ? "Could not load available slots." : null)}
+                error={slotsQuery.isError ? "Could not load available slots." : null}
                 busy={book.isPending}
                 onGoToAbout={() => setActiveTab("about")}
                 onBookAppointment={selection => {
-                  setError("");
                   book.mutate({ patientId: selection.patientId, windowId: selection.time, reason: selection.reason });
                 }}
               />

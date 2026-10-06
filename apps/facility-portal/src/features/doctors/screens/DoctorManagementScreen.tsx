@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import { useDoctorDirectory } from "../hooks/useDoctorDirectory";
 import {
   Search,
@@ -23,10 +25,12 @@ export default function DoctorManagementScreen() {
     error,
     summary: doctorManagementSummary,
   } = useDoctorDirectory();
+  useEffect(() => {
+    if (isError) toast.add({ title: "Could not load doctors", description: error instanceof Error ? error.message : "Doctor directory is unavailable.", type: "error" });
+  }, [isError, error]);
 
   return (
     <div className="flex flex-col gap-6 pb-12">
-      {isError && <p role="alert" className="text-[13px] text-red-700">{error instanceof Error ? error.message : "Doctor directory is unavailable."}</p>}
       {/* TopBar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

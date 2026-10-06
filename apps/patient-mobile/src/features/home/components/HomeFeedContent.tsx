@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors } from "@startup/design-tokens";
-import { IconLabel } from "@startup/mobile-ui";
+import { IconLabel, useToastFeedback } from "@startup/mobile-ui";
 import { homeActions } from "../utils/HomeActions";
 import AmbulanceBanner from "./AmbulanceBanner";
 import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
@@ -20,10 +20,11 @@ export function HomeFeedContent({
   isLoading,
   isError,
 }: {
-  upcoming?: ClinicAppointment;
+  upcoming?: ClinicAppointment[];
   isLoading: boolean;
   isError: boolean;
 }) {
+  useToastFeedback({ error: isError ? "Could not load appointments. Open Bookings to retry." : "" });
   return (
     <>
       <View style={styles.actionsRow}>
@@ -59,27 +60,24 @@ export function HomeFeedContent({
         />
       </View>
 
-      {upcoming ? (
-        <UpcomingAppointmentCard
-          doctorName={upcoming.doctor_name}
-          specialization={upcoming.facility_name}
-          date={formatDisplayDate(upcoming.starts_at)}
-          time={new Date(upcoming.starts_at).toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-          onCardPress={() => router.push("/appointments" as Href)}
-        />
+      {upcoming?.length ? (
+        upcoming.map((appointment, index) => (
+          <UpcomingAppointmentCard
+            key={appointment.id}
+            showHeader={index === 0}
+            doctorName={appointment.doctor_name}
+            specialization={appointment.facility_name}
+            date={formatDisplayDate(appointment.starts_at)}
+            time={new Date(appointment.starts_at).toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+            onCardPress={() => router.push("/appointments" as Href)}
+          />
+        ))
       ) : isLoading ? (
         <Text style={{ color: colors.patient.textSecondary }}>
           Loading your appointments…
-        </Text>
-      ) : isError ? (
-        <Text
-          accessibilityRole="alert"
-          style={{ color: colors.patient.textSecondary }}
-        >
-          Could not load appointments. Open Bookings to retry.
         </Text>
       ) : null}
 

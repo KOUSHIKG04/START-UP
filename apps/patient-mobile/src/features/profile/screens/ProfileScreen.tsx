@@ -14,7 +14,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Card, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Card, FadedScrollView, Header, useToastFeedback } from "@startup/mobile-ui";
 import { NotificationDrawer } from "../../../components/NotificationDrawer";
 import {
   ProfileIdentity,
@@ -36,6 +36,7 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
     queryFn: () => listMyFamilyProfiles(supabase!),
     enabled: Boolean(supabase && profile?.patient_id),
   });
+  useToastFeedback({ error: family.isError ? "Family profiles are unavailable right now." : "" });
   const bookings = useQuery({
     queryKey: ["patient-clinic-appointments"],
     queryFn: () => listClinicAppointments(supabase!),
@@ -142,11 +143,6 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
               </Text>
             </View>
           ))}
-          {family.error ? (
-            <Text accessibilityRole="alert" style={styles.rowSubtitle}>
-              Family profiles are unavailable right now.
-            </Text>
-          ) : null}
         </Card>
 
         {/* 1. SEPARATE CARD: My Bookings */}

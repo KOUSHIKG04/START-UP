@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
+import type { IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 import type { ClinicAppointment } from "@startup/contracts";
-import { changePortalAppointment } from "../server/actions";
-import { Search, Calendar, ChevronDown, Plus } from "lucide-react";
+import { changePortalAppointment, redeemPortalCheckinToken } from "../server/actions";
+import { Search, Calendar, ChevronDown, Plus, ScanLine } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
+import { toast } from "@startup/web-ui/components/ui/toast";
 
 import type { AppointmentPeriod } from "../types/appointments";
 import { defaultAppointmentPeriod, appointmentsDateFormatter } from "../utils/appointmentsConstants";
@@ -23,11 +25,23 @@ export default function AppointmentsScreen({
   const [pending, startTransition] = React.useTransition();
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("All");
-  const [message, setMessage] = React.useState("");
+  const [now, setNow] = React.useState(() => Date.now());
+  const [showScanner, setShowScanner] = React.useState(false);
+  const [checkinToken, setCheckinToken] = React.useState("");
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const scannerControlsRef = React.useRef<IScannerControls | null>(null);
+  const scanningRef = React.useRef(false);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [filterPeriod, setFilterPeriod] = React.useState<AppointmentPeriod>(
     defaultAppointmentPeriod
   );
+  React.useEffect(() => {
+    if (loadError) toast.add({ title: "Could not load appointments", description: loadError, type: "error" });
+  }, [loadError]);
+  React.useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const displayedAppointments = React.useMemo(() => {
     const today = new Date();
@@ -71,11 +85,13 @@ export default function AppointmentsScreen({
       total: appointments.length,
       confirmed: appointments.filter((item) => item.status === "confirmed")
         .length,
-      pending: appointments.filter((item) => item.status === "pending").length,
+      pending: appointments.filter((item) => item.status === "pending" &&
+        new Date(item.starts_at).getTime() > now &&
+        (item.request_expires_at === null || new Date(item.request_expires_at).getTime() > now)).length,
       cancelled: appointments.filter((item) => item.status === "cancelled")
         .length,
     }),
-    [appointments]
+    [appointments, now]
   );
 
   const appointmentsDateLabel = appointmentsDateFormatter.format(new Date());
@@ -106,15 +122,79 @@ export default function AppointmentsScreen({
         : null;
     if (action === "reject" && !note?.trim()) return;
     startTransition(async () => {
-      const result = await changePortalAppointment({
-        appointmentId: item.id,
-        expectedVersion: Number(item.row_version),
-        action,
-        note,
-      });
-      setMessage(result.error ?? "Appointment updated.");
-      if (!result.error) router.refresh();
+      try {
+        const result = await changePortalAppointment({
+          appointmentId: item.id,
+          expectedVersion: Number(item.row_version),
+          action,
+          note,
+        });
+        if (result.error) toast.add({ title: "Could not update appointment", description: result.error, type: "error" });
+        else { toast.add({ title: "Appointment updated", type: "success" }); router.refresh(); }
+      } catch {
+        toast.add({ title: "Could not update appointment", description: "Check your connection and try again.", type: "error" });
+      }
     });
+  }
+
+  const stopCamera = React.useCallback(() => {
+    scanningRef.current = false;
+    scannerControlsRef.current?.stop();
+    scannerControlsRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, []);
+
+  React.useEffect(() => () => stopCamera(), [stopCamera]);
+
+  function submitCheckin(token: string) {
+    const value = token.trim();
+    if (!value) return;
+    stopCamera();
+    startTransition(async () => {
+      try {
+        const result = await redeemPortalCheckinToken(value);
+        if (result.error) toast.add({ title: "Could not check in patient", description: result.error, type: "error" });
+        else {
+          toast.add({ title: "Patient checked in", description: "The doctor can now call them from the queue.", type: "success" });
+          setCheckinToken("");
+          setShowScanner(false);
+          router.refresh();
+        }
+      } catch {
+        toast.add({ title: "Could not check in patient", description: "Check your connection and try again.", type: "error" });
+      }
+    });
+  }
+
+  async function startCamera() {
+    if (scanningRef.current) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.add({ title: "Camera scanning unavailable", description: "Paste the QR value below.", type: "warning" });
+      return;
+    }
+    scanningRef.current = true;
+    try {
+      const video = videoRef.current;
+      if (!video) { stopCamera(); return; }
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      if (!scanningRef.current) return;
+      const reader = new BrowserQRCodeReader();
+      const controls = await reader.decodeFromConstraints(
+        { video: { facingMode: { ideal: "environment" } }, audio: false },
+        video,
+        (result, _error, activeControls) => {
+          if (result && scanningRef.current) {
+            activeControls.stop();
+            submitCheckin(result.getText());
+          }
+        }
+      );
+      if (!scanningRef.current) controls.stop();
+      else scannerControlsRef.current = controls;
+    } catch {
+      stopCamera();
+      toast.add({ title: "Camera access unavailable", description: "Paste the QR value below.", type: "warning" });
+    }
   }
 
   return (
@@ -131,6 +211,9 @@ export default function AppointmentsScreen({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <Button type="button" variant="outline" onClick={() => { stopCamera(); setShowScanner((current) => !current); }}>
+            <ScanLine className="size-4" /> Scan patient QR
+          </Button>
           {/* Search Box */}
           <div className="flex w-56 items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
             <Search className="size-4 shrink-0 text-[#94a3b8]" />
@@ -190,22 +273,23 @@ export default function AppointmentsScreen({
         </div>
       </div>
 
-      {loadError ? (
-        <p role="alert" className="text-sm text-red-600">
-          {loadError}
-        </p>
-      ) : null}
-      {message ? (
-        <p role="status" className="text-sm text-[#07595d]">
-          {message}
-        </p>
-      ) : null}
+      {showScanner ? <section aria-label="Patient check-in" className="rounded-lg border border-[#e2e8f0] bg-white p-4">
+        <h2 className="text-[16px] font-semibold text-[#0f172a]">Patient check-in</h2>
+        <p className="mt-1 text-[13px] text-[#475569]">Scan the QR shown in the Patient App for an app-booked clinic visit.</p>
+        <video ref={videoRef} muted playsInline className="mt-3 max-h-64 w-full max-w-sm rounded-lg bg-[#0f172a]" />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => void startCamera()} disabled={pending}>Start camera</Button>
+          <input aria-label="Check-in QR value" value={checkinToken} onChange={(event) => setCheckinToken(event.target.value)} placeholder="Paste QR value if camera is unavailable" className="min-w-64 rounded-lg border border-[#e2e8f0] px-3 py-2 text-[13px]" />
+          <Button type="button" onClick={() => submitCheckin(checkinToken)} disabled={pending || !checkinToken.trim()}>Check in</Button>
+        </div>
+      </section> : null}
 
       {/* Summary Stat Cards Row */}
       <AppointmentsSummaryCards summary={appointmentsSummary} />
 
       {/* Recent Bookings Card & Table */}
       <AppointmentsTable
+        now={now}
         pageRows={pageRows}
         pending={pending}
         onAct={act}

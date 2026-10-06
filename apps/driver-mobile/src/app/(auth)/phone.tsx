@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -9,6 +10,7 @@ export default function DriverPhone() {
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   async function submit() {
     if (!supabase) {
       setError("Supabase is not configured.");
@@ -49,11 +51,7 @@ export default function DriverPhone() {
             style={styles.input}
           />
         </View>
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {error}
-          </Text>
-        ) : null}
+
         <Pressable
           accessibilityRole="button"
           disabled={busy || phone.replace(/\D/g, "").length !== 10}

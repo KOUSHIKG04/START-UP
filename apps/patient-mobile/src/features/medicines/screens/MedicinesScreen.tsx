@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listMyClinicalRecords } from "@startup/data-access";
 import type { ClinicalRecord } from "@startup/contracts";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Card, Chip, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Button, Card, Chip, FadedScrollView, Header, useToastFeedback } from "@startup/mobile-ui";
 import type { MedicinesScreenProps } from "../types/medicines";
 import { supabase } from "../../../services/supabase";
 
@@ -17,6 +17,7 @@ export function MedicinesScreen({
     queryFn: () => listMyClinicalRecords(supabase!),
     enabled: Boolean(supabase),
   });
+  useToastFeedback({ error: clinicalRecords.isError ? "Could not load medications. Please retry." : "" });
 
   const records = clinicalRecords.data ?? [];
   const record: ClinicalRecord | undefined = appointmentId
@@ -46,9 +47,7 @@ export function MedicinesScreen({
           </View>
         ) : clinicalRecords.isError ? (
           <View style={styles.centerBox}>
-            <Text accessibilityRole="alert" style={styles.errorText}>
-              Could not load medications. Please retry.
-            </Text>
+            <Button label="Retry" onPress={() => void clinicalRecords.refetch()} />
           </View>
         ) : !record || record.medicines.length === 0 ? (
           <View style={styles.emptyCard}>

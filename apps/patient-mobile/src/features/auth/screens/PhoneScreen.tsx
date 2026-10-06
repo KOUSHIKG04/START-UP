@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -8,6 +9,7 @@ import { OnboardingButton, OnboardingShell } from "../components/OnboardingShell
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  useToastFeedback({ error });
   async function submit() {
     if (!supabase) { setError("Supabase is not configured."); return; }
     setBusy(true); setError("");
@@ -18,7 +20,7 @@ export default function PhoneScreen() {
   return <OnboardingShell onBack={() => router.back()}><View style={styles.body}>
     <Text style={styles.title}>Enter your mobile number</Text><Text style={styles.caption}>we’ll send you 6-digit OTP</Text>
     <View style={styles.number}><Text style={styles.country}>+91</Text><View style={styles.divider} /><TextInput accessibilityLabel="Mobile number" keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" maxLength={10} placeholder="9483XXXXXX" value={phone} onChangeText={setPhone} style={styles.input} /></View>
-    {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+
     <View style={styles.action}><OnboardingButton label={busy ? "Sending…" : "Send OTP"} disabled={busy || phone.replace(/\D/g, "").length !== 10} onPress={() => void submit()} /></View>
     <Text style={styles.safe}>♢  Your number is safe with us.</Text>
   </View></OnboardingShell>;

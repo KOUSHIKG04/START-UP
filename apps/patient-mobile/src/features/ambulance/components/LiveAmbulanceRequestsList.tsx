@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Button } from "@startup/mobile-ui";
+import { Button, useToastFeedback } from "@startup/mobile-ui";
 import type { MyAmbulanceBooking } from "@startup/contracts";
 
 export function LiveAmbulanceRequestsList({
@@ -31,6 +31,7 @@ export function LiveAmbulanceRequestsList({
   isCancelPending: boolean;
   onCancel: (booking: MyAmbulanceBooking) => void;
 }) {
+  useToastFeedback({ error: error ? "Could not load your ambulance requests." : "" });
   return (
     <>
       <Text style={styles.title}>My requests</Text>
@@ -40,11 +41,6 @@ export function LiveAmbulanceRequestsList({
         onPress={onRefresh}
       />
       {isLoading ? <Text>Loading requests…</Text> : null}
-      {error ? (
-        <Text accessibilityRole="alert">
-          Could not load your ambulance requests.
-        </Text>
-      ) : null}
       {bookings?.map((booking) => (
         <View key={booking.id} style={styles.card}>
           <Text style={styles.name}>

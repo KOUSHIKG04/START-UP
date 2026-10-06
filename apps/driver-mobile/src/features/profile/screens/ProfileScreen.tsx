@@ -16,7 +16,7 @@ import {
   listMyAmbulanceFleet,
   setMyDriverAvailability,
 } from "@startup/data-access";
-import { Button } from "@startup/mobile-ui";
+import { Button, useToast, useToastFeedback } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -30,9 +30,9 @@ import { signOutWithPushCleanup } from "../../notifications/deviceNotifications"
 
 export function ProfileScreen() {
   const { profile } = useMobileSession();
+  const { showToast } = useToast();
   const [support, setSupport] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
   const driver = useQuery({
     queryKey: ["my-driver-profile"],
@@ -45,6 +45,7 @@ export function ProfileScreen() {
     queryFn: () => listMyAmbulanceFleet(supabase!),
     enabled: Boolean(supabase && profile?.driver?.id),
   });
+  useToastFeedback({ error: fleet.isError || driver.isError ? "Could not load your partner details." : "" });
 
   const photo = useQuery({
     queryKey: ["my-driver-photo", driver.data?.profile_photo_path],
@@ -68,7 +69,6 @@ export function ProfileScreen() {
     if (!supabase || !vehicle || busy) return;
 
     setBusy(true);
-    setMessage("");
 
     try {
       let latitude: number | undefined;
@@ -94,12 +94,10 @@ export function ProfileScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["driver-fleet", profile?.driver?.id],
       });
+      showToast({ title: value ? "You are available" : "You are offline", type: "success" });
     } catch (cause) {
-      setMessage(
-        cause instanceof Error
-          ? cause.message
-          : "Could not update availability."
-      );
+      const feedback = cause instanceof Error ? cause.message : "Could not update availability.";
+      showToast({ title: "Availability update failed", message: feedback, type: "error" });
     } finally {
       setBusy(false);
     }
@@ -209,12 +207,6 @@ export function ProfileScreen() {
             </Copy>
           </Card>
         ) : null}
-        {fleet.isError || driver.isError ? (
-          <Copy accessibilityRole="alert">
-            Could not load your partner details.
-          </Copy>
-        ) : null}
-        {message ? <Copy accessibilityRole="alert">{message}</Copy> : null}
         <Button
           theme="driver"
           variant="outline"

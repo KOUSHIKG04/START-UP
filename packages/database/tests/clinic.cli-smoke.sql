@@ -22,6 +22,7 @@ DECLARE
   organization_id uuid;
   slot jsonb;
   appointment_id uuid;
+  checkin_token text;
   booking_key uuid := gen_random_uuid();
   start_at timestamptz := date_trunc('minute', now()) + interval '1 hour';
   version bigint;
@@ -162,14 +163,39 @@ BEGIN
     FROM jsonb_array_elements(public.list_clinic_appointments(practice_id)) x
     WHERE (x->>'id')::uuid=appointment_id;
   PERFORM public.transition_clinic_appointment(appointment_id,version,'approve');
+  denied := false;
   SELECT (x->>'row_version')::bigint INTO version
     FROM jsonb_array_elements(public.list_clinic_appointments(practice_id)) x
     WHERE (x->>'id')::uuid=appointment_id;
-  PERFORM public.transition_clinic_appointment(appointment_id,version,'check_in');
+  BEGIN
+    PERFORM public.transition_clinic_appointment(appointment_id,version,'check_in');
+  EXCEPTION WHEN SQLSTATE '22023' THEN denied := true;
+  END;
+  IF NOT denied THEN RAISE EXCEPTION 'App-booked visit bypassed patient QR check-in'; END IF;
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
+  checkin_token := public.issue_clinic_checkin_token(appointment_id);
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',manager_auth::text,true);
+  IF public.redeem_clinic_checkin_token(checkin_token) IS DISTINCT FROM appointment_id THEN
+    RAISE EXCEPTION 'Reception could not redeem patient QR'; END IF;
+  EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent ni
+    JOIN clinzo.domain_event e ON e.id=ni.event_id
+    JOIN clinzo.doctor d ON d.identity_id=ni.recipient_id
+    WHERE d.id=smoke.doctor_id AND e.aggregate_id=smoke.appointment_id
+      AND e.event_type='appointment.check_in') THEN
+    RAISE EXCEPTION 'Doctor arrival notification missing'; END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',manager_auth::text,true);
   SELECT (x->>'row_version')::bigint INTO version
     FROM jsonb_array_elements(public.list_clinic_appointments(practice_id)) x
     WHERE (x->>'id')::uuid=appointment_id;
   PERFORM public.transition_clinic_appointment(appointment_id,version,'call');
+  -- Reception calls the patient; only the assigned doctor starts and signs care.
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
   SELECT (x->>'row_version')::bigint INTO version
     FROM jsonb_array_elements(public.list_clinic_appointments(practice_id)) x
     WHERE (x->>'id')::uuid=appointment_id;

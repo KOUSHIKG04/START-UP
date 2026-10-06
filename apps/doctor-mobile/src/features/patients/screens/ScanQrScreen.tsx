@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useRef, useState } from "react";
 import { Linking, Platform, View } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -19,6 +20,7 @@ export function ScanQrScreen() {
   const [value, setValue] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  useToastFeedback({ error, success: message });
   const [patientAppointment, setPatientAppointment] = useState<ClinicAppointment>();
   const scanned = useRef(false);
   const queryClient = useQueryClient();
@@ -72,14 +74,14 @@ export function ScanQrScreen() {
     } catch { setError("Camera is unavailable. Enter the patient ID below."); }
   }
 
-  return <DoctorScreen title="Scan QR code" subtitle="Look up a patient before starting a visit" bottomNav={false}>
+  return <DoctorScreen title="Scan QR code" subtitle="Scan the appointment QR to confirm arrival" bottomNav={false}>
     <View style={{ height: 280, backgroundColor: palette.surface, borderRadius: 18, overflow: "hidden", alignItems: "center", justifyContent: "center", gap: 20 }}>
       {camera && focused && permission?.granted ? <CameraView style={{ width: "100%", height: "100%" }} facing="back"
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={({ data }) => {
           if (!scanned.current) { scanned.current = true; lookup(data); }
         }} onMountError={() => { setCamera(false); setError("Unable to open the camera. Enter the patient ID below."); }} /> : <>
         <ScanLine size={64} color={palette.primary} strokeWidth={1.8} />
-        <Label style={{ textAlign: "center", paddingHorizontal: 26 }}>Scan a patient’s QR code or enter their patient ID.</Label>
+        <Label style={{ textAlign: "center", paddingHorizontal: 26 }}>Scan the Patient App check-in QR. A patient ID only looks up their appointment.</Label>
       </>}
     </View>
     <Button theme="doctor" label={camera ? "Stop scanning" : "Open camera"} onPress={() => camera ? setCamera(false) : void enableCamera()} />
@@ -87,8 +89,6 @@ export function ScanQrScreen() {
       label="Open camera settings" onPress={() => void Linking.openSettings().catch(() => setError("Open your device settings and allow camera access."))} /> : null}
     <Input label="Patient ID" accessibilityLabel="Patient ID" autoCapitalize="characters" placeholder="e.g. PAT-..." value={value} onChangeText={setValue} onSubmitEditing={() => lookup(value)} containerStyle={ui.field} />
     <Button theme="doctor" variant="secondary" label="Look up patient" disabled={redeem.isPending || appointments.isLoading} onPress={() => lookup(value)} />
-    {error ? <Label style={ui.error}>{error}</Label> : null}
-    {message ? <Label>{message}</Label> : null}
     {patientAppointment ? <Panel>
       <View style={ui.row}>
         <User size={28} color={palette.primary} />
@@ -98,11 +98,11 @@ export function ScanQrScreen() {
           <Label muted>{patientAppointment.patient_public_code}</Label>
         </View>
       </View>
-      <Button theme="doctor" label="Open clinical notes" onPress={() => router.push({ pathname: "/clinical-notes", params: { appointmentId: patientAppointment.id } })} />
+      <Button theme="doctor" label={patientAppointment.status === "in_consultation" ? "Open clinical notes" : "View appointment"} onPress={() => router.push(patientAppointment.status === "in_consultation" ? { pathname: "/clinical-notes", params: { appointmentId: patientAppointment.id } } : { pathname: "/appointments", params: { appointmentId: patientAppointment.id } })} />
     </Panel> : null}
     <Panel>
       <Heading>Patient lookup</Heading>
-      <Label muted>Use a patient ID or QR from an appointment at your clinic. Other patients cannot be opened here.</Label>
+      <Label muted>Patient ID lookup does not check in the patient. Use their appointment QR to confirm arrival.</Label>
       <Button theme="doctor" variant="ghost" label="Look up next patient" disabled={!appointments.data?.length}
         onPress={() => { const first = appointments.data?.[0]; if (first) { setValue(first.patient_public_code); lookup(first.patient_public_code); } }} />
     </Panel>

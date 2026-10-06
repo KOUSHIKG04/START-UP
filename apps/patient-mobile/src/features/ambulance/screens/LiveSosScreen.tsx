@@ -11,20 +11,21 @@ import {
   refreshMyAmbulanceDispatch,
   requestMySos,
 } from "@startup/data-access";
-import { Button, Header, Input, SafeAreaView } from "@startup/mobile-ui";
+import { Button, Header, Input, SafeAreaView, useToast, type ToastType } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 const sosDispatchEnabled = process.env.EXPO_PUBLIC_ENABLE_SOS_DISPATCH === "true";
 
 export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
   const { profile } = useMobileSession();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [pickup, setPickup] = useState<{ latitude: number; longitude: number } | null>(null);
   const [address, setAddress] = useState("");
   const [summary, setSummary] = useState("");
   const [requestKey, setRequestKey] = useState(() => Crypto.randomUUID());
   const [locating, setLocating] = useState(false);
-  const [message, setMessage] = useState("");
+  const report = (text: string, type: ToastType) => showToast({ title: type === "error" ? "SOS action failed" : text, message: type === "error" ? text : undefined, type });
   const bookings = useQuery({ queryKey: ["my-ambulance-bookings"],
     queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && sosDispatchEnabled), refetchInterval: 15000 });
   const active = bookings.data?.find((booking) => booking.booking_type === "sos" &&
@@ -44,14 +45,14 @@ export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
   });
 
   async function locate() {
-    setLocating(true); setMessage("");
+    setLocating(true);
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
       if (!permission.granted) throw new Error("permission denied");
       const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       setPickup({ latitude: location.coords.latitude, longitude: location.coords.longitude });
       setRequestKey(Crypto.randomUUID());
-    } catch { setMessage("Current location is required for app dispatch. Call 112 if location access is unavailable."); }
+    } catch { report("Current location is required for app dispatch. Call 112 if location access is unavailable.", "error"); }
     finally { setLocating(false); }
   }
 
@@ -63,26 +64,26 @@ export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
         pickupAddress: address, summary, idempotencyKey: requestKey });
     },
     onSuccess: () => {
-      setMessage("Emergency request received. Searching for an approved ALS ambulance.");
+      report("Emergency request received. Searching for an approved ALS ambulance.", "success");
       setRequestKey(Crypto.randomUUID());
       void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] });
     },
-    onError: () => setMessage("App dispatch is unavailable. Call emergency services now."),
+    onError: () => report("App dispatch is unavailable. Call emergency services now.", "error"),
   });
   const cancel = useMutation({
     mutationFn: () => cancelMyAmbulanceBooking(supabase!, {
       bookingId: active!.id, expectedVersion: Number(active!.row_version),
     }),
-    onSuccess: () => { setMessage("SOS request cancelled."); void bookings.refetch(); },
-    onError: () => setMessage("Could not cancel. Refresh the request or call emergency services."),
+    onSuccess: () => { report("SOS request cancelled.", "success"); void bookings.refetch(); },
+    onError: () => report("Could not cancel. Refresh the request or call emergency services.", "error"),
   });
   const refreshDispatch = useMutation({
     mutationFn: () => refreshMyAmbulanceDispatch(supabase!, active!.id),
     onSuccess: () => {
-      setMessage("Search refreshed.");
+      report("Search refreshed.", "info");
       void bookings.refetch();
     },
-    onError: () => setMessage("Could not refresh dispatch. Call emergency services if you still need help."),
+    onError: () => report("Could not refresh dispatch. Call emergency services if you still need help.", "error"),
   });
 
   return <SafeAreaView style={styles.screen}>
@@ -130,7 +131,6 @@ export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
       </>}
       <Button label="Refresh status" variant="outline" onPress={() => void bookings.refetch()} />
       </> : null}
-      {message ? <Text accessibilityRole="alert">{message}</Text> : null}
     </ScrollView>
   </SafeAreaView>;
 }

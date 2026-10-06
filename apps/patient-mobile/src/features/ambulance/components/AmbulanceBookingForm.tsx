@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Clock3, MapPin, ShieldCheck } from "lucide-react-native";
 import { colors, fontFamilies, gradients } from "@startup/design-tokens";
 import type { PublicHospital } from "@startup/contracts";
+import { useToastFeedback } from "@startup/mobile-ui";
 import { ambulanceTypes, type AmbulanceType } from "../utils/ambulanceConstants";
 import {
   ActionButton,
@@ -84,7 +85,6 @@ export function AmbulanceBookingForm({
   isRequestPending,
   isBookingsLoading,
   hasActiveBooking,
-  error,
   onRequestBooking,
 }: {
   destination: string;
@@ -106,9 +106,9 @@ export function AmbulanceBookingForm({
   isRequestPending: boolean;
   isBookingsLoading: boolean;
   hasActiveBooking: boolean;
-  error: string;
   onRequestBooking: () => void;
 }) {
+  useToastFeedback({ error: isHospitalsError ? "Could not load hospitals." : "" });
   const renderHospital = useCallback(
     ({ item }: { item: PublicHospital }) => (
       <HospitalCard
@@ -197,11 +197,6 @@ export function AmbulanceBookingForm({
           {isHospitalsLoading ? (
             <Text style={s.bookingMessage}>Loading hospitals…</Text>
           ) : null}
-          {isHospitalsError ? (
-            <Text accessibilityRole="alert" style={s.bookingMessage}>
-              Could not load hospitals.
-            </Text>
-          ) : null}
           {isBookingsLoading ? (
             <Text style={s.bookingMessage}>Checking your active request…</Text>
           ) : null}
@@ -213,11 +208,6 @@ export function AmbulanceBookingForm({
           {!pickup ? (
             <Text style={s.bookingMessage}>
               Confirm your pickup location before booking.
-            </Text>
-          ) : null}
-          {error ? (
-            <Text accessibilityRole="alert" style={s.bookingMessage}>
-              {error}
             </Text>
           ) : null}
 

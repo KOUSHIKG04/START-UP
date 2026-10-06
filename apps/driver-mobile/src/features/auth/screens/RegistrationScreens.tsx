@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import React, { useState, type ReactNode } from "react";
 import {
   Image,
@@ -92,13 +93,6 @@ function Frame({
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
-function ErrorText({ message }: { message: string }) {
-  return message ? (
-    <Text accessibilityRole="alert" style={s.error}>
-      {message}
-    </Text>
-  ) : null;
 }
 
 export function WelcomeScreen({ onNext }: { onNext: () => void }) {
@@ -197,6 +191,7 @@ export function DetailsScreen({
   );
   const [consent, setConsent] = useState(initialConsent);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [picking, setPicking] = useState(false);
   const [saving, setSaving] = useState(false);
   const change = (key: keyof DriverProfile, value: string) =>
@@ -342,7 +337,6 @@ export function DetailsScreen({
               I agree to verification and safety checks
             </Text>
           </Pressable>
-          <ErrorText message={error} />
           <Button
             theme="driver"
             label="Continue"
@@ -384,6 +378,7 @@ export function DocumentsScreen({
     initialDocuments?.files ?? {}
   );
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [picking, setPicking] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const pick = async (doc: (typeof documentTypes)[number]) => {
@@ -515,7 +510,6 @@ export function DocumentsScreen({
           PDF, JPG or PNG up to 10 MB. Photos must be JPG or PNG.
         </Text>
         <View style={s.documentFooter}>
-          <ErrorText message={error} />
           <Button
             theme="driver"
             label="Submit for Verification"

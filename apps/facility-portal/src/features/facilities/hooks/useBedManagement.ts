@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import type { BedInventoryProjection } from "@startup/contracts";
 import type { DeptBedData } from "../types/bedManagement";
 import { bedRowColor } from "../utils/bedManagementConstants";
@@ -22,7 +23,6 @@ export function useBedManagement(inventory: BedInventoryProjection[]) {
   const [viewMode, setViewMode] = useState<"percent" | "count">("percent");
   const departments: DeptBedData[] = rowsFromInventory(inventory);
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   const handleAdjustAvailable = (id: string, delta: number) => {
@@ -38,14 +38,13 @@ export function useBedManagement(inventory: BedInventoryProjection[]) {
     form.set("maintenance", String(row.maintenance));
     form.set("expectedRowVersion", row.rowVersion ?? "0");
     setPendingId(id);
-    setSaveError(null);
     startTransition(async () => {
       try {
         const result = await saveBedInventory(form);
-        if (result.error) setSaveError(result.error);
-        else router.refresh();
+        if (result.error) toast.add({ title: "Could not update beds", description: result.error, type: "error" });
+        else { toast.add({ title: "Bed availability updated", type: "success" }); router.refresh(); }
       } catch {
-        setSaveError("Could not update bed availability. Try again.");
+        toast.add({ title: "Could not update beds", description: "Check your connection and try again.", type: "error" });
       } finally {
         setPendingId(null);
       }
@@ -59,5 +58,5 @@ export function useBedManagement(inventory: BedInventoryProjection[]) {
   const availPercent = totalBeds ? ((totalAvailable / totalBeds) * 100).toFixed(1) : "0";
   const occPercent = totalBeds ? ((totalOccupied / totalBeds) * 100).toFixed(1) : "0";
 
-  return { viewMode, setViewMode, departments, handleAdjustAvailable, totalBeds, totalAvailable, totalOccupied, totalMaintenance, availPercent, occPercent, pendingId, saveError };
+  return { viewMode, setViewMode, departments, handleAdjustAvailable, totalBeds, totalAvailable, totalOccupied, totalMaintenance, availPercent, occPercent, pendingId };
 }

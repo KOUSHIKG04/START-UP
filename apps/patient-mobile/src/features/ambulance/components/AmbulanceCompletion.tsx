@@ -16,7 +16,7 @@ import {
   UserRound,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Button, Card } from "@startup/mobile-ui";
+import { Button, Card, useToastFeedback } from "@startup/mobile-ui";
 import type { MyAmbulanceBooking } from "@startup/contracts";
 
 const experienceRatings = [
@@ -40,6 +40,7 @@ export function AmbulanceCompletion({
   const [ratingSubmitted, setRatingSubmitted] = useState(booking.review_rating !== null);
   const [ratingPending, setRatingPending] = useState(false);
   const [ratingError, setRatingError] = useState("");
+  useToastFeedback({ error: ratingError });
 
   const handleRatingSubmit = async () => {
     if (rating === undefined || ratingSubmitted) return;
@@ -192,7 +193,6 @@ export function AmbulanceCompletion({
               </Text>
             </View>
           )}
-          {ratingError ? <Text accessibilityRole="alert" style={styles.ratingSubmittedText}>{ratingError}</Text> : null}
         </Card>
 
         {/* Go to Home Button */}

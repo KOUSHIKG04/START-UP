@@ -93,7 +93,7 @@ export function HomeScreen({
     .sort(
       (a, b) =>
         new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
-    )[0];
+    );
 
   const { collapsedHeight, expandedHeaderStyle, searchStyle } =
     getHeaderAnimationStyles(scrollY, topInset);

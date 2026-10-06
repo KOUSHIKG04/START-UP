@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { AudioSession, LiveKitRoom, VideoTrack, isTrackReference, registerGlobals, useRoomContext, useTracks } from "@livekit/react-native";
-import { Track } from "livekit-client";
+import { Track, type LocalVideoTrack } from "livekit-client";
 import { uuidSchema } from "@startup/contracts";
 import { getOnlineJoinContext, getOnlineVideoToken, listOnlineMessages, sendOnlineMessage, subscribeOnlineMessages } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
@@ -24,11 +24,12 @@ import {
   PhoneOff,
   Send,
   Smile,
+  SwitchCamera,
   UserRound,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { FadedScrollView, Input, SafeAreaView } from "@startup/mobile-ui";
+import { FadedScrollView, Input, SafeAreaView, useToast, useToastFeedback } from "@startup/mobile-ui";
 import type { Appointment } from "../../appointments/types/appointment";
 
 registerGlobals();
@@ -60,6 +61,7 @@ export function OnlineVisitFlow({
     queryFn: () => listOnlineMessages(supabase!, appointmentId!), enabled: Boolean(context.data && supabase) });
   const token = useQuery({ queryKey: ["online-video-token", appointmentId],
     queryFn: () => getOnlineVideoToken(supabase!, appointmentId!), enabled: Boolean(!showChat && context.data && supabase), staleTime: 5 * 60 * 1000 });
+  useToastFeedback({ error: sendError || (messages.isError ? "Could not load messages." : "") });
   useEffect(() => {
     if (!context.data || !supabase || !appointmentId) return;
     return subscribeOnlineMessages(supabase, appointmentId, () => {
@@ -144,7 +146,6 @@ export function OnlineVisitFlow({
       >
         <Text style={styles.chatDay}>TODAY · SECURE CONSULTATION</Text>
         {messages.isLoading ? <Text>Loading messages…</Text> : null}
-        {messages.isError ? <Text>Could not load messages.</Text> : null}
         {(messages.data ?? []).map((item) => (
           <ChatBubble key={item.id} received={item.sender_id !== profile?.identity_id}
             text={item.body} time={new Date(item.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} />
@@ -152,7 +153,6 @@ export function OnlineVisitFlow({
       </FadedScrollView>
 
       <View style={styles.chatInputArea}>
-        {sendError ? <Text accessibilityRole="alert">{sendError}</Text> : null}
         <View style={styles.quickReplies}>
           {["Feeling better", "Still unwell", "Start video call"].map((reply) => (
             <Pressable
@@ -229,6 +229,9 @@ function VideoCallView({
   onMuteChange: (muted: boolean) => void;
 }) {
   const room = useRoomContext();
+  const { showToast } = useToast();
+  const [frontCamera, setFrontCamera] = useState(true);
+  const [switchingCamera, setSwitchingCamera] = useState(false);
   const tracks = useTracks([Track.Source.Camera]);
   const remote = tracks.find((track) => isTrackReference(track) && !track.participant.isLocal);
   const local = tracks.find((track) => isTrackReference(track) && track.participant.isLocal);
@@ -236,6 +239,23 @@ function VideoCallView({
     const next = !cameraOff;
     await room.localParticipant.setCameraEnabled(!next);
     onCameraChange(next);
+  };
+  const flipCamera = async () => {
+    if (cameraOff || switchingCamera) return;
+    const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track as LocalVideoTrack | undefined;
+    if (!track) {
+      showToast({ title: "Camera unavailable", message: "Turn on your camera before switching it.", type: "error" });
+      return;
+    }
+    setSwitchingCamera(true);
+    try {
+      await track.mediaStreamTrack.applyConstraints({ facingMode: frontCamera ? "environment" : "user" });
+      setFrontCamera(!frontCamera);
+    } catch {
+      showToast({ title: "Could not switch camera", message: "Check that this device has another camera and try again.", type: "error" });
+    } finally {
+      setSwitchingCamera(false);
+    }
   };
   const changeMute = async () => {
     const next = !muted;
@@ -266,6 +286,9 @@ function VideoCallView({
           <VideoControl accessibilityLabel={cameraOff ? "Turn camera on" : "Turn camera off"} onPress={() => void changeCamera()}>
             <Camera color={colors.white} size={25} />
           </VideoControl>
+          <VideoControl accessibilityLabel={frontCamera ? "Switch to back camera" : "Switch to front camera"} disabled={cameraOff || switchingCamera || !local} onPress={() => void flipCamera()}>
+            <SwitchCamera color={colors.white} size={25} />
+          </VideoControl>
           <VideoControl accessibilityLabel={muted ? "Unmute" : "Mute"} onPress={() => void changeMute()}>
             <Mic color={colors.white} size={27} />
           </VideoControl>
@@ -282,21 +305,26 @@ function VideoControl({
   accessibilityLabel,
   children,
   danger = false,
+  disabled = false,
   onPress,
 }: {
   accessibilityLabel: string;
   children: ReactNode;
   danger?: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.videoControl,
         danger ? styles.videoEndControl : undefined,
+        disabled ? { opacity: 0.5 } : undefined,
         pressed ? styles.pressed : undefined,
       ]}
     >

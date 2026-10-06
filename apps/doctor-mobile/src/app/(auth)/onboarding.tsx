@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { Image, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -35,6 +36,7 @@ export default function DoctorOnboarding() {
   const [locating, setLocating] = useState(false); const [locationError, setLocationError] = useState("");
   const [genderOpen, setGenderOpen] = useState(false); const [specialtyOpen, setSpecialtyOpen] = useState(false); const [languageOpen, setLanguageOpen] = useState(false);
   const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  useToastFeedback({ error });
 
   useEffect(() => {
     let active = true;
@@ -159,7 +161,6 @@ export default function DoctorOnboarding() {
     {field("Phone Number", phone, setPhone, "+91 98765 43210", "phone-pad")}
     <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: solo }} onPress={() => { setSolo(!solo); setFacilityOpen(false); }} style={styles.solo}><View style={[styles.checkbox, solo && styles.checked]} /><Text style={styles.soloText}>I run my own clinic</Text></Pressable>
     {solo ? <>{field("Clinic address", address, setAddress, "Street address")}{field("Area / locality", locality, setLocality, "Area or locality")}<View style={styles.row}><View style={{ flex: 1 }}>{field("City", practiceCity, setPracticeCity, "City")}</View><View style={{ flex: 1 }}>{field("State", practiceState, setPracticeState, "State")}</View></View>{field("Pincode", pincode, setPincode, "6-digit pincode", "number-pad")}<View style={styles.field}><Text style={styles.label}>Clinic location</Text><Text style={styles.locationHint}>Be at your clinic before capturing its location.</Text><Pressable accessibilityRole="button" disabled={locating} onPress={() => void captureClinicLocation()} style={styles.select}><Text style={styles.selectText}>{locating ? "Finding location…" : clinicLocation ? "Update clinic location while here" : "I'm at my clinic — use current location"}</Text></Pressable>{clinicLocation ? <Text style={styles.locationHint}>Location captured{clinicLocation.accuracy === null ? "" : ` (±${Math.round(clinicLocation.accuracy)} m)`}.</Text> : null}{locationError ? <Text accessibilityRole="alert" style={styles.error}>{locationError} <Text onPress={() => void Linking.openSettings()}>Open settings</Text></Text> : null}</View></> : null}
-    {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     <OnboardingButton label={busy ? "Submitting…" : "Save Profile"} disabled={busy} onPress={() => void submit()} />
     <Text style={styles.privacy}>♢  Your information is secure and private</Text>
     <Image source={city} resizeMode="stretch" style={styles.bottomArt} />

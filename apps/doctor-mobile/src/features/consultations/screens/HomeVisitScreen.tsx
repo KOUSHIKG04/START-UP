@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useRef, useState } from "react";
 import { Image, Linking, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ export function HomeVisitScreen() {
   const { patient, appointment } = useVisit();
   const [pin, setPin] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const inputs = useRef<(TextInput | null)[]>([]);
   if (!patient || !appointment) return <MissingPatient />;
   const navigate = async () => {
@@ -134,7 +136,6 @@ export function HomeVisitScreen() {
           Demo PIN: {patient.pin}
         </Label>
       </View>
-      {!!error && <Label style={ui.error}>{error}</Label>}
       <Button
         theme="doctor"
         label="Start Consultation"

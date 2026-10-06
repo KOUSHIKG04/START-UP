@@ -26,6 +26,7 @@ import {
   Chip,
   FadedScrollView,
   Header,
+  useToastFeedback,
 } from "@startup/mobile-ui";
 import DoctorCard from "../../doctors/components/DoctorCard";
 import type { PrescriptionScreenProps } from "../types/prescription";
@@ -44,6 +45,7 @@ export function PrescriptionScreen({
     queryFn: () => listMyClinicalRecords(supabase!),
     enabled: Boolean(supabase),
   });
+  useToastFeedback({ error: clinicalRecords.isError ? "Could not load prescriptions. Please retry." : "" });
 
   const records = clinicalRecords.data ?? [];
   const targetId = appointmentId ?? appointment?.id;
@@ -89,9 +91,7 @@ export function PrescriptionScreen({
           </View>
         ) : clinicalRecords.isError ? (
           <View style={styles.centerBox}>
-            <Text accessibilityRole="alert" style={styles.errorText}>
-              Could not load prescriptions. Please reopen this page to retry.
-            </Text>
+            <Button label="Retry" onPress={() => void clinicalRecords.refetch()} />
           </View>
         ) : !record ? (
           <View style={styles.emptyCard}>

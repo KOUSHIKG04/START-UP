@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AcceptPendingAppointmentButton } from "../components/AcceptPendingAppointmentButton";
+import { DashboardErrorToast } from "../components/DashboardErrorToast";
 import { formatDisplayDate, formatDisplayDateTime, type BedInventoryProjection, type ClinicAppointment } from "@startup/contracts";
 import {
   Search,
@@ -43,15 +44,18 @@ export default function DashboardScreen({
   });
 
   const capacity = inventory.filter(item => item.configured).reduce((sum, item) => sum + item.total, 0);
+  const now = new Date().getTime();
   
   const pendingRequests = appointments
-    .filter((item) => item.status === "pending")
+    .filter((item) => item.status === "pending" &&
+      new Date(item.starts_at).getTime() > now &&
+      (item.request_expires_at === null || new Date(item.request_expires_at).getTime() > now))
     .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
     .slice(0, 2);
 
   return (
     <div className="flex flex-col gap-6 pb-12">
-      {loadError && <p role="alert" className="text-[13px] text-red-700">{loadError}</p>}
+      <DashboardErrorToast message={loadError} />
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

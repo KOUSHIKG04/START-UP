@@ -19,7 +19,6 @@ type DevEmailAuthFormProps = {
   confirmPassword: string;
   onConfirmPasswordChange: (v: string) => void;
   busy: boolean;
-  error: string;
   onSubmit: () => void;
   onSwitchEmailMode: () => void;
 };
@@ -52,7 +51,6 @@ function EmailCredentialsForm({
   confirmPassword,
   onConfirmPasswordChange,
   busy,
-  error,
   onSubmit,
   onSwitchEmailMode,
 }: Omit<DevEmailAuthFormProps, "confirmationPending" | "onBackToSignIn">) {
@@ -102,11 +100,6 @@ function EmailCredentialsForm({
           style={styles.input}
           editable={!busy}
         />
-      ) : null}
-      {error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {error}
-        </Text>
       ) : null}
       <OnboardingButton
         label={submitLabel}

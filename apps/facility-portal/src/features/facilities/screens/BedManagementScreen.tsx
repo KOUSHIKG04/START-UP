@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import { useBedManagement } from "../hooks/useBedManagement";
 import type { BedInventoryProjection } from "@startup/contracts";
 import { InitialBedCountsForm } from "../components/InitialBedCountsForm";
@@ -29,8 +31,10 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
     occPercent,
     totalMaintenance,
     pendingId,
-    saveError,
   } = useBedManagement(inventory);
+  useEffect(() => {
+    if (loadError) toast.add({ title: "Could not load bed inventory", description: loadError, type: "error" });
+  }, [loadError]);
   const bedManagementDateLabel = bedManagementDateFormatter.format(new Date());
 
   return (
@@ -164,7 +168,6 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
         </div>
       </div>
 
-      {(loadError || saveError) && <p role="alert" className="text-[13px] text-red-600">{loadError ?? saveError}</p>}
       {/* Bed Availability by Department (Figma 832:86) */}
       <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
         {/* Header & Toggle */}

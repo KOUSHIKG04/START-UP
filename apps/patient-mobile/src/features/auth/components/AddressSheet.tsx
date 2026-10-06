@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -31,6 +32,7 @@ export function AddressSheet({
 }) {
   const [address, setAddress] = useState<PatientAddress>(value);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [isLocating, setIsLocating] = useState(false);
 
   const [prevVisible, setPrevVisible] = useState(visible);
@@ -210,11 +212,7 @@ export function AddressSheet({
                 </View>
               </Pressable>
 
-              {error ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                  {error}
-                </Text>
-              ) : null}
+
 
               {/* Form Fields */}
               <View style={styles.fieldsContainer}>

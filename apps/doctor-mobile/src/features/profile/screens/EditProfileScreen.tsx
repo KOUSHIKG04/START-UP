@@ -1,8 +1,9 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Chip, Input } from "@startup/mobile-ui";
+import { Button, Chip, Input, useToast } from "@startup/mobile-ui";
 import { doctorLanguageCode, doctorLanguageName } from "@startup/contracts";
 import { getMyDoctorProfile, updateMyDoctorProfile } from "@startup/data-access";
 import { DoctorScreen, Label, Panel } from "../../../components/DoctorScreen";
@@ -11,6 +12,7 @@ import { mobileSession, supabase, useMobileSession } from "../../../services/sup
 
 export function EditProfileScreen() {
   const client = useQueryClient();
+  const { showToast } = useToast();
   const { profile: sessionProfile } = useMobileSession();
   const profile = useQuery({
     queryKey: ["my-doctor-profile", sessionProfile?.doctor?.id],
@@ -22,6 +24,7 @@ export function EditProfileScreen() {
   const [languages, setLanguages] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState("");
+  useToastFeedback({ error });
 
   useEffect(() => {
     if (!profile.data || initialized) return;
@@ -40,6 +43,7 @@ export function EditProfileScreen() {
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["my-doctor-profile"] });
       await mobileSession.refresh();
+      showToast({ title: "Profile saved", type: "success" });
       if (router.canGoBack()) router.back();
       else router.replace("/profile");
     },
@@ -62,7 +66,6 @@ export function EditProfileScreen() {
             ))}
           </View>
           <Button theme="doctor" label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => { setError(""); save.mutate(); }} />
-          {error ? <Label style={ui.error}>{error}</Label> : null}
         </> : null}
       </Panel>
     </DoctorScreen>

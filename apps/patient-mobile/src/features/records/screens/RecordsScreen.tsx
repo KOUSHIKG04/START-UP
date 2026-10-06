@@ -10,7 +10,7 @@ import { FileText } from "lucide-react-native";
 import { listMyClinicalRecords } from "@startup/data-access";
 import { formatDisplayDate } from "@startup/contracts";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Card, FadedScrollView, Header } from "@startup/mobile-ui";
+import { Card, FadedScrollView, Header, useToastFeedback } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
 import type { RecordsScreenProps } from "../types/records";
 
@@ -23,6 +23,7 @@ export function RecordsScreen({
     queryFn: () => listMyClinicalRecords(supabase!),
     enabled: Boolean(supabase),
   });
+  useToastFeedback({ error: records.isError ? "Could not load records." : "" });
 
   return (
     <View style={styles.screen}>
@@ -38,9 +39,6 @@ export function RecordsScreen({
           </View>
         ) : records.isError ? (
           <View style={styles.state}>
-            <Text accessibilityRole="alert" style={styles.stateText}>
-              Could not load records.
-            </Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => records.refetch()}

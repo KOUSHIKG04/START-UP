@@ -29,11 +29,9 @@ function GoogleIcon({ size = 20 }: { size?: number }) {
 export function ProdAuthChoices({
   onContinueWithGoogle,
   onContinueWithPhone,
-  error,
 }: {
   onContinueWithGoogle: () => void;
   onContinueWithPhone: () => void;
-  error?: string;
 }) {
   return (
     <View style={styles.choices}>
@@ -69,11 +67,6 @@ export function ProdAuthChoices({
         <Text style={styles.socialButtonText}>Continue with Phone</Text>
       </Pressable>
 
-      {error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {error}
-        </Text>
-      ) : null}
     </View>
   );
 }

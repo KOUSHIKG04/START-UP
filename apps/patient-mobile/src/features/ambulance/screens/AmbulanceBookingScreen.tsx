@@ -1,3 +1,4 @@
+import { useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useEffect, useState } from "react";
 import {
   BackHandler,
@@ -58,6 +59,7 @@ export function AmbulanceBookingScreen({
   const [pickup, setPickup] = useState<{ latitude: number; longitude: number } | null>(null);
   const [pickupAddress, setPickupAddress] = useState("");
   const [error, setError] = useState("");
+  useToastFeedback({ error });
   const [idempotencyKey, setIdempotencyKey] = useState(() => Crypto.randomUUID());
   const [currentBookingId, setCurrentBookingId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
@@ -243,7 +245,6 @@ export function AmbulanceBookingScreen({
           isRequestPending={request.isPending}
           isBookingsLoading={bookings.isLoading}
           hasActiveBooking={Boolean(activeBooking)}
-          error={error}
           onRequestBooking={() => request.mutate()}
         />
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "@startup/web-ui/components/ui/toast";
 import {
   scheduleTabs,
 } from "../utils/doctorSchedulesConstants";
@@ -12,13 +13,15 @@ import { DoctorShiftGantt } from "../components/DoctorShiftGantt";
 import { DoctorAssignmentsTable } from "../components/DoctorAssignmentsTable";
 
 export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: { doctors: FacilityDoctorRosterItem[]; sessions: PracticeSession[]; loadError?: string }) {
+  React.useEffect(() => {
+    if (loadError) toast.add({ title: "Could not load doctor schedules", description: loadError, type: "error" });
+  }, [loadError]);
   const [activeTab, setActiveTab] =
     React.useState<(typeof scheduleTabs)[number]>("Today");
   const schedule = facilitySchedule(doctors, sessions);
 
   return (
     <div className="flex flex-col gap-6 pb-12">
-      {loadError && <p role="alert" className="text-[13px] text-red-700">{loadError}</p>}
       {/* TopBar (Figma 840:56) */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

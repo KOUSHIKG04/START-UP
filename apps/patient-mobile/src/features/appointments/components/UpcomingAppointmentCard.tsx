@@ -23,6 +23,7 @@ import SectionHeader from "../../../components/SectionHeader";
 import { router } from "expo-router";
 
 export type UpcomingAppointmentCardProps = {
+  showHeader?: boolean;
   doctorName: string;
   specialization?: string;
   date: string;
@@ -33,6 +34,7 @@ export type UpcomingAppointmentCardProps = {
 };
 
 export default function UpcomingAppointmentCard({
+  showHeader = true,
   doctorName,
   specialization = "Clinic visit",
   date,
@@ -43,11 +45,11 @@ export default function UpcomingAppointmentCard({
 }: UpcomingAppointmentCardProps) {
   return (
     <View style={styles.appointmentSection}>
-      <SectionHeader
+      {showHeader ? <SectionHeader
         title="Upcoming Appointments"
         seeAllText="View all"
         onSeeAllPress={() => router.push("/appointments")}
-      />
+      /> : null}
       <Card
         accessibilityLabel={`Upcoming appointment with ${doctorName} on ${date} at ${time}`}
         backgroundColor={gradients.patientBanner.colors[1]}
