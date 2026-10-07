@@ -4,8 +4,9 @@ import type { PublicPractice } from "@startup/contracts";
 export function uniqueDoctorPractices(practices: PublicPractice[], mode: "clinic" | "online" | "home"): PublicPractice[] {
   const byPractice = new Map<string, PublicPractice>();
   for (const practice of practices) {
-    if (!practice.service_code.startsWith(`${mode}-`) || byPractice.has(practice.practice_id)) continue;
-    byPractice.set(practice.practice_id, practice);
+    const key = mode === "online" ? practice.doctor_id : practice.practice_id;
+    if (!practice.service_code.startsWith(`${mode}-`) || byPractice.has(key)) continue;
+    byPractice.set(key, practice);
   }
   return [...byPractice.values()];
 }

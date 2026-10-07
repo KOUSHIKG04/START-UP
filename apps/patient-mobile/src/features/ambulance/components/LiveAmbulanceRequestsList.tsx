@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Button, useToastFeedback } from "@startup/mobile-ui";
+import { Button, Loader, useToastFeedback } from "@startup/mobile-ui";
 import type { MyAmbulanceBooking } from "@startup/contracts";
 
 export function LiveAmbulanceRequestsList({
@@ -40,7 +40,7 @@ export function LiveAmbulanceRequestsList({
         variant="outline"
         onPress={onRefresh}
       />
-      {isLoading ? <Text>Loading requests…</Text> : null}
+      {isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
       {bookings?.map((booking) => (
         <View key={booking.id} style={styles.card}>
           <Text style={styles.name}>
@@ -74,7 +74,7 @@ export function LiveAmbulanceRequestsList({
             <View style={styles.card}>
               <Text style={styles.subtitle}>Your completion PIN</Text>
               {isPinLoading ? (
-                <Text>Loading verification PIN…</Text>
+                <Loader theme="patient" style={{ minHeight: 36 }} />
               ) : null}
               {pinData ? (
                 <Text

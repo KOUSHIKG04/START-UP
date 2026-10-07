@@ -9,12 +9,12 @@ import {
   Chip,
   FadedScrollView,
   Input,
+  Loader,
   TimeSlot,
+  useToast,
   useToastFeedback,
 } from "@startup/mobile-ui";
-import {
-  months,
-} from "../utils/doctorProfileConstants";
+import { months } from "../utils/doctorProfileConstants";
 import type { BookSlotsProps } from "../types/doctor-profile";
 
 function localDateKey(value: Date): string {
@@ -33,37 +33,91 @@ export function BookSlots({
   busy,
 }: BookSlotsProps) {
   useToastFeedback({ error: error ?? "" });
+  const { showToast } = useToast();
+  const noSlotsNotice = useRef("");
   const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [patientId, setPatientId] = useState(patientOptions[0]?.id ?? "");
-  const selectedPatientIsVerified = patientOptions.some(option => option.id === patientId && option.verified);
+  const selectedPatientIsVerified = patientOptions.some(
+    (option) => option.id === patientId && option.verified
+  );
 
   useEffect(() => {
     if (selectedPatientIsVerified) return;
-    setPatientId(patientOptions.find(option => option.verified)?.id ?? "");
+    setPatientId(patientOptions.find((option) => option.verified)?.id ?? "");
   }, [patientOptions, selectedPatientIsVerified]);
 
   const today = useMemo(() => new Date(), []);
-  const monthOptions = useMemo(() => Array.from({ length: 12 }, (_, offset) => {
-    const date = new Date(today.getFullYear(), today.getMonth() + offset, 1);
-    return { offset, name: months[date.getMonth()].name };
-  }), [today]);
+  const monthOptions = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, offset) => {
+        const date = new Date(
+          today.getFullYear(),
+          today.getMonth() + offset,
+          1
+        );
+        return { offset, name: months[date.getMonth()].name };
+      }),
+    [today]
+  );
   const monthDates = useMemo(() => {
-    const selectedMonth = new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1);
+    const selectedMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + selectedMonthOffset,
+      1
+    );
     const todayKey = localDateKey(today);
-    return Array.from({ length: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0).getDate() }, (_, index) => {
-      const date = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), index + 1);
-      const key = localDateKey(date);
-      return { key, dayNumber: date.getDate(), day: date.toLocaleDateString("en-US", { weekday: "short" }), closed: key < todayKey };
-    });
+    return Array.from(
+      {
+        length: new Date(
+          selectedMonth.getFullYear(),
+          selectedMonth.getMonth() + 1,
+          0
+        ).getDate(),
+      },
+      (_, index) => {
+        const date = new Date(
+          selectedMonth.getFullYear(),
+          selectedMonth.getMonth(),
+          index + 1
+        );
+        const key = localDateKey(date);
+        return {
+          key,
+          dayNumber: date.getDate(),
+          day: date.toLocaleDateString("en-US", { weekday: "short" }),
+          closed: key < todayKey,
+        };
+      }
+    );
   }, [today, selectedMonthOffset]);
-  const dateSlots = slots.filter(slot => localDateKey(new Date(slot.starts_at)) === selectedDate);
-  const selectedSlot = dateSlots.find(slot => slot.window_id === selectedTime);
+
+
+  const dateSlots = slots.filter(
+    (slot) => localDateKey(new Date(slot.starts_at)) === selectedDate
+  );
+  const selectedSlot = dateSlots.find(
+    (slot) => slot.window_id === selectedTime
+  );
 
   const datesScrollRef = useRef<ScrollView>(null);
   const monthsScrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (loading || error || slots.length > 0) {
+      noSlotsNotice.current = "";
+      return;
+    }
+    if (noSlotsNotice.current === consultationType) return;
+    noSlotsNotice.current = consultationType;
+    showToast({
+      title: "No slots available",
+      message: `This doctor has not published upcoming ${consultationType.toLowerCase()} times yet.`,
+      type: "info",
+    });
+  }, [consultationType, error, loading, showToast, slots.length]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -72,7 +126,10 @@ export function BookSlots({
         animated: false,
       });
       datesScrollRef.current?.scrollTo({
-        x: selectedMonthOffset === 0 ? Math.max(0, (today.getDate() - 1) * 62 - 110) : 0,
+        x:
+          selectedMonthOffset === 0
+            ? Math.max(0, (today.getDate() - 1) * 62 - 110)
+            : 0,
         animated: false,
       });
     }, 120);
@@ -88,6 +145,17 @@ export function BookSlots({
   const handleSelectDate = (key: string, idx: number) => {
     setSelectedDate(key);
     setSelectedTime(null);
+    if (
+      !loading &&
+      !error &&
+      !slots.some((slot) => localDateKey(new Date(slot.starts_at)) === key)
+    ) {
+      showToast({
+        title: "No times on this date",
+        message: "Choose another date to see available slots.",
+        type: "info",
+      });
+    }
     datesScrollRef.current?.scrollTo({
       x: Math.max(0, idx * 54 - 110),
       animated: true,
@@ -106,184 +174,200 @@ export function BookSlots({
         padding={16}
         style={styles.bookSlotsCard}
       >
-      <View style={styles.bookingSection}>
-        <Text style={styles.sectionTitle}>Select date</Text>
-        <FadedScrollView
-          ref={monthsScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.monthsStrip}
-        >
-          {monthOptions.map((m) => {
-            const isSelected = m.offset === selectedMonthOffset;
-            return (
+        <View style={styles.bookingSection}>
+          <Text style={styles.sectionTitle}>Select date</Text>
+          <FadedScrollView
+            ref={monthsScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.monthsStrip}
+          >
+            {monthOptions.map((m) => {
+              const isSelected = m.offset === selectedMonthOffset;
+              return (
+                <Chip
+                  key={m.offset}
+                  label={m.name}
+                  selected={isSelected}
+                  accessibilityState={{ selected: isSelected }}
+                  onPress={() => handleSelectMonth(m.offset)}
+                  style={[
+                    styles.monthChip,
+                    isSelected ? styles.selectedMonthChip : undefined,
+                  ]}
+                  labelStyle={
+                    isSelected
+                      ? styles.selectedMonthChipText
+                      : styles.monthChipText
+                  }
+                />
+              );
+            })}
+          </FadedScrollView>
+
+          <FadedScrollView
+            ref={datesScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.datesCarousel}
+          >
+            {monthDates.map((date, idx) => {
+              const selected = date.key === selectedDate;
+
+              return (
+                <Button
+                  key={date.key}
+                  variant={selected ? "primary" : "outline"}
+                  theme="patient"
+                  disabled={date.closed}
+                  accessibilityRole="radio"
+                  accessibilityState={{
+                    selected,
+                    disabled: date.closed,
+                  }}
+                  onPress={() => handleSelectDate(date.key, idx)}
+                  style={[
+                    styles.dateCard,
+                    selected ? styles.selectedDateCard : undefined,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.dateNumber,
+                      selected ? styles.selectedDateNumber : undefined,
+                      date.closed ? styles.disabledDateText : undefined,
+                    ]}
+                  >
+                    {date.dayNumber}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.dateDay,
+                      selected ? styles.selectedDateDay : undefined,
+                      date.closed ? styles.disabledDateText : undefined,
+                    ]}
+                  >
+                    {date.day}
+                  </Text>
+                </Button>
+              );
+            })}
+          </FadedScrollView>
+        </View>
+
+        <View style={styles.bookingSection}>
+          <View style={styles.sectionHeadingRow}>
+            <Text style={styles.sectionTitle}>Select time</Text>
+            {dateSlots.length > 0 ? (
+              <Text style={styles.availability}>
+                {dateSlots.length} slots available
+                {selectedDate ? ` · ${formatDisplayDate(selectedDate)}` : ""}
+              </Text>
+            ) : null}
+          </View>
+          <View style={styles.slotGrid}>
+            {dateSlots.map((slot) => {
+              const time = new Date(slot.starts_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              const selected = selectedTime === slot.window_id;
+              return (
+                <TimeSlot
+                  key={slot.window_id}
+                  time={time}
+                  disabled={false}
+                  accessibilityRole="radio"
+                  accessibilityState={{
+                    selected,
+                    disabled: false,
+                  }}
+                  onPress={() => setSelectedTime(slot.window_id)}
+                  style={[
+                    styles.timeSlot,
+                    selected ? styles.selectedTimeSlot : undefined,
+                  ]}
+                  textStyle={[selected ? styles.selectedTimeText : undefined]}
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.bookingSection}>
+          <Text style={styles.sectionTitle}>For whom?</Text>
+          <View style={styles.patientRow}>
+            {patientOptions.map((option) => (
               <Chip
-                key={m.offset}
-                label={m.name}
-                selected={isSelected}
-                accessibilityState={{ selected: isSelected }}
-                onPress={() => handleSelectMonth(m.offset)}
-                style={[
-                  styles.monthChip,
-                  isSelected ? styles.selectedMonthChip : undefined,
-                ]}
-                labelStyle={
-                  isSelected
-                    ? styles.selectedMonthChipText
-                    : styles.monthChipText
-                }
-              />
-            );
-          })}
-        </FadedScrollView>
-
-        <FadedScrollView
-          ref={datesScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.datesCarousel}
-        >
-          {monthDates.map((date, idx) => {
-            const selected = date.key === selectedDate;
-
-            return (
-              <Button
-                key={date.key}
-                variant={selected ? "primary" : "outline"}
+                key={option.id}
+                variant="radio"
+                selected={patientId === option.id}
                 theme="patient"
-                disabled={date.closed}
-                accessibilityRole="radio"
-                accessibilityState={{
-                  selected,
-                  disabled: date.closed,
+                label={option.label}
+                onPress={() => {
+                  if (option.verified) setPatientId(option.id);
                 }}
-                onPress={() => handleSelectDate(date.key, idx)}
-                style={[
-                  styles.dateCard,
-                  selected ? styles.selectedDateCard : undefined,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.dateNumber,
-                    selected ? styles.selectedDateNumber : undefined,
-                    date.closed ? styles.disabledDateText : undefined,
-                  ]}
-                >
-                  {date.dayNumber}
-                </Text>
-                <Text
-                  style={[
-                    styles.dateDay,
-                    selected ? styles.selectedDateDay : undefined,
-                    date.closed ? styles.disabledDateText : undefined,
-                  ]}
-                >
-                  {date.day}
-                </Text>
-              </Button>
-            );
-          })}
-        </FadedScrollView>
-      </View>
-
-      <View style={styles.bookingSection}>
-        <View style={styles.sectionHeadingRow}>
-          <Text style={styles.sectionTitle}>Select time</Text>
-          <Text style={styles.availability}>{dateSlots.length} slots available{selectedDate ? ` · ${formatDisplayDate(selectedDate)}` : ""}</Text>
-        </View>
-        <View style={styles.slotGrid}>
-          {dateSlots.map((slot) => {
-            const time = new Date(slot.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            const selected = selectedTime === slot.window_id;
-            return (
-              <TimeSlot
-                key={slot.window_id}
-                time={time}
-                disabled={false}
-                accessibilityRole="radio"
-                accessibilityState={{
-                  selected,
-                  disabled: false,
-                }}
-                onPress={() => setSelectedTime(slot.window_id)}
-                style={[
-                  styles.timeSlot,
-                  selected ? styles.selectedTimeSlot : undefined,
-                ]}
-                textStyle={[
-                  selected ? styles.selectedTimeText : undefined,
-                ]}
               />
-            );
-          })}
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.bookingSection}>
-        <Text style={styles.sectionTitle}>For whom?</Text>
-        <View style={styles.patientRow}>
-          {patientOptions.map(option => <Chip
-            key={option.id}
-            variant="radio"
-            selected={patientId === option.id}
-            theme="patient"
-            label={option.label}
-            onPress={() => { if (option.verified) setPatientId(option.id); }}
-          />)}
-        </View>
-      </View>
-
-      <View style={styles.bookingSection}>
-        <View style={styles.sectionHeadingRow}>
+        <View style={styles.bookingSection}>
           <Text style={styles.sectionTitle}>Reason for visit (optional)</Text>
-          <Button
-            label="About Doctor"
-            variant="ghost"
-            theme="patient"
-            onPress={onGoToAbout}
-            style={styles.backToAboutButton}
-            labelStyle={styles.backToAboutLabel}
-            leftIcon={
-              <ChevronLeft
-                color={colors.patient.primaryDark}
-                size={15}
-                strokeWidth={2.4}
-              />
-            }
+          <Input
+            accessibilityLabel="Reason for visit"
+            placeholder="e.g. Fever, back pain, routine check-up..."
+            value={reason}
+            onChangeText={setReason}
+            containerStyle={styles.reasonInputContainer}
           />
         </View>
-        <Input
-          accessibilityLabel="Reason for visit"
-          placeholder="e.g. Fever, back pain, routine check-up..."
-          value={reason}
-          onChangeText={setReason}
-          containerStyle={styles.reasonInputContainer}
+        {loading ? <Loader theme="patient" style={styles.loading} /> : null}
+      </Card>
+
+      <View style={styles.actions}>
+        <Button
+          label="About Doctor"
+          variant="outline"
+          theme="patient"
+          onPress={onGoToAbout}
+          style={styles.actionButton}
+          labelStyle={styles.actionLabel}
+          // leftIcon={
+          //   <ChevronLeft
+          //     color={colors.patient.primaryDark}
+          //     size={15}
+          //     strokeWidth={2.4}
+          //   />
+          // }
+        />
+        <Button
+          label="Book Appointment"
+          disabled={
+            busy ||
+            !selectedSlot ||
+            !selectedPatientIsVerified ||
+            consultationType === "Home Visit"
+          }
+          onPress={() => {
+            if (!selectedSlot) return;
+            onBookAppointment({
+              date: formatDisplayDate(selectedSlot.starts_at),
+              time: selectedSlot.window_id,
+              patient:
+                patientOptions.find((option) => option.id === patientId)
+                  ?.label ?? "Self",
+              patientId,
+              reason,
+              consultationType,
+              address,
+            });
+          }}
+          style={styles.actionButton}
+          labelStyle={styles.actionLabel}
         />
       </View>
-      {loading ? <Text style={styles.availability}>Loading slots…</Text> : null}
-      {slots.length === 0 && !loading && !error ? <Text style={styles.availability}>No upcoming {consultationType === "Online" ? "online" : consultationType === "Home Visit" ? "home-visit" : "clinic"} times are available. Please check again later.</Text> : null}
-      {selectedDate && dateSlots.length === 0 && slots.length > 0 ? <Text style={styles.availability}>No available times on this date. Choose another date.</Text> : null}
-    </Card>
-
-    <Button
-      label="Book Appointment"
-      disabled={busy || !selectedSlot || !selectedPatientIsVerified || consultationType === "Home Visit"}
-      onPress={() => {
-        if (!selectedSlot) return;
-        onBookAppointment({
-          date: formatDisplayDate(selectedSlot.starts_at),
-          time: selectedSlot.window_id,
-          patient: patientOptions.find(option => option.id === patientId)?.label ?? "Self",
-          patientId,
-          reason,
-          consultationType,
-          address,
-        });
-      }}
-      style={styles.bookButton}
-    />
-  </View>
+    </View>
   );
 }
 
@@ -423,24 +507,16 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: "100%",
   },
-  bookButton: {
-    width: "100%",
-    alignSelf: "stretch",
+  actions: { flexDirection: "row", gap: 10 },
+  actionButton: {
+    flex: 1,
+    minWidth: 0,
     minHeight: 48,
     borderRadius: radius.md,
-  },
-  backToAboutButton: {
-    minHeight: 28,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
   },
-  backToAboutLabel: {
-    color: colors.patient.primaryDark,
+  loading: { minHeight: 32 },
+  actionLabel: {
     fontFamily: fontFamilies.semibold,
     fontSize: 12,
     fontWeight: "600",

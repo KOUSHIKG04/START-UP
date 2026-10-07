@@ -105,7 +105,7 @@ export function ProfileScreen() {
 
   return (
     <View style={ui.screen}>
-      <PageHeader title="Profile" subtitle="Your CLINZO partner account" />
+      <PageHeader title="Profile" />
       <Body>
         <View style={[ui.center, { paddingVertical: 16 }]}>
           {photo.data ? (

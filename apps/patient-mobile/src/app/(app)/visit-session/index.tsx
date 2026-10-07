@@ -41,6 +41,7 @@ export default function VisitSessionRoute() {
       mode={mode}
       onBackPress={() => router.back()}
       onGoHome={() => router.replace("/")}
+      onRealComplete={() => { if (appointment.backendId) router.replace({ pathname: "/rate-doctor/[id]", params: { id: appointment.backendId } } as Href); }}
       onViewMedicines={() =>
         router.push({
           pathname: "/medicines",

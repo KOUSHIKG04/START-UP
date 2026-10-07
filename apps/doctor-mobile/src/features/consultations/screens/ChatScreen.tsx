@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Send, Check } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
+import { Loader } from "@startup/mobile-ui";
 import {
   Choice,
   DoctorHeader,
@@ -116,7 +117,7 @@ export function ChatScreen() {
     [],
   );
 
-  if (live.isLive && live.loading) return <Label>Loading consultation…</Label>;
+  if (live.isLive && live.loading) return <Loader theme="doctor" size="large" style={{ flex: 1 }} />;
   if (live.isLive && !live.appointment) return <MissingPatient />;
   if (!live.isLive && (!patient || !appointment)) return <MissingPatient />;
   const demoThread: MessageItem[] = [
@@ -154,7 +155,6 @@ export function ChatScreen() {
     >
       <DoctorHeader
         title={live.appointment?.patient_name ?? patient?.name ?? "Patient"}
-        subtitle={live.appointment ? "Secure consultation" : "Demo chat · Messages stay on this device"}
       />
       <FlatList
         ref={flatListRef}

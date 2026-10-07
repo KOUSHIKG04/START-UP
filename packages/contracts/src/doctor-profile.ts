@@ -1,10 +1,14 @@
 import { z } from "zod";
 import { uuidSchema } from "./validation";
 
+export const doctorQualificationSchema = z.string().trim().min(2).max(160);
+
 export const doctorProfileSchema = z.object({
   id: uuidSchema,
   full_name: z.string(),
   bio: z.string().nullable(),
+  qualification: z.string().nullable(),
+  qualification_claim: z.string().nullable(),
   registration_authority: z.string(),
   registration_number: z.string(),
   practice_started_on: z.iso.date(),

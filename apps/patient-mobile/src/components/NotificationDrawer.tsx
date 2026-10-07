@@ -3,9 +3,9 @@ import {
   Animated,
   BackHandler,
   Dimensions,
-  FlatList,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -17,7 +17,6 @@ import { formatDisplayDate } from "@startup/contracts";
 import {
   Bell,
   CalendarCheck,
-  CheckCircle2,
   FileText,
   Pill,
   Stethoscope,
@@ -70,6 +69,19 @@ function getIconBg(type: NotificationItem["type"]) {
     default:
       return "#E8F8F4";
   }
+}
+
+function notificationTime(createdAt: string) {
+  const elapsed = Date.now() - new Date(createdAt).getTime();
+  if (!Number.isFinite(elapsed) || elapsed < 0) return formatDisplayDate(createdAt);
+  const minutes = Math.floor(elapsed / 60_000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  if (hours < 48) return "Yesterday";
+  const days = Math.floor(hours / 24);
+  return days < 7 ? `${days}d ago` : formatDisplayDate(createdAt);
 }
 
 function NotificationCard({
@@ -143,7 +155,7 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
         : item.template_key === "appointment.auto_confirmed" || item.template_key === "appointment.approve" ? "Appointment confirmed"
         : isAppointment ? "Appointment update" : isAmbulance ? "Ambulance trip update" : item.template_key.startsWith("verification.") ? "Verification update" : "Notification",
       message: typeof status === "string" ? `Status: ${status.replaceAll("_", " ")}` : "You have a new update.",
-      time: formatDisplayDate(item.created_at),
+      time: notificationTime(item.created_at),
       type: isAppointment ? "appointment" as const : "general" as const,
       read: item.is_read,
     };
@@ -160,12 +172,9 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
   }
   const fadeAnim = fadeAnimRef.current;
 
-  if (visible && !showModal) {
-    setShowModal(true);
-  }
-
   useEffect(() => {
     if (visible) {
+      setShowModal(true);
       slideAnim.setValue(SCREEN_WIDTH);
       Animated.parallel([
         Animated.timing(slideAnim, {
@@ -228,13 +237,6 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
     [notifications, markRead]
   );
 
-  const renderItem = useCallback(
-    ({ item }: { item: NotificationItem }) => (
-      <NotificationCard item={item} onPress={handleCardPress} />
-    ),
-    [handleCardPress]
-  );
-
   if (!showModal) return null;
 
   return (
@@ -258,25 +260,26 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
         <Animated.View
           style={[
             styles.drawer,
-            {
-              paddingTop: insets.top,
-              transform: [{ translateX: slideAnim }],
-            },
+            { transform: [{ translateX: slideAnim }] },
           ]}
         >
           <Header
-            title="Notifications"
+            title="Notification"
             app="patient"
             onBackPress={onClose}
           />
 
           <View style={styles.drawerSubheader}>
             <Text style={styles.unreadCountText}>
-              {notifications.filter((n) => !n.read).length} unread
+              {notifications.filter((n) => !n.read).length > 0
+                ? `${notifications.filter((n) => !n.read).length} new notification${
+                    notifications.filter((n) => !n.read).length > 1 ? "s" : ""
+                  }`
+                : "All caught up"}
             </Text>
             {notifications.some((n) => !n.read) ? (
               <Pressable
-                accessibilityLabel="Mark all notifications as read"
+                accessibilityLabel="Mark all as read"
                 accessibilityRole="button"
                 onPress={markAllAsRead}
                 hitSlop={8}
@@ -286,22 +289,17 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
             ) : null}
           </View>
 
-          <FlatList
-            data={notifications}
-            keyExtractor={(item) => item.id}
+          <ScrollView
             contentContainerStyle={[
               styles.listContent,
               { paddingBottom: Math.max(insets.bottom, 20) + 20 },
             ]}
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <>
-                {notificationsQuery.isError ? <Text accessibilityRole="alert" style={styles.itemMessage}>Could not load notifications.</Text> : null}
-                {!notificationsQuery.isError && notifications.length === 0 ? <Text style={styles.itemMessage}>No notifications yet.</Text> : null}
-              </>
-            }
-            renderItem={renderItem}
-          />
+          >
+            {notificationsQuery.isError ? <Text accessibilityRole="alert" style={styles.itemMessage}>Could not load notifications.</Text> : null}
+            {!notificationsQuery.isError && notifications.length === 0 ? <Text style={styles.itemMessage}>No notifications yet.</Text> : null}
+            {notifications.map((item) => <NotificationCard key={item.id} item={item} onPress={handleCardPress} />)}
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>

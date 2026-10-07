@@ -45,10 +45,6 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
           <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
             Bed Management
           </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Monitor and manage facility bed allocation
-          </p>
-          {!loadError && inventory.length === 0 && <p className="text-[13px] text-[#475569] mt-1">This facility does not offer patient beds.</p>}
         </div>
 
         <div className="flex items-center gap-3">
@@ -83,6 +79,8 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
           </div>
         </div>
       </div>
+
+      {!loadError && inventory.length === 0 && <p className="text-[13px] text-[#475569]">This facility does not offer patient beds.</p>}
 
       {/* 4 Stat Cards Row (Figma 832:71) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

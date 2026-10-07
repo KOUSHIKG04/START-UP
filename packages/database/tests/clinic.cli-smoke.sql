@@ -203,6 +203,30 @@ BEGIN
   SELECT (x->>'row_version')::bigint INTO version
     FROM jsonb_array_elements(public.list_clinic_appointments(practice_id)) x
     WHERE (x->>'id')::uuid=appointment_id;
+  PERFORM public.issue_consultation_prescription(appointment_id,
+    jsonb_build_array(jsonb_build_object(
+      'medicine_name','Fixture medicine','strength','500 mg','form','tablet',
+      'route','oral','instructions','Take after breakfast',
+      'dose_quantity',1,'dose_unit','tablet',
+      'starts_on',current_date::text,'ends_on',(current_date+5)::text,
+      'timings',jsonb_build_array(jsonb_build_object('meal_anchor','breakfast','meal_relation','after'))
+    )), 'UTC');
+  PERFORM set_config('request.jwt.claim.sub',patient_auth::text,true);
+  SELECT x INTO view_row FROM jsonb_array_elements(public.list_my_clinical_records()) x
+    WHERE (x->>'appointment_id')::uuid=appointment_id;
+  IF view_row->>'prescription_code' IS NULL
+    OR jsonb_array_length(view_row->'medicines') <> 1
+    OR view_row->>'assessment' IS NOT NULL
+    OR view_row->'diagnoses' <> '[]'::jsonb
+    OR view_row->'vitals' <> '[]'::jsonb THEN
+    RAISE EXCEPTION 'Patient cannot read signed prescription safely before consultation completion';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub',manager_auth::text,true);
+  IF EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_my_clinical_records()) x
+      WHERE (x->>'appointment_id')::uuid=appointment_id) THEN
+    RAISE EXCEPTION 'Other patient could read this prescription';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
   PERFORM public.transition_clinic_appointment(appointment_id,version,'complete','Signed fixture assessment');
   EXECUTE 'RESET ROLE';
   IF NOT EXISTS(SELECT 1 FROM clinzo.notification_intent ni
@@ -238,6 +262,30 @@ BEGIN
   IF view_row->>'patient_gender' IS DISTINCT FROM 'Female' THEN
     RAISE EXCEPTION 'Patient cannot see own appointment details';
   END IF;
+  PERFORM public.submit_my_doctor_review(appointment_id,5,'Helpful consultation');
+  IF public.get_my_doctor_review(appointment_id)->>'rating' IS DISTINCT FROM '5' THEN
+    RAISE EXCEPTION 'Patient cannot read the saved doctor rating';
+  END IF;
+  BEGIN
+    PERFORM public.submit_my_doctor_review(appointment_id,4,NULL);
+    RAISE EXCEPTION 'Duplicate doctor review was accepted';
+  EXCEPTION WHEN unique_violation THEN NULL;
+  END;
+  EXECUTE 'RESET ROLE';
+  IF NOT EXISTS (SELECT 1 FROM clinzo.doctor_review r WHERE r.appointment_id=smoke.appointment_id
+      AND r.moderation_state='published' AND r.comment='Helpful consultation') THEN
+    RAISE EXCEPTION 'Completed doctor rating was not published';
+  END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',manager_auth::text,true);
+  IF public.get_my_doctor_review(appointment_id) IS NOT NULL THEN
+    RAISE EXCEPTION 'Another patient could read doctor review';
+  END IF;
+  BEGIN
+    PERFORM public.submit_my_doctor_review(appointment_id,3,NULL);
+    RAISE EXCEPTION 'Another patient rated this appointment';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
   EXECUTE 'RESET ROLE';
   IF has_function_privilege('authenticated',
     'clinzo.record_manual_doctor_facility_association(uuid,uuid,text,text)','EXECUTE') THEN

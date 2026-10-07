@@ -61,7 +61,6 @@ export function BookingStatusScreen({
               qualification={appointment.qualification}
               specialty={appointment.specialty}
               experience={appointment.experience}
-              rating={appointment.rating}
               fee={appointment.fee}
               contextLabel={flow.profileContext}
               showChevron={false}

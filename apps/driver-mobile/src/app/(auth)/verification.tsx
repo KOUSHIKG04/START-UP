@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -39,7 +40,7 @@ export default function DriverVerification() {
   if (application.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
 

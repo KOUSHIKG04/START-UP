@@ -7,7 +7,7 @@ import { AudioSession, LiveKitRoom, VideoTrack, isTrackReference, registerGlobal
 import { Track, type LocalVideoTrack } from "livekit-client";
 import { getOnlineVideoToken, startOnlineAppointment } from "@startup/data-access";
 import { ChevronLeft, MessageCircle, MicOff, Mic, SwitchCamera, PhoneOff, User } from "lucide-react-native";
-import { Button } from "@startup/mobile-ui";
+import { Button, Loader } from "@startup/mobile-ui";
 import {
   Heading,
   IconButton,
@@ -44,15 +44,11 @@ function DemoOnlineConsultation() {
         >
           <ChevronLeft size={26} color={palette.primary} />
         </IconButton>
-        <View>
-          <Heading>{patient.name}</Heading>
-          <Label style={{ fontSize: 12, color: palette.dark }}>
-            Demo consultation · Video is not connected
-          </Label>
-        </View>
+        <Heading>{patient.name}</Heading>
       </View>
       <View style={styles.stage}>
         <User size={30} color={palette.primary} />
+        <Label>Demo consultation · Video is not connected</Label>
         {ending && (
           <View style={styles.endPanel}>
             <Heading>End demo call?</Heading>
@@ -138,7 +134,7 @@ function LiveOnlineConsultation({ appointmentId }: { appointmentId: string }) {
     return () => { void AudioSession.stopAudioSession(); };
   }, [token.data]);
   const appointment = live.appointment;
-  if (live.loading) return <SafeAreaView style={styles.screen}><Label>Loading consultation…</Label></SafeAreaView>;
+  if (live.loading) return <SafeAreaView style={styles.screen}><Loader theme="doctor" size="large" style={{ flex: 1 }} /></SafeAreaView>;
   if (!appointment) return <MissingPatient />;
   if (appointment.status === "confirmed") return <SafeAreaView style={styles.screen}>
     <Heading>{appointment.patient_name}</Heading>
@@ -149,7 +145,7 @@ function LiveOnlineConsultation({ appointmentId }: { appointmentId: string }) {
   if (appointment.status !== "in_consultation") return <MissingPatient />;
   if (!token.data) return <SafeAreaView style={styles.screen}>
     <Heading>{appointment.patient_name}</Heading>
-    <Label>{token.error instanceof Error ? token.error.message : "Connecting video…"}</Label>
+    {token.error instanceof Error ? <Label style={ui.error}>{token.error.message}</Label> : <Loader theme="doctor" size="large" />}
   </SafeAreaView>;
   return <LiveKitRoom serverUrl={token.data.serverUrl} token={token.data.participantToken} connect audio video>
     <LiveVideoStage appointmentId={appointmentId} patientName={appointment.patient_name} patientId={appointment.patient_id} />
@@ -173,7 +169,12 @@ function LiveVideoStage({ appointmentId, patientName, patientId }: { appointment
     try {
       const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track as LocalVideoTrack | undefined;
       if (!track) throw new Error("Camera track unavailable");
-      await track.mediaStreamTrack.applyConstraints({ facingMode: front ? "environment" : "user" });
+      const constraints = {
+        ...track.mediaStreamTrack.getConstraints(),
+        facingMode: front ? "environment" : "user",
+      };
+      delete constraints.deviceId;
+      await track.mediaStreamTrack.applyConstraints(constraints);
       setFront(!front);
       setDeviceError("");
     } catch { setDeviceError("Camera could not be switched."); }
@@ -183,26 +184,26 @@ function LiveVideoStage({ appointmentId, patientName, patientId }: { appointment
     try { await room.localParticipant.setMicrophoneEnabled(muted); setMuted(!muted); setDeviceError(""); }
     catch { setDeviceError("Microphone setting could not be changed."); }
   };
-  return <SafeAreaView style={styles.screen}>
-    <View style={ui.row}>
-      <IconButton label="Go back" onPress={() => router.canGoBack() ? router.back() : router.replace("/appointments")}><ChevronLeft size={26} color={palette.primary} /></IconButton>
-      <View><Heading>{patientName}</Heading><Label style={{ fontSize: 12, color: palette.dark }}>Secure video consultation</Label></View>
-    </View>
-    <View style={styles.stage}>
+  return <SafeAreaView style={styles.liveScreen}>
+    <View style={styles.liveStage}>
       {remote && isTrackReference(remote) ? <VideoTrack trackRef={remote} style={StyleSheet.absoluteFill} /> : <User size={30} color={palette.primary} />}
-      {ending ? <View style={styles.endPanel}>
+      {ending ? <View style={styles.liveEndPanel}>
         <Heading>End call?</Heading>
         <Label>Continue with clinical notes for {patientName}.</Label>
         <Button theme="doctor" label="Continue to clinical notes" onPress={() => { setEnding(false); router.replace(notesRoute); }} />
         <Button theme="doctor" variant="secondary" label="Stay in call" onPress={() => setEnding(false)} />
       </View> : null}
     </View>
-    <View style={styles.self}>
+    <View style={styles.liveHeader}>
+      <IconButton label="Go back" onPress={() => router.canGoBack() ? router.back() : router.replace("/appointments")}><ChevronLeft size={26} color={palette.primary} /></IconButton>
+      <Heading>{patientName}</Heading>
+    </View>
+    <View style={styles.liveSelf}>
       {local && isTrackReference(local) ? <VideoTrack trackRef={local} style={StyleSheet.absoluteFill} /> : <User size={26} color="white" />}
       <Label style={{ color: "white", fontSize: 11 }}>{front ? "You" : "Back camera"}{muted ? " · Muted" : ""}</Label>
     </View>
-    {deviceError ? <Label style={ui.error}>{deviceError}</Label> : null}
-    <View style={styles.controls}>
+    {deviceError ? <View style={styles.liveDeviceError}><Label style={ui.error}>{deviceError}</Label></View> : null}
+    <View style={styles.liveControls}>
       <IconButton label={front ? "Switch to back camera" : "Switch to front camera"} style={styles.control} disabled={switchingCamera || !local} onPress={() => void switchCamera()}><SwitchCamera size={27} color="white" /></IconButton>
       <IconButton label={muted ? "Unmute microphone" : "Mute microphone"} style={[styles.control, muted && { backgroundColor: palette.dark }]} onPress={() => void toggleMic()}>{muted ? <MicOff size={25} color="white" /> : <Mic size={25} color="white" />}</IconButton>
       <IconButton label="Chat with patient" style={styles.control} onPress={() => router.push({ pathname: "/chat", params: { appointmentId, patientId, mode: "online" } })}><MessageCircle size={25} color="white" /></IconButton>
@@ -212,6 +213,13 @@ function LiveVideoStage({ appointmentId, patientName, patientId }: { appointment
 }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#CFEDEA", padding: 16 },
+  liveScreen: { flex: 1, backgroundColor: "#CFEDEA" },
+  liveStage: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
+  liveHeader: { position: "absolute", top: 12, left: 16, right: 16, flexDirection: "row", alignItems: "center", gap: 12 },
+  liveSelf: { position: "absolute", right: 30, bottom: 150, width: 101, height: 131, backgroundColor: "#0A9E96", borderRadius: 26, alignItems: "center", justifyContent: "center", gap: 8 },
+  liveControls: { position: "absolute", left: 38, right: 38, bottom: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  liveDeviceError: { position: "absolute", left: 16, right: 16, bottom: 112 },
+  liveEndPanel: { position: "absolute", left: 16, right: 16, padding: 20, gap: 14, borderRadius: 18, backgroundColor: "white" },
   stage: { flex: 1, alignItems: "center", justifyContent: "center" },
   self: {
     width: 100,

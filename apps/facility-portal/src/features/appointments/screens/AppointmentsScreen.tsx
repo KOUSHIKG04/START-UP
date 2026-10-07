@@ -205,9 +205,6 @@ export default function AppointmentsScreen({
           <h1 className="text-[24px] font-bold tracking-tight text-[#0f172a]">
             Appointments
           </h1>
-          <p className="mt-0.5 text-[13px] text-[#475569]">
-            Manage and schedule patient visits across departments
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

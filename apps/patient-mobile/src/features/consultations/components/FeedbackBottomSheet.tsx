@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -9,48 +9,41 @@ import {
   View,
 } from "react-native";
 import { CheckCircle2 } from "lucide-react-native";
-import { router } from "expo-router";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, TextArea } from "@startup/mobile-ui";
 
 type FeedbackBottomSheetProps = {
   visible: boolean;
   onClose: () => void;
-  onSubmitSuccess?: () => void;
+  onSubmit: (comment: string) => Promise<void>;
 };
 
 export default function FeedbackBottomSheet({
   visible,
   onClose,
-  onSubmitSuccess,
+  onSubmit,
 }: FeedbackBottomSheetProps) {
   const [feedback, setFeedback] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleClose = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
     setSubmitted(false);
     setFeedback("");
     onClose();
   };
 
-  const submit = () => {
-    setSubmitted(true);
-    timerRef.current = setTimeout(() => {
-      handleClose();
-      if (onSubmitSuccess) {
-        onSubmitSuccess();
-      } else {
-        router.replace("/");
-      }
-    }, 3000);
+  const submit = async () => {
+    if (submitting || !feedback.trim()) return;
+    setSubmitting(true);
+    try {
+      await onSubmit(feedback.trim());
+      setSubmitted(true);
+    } catch {
+      // Keep the form open so the patient can retry after the route's error toast.
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -82,6 +75,7 @@ export default function FeedbackBottomSheet({
                 </View>
               </View>
               <Text style={styles.thankYouTitle}>Thank you!</Text>
+              <Button label="Done" onPress={handleClose} style={styles.submitButton} />
             </View>
           ) : (
             <>
@@ -97,9 +91,9 @@ export default function FeedbackBottomSheet({
                 style={styles.textArea}
               />
               <Button
-                disabled={!feedback.trim()}
+                disabled={!feedback.trim() || submitting}
                 label="Submit"
-                onPress={submit}
+                onPress={() => void submit()}
                 style={styles.submitButton}
               />
             </>

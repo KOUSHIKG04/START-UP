@@ -1,10 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { AudioSession, LiveKitRoom, VideoTrack, isTrackReference, registerGlobals, useRoomContext, useTracks } from "@livekit/react-native";
 import { Track, type LocalVideoTrack } from "livekit-client";
-import { uuidSchema } from "@startup/contracts";
-import { getOnlineJoinContext, getOnlineVideoToken, listOnlineMessages, sendOnlineMessage, subscribeOnlineMessages } from "@startup/data-access";
+import { uuidSchema, type ClinicAppointment } from "@startup/contracts";
+import { getOnlineJoinContext, getOnlineVideoToken, listClinicAppointments, listOnlineMessages, sendOnlineMessage, subscribeOnlineMessages } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import {
   KeyboardAvoidingView,
@@ -29,7 +29,7 @@ import {
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { FadedScrollView, Input, SafeAreaView, useToast, useToastFeedback } from "@startup/mobile-ui";
+import { FadedScrollView, Input, Loader, SafeAreaView, useToast, useToastFeedback } from "@startup/mobile-ui";
 import type { Appointment } from "../../appointments/types/appointment";
 
 registerGlobals();
@@ -45,6 +45,7 @@ export function OnlineVisitFlow({
   appointment,
   initialChat,
   onBackPress,
+  onComplete,
 }: OnlineVisitFlowProps) {
   const [showChat, setShowChat] = useState(initialChat);
   const [message, setMessage] = useState("");
@@ -55,6 +56,14 @@ export function OnlineVisitFlow({
   const live = uuidSchema.safeParse(appointmentId).success;
   const { profile } = useMobileSession();
   const queryClient = useQueryClient();
+  const completionShown = useRef(false);
+  const appointmentStatus = useQuery({ queryKey: ["patient-clinic-appointments"],
+    queryFn: () => listClinicAppointments(supabase!), enabled: Boolean(live && supabase), refetchInterval: 10_000 });
+  useEffect(() => {
+    if (!appointmentStatus.data?.some((item: ClinicAppointment) => item.id === appointmentId && item.status === "completed") || completionShown.current) return;
+    completionShown.current = true;
+    onComplete();
+  }, [appointmentStatus.data, appointmentId, onComplete]);
   const context = useQuery({ queryKey: ["online-context", appointmentId],
     queryFn: () => getOnlineJoinContext(supabase!, appointmentId!), enabled: Boolean(live && supabase) });
   const messages = useQuery({ queryKey: ["online-messages", appointmentId],
@@ -83,11 +92,11 @@ export function OnlineVisitFlow({
   };
 
   if (!live) return <View style={styles.videoCallScreen}><Text>This appointment is not linked to a live online consultation.</Text></View>;
-  if (context.isLoading) return <View style={styles.videoCallScreen}><Text>Loading consultation…</Text></View>;
+  if (context.isLoading) return <View style={styles.videoCallScreen}><Loader theme="patient" size="large" /></View>;
   if (!context.data) return <View style={styles.videoCallScreen}><Text>Consultation is available after confirmation, near its scheduled time.</Text></View>;
 
   if (!showChat) {
-    if (token.isLoading) return <View style={styles.videoCallScreen}><Text>Connecting video…</Text></View>;
+    if (token.isLoading) return <View style={styles.videoCallScreen}><Loader theme="patient" size="large" /></View>;
     if (!token.data) return <View style={styles.videoCallScreen}><Text>{token.error instanceof Error ? token.error.message : "Video service is unavailable."}</Text></View>;
     return (
       <LiveKitRoom serverUrl={token.data.serverUrl} token={token.data.participantToken} connect audio video>
@@ -96,7 +105,15 @@ export function OnlineVisitFlow({
         cameraOff={cameraOff}
         muted={muted}
         onBackPress={onBackPress}
-        onEnd={onBackPress}
+        onEnd={() => { void (async () => {
+          try {
+            const latest = await listClinicAppointments(supabase!);
+            if (latest.some((item: ClinicAppointment) => item.id === appointmentId && item.status === "completed")) {
+              if (!completionShown.current) { completionShown.current = true; onComplete(); }
+            }
+            else onBackPress();
+          } catch { onBackPress(); }
+        })(); }}
         onCameraChange={setCameraOff}
         onMuteChange={setMuted}
       />
@@ -145,7 +162,7 @@ export function OnlineVisitFlow({
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.chatDay}>TODAY · SECURE CONSULTATION</Text>
-        {messages.isLoading ? <Text>Loading messages…</Text> : null}
+        {messages.isLoading ? <Loader theme="patient" style={{ minHeight: 48 }} /> : null}
         {(messages.data ?? []).map((item) => (
           <ChatBubble key={item.id} received={item.sender_id !== profile?.identity_id}
             text={item.body} time={new Date(item.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} />
@@ -249,7 +266,12 @@ function VideoCallView({
     }
     setSwitchingCamera(true);
     try {
-      await track.mediaStreamTrack.applyConstraints({ facingMode: frontCamera ? "environment" : "user" });
+      const constraints = {
+        ...track.mediaStreamTrack.getConstraints(),
+        facingMode: frontCamera ? "environment" : "user",
+      };
+      delete constraints.deviceId;
+      await track.mediaStreamTrack.applyConstraints(constraints);
       setFrontCamera(!frontCamera);
     } catch {
       showToast({ title: "Could not switch camera", message: "Check that this device has another camera and try again.", type: "error" });

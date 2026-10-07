@@ -1,11 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
-import { ChevronRight, MapPin } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, CardSeparator, Chip } from "@startup/mobile-ui";
 import type { AboutDoctorProps } from "../types/doctor-profile";
 import { doctorLanguageName } from "../utils/doctorDisplay";
 
-export function AboutDoctor({ doctorName, bio, facilityName, facilityAddress, distanceMeters, languages, onGoToSlots }: AboutDoctorProps) {
+export function AboutDoctor({
+  doctorName,
+  bio,
+  facilityName,
+  facilityAddress,
+  distanceMeters,
+  languages,
+  onBack,
+  onGoToSlots,
+}: AboutDoctorProps) {
   return (
     <View style={styles.container}>
       <Card
@@ -40,7 +49,11 @@ export function AboutDoctor({ doctorName, bio, facilityName, facilityAddress, di
                 <Text style={styles.hospitalName}>{facilityName}, </Text>
                 <Text style={styles.hospitalAddress}>{facilityAddress}</Text>
               </Text>
-              {distanceMeters !== null ? <Text style={styles.secondaryText}>{(distanceMeters / 1000).toFixed(1)} km from you</Text> : null}
+              {distanceMeters !== null ? (
+                <Text style={styles.secondaryText}>
+                  {(distanceMeters / 1000).toFixed(1)} km from you
+                </Text>
+              ) : null}
             </View>
           </View>
         </View>
@@ -51,27 +64,34 @@ export function AboutDoctor({ doctorName, bio, facilityName, facilityAddress, di
           <Text style={styles.sectionTitle}>Languages</Text>
           <View style={styles.languageRow}>
             {languages.map((language) => (
-              <Chip key={language} label={doctorLanguageName(language)} style={styles.languageChip} />
+              <Chip
+                key={language}
+                label={doctorLanguageName(language)}
+                style={styles.languageChip}
+              />
             ))}
           </View>
         </View>
       </Card>
 
-      <Button
-        label="Book Slots"
-        variant="primary"
-        theme="patient"
-        onPress={onGoToSlots}
-        style={styles.bookSlotsButton}
-        labelStyle={styles.bookSlotsLabel}
-        rightIcon={
-          <ChevronRight
-            color={colors.white}
-            size={16}
-            strokeWidth={2.4}
-          />
-        }
-      />
+      <View style={styles.actions}>
+        <Button
+          label="Back"
+          variant="outline"
+          theme="patient"
+          onPress={onBack}
+          style={styles.actionButton}
+          labelStyle={styles.bookSlotsLabel}
+        />
+        <Button
+          label="Book Slots"
+          variant="primary"
+          theme="patient"
+          onPress={onGoToSlots}
+          style={styles.actionButton}
+          labelStyle={styles.bookSlotsLabel}
+        />
+      </View>
     </View>
   );
 }
@@ -147,11 +167,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
     paddingVertical: 4,
   },
-  bookSlotsButton: {
-    width: "100%",
-    alignSelf: "stretch",
+  actions: { flexDirection: "row", gap: 10 },
+  actionButton: {
+    flex: 1,
+    minWidth: 0,
     minHeight: 48,
     borderRadius: radius.md,
+    paddingHorizontal: 8,
   },
   bookSlotsLabel: {
     fontFamily: fontFamilies.semibold,

@@ -43,6 +43,7 @@ export type AboutDoctorProps = {
   facilityAddress: string;
   distanceMeters: number | null;
   languages: string[];
+  onBack: () => void;
   onGoToSlots: () => void;
 };
 

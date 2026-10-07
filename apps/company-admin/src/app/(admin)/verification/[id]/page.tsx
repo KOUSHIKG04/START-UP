@@ -42,7 +42,10 @@ export default async function CaseDetail({
       ? ["registration_certificate", "operating_licence"]
       : ["aadhaar", "pan", "driving_licence", "vehicle_rc", "insurance", "fitness", "ambulance_image", "equipment_images"];
   const missingKinds = requiredKinds.filter(kind => !current.some(document => document.kind === kind));
-  const allApproved = missingKinds.length === 0 && current.every(document => document.status === "approved");
+  const claimedQualification = typeof item.doctor?.claimed_qualification === "string" ? item.doctor.claimed_qualification : "";
+  const reviewedQualification = typeof item.doctor?.reviewed_qualification === "string" ? item.doctor.reviewed_qualification : "";
+  const qualificationApproved = item.subject_type !== "doctor" || Boolean(claimedQualification && claimedQualification === reviewedQualification);
+  const allApproved = missingKinds.length === 0 && current.every(document => document.status === "approved") && qualificationApproved;
   const details = item.doctor ?? item.facility ?? item.driver;
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -57,13 +60,6 @@ export default async function CaseDetail({
           <h1 className="text-2xl font-semibold tracking-tight">
             {item.subject_name}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm capitalize">
-            {item.subject_type === "facility"
-              ? "Hospital / clinic"
-              : item.subject_type}{" "}
-            verification · Submitted{" "}
-            {formatDisplayDate(item.submitted_at, "Asia/Kolkata")}
-          </p>
         </div>
         <StatusBadge status={item.status} />
       </header>
@@ -103,6 +99,11 @@ export default async function CaseDetail({
                   Version {document.version} · Submitted{" "}
                   {formatDisplayDate(document.submitted_at, "Asia/Kolkata")}
                 </p>
+                {item.subject_type === "doctor" && document.kind === "medical_degree" ? (
+                  <p className="mt-2 text-sm">
+                    Claimed qualifications: <strong>{claimedQualification || "Not submitted yet"}</strong>
+                  </p>
+                ) : null}
               </div>
               <div className="flex items-center gap-3">
                 <span className="bg-muted rounded-full px-2.5 py-1 text-xs capitalize">
@@ -124,7 +125,7 @@ export default async function CaseDetail({
               </p>
             )}
             {document.status === "pending" && (
-              <DocumentActions caseId={id} documentId={document.id} />
+              <DocumentActions caseId={id} documentId={document.id} approvalLabel={document.kind === "medical_degree" ? "Approve degree and qualifications" : undefined} canApprove={document.kind !== "medical_degree" || Boolean(claimedQualification)} />
             )}
           </article>
         ))}
@@ -138,14 +139,13 @@ export default async function CaseDetail({
         <section className="bg-card rounded-xl border p-5">
           <h2 className="font-semibold">Complete verification</h2>
           <p className="text-muted-foreground mt-1 mb-4 text-sm">
-            Every required document must be approved before this case can be
-            verified.
+            Every required document and the doctor's claimed qualifications must be reviewed before verification.
           </p>
           {allApproved ? (
             <FinalizeAction caseId={id} subjectType={item.subject_type} />
           ) : (
             <p className="text-muted-foreground text-sm">
-              {missingKinds.length ? `Awaiting ${missingKinds.map(kind => documentNames[kind] ?? kind.replaceAll("_", " ")).join(", ")}.` : "Review all pending or rejected documents first."}
+              {item.subject_type === "doctor" && !claimedQualification ? "Awaiting the doctor's qualifications." : missingKinds.length ? `Awaiting ${missingKinds.map(kind => documentNames[kind] ?? kind.replaceAll("_", " ")).join(", ")}.` : !qualificationApproved ? "Review the claimed qualifications against the degree certificate." : "Review all pending or rejected documents first."}
             </p>
           )}
         </section>

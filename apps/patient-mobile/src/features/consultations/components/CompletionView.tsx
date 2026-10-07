@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -21,6 +21,8 @@ import type { CompletionActions } from "../types/visit-session";
 
 export interface CompletionViewProps extends CompletionActions {
   appointment: Appointment;
+  existingRating?: number | null;
+  onSubmitRating?: (rating: number, comment?: string) => Promise<void>;
 }
 
 const experienceRatings = [
@@ -36,25 +38,24 @@ export function CompletionView({
   onGoHome,
   onViewMedicines,
   onViewPrescription,
+  existingRating,
+  onSubmitRating,
 }: CompletionViewProps) {
   const insets = useSafeAreaInsets();
-  const [rating, setRating] = useState<number>();
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [rating, setRating] = useState<number | undefined>(existingRating ?? undefined);
+  const [ratingSubmitted, setRatingSubmitted] = useState(existingRating != null);
+  const [submitting, setSubmitting] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const ratingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (ratingTimerRef.current) clearTimeout(ratingTimerRef.current);
-    };
-  }, []);
-
-  const handleRatingSubmit = () => {
-    if (rating === undefined || ratingSubmitted) return;
-    setRatingSubmitted(true);
-    ratingTimerRef.current = setTimeout(() => {
-      onGoHome();
-    }, 2000);
+  const submitRating = async (comment?: string) => {
+    if (rating === undefined || ratingSubmitted || !onSubmitRating || submitting) return;
+    setSubmitting(true);
+    try {
+      await onSubmitRating(rating, comment);
+      setRatingSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
   const isClinic = appointment.consultationType === "Clinic Visit";
   const isHome = appointment.consultationType === "Home Visit";
@@ -139,7 +140,7 @@ export function CompletionView({
       </View>
 
       <View style={styles.bottomSection}>
-        <Card
+        {onSubmitRating ? <Card
           variant="outlined"
           backgroundColor="#E8F8F4"
           borderRadius={radius.md}
@@ -149,7 +150,7 @@ export function CompletionView({
           padding={16}
           style={styles.experienceCard}
         >
-          <Text style={styles.feedbackTitle}>How was your experience?</Text>
+          <Text style={styles.feedbackTitle}>Rate your doctor</Text>
           {/* <Text style={styles.feedbackDescription}>
             Your feedback helps us improve
           </Text> */}
@@ -157,14 +158,14 @@ export function CompletionView({
             {experienceRatings.map((item, index) => (
               <Pressable
                 key={item.label}
-                accessibilityLabel={item.label}
+                accessibilityLabel={`${index + 1} out of 5, ${item.label}`}
                 accessibilityRole="button"
-                accessibilityState={{ selected: rating === index }}
-                disabled={ratingSubmitted}
-                onPress={() => setRating(index)}
+                accessibilityState={{ selected: rating === index + 1 }}
+                disabled={ratingSubmitted || submitting}
+                onPress={() => setRating(index + 1)}
                 style={({ pressed }) => [
                   styles.ratingButton,
-                  rating === index ? styles.selectedRating : undefined,
+                  rating === index + 1 ? styles.selectedRating : undefined,
                   pressed ? styles.pressed : undefined,
                 ]}
               >
@@ -177,8 +178,8 @@ export function CompletionView({
             <Button
               label="Submit"
               variant="outline"
-              disabled={rating === undefined}
-              onPress={handleRatingSubmit}
+              disabled={rating === undefined || submitting}
+              onPress={() => void submitRating().catch(() => {})}
               style={[
                 styles.experienceSubmitButton,
                 rating !== undefined && styles.experienceSubmitButtonActive,
@@ -188,10 +189,10 @@ export function CompletionView({
           ) : (
             <View style={styles.ratingSubmittedConfirmation}>
               <CheckCircle2 color={colors.patient.primaryDark} size={16} strokeWidth={2.4} />
-              <Text style={styles.ratingSubmittedText}>Submitted • Returning home...</Text>
+              <Text style={styles.ratingSubmittedText}>Rating saved. Thank you!</Text>
             </View>
           )}
-        </Card>
+        </Card> : null}
 
         <View style={styles.completionActionsRow}>
           <Button
@@ -200,20 +201,21 @@ export function CompletionView({
             style={styles.completionSideButton}
             labelStyle={styles.completionSideButtonLabel}
           />
-          <Button
+          {onSubmitRating && !ratingSubmitted ? <Button
             label="Share Detailed Feedback"
-            onPress={() => setFeedbackOpen(true)}
+            onPress={() => { if (rating !== undefined) setFeedbackOpen(true); }}
+            disabled={rating === undefined || submitting}
             style={styles.completionSideButton}
             labelStyle={styles.completionSideButtonLabel}
             variant="outline"
-          />
+          /> : null}
         </View>
       </View>
 
       <FeedbackBottomSheet
         visible={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
-        onSubmitSuccess={onGoHome}
+        onSubmit={submitRating}
       />
     </FadedScrollView>
   );

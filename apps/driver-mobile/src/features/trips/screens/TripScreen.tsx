@@ -5,15 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, MessageCircle, Phone, User } from "lucide-react-native";
 import { completeMyDriverTrip, listMyDriverTrips, transitionMyDriverTrip } from "@startup/data-access";
 import type { MyDriverTrip, TransitionDriverTripInput } from "@startup/contracts";
-import { Button, Input, useToast, useToastFeedback } from "@startup/mobile-ui";
+import { Button, Input, Loader, useToast, useToastFeedback } from "@startup/mobile-ui";
 import { Body, Card, Copy, Heading, Metrics, PageHeader } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
-const stages: Record<Exclude<MyDriverTrip["status"], "cancelled">, [string, string]> = {
-  heading_to_pickup: ["Navigate to Patient", "Heading to pickup"], arrived_at_pickup: ["At Pickup Location", "Arrived at pickup"],
-  in_progress: ["Trip in Progress", "En route to destination"], arrived_at_destination: ["At Destination", "Ask for patient verification"],
-  completed: ["Trip Complete", "Patient delivered safely"],
+const stages: Record<Exclude<MyDriverTrip["status"], "cancelled">, string> = {
+  heading_to_pickup: "Navigate to Patient", arrived_at_pickup: "At Pickup Location",
+  in_progress: "Trip in Progress", arrived_at_destination: "At Destination",
+  completed: "Trip Complete",
 };
 const next: Partial<Record<MyDriverTrip["status"], { action: TransitionDriverTripInput["action"]; label: string }>> = {
   heading_to_pickup: { action: "arrive_pickup", label: "I’ve arrived at pickup" }, arrived_at_pickup: { action: "start", label: "Start trip" },
@@ -40,9 +40,9 @@ export function TripScreen() {
     catch { const feedback = "Could not complete the trip. Check the PIN and trip status."; showToast({ title: "Trip completion failed", message: feedback, type: "error" }); }
     finally { setBusy(false); }
   }
-  if (!trip || trip.status === "cancelled") return <View style={ui.screen}><PageHeader title="Current trip" /><Body>{trips.isLoading ? <Copy>Loading trip…</Copy> : <Heading>No active trip</Heading>}<Button theme="driver" label="Back to Home" onPress={() => router.replace("/home")} /></Body></View>;
-  const [title, subtitle] = stages[trip.status];
-  return <View style={ui.screen}><PageHeader title={title} subtitle={subtitle} /><Body>
+  if (!trip || trip.status === "cancelled") return <View style={ui.screen}><PageHeader title="Current trip" /><Body>{trips.isLoading ? <Loader theme="driver" style={{ minHeight: 96 }} /> : <Heading>No active trip</Heading>}{!trips.isLoading ? <Button theme="driver" label="Back to Home" onPress={() => router.replace("/home")} /> : null}</Body></View>;
+  const title = stages[trip.status];
+  return <View style={ui.screen}><PageHeader title={title} /><Body>
     {trip.status !== "completed" ? <>
       <Image source={require("../../../../assets/figma/trip-map.png")} accessibilityLabel="Reference route map; live navigation is not connected" style={styles.map} />
       {trip.status === "arrived_at_destination" ? <View style={styles.pin}><Heading>Enter Patient’s PIN to Complete</Heading><Input accessibilityLabel="Patient PIN" value={pin} onChangeText={value => setPin(value.replace(/\D/g, "").slice(0, 4))} keyboardType="number-pad" maxLength={4} placeholder="— — — —" secureTextEntry style={styles.pinInput} /><View style={styles.notice}><Copy style={{ color: palette.primary }}>Ask the patient for the PIN shown in their app.</Copy></View></View> : null}

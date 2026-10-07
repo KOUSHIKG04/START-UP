@@ -3,7 +3,7 @@ import { getMyPatientVerificationPin } from "@startup/data-access";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ChevronDown, Lock } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Button, Card, Input } from "@startup/mobile-ui";
+import { Button, Card, Input, Loader } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 export function ProfilePinCard() {
@@ -105,7 +105,7 @@ export function ProfilePinCard() {
             ))}
           </View>
           {loading ? (
-            <Text style={styles.pinInstructions}>Checking active service…</Text>
+            <Loader theme="patient" style={{ minHeight: 32 }} />
           ) : null}
           {unavailable ? (
             <Text style={styles.pinInstructions}>

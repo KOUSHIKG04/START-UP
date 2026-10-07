@@ -25,9 +25,6 @@ export default async function OverviewPage() {
         <h1 className="text-2xl font-semibold tracking-tight">
           Verification overview
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Review submitted credentials across the Clinzo network.
-        </p>
       </header>
       <section
         aria-label="Verification workload"

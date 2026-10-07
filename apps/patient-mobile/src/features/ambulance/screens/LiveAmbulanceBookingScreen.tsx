@@ -14,7 +14,7 @@ import {
   requestAmbulanceBooking,
 } from "@startup/data-access";
 import type { RequestAmbulanceBookingInput } from "@startup/contracts";
-import { Button, Header, Input, SafeAreaView } from "@startup/mobile-ui";
+import { Button, Header, Input, Loader, SafeAreaView } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import { LiveAmbulanceRequestsList } from "../components/LiveAmbulanceRequestsList";
 
@@ -173,13 +173,9 @@ export function LiveAmbulanceBookingScreen({
           status here.
         </Text>
         <Button
-          label={
-            locating
-              ? "Finding pickup…"
-              : pickup
-                ? "Refresh pickup location"
-                : "Use current pickup location"
-          }
+          label={pickup ? "Refresh pickup location" : "Use current pickup location"}
+          accessibilityLabel={locating ? "Locating pickup" : pickup ? "Refresh pickup location" : "Use current pickup location"}
+          leftIcon={locating ? <Loader theme="patient" /> : undefined}
           disabled={locating}
           variant="outline"
           onPress={() => void locatePickup()}
@@ -213,7 +209,7 @@ export function LiveAmbulanceBookingScreen({
           ))}
         </View>
         <Text style={styles.subtitle}>Destination hospital</Text>
-        {hospitals.isLoading ? <Text>Loading hospitals…</Text> : null}
+        {hospitals.isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
         {hospitals.data?.length === 0 ? (
           <Text>No active hospitals are available in the directory yet.</Text>
         ) : null}

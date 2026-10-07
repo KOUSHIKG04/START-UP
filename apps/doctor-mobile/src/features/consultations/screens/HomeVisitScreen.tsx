@@ -33,7 +33,6 @@ export function HomeVisitScreen() {
   return (
     <DoctorScreen
       title="Home visit"
-      subtitle={`Appointment – ${appointment.date || "Today"}, ${appointment.time || "5:30 PM"}`}
       bottomNav={false}
     >
       <Image

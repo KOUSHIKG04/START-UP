@@ -3,7 +3,7 @@ import { Pressable, View } from "react-native";
 import { Ambulance } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { listMyDriverTrips } from "@startup/data-access";
-import { useToastFeedback } from "@startup/mobile-ui";
+import { Skeleton, useToastFeedback } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -46,11 +46,6 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
     <View style={ui.screen}>
       <PageHeader
         title={history ? "My Trips" : "My Earnings"}
-        subtitle={
-          history
-            ? "Your completed ambulance trips"
-            : "Ambulance billing statements"
-        }
       />
       <Body>
         <View
@@ -100,8 +95,8 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
           </>
         )}
         <Heading>Trip History ({period})</Heading>
-        {trips.isLoading ? <Copy>Loading trips…</Copy> : null}
-        {!filtered.length ? (
+        {trips.isLoading ? <Skeleton theme="driver" height={92} radius={12} /> : null}
+        {!trips.isLoading && !filtered.length ? (
           <Card>
             <View style={[ui.center, { paddingVertical: 24 }]}>
               <Ambulance color={palette.primary} size={36} />

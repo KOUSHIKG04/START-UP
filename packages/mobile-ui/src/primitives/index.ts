@@ -12,3 +12,5 @@ export * from "./StatusBadge";
 export * from "./FadedScrollView";
 export * from "./Accordion";
 export * from "./Toast";
+export * from "./Loader";
+export * from "./Skeleton";

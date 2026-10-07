@@ -1,4 +1,5 @@
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
@@ -32,7 +33,7 @@ export default function DetailsRoute() {
   if (application.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
 

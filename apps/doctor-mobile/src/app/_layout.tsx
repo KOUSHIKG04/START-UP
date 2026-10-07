@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import {
   albertSansFonts,
+  Loader,
   SafeAreaProvider,
   MobileThemeProvider,
   ToastProvider,
@@ -36,7 +37,7 @@ export default function RootLayout() {
   if (auth.loading)
     return (
       <View style={styles.root}>
-        <ActivityIndicator style={{ flex: 1 }} />
+        <Loader theme="doctor" size="large" style={{ flex: 1 }} />
       </View>
     );
   if (auth.session && auth.error)

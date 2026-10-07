@@ -25,7 +25,6 @@ export const ui = StyleSheet.create({
     lineHeight: 28,
     color: "white",
   },
-  subtitle: { color: "white", fontSize: 13, lineHeight: 18 },
   header: { backgroundColor: palette.primary },
   headerRow: {
     minHeight: 96,

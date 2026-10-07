@@ -113,12 +113,6 @@ function ProfileHeader({ family }: { family: boolean }) {
         <Text style={styles.title}>
           {family ? "Family member Profile" : "Your Profile"}
         </Text>
-        <Text style={styles.subtitle}>
-          {family
-            ? "let’s set up their health profile to"
-            : "let’s set up your health profile to"}
-          {"\n"}personalise your experience
-        </Text>
       </View>
     </View>
   );
@@ -371,13 +365,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.regular,
     fontSize: 22,
     color: colors.black,
-  },
-  subtitle: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#777",
-    marginTop: 2,
   },
   label: {
     fontFamily: fontFamilies.regular,

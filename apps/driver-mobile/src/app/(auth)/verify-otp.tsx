@@ -61,7 +61,6 @@ export default function DriverVerifyOtp() {
       </Pressable>
       <View style={styles.content}>
         <Text style={styles.title}>Verify OTP</Text>
-        <Text style={styles.subtitle}>Enter the 6-digit OTP sent to</Text>
         <Text style={styles.phone}>{phone}</Text>
         <Pressable
           accessibilityRole="button"
@@ -115,7 +114,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: colors.driver.text,
   },
-  subtitle: { fontFamily: fontFamilies.regular, fontSize: 14, marginTop: 8 },
   phone: {
     color: colors.driver.primary,
     fontFamily: fontFamilies.medium,

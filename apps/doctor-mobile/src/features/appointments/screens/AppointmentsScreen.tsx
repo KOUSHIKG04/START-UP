@@ -9,7 +9,7 @@ import type { ClinicAppointment, ClinicTransitionInput } from "@startup/contract
 import type { VisitMode } from "../../../types/doctor";
 import { modeLabels } from "../../../data/demo";
 import { PatientCard } from "../../patients/components/PatientCard";
-import { Button, Input, useToast } from "@startup/mobile-ui";
+import { Button, Input, Loader, useToast } from "@startup/mobile-ui";
 import { Choice, DoctorScreen, Heading, IconButton, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { supabase } from "../../../services/supabase";
@@ -131,7 +131,7 @@ export function AppointmentsScreen() {
     <View style={[ui.wrap, { justifyContent: "center", gap: 6 }]}>
       {(["all", "clinic", "online", "home"] as const).map((mode) => <Choice key={mode} label={mode === "all" ? "All" : modeLabels[mode]} selected={filter === mode} onPress={() => setFilter(mode)} />)}
     </View>
-    {appointments.isLoading ? <Label muted>Loading appointments…</Label> : null}
+    {appointments.isLoading ? <Loader theme="doctor" style={{ minHeight: 88 }} /> : null}
     {appointments.isError ? <Panel><Label style={ui.error}>Could not load appointments. Reopen this tab to retry.</Label></Panel> : null}
     {visible.map((item) => <View key={item.id} style={{ gap: 8 }}><PatientCard appointment={item} onOpen={() => setExpandedId(expandedId === item.id ? null : item.id)} />{expandedId === item.id ? <Panel>
       <Label muted>{new Date(item.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {item.facility_name}</Label>

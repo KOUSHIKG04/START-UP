@@ -11,7 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Clock3, MapPin, ShieldCheck } from "lucide-react-native";
 import { colors, fontFamilies, gradients } from "@startup/design-tokens";
 import type { PublicHospital } from "@startup/contracts";
-import { useToastFeedback } from "@startup/mobile-ui";
+import { Loader, useToastFeedback } from "@startup/mobile-ui";
 import { ambulanceTypes, type AmbulanceType } from "../utils/ambulanceConstants";
 import {
   ActionButton,
@@ -195,10 +195,10 @@ export function AmbulanceBookingForm({
             style={s.bookButton}
           />
           {isHospitalsLoading ? (
-            <Text style={s.bookingMessage}>Loading hospitals…</Text>
+            <Loader theme="patient" style={{ minHeight: 36 }} />
           ) : null}
           {isBookingsLoading ? (
-            <Text style={s.bookingMessage}>Checking your active request…</Text>
+            <Loader theme="patient" style={{ minHeight: 36 }} />
           ) : null}
           {hasActiveBooking ? (
             <Text style={s.bookingMessage}>

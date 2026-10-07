@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@startup/design-tokens";
 import {
   albertSansFonts,
+  Loader,
   SafeAreaProvider,
   MobileThemeProvider,
   ToastProvider,
@@ -51,7 +52,7 @@ export default function RootLayout() {
     return null;
   }
 
-  if (auth.loading) return <View style={styles.root}><ActivityIndicator style={{ flex: 1 }} /></View>;
+  if (auth.loading) return <View style={styles.root}><Loader theme="patient" size="large" style={{ flex: 1 }} /></View>;
   if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void signOutWithPushCleanup()} /></View>;
 
   return (

@@ -37,9 +37,6 @@ export default function AddFamilyScreen() {
                 />
               </View>
             </View>
-            <Text style={styles.subtitle}>
-              Book appointment for your loved ones
-            </Text>
           </View>
 
           {familyMembers.length > 0 ? (
@@ -131,13 +128,6 @@ const styles = StyleSheet.create({
   iconWrap: {
     justifyContent: "center",
     alignItems: "center",
-  },
-  subtitle: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 16,
-    color: "rgba(0, 0, 0, 0.5)",
-    textAlign: "center",
-    marginTop: 6,
   },
   membersList: {
     gap: 12,

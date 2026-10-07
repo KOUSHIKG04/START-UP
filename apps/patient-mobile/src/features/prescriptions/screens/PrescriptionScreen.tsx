@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { formatDisplayDate } from "@startup/contracts";
 import {
-  ActivityIndicator,
   Pressable,
   Share,
   StyleSheet,
@@ -26,6 +26,7 @@ import {
   Chip,
   FadedScrollView,
   Header,
+  Skeleton,
   useToastFeedback,
 } from "@startup/mobile-ui";
 import DoctorCard from "../../doctors/components/DoctorCard";
@@ -45,13 +46,16 @@ export function PrescriptionScreen({
     queryFn: () => listMyClinicalRecords(supabase!),
     enabled: Boolean(supabase),
   });
+  useFocusEffect(useCallback(() => {
+    if (supabase) void clinicalRecords.refetch();
+  }, [clinicalRecords.refetch]));
   useToastFeedback({ error: clinicalRecords.isError ? "Could not load prescriptions. Please retry." : "" });
 
   const records = clinicalRecords.data ?? [];
   const targetId = appointmentId ?? appointment?.id;
   const record: ClinicalRecord | undefined = targetId
     ? records.find(
-        (r) => r.appointment_id === targetId || r.appointment_code === targetId
+        (r: ClinicalRecord) => r.appointment_id === targetId || r.appointment_code === targetId
       )
     : records[0];
 
@@ -85,15 +89,12 @@ export function PrescriptionScreen({
         showsVerticalScrollIndicator={false}
       >
         {clinicalRecords.isLoading ? (
-          <View style={styles.centerBox}>
-            <ActivityIndicator color={colors.patient.primary} size="large" />
-            <Text style={styles.stateText}>Loading prescription…</Text>
-          </View>
+          <Skeleton theme="patient" height={180} radius={14} />
         ) : clinicalRecords.isError ? (
           <View style={styles.centerBox}>
             <Button label="Retry" onPress={() => void clinicalRecords.refetch()} />
           </View>
-        ) : !record ? (
+        ) : !record?.prescription_code ? (
           <View style={styles.emptyCard}>
             <FileText color={colors.patient.primary} size={42} />
             <Text style={styles.emptyTitle}>No signed prescription yet</Text>
@@ -106,16 +107,9 @@ export function PrescriptionScreen({
           <>
             <DoctorCard
               name={record.doctor_name}
-              qualification={
-                record.doctor_qualification ?? "Qualification pending review"
-              }
+              qualification={record.doctor_qualification ?? ""}
               specialty={record.doctor_specialty ?? "Specialty unavailable"}
               experience=""
-              rating={
-                record.doctor_rating === null
-                  ? "No ratings yet"
-                  : `${record.doctor_rating} (${record.doctor_review_count} reviews)`
-              }
               hideFee
               hideExperience
             />
@@ -136,7 +130,7 @@ export function PrescriptionScreen({
                   Prescription #{record.prescription_code ?? "not issued"}
                 </Text>
                 <Text style={styles.secondaryText}>
-                  Issued {formatDate(record.signed_at ?? record.started_at)}
+                  {record.signed_at ? `Consultation completed ${formatDate(record.signed_at)}` : "Consultation in progress"}
                 </Text>
               </View>
               <Chip
@@ -228,22 +222,19 @@ export function PrescriptionScreen({
               ) : null}
             </View>
 
-            <View style={styles.adviceBanner}>
+            {record.assessment || record.followup ? <View style={styles.adviceBanner}>
               <View style={styles.adviceIcon}>
                 <Info color={colors.patient.primaryDark} size={18} />
               </View>
               <View style={styles.flexCopy}>
                 <Text style={styles.adviceTitle}>
-                  {record.assessment ||
-                    "Rest well, stay hydrated, and take medications as prescribed."}
+                  {record.assessment ?? "Follow-up recommended"}
                 </Text>
-                <Text style={styles.secondaryText}>
-                  {record.followup
-                    ? `Follow-up: ${formatDate(record.followup.recommended_date)} · ${record.followup.reason}`
-                    : "Contact clinic if symptoms persist or worsen"}
-                </Text>
+                {record.followup ? <Text style={styles.secondaryText}>
+                  Follow-up: {formatDate(record.followup.recommended_date)} · {record.followup.reason}
+                </Text> : null}
               </View>
-            </View>
+            </View> : null}
 
             <View style={styles.actionRow}>
               <Button

@@ -27,12 +27,10 @@ export function Card({ children }: { children: ReactNode }) {
 }
 export function PageHeader({
   title,
-  subtitle,
   right,
   onBack,
 }: {
   title: string;
-  subtitle?: string;
   right?: ReactNode;
   onBack?: () => void;
 }) {
@@ -51,7 +49,6 @@ export function PageHeader({
         )}
         <View style={ui.grow}>
           <Copy style={ui.title}>{title}</Copy>
-          {subtitle && <Copy style={ui.subtitle}>{subtitle}</Copy>}
         </View>
         {right}
       </View>

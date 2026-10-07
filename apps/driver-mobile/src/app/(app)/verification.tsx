@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { listMyAmbulanceFleet } from "@startup/data-access";
@@ -27,7 +28,7 @@ export default function DriverVerification() {
   if (fleet.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
 

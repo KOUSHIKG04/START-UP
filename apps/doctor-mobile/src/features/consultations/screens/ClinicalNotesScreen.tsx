@@ -5,7 +5,7 @@ import { FileText } from "lucide-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { completeOnlineAppointment, listMyPracticeAppointments, transitionClinicAppointment } from "@startup/data-access";
 import { uuidSchema } from "@startup/contracts";
-import { Button, Input, TextArea } from "@startup/mobile-ui";
+import { Button, Input, Loader, TextArea } from "@startup/mobile-ui";
 import {
   DoctorScreen,
   Heading,
@@ -74,7 +74,6 @@ export function ClinicalNotesScreen() {
     return (
       <DoctorScreen
         title={liveAppointment.patient_name}
-        subtitle={`${liveAppointment.facility_name} · Booking ${liveAppointment.public_code}`}
       >
         {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
           <ConsultationForm appointmentId={liveAppointment.id} />
@@ -114,7 +113,7 @@ export function ClinicalNotesScreen() {
   }
 
   if (isLiveAppointment) {
-    return <DoctorScreen title="Consultation details"><Panel><Label muted>{appointmentsQuery.isLoading ? "Loading consultation…" : appointmentsQuery.isError ? "Could not load this consultation. Try again." : "This consultation is unavailable for your account."}</Label></Panel></DoctorScreen>;
+    return <DoctorScreen title="Consultation details"><Panel>{appointmentsQuery.isLoading ? <Loader theme="doctor" style={{ minHeight: 72 }} /> : <Label muted>{appointmentsQuery.isError ? "Could not load this consultation. Try again." : "This consultation is unavailable for your account."}</Label>}</Panel></DoctorScreen>;
   }
 
   if (!patient || !appointment) return <MissingPatient />;
@@ -123,7 +122,6 @@ export function ClinicalNotesScreen() {
   return (
     <DoctorScreen
       title={patient.name}
-      subtitle={`${patient.gender}, ${patient.age} • Blood: ${patient.blood}`}
     >
       <Heading style={{ fontSize: 13 }}>Recorded Vitals</Heading>
       <View style={ui.row}>

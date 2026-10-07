@@ -112,7 +112,7 @@ BEGIN
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',doctor3_auth::text,true);
   request_id:=public.submit_my_doctor_claim_for_facility(jsonb_build_object(
-    'age_years',35,'gender','Female','specialty','General Physician','language','English',
+    'age_years',35,'gender','Female','specialty','General Physician','qualification','MBBS','language','English',
     'facility_name','Association Fixture Hospital','email','fixture@example.test',
     'phone','+919876543211','license_path',license_path,'degree_path',degree_path),facility_id);
   EXECUTE 'RESET ROLE';

@@ -10,11 +10,13 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 import { router, type Href } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { listClinicAppointments } from "@startup/data-access";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { listClinicAppointments, listMyPatientLocations, saveMyPatientLocation } from "@startup/data-access";
+import type { SavedPatientLocation } from "@startup/contracts";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Bell, ChevronLeft, Search, X } from "lucide-react-native";
+import { Bell, ChevronDown, ChevronLeft, MapPin, Search, X } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
@@ -31,7 +33,9 @@ import { HomeSearchResults } from "../components/HomeSearchResults";
 import { HomeFeedContent } from "../components/HomeFeedContent";
 import { NotificationDrawer } from "../../../components/NotificationDrawer";
 import { useTypewriterPlaceholder } from "../../../hooks/useTypewriterPlaceholder";
-import { supabase } from "../../../services/supabase";
+import { supabase, useMobileSession } from "../../../services/supabase";
+import { formatSavedLocation, locationHeadline } from "../../locations/locationDisplay";
+import { canGeocodeAddress } from "../../locations/geocoding";
 import {
   COLLAPSE_DISTANCE,
   CONTENT_TOP,
@@ -66,6 +70,38 @@ export function HomeScreen({
   onNotificationPress?: () => void;
 } = {}) {
   const { top: topInset } = useSafeAreaInsets();
+  const { profile } = useMobileSession();
+  const queryClient = useQueryClient();
+  const geocodedLocation = useRef<string | null>(null);
+  const savedLocations = useQuery({
+    queryKey: ["my-patient-locations", profile?.patient_id],
+    queryFn: () => listMyPatientLocations(supabase!),
+    enabled: Boolean(supabase && profile?.patient_id),
+  });
+  const selectedLocation = savedLocations.data?.find((item: SavedPatientLocation) => item.selected);
+  useEffect(() => {
+    if (!selectedLocation || selectedLocation.latitude !== null || geocodedLocation.current === selectedLocation.id || !supabase) return;
+    geocodedLocation.current = selectedLocation.id;
+    void (async () => {
+      try {
+        if (!await canGeocodeAddress()) return;
+        const [point] = await Location.geocodeAsync(formatSavedLocation(selectedLocation));
+        if (!point) return;
+        await saveMyPatientLocation(supabase, {
+          label: selectedLocation.label, kind: selectedLocation.kind,
+          building: selectedLocation.building || undefined, street: selectedLocation.street || undefined,
+          locality: selectedLocation.locality || undefined, city: selectedLocation.city || undefined,
+          state: selectedLocation.state || undefined, pincode: selectedLocation.pincode || undefined,
+          instructions: selectedLocation.instructions || undefined,
+          use_account_details: selectedLocation.use_account_details,
+          receiver_name: selectedLocation.receiver_name || undefined,
+          receiver_phone: selectedLocation.receiver_phone || undefined,
+          latitude: point.latitude, longitude: point.longitude,
+        }, selectedLocation.id);
+        await queryClient.invalidateQueries({ queryKey: ["my-patient-locations"] });
+      } catch { /* The address remains available to edit when geocoding fails. */ }
+    })();
+  }, [selectedLocation, queryClient]);
   const scrollYRef = useRef<Animated.Value | null>(null);
   if (scrollYRef.current === null) {
     scrollYRef.current = new Animated.Value(0);
@@ -172,10 +208,11 @@ export function HomeScreen({
       />
 
       <Animated.View
-        pointerEvents="none"
+        pointerEvents="box-none"
         style={[styles.expandedHeader, expandedHeaderStyle]}
       >
         <LinearGradient
+          pointerEvents="none"
           colors={gradients.patientBanner.colors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -184,6 +221,11 @@ export function HomeScreen({
         <SafeAreaView edges={["top"]} style={styles.safeArea}>
           <View style={styles.headerRow}>
             <Text style={styles.greeting}>Good Morning 👋</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`} onPress={() => router.push("/select-location")} style={styles.locationButton}>
+              <MapPin color={colors.white} size={15} strokeWidth={2} />
+              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>{locationHeadline(selectedLocation)}</Text>
+              <ChevronDown color={colors.white} size={15} />
+            </Pressable>
           </View>
         </SafeAreaView>
       </Animated.View>
@@ -359,10 +401,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   headerRow: {
-    height: 48,
+    height: 70,
     marginTop: 18,
-    flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 24,
   },
   greeting: {
@@ -372,6 +414,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 34,
   },
+  locationButton: { flexDirection: "row", alignItems: "center", gap: 5, maxWidth: "75%", minHeight: 26 },
+  locationText: { color: colors.white, fontFamily: fontFamilies.medium, fontSize: 13, flexShrink: 1 },
   fixedHeaderSafeArea: {
     position: "absolute",
     top: 0,

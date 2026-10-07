@@ -12,9 +12,13 @@ import { reviewDocument, finalizeCase } from "./actions";
 export function DocumentActions({
   caseId,
   documentId,
+  approvalLabel = "Approve",
+  canApprove = true,
 }: {
   caseId: string;
   documentId: string;
+  approvalLabel?: string;
+  canApprove?: boolean;
 }) {
 
   const [state, action, pending] = useActionState(
@@ -45,8 +49,8 @@ export function DocumentActions({
       >
         Reject
       </Button>
-      <Button name="decision" value="approved" disabled={pending}>
-        Approve
+      <Button name="decision" value="approved" disabled={pending || !canApprove}>
+        {approvalLabel}
       </Button>
     </form>
   );

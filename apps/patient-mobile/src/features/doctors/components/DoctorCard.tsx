@@ -16,7 +16,8 @@ export type DoctorCardProps = {
   qualification: string;
   specialty: string;
   experience: string;
-  rating: string;
+  rating?: string;
+  showRating?: boolean;
   fee?: string;
   distanceMeters?: number | null;
   hideFee?: boolean;
@@ -24,7 +25,7 @@ export type DoctorCardProps = {
   onPress?: () => void;
   showChevron?: boolean;
   contextLabel?: string;
-  variant?: "default" | "profile";
+  variant?: "default" | "profile" | "detail";
   style?: StyleProp<ViewStyle>;
 };
 
@@ -45,6 +46,7 @@ export default function DoctorCard({
   specialty,
   experience,
   rating,
+  showRating = false,
   fee = "",
   distanceMeters,
   hideFee = false,
@@ -115,9 +117,7 @@ export default function DoctorCard({
               ) : null}
             </View>
 
-            <Text numberOfLines={1} style={styles.secondaryText}>
-              {degree}
-            </Text>
+            {degree ? <Text numberOfLines={1} style={styles.secondaryText}>{degree}</Text> : null}
 
             <Text numberOfLines={1} style={styles.specialtyText}>
               {specialty}
@@ -125,7 +125,7 @@ export default function DoctorCard({
           </View>
         </View>
 
-        <View style={styles.profileGrid}>
+        {(!hideExperience && experience) || (showRating && rating) ? <View style={styles.profileGrid}>
           {!hideExperience && experience ? (
             <MetricCell
               icon={
@@ -139,15 +139,15 @@ export default function DoctorCard({
               value={experience}
             />
           ) : null}
-          <MetricCell icon={<StarIcon />} label="Rating" value={rating} />
-        </View>
+          {showRating && rating ? <MetricCell icon={<StarIcon />} label="Rating" value={rating} /> : null}
+        </View> : null}
       </Card>
     );
   }
 
   return (
     <Card
-      accessibilityLabel={`${name}, ${specialty}${hideFee || !fee ? "" : `, consultation fee ${fee}`}${distanceMeters == null ? "" : `, ${(distanceMeters / 1000).toFixed(1)} km away`}`}
+      accessibilityLabel={`${name}, ${specialty}${showRating && rating ? `, rating ${rating}` : ""}${hideFee || !fee ? "" : `, consultation fee ${fee}`}${distanceMeters == null ? "" : `, ${(distanceMeters / 1000).toFixed(1)} km away`}`}
       variant="outlined"
       backgroundColor="#E6F4F3"
       borderColor="#E0E5EB"
@@ -161,12 +161,12 @@ export default function DoctorCard({
       padding={14}
       style={[styles.flatCard, style]}
     >
-      <View style={styles.headerRow}>
-        <View style={styles.avatarSquare}>
+      <View style={[styles.headerRow, variant === "detail" && styles.detailHeaderRow]}>
+        <View style={[styles.avatarSquare, variant === "detail" && styles.detailAvatar]}>
           <UserRound color={colors.white} size={26} strokeWidth={1.8} />
         </View>
 
-        <View style={styles.doctorInfo}>
+        <View style={[styles.doctorInfo, variant === "detail" && styles.detailDoctorInfo]}>
           <Text numberOfLines={1} style={styles.nameLine}>
             <Text style={styles.nameText}>{name}</Text>
             {degree ? (
@@ -174,21 +174,16 @@ export default function DoctorCard({
             ) : null}
           </Text>
 
-          {department || rating ? (
-            <Text numberOfLines={1} style={styles.deptRatingLine}>
-              {department ?? ""}
-              {department && rating ? " • " : ""}
-              {rating}
-            </Text>
-          ) : null}
+          {department ? <Text numberOfLines={1} style={styles.departmentText}>{department}</Text> : null}
 
-          <Text numberOfLines={1} style={styles.specialtyText}>
-            {specialty}
-            {contextLabel ? (
-              <Text style={styles.contextInline}>{`  (${contextLabel})`}</Text>
-            ) : null}
-          </Text>
-          {distanceMeters != null ? <Text style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
+          <View style={styles.specialtyRatingRow}>
+            <Text numberOfLines={1} style={[styles.specialtyText, styles.specialtyInRow]}>{specialty}</Text>
+            {showRating && rating ? <Text numberOfLines={1} style={styles.ratingText}>{rating}</Text> : null}
+          </View>
+          {contextLabel || distanceMeters != null ? <View style={styles.contextDistanceRow}>
+            {contextLabel ? <Text style={styles.contextInline}>{contextLabel}</Text> : null}
+            {distanceMeters != null ? <Text style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
+          </View> : null}
         </View>
       </View>
 
@@ -253,6 +248,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
   },
+  detailHeaderRow: { alignItems: "center" },
+  detailAvatar: { marginTop: 0 },
+  detailDoctorInfo: { minHeight: 55, justifyContent: "center", paddingTop: 0 },
   avatarSquare: {
     width: 55,
     height: 55,
@@ -287,11 +285,20 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     lineHeight: 20,
   },
-  deptRatingLine: {
+  departmentText: {
     color: "#677e87",
     fontFamily: fontFamilies.medium,
     fontSize: 14,
     lineHeight: 16,
+  },
+  specialtyRatingRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  specialtyInRow: { flexShrink: 1, minWidth: 0 },
+  ratingText: {
+    color: "#677e87",
+    fontFamily: fontFamilies.medium,
+    fontSize: 11,
+    lineHeight: 16,
+    flexShrink: 0,
   },
   specialtyText: {
     color: colors.patient.primaryDark,
@@ -306,6 +313,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
+  contextDistanceRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
   contextInline: {
     color: colors.patient.accent,
     fontFamily: fontFamilies.regular,

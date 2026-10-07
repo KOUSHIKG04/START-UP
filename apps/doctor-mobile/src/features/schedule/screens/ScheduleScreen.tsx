@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Switch, View } from "react-native";
-import { Button, Input, useToast } from "@startup/mobile-ui";
+import { Button, Input, Loader, Skeleton, useToast } from "@startup/mobile-ui";
 import { Calendar, Check } from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addClinicUnavailability, getMyDoctorDailySlotUsage, getMySchedulePreferences, listClinicUnavailability, listMyClinicSessions, listMyDoctorFacilityRequests, listMyPractices, publishSelectedDoctorSlots, revokeClinicUnavailability, saveMySchedulePreferences, setClinicAutoConfirmLimit } from "@startup/data-access";
-import { parseDisplayDate } from "@startup/contracts";
-import { supabase } from "../../../services/supabase";
+import { parseDisplayDate, type ClinicPractice } from "@startup/contracts";
+import { supabase, useMobileSession } from "../../../services/supabase";
+import { getSelectedPracticeId, selectedPracticeQueryKey, setSelectedPracticeId } from "../../practices/selectedPractice";
 import {
   Choice,
   DoctorScreen,
@@ -67,9 +68,13 @@ function NumberSetting({
 export function ScheduleScreen() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { profile } = useMobileSession();
+  const doctorId = profile?.doctor?.id;
   const practices = useQuery({ queryKey: ["my-practices"], queryFn: () => listMyPractices(supabase!), enabled: Boolean(supabase), refetchInterval: (query) => query.state.data?.length ? false : 30000 });
+  const preferredPractice = useQuery({ queryKey: selectedPracticeQueryKey(doctorId), queryFn: () => getSelectedPracticeId(doctorId!), enabled: Boolean(doctorId) });
   const [practiceId, setPracticeId] = useState<string | null>(null);
-  const selectedPracticeId = practiceId ?? practices.data?.[0]?.practice_id ?? null;
+  const availablePractices = practices.data as ClinicPractice[] | undefined;
+  const selectedPracticeId = availablePractices?.find(item => item.practice_id === practiceId)?.practice_id ?? availablePractices?.find(item => item.practice_id === preferredPractice.data)?.practice_id ?? availablePractices?.[0]?.practice_id ?? null;
   const selectedPractice = practices.data?.find(item => item.practice_id === selectedPracticeId);
   const associationRequests = useQuery({ queryKey: ["my-doctor-facility-requests"], queryFn: () => listMyDoctorFacilityRequests(supabase!), enabled: Boolean(supabase && practices.data && !selectedPracticeId), refetchInterval: 30000 });
   const pendingAssociation = associationRequests.data?.find(item => item.status === "pending");
@@ -92,6 +97,11 @@ export function ScheduleScreen() {
     home: { start: "16:00", end: "17:00" },
   });
   const [selectedSlots, setSelectedSlots] = useState<Record<"clinic" | "online" | "home", string[]>>({ clinic: [], online: [], home: [] });
+  useEffect(() => {
+    if (!preferredPractice.data || !availablePractices?.some(item => item.practice_id === preferredPractice.data)) return;
+    setPracticeId(preferredPractice.data);
+    setSelectedSlots({ clinic: [], online: [], home: [] });
+  }, [preferredPractice.data, availablePractices]);
   const [sessionLimits, setSessionLimits] = useState<Record<string, string>>({});
   const [leaveDate, setLeaveDate] = useState(""); const [leaveStart, setLeaveStart] = useState(""); const [leaveEnd, setLeaveEnd] = useState(""); const [leaveReason, setLeaveReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -225,14 +235,13 @@ export function ScheduleScreen() {
   return (
     <DoctorScreen
       title="Manage Schedule"
-      subtitle="Define your working hours and booking preferences"
       background="#F6F9F9"
     >
-      {practices.isLoading ? <Label muted>Loading your clinics…</Label> : null}
+      {practices.isLoading ? <Loader theme="doctor" style={{ minHeight: 40 }} /> : null}
       {practices.isError ? <Label style={ui.error}>Could not load your clinics.</Label> : null}
-      {practices.data && practices.data.length > 1 ? <Panel><Heading style={{ fontSize: 13 }}>Your clinic</Heading><View style={ui.wrap}>{practices.data.map(practice => <Choice key={practice.practice_id} label={practice.facility_name} selected={selectedPracticeId === practice.practice_id} onPress={() => { setPracticeId(practice.practice_id); setSelectedSlots({ clinic: [], online: [], home: [] }); }} />)}</View></Panel> : null}
+      {practices.data && practices.data.length > 1 ? <Panel><Heading style={{ fontSize: 13 }}>Your clinic</Heading><View style={ui.wrap}>{(practices.data as ClinicPractice[]).map((practice: ClinicPractice) => <Choice key={practice.practice_id} label={practice.facility_name} selected={selectedPracticeId === practice.practice_id} onPress={() => { setPracticeId(practice.practice_id); setSelectedSlots({ clinic: [], online: [], home: [] }); if (doctorId && practice.is_clinician && practice.verified) void setSelectedPracticeId(doctorId, practice.practice_id).then(() => queryClient.setQueryData(selectedPracticeQueryKey(doctorId), practice.practice_id)).catch(() => showToast({ title: "Could not remember practice", type: "error" })); }} />)}</View></Panel> : null}
       {selectedPractice ? <Label muted>{selectedPractice.facility_name}{selectedPractice.verified ? "" : " · awaiting verification"}</Label> : null}
-      {saved.isLoading ? <Label muted>Loading saved schedule…</Label> : null}
+      {saved.isLoading ? <Skeleton theme="doctor" height={72} radius={12} /> : null}
       {saved.isError ? <Label style={ui.error}>Could not load saved schedule.</Label> : null}
       <WorkingDaysPanel
         selectedDays={draft.days}
@@ -352,7 +361,8 @@ export function ScheduleScreen() {
         {draft.homeVisits ? <Input label="Travel radius from practice (km)" accessibilityLabel="Home visit travel radius in kilometres" value={draft.homeRadius} onChangeText={(homeRadius) => update({ homeRadius })} keyboardType="decimal-pad" /> : null}
       </Panel>
       <ConsultationChargesPanel draft={draft} onUpdate={update} />
-      {!practices.isLoading && !selectedPracticeId ? (
+      {!selectedPracticeId && associationRequests.isLoading ? <Loader theme="doctor" style={{ minHeight: 40 }} /> : null}
+      {!practices.isLoading && !associationRequests.isLoading && !selectedPracticeId ? (
         <Label muted>
           {pendingAssociation
             ? `${pendingAssociation.facility_name} must accept your doctor association in its Doctor Management portal before you can save a schedule.`
@@ -360,9 +370,7 @@ export function ScheduleScreen() {
               ? `Your association with ${rejectedAssociation.facility_name} was declined. Update your facility request before saving a schedule.`
               : practices.isError || associationRequests.isError
                 ? "Could not load your practice status. Reopen this screen and try again."
-                : associationRequests.isLoading
-                  ? "Checking your practice approval…"
-                  : "An active clinic or hospital association is required before you can save a schedule."}
+                : "An active clinic or hospital association is required before you can save a schedule."}
         </Label>
       ) : null}
       <Button

@@ -13,7 +13,6 @@ import {
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
 import { FadedScrollView, Button } from "@startup/mobile-ui";
 import { palette, ui } from "./theme";
 
@@ -69,11 +68,9 @@ export function IconButton({
 }
 export function DoctorHeader({
   title,
-  subtitle,
   trailing,
 }: {
   title: string;
-  subtitle?: string;
   trailing?: ReactNode;
 }) {
   const insets = useSafeAreaInsets();
@@ -89,11 +86,6 @@ export function DoctorHeader({
       </IconButton>
       <View style={ui.flex}>
         <Heading style={{ fontSize: 17 }}>{title}</Heading>
-        {subtitle && (
-          <Label muted style={{ fontSize: 12 }}>
-            {subtitle}
-          </Label>
-        )}
       </View>
       {trailing}
     </View>
@@ -102,13 +94,11 @@ export function DoctorHeader({
 export function DoctorScreen({
   children,
   title,
-  subtitle,
   background = palette.white,
   bottomNav = true,
   contentStyle,
 }: PropsWithChildren<{
   title: string;
-  subtitle?: string;
   background?: string;
   bottomNav?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
@@ -119,7 +109,7 @@ export function DoctorScreen({
       style={[ui.screen, { backgroundColor: background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <DoctorHeader title={title} subtitle={subtitle} />
+      <DoctorHeader title={title} />
       <FadedScrollView
         edgeColor={background}
         keyboardShouldPersistTaps="handled"

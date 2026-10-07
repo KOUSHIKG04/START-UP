@@ -1,4 +1,5 @@
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
@@ -35,7 +36,7 @@ export default function EditDriverProfile() {
   if (current.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
   if (current.error || !current.data)

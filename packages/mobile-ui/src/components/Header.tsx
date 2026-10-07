@@ -10,14 +10,13 @@ import {
   type ViewProps,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
-import { colors, fontFamilies, typography } from "@startup/design-tokens";
+import { colors, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 
 export type { HeaderApp } from "../utils/headerBackground";
 
 export type HeaderProps = ViewProps & {
   title?: string;
-  subtitle?: string;
   centered?: boolean;
   centerContent?: ReactNode;
   rightAction?: ReactNode;
@@ -27,14 +26,12 @@ export type HeaderProps = ViewProps & {
   backgroundColor?: string;
   foregroundColor?: string;
   titleStyle?: TextStyle;
-  subtitleStyle?: TextStyle;
   backAccessibilityLabel?: string;
   safeAreaEdges?: readonly Edge[];
 };
 
 export function Header({
   title,
-  subtitle,
   centered = false,
   centerContent,
   rightAction,
@@ -44,7 +41,6 @@ export function Header({
   backgroundColor,
   foregroundColor = colors.white,
   titleStyle,
-  subtitleStyle,
   style,
   backAccessibilityLabel = "Go back",
   safeAreaEdges = ["top"],
@@ -113,19 +109,6 @@ export function Header({
                   {title}
                 </Text>
               ) : null}
-              {subtitle ? (
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.subtitle,
-                    centered && styles.centeredText,
-                    { color: foregroundColor },
-                    subtitleStyle,
-                  ]}
-                >
-                  {subtitle}
-                </Text>
-              ) : null}
             </View>
           )}
 
@@ -185,12 +168,5 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.headerText,
-  },
-  subtitle: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
-    lineHeight: 18,
-    opacity: 0.9,
-    marginTop: 2,
   },
 });

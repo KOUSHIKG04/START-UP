@@ -29,9 +29,6 @@ export function LoginForm({
         <CardContent className="p-6 sm:p-8">
           <div className="mb-7 space-y-1 text-center">
             <h1 className="text-2xl font-semibold">{loginContent.heading}</h1>
-            <p className="text-muted-foreground text-sm">
-              {loginContent.description}
-            </p>
           </div>
 
           <form action={action} className="space-y-5">

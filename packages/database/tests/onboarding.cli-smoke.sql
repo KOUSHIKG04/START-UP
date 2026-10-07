@@ -48,7 +48,7 @@ BEGIN
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
   IF NOT public.submit_my_doctor_claim(jsonb_build_object('age_years',42,'gender','Female',
-    'specialty','Cardiologist','language','English','facility_name','Fixture Hospital',
+    'specialty','Cardiologist','qualification','MBBS, MD','language','English','facility_name','Fixture Hospital',
     'email','doctor@example.com','phone','+911234567891','license_path',path,'degree_path',degree_path)) THEN
     RAISE EXCEPTION 'Doctor claim not saved'; END IF;
   IF NOT public.has_my_doctor_claim() THEN RAISE EXCEPTION 'Doctor claim not visible'; END IF;

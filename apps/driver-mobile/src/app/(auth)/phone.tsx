@@ -37,7 +37,6 @@ export default function DriverPhone() {
       </Pressable>
       <View style={styles.content}>
         <Text style={styles.title}>Enter your mobile number</Text>
-        <Text style={styles.subtitle}>We’ll send you a 6-digit OTP</Text>
         <View style={styles.number}>
           <Text style={styles.country}>+91</Text>
           <TextInput
@@ -77,7 +76,6 @@ const styles = StyleSheet.create({
     color: colors.driver.text,
     textAlign: "center",
   },
-  subtitle: { fontFamily: fontFamilies.regular, fontSize: 14, marginTop: 8 },
   number: {
     flexDirection: "row",
     alignItems: "center",

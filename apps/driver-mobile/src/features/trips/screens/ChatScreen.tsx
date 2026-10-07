@@ -82,7 +82,6 @@ export function ChatScreen() {
     >
       <PageHeader
         title="Rajesh Kumar"
-        subtitle="Patient chat · local preview"
         onBack={() => router.back()}
       />
       <FlatList

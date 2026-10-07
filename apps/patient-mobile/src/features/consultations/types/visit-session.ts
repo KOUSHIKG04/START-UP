@@ -13,4 +13,5 @@ export type VisitSessionScreenProps = PatientScreenProps & {
   onGoHome: () => void;
   onViewMedicines: () => void;
   onViewPrescription: () => void;
+  onRealComplete?: () => void;
 };

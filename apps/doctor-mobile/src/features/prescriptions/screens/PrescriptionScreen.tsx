@@ -107,7 +107,6 @@ export function PrescriptionScreen() {
   return (
     <DoctorScreen
       title="Write prescription"
-      subtitle={`${patient.name} – ${visit.completed ? "Consultation completed" : "Consultation in progress"}`}
     >
       {visit.signed && (
         <Label style={ui.success}>

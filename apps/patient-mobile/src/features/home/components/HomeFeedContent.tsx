@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors } from "@startup/design-tokens";
-import { IconLabel, useToastFeedback } from "@startup/mobile-ui";
+import { IconLabel, Skeleton, useToastFeedback } from "@startup/mobile-ui";
 import { homeActions } from "../utils/HomeActions";
 import AmbulanceBanner from "./AmbulanceBanner";
 import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
@@ -76,9 +76,7 @@ export function HomeFeedContent({
           />
         ))
       ) : isLoading ? (
-        <Text style={{ color: colors.patient.textSecondary }}>
-          Loading your appointments…
-        </Text>
+        <Skeleton theme="patient" height={118} radius={16} />
       ) : null}
 
       <PopularServices />

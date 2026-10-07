@@ -4,6 +4,7 @@ import {
   Building2,
   CalendarClock,
   CalendarDays,
+  CreditCard,
   Hash,
   MapPin,
   Stethoscope,
@@ -63,6 +64,11 @@ export default function AppointmentDetailsCard({
         icon={<MapPin size={17} color={colors.textSecondary} />}
         label="Location"
         value={appointment.location}
+      />
+      <DetailRow
+        icon={<CreditCard size={17} color={colors.textSecondary} />}
+        label="Consultation Fee"
+        value={appointment.fee}
         last
       />
     </Accordion>

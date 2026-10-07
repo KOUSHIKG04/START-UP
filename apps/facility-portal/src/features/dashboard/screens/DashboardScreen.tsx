@@ -62,9 +62,6 @@ export default function DashboardScreen({
           <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
             Hospital Dashboard
           </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Real-time administrative operations overview
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

@@ -61,14 +61,33 @@ BEGIN
   INSERT INTO clinzo.verification_document(case_id,kind,bucket_id,storage_path,version)
     VALUES(doctor_case_id,'medical_degree','doctor-licenses',auth_id||'/fixture/medical-degree.pdf',1)
     RETURNING id INTO doctor_degree_id;
+  INSERT INTO clinzo.doctor_onboarding_claim(doctor_id,reported_age_years,reported_gender,
+    claimed_specialty,claimed_language,claimed_facility_name,contact_phone,
+    license_storage_path,degree_storage_path,claimed_qualification)
+    VALUES(doctor_id,35,'Female','General Physician','English','Fixture Review Clinic',
+      '+919876543210',auth_id||'/fixture/medical-registration.pdf',
+      auth_id||'/fixture/medical-degree.pdf','MBBS, MD');
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM public.review_company_verification_document(doctor_degree_id,'approved',NULL);
   PERFORM public.finalize_company_verification(doctor_case_id,NULL);
   EXECUTE 'RESET ROLE';
   IF NOT EXISTS(SELECT 1 FROM clinzo.facility WHERE id=facility_id AND verification_status='verified')
     THEN RAISE EXCEPTION 'Facility decision not persisted'; END IF;
-  IF NOT EXISTS(SELECT 1 FROM clinzo.doctor WHERE id=doctor_id AND credential_status='verified')
+  IF NOT EXISTS(SELECT 1 FROM clinzo.doctor WHERE id=doctor_id AND credential_status='verified'
+    AND qualification='MBBS, MD')
     THEN RAISE EXCEPTION 'Doctor decision not persisted'; END IF;
+  UPDATE clinzo.doctor_onboarding_claim SET claimed_qualification='MBBS, MD, DM'
+    WHERE doctor_onboarding_claim.doctor_id=(SELECT c.doctor_id FROM clinzo.verification_case c WHERE c.id=doctor_case_id);
+  IF NOT EXISTS(SELECT 1 FROM clinzo.verification_document WHERE id=doctor_degree_id AND status='pending')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.verification_case WHERE id=doctor_case_id AND status='under_review')
+    OR NOT EXISTS(SELECT 1 FROM clinzo.doctor WHERE id=doctor_id AND qualification='MBBS, MD') THEN
+    RAISE EXCEPTION 'Changing qualification did not reopen degree review safely'; END IF;
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM public.review_company_verification_document(doctor_degree_id,'approved',NULL);
+  PERFORM public.finalize_company_verification(doctor_case_id,NULL);
+  EXECUTE 'RESET ROLE';
+  IF NOT EXISTS(SELECT 1 FROM clinzo.doctor WHERE id=doctor_id AND qualification='MBBS, MD, DM') THEN
+    RAISE EXCEPTION 'Reapproved qualification was not published'; END IF;
 END $$;
 ROLLBACK;
 SELECT true AS company_verification_smoke_passed;

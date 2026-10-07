@@ -1,4 +1,5 @@
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { Redirect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDriverRegistrationApplication } from "@startup/data-access";
@@ -18,7 +19,7 @@ export default function OnboardingRoute() {
   if (application.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
 

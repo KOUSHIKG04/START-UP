@@ -18,6 +18,7 @@ export function VisitSessionScreen({
   onGoHome,
   onViewMedicines,
   onViewPrescription,
+  onRealComplete,
 }: VisitSessionScreenProps) {
   const [completed, setCompleted] = useState(false);
 
@@ -41,7 +42,7 @@ export function VisitSessionScreen({
           appointment={appointment}
           initialChat={mode === "online-chat"}
           onBackPress={onBackPress}
-          onComplete={() => setCompleted(true)}
+          onComplete={onRealComplete ?? (() => setCompleted(true))}
         />
       </View>
     );

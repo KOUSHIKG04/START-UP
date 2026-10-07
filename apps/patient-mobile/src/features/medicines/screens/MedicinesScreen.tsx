@@ -1,10 +1,10 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Pill } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { listMyClinicalRecords } from "@startup/data-access";
 import type { ClinicalRecord } from "@startup/contracts";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Button, Card, Chip, FadedScrollView, Header, useToastFeedback } from "@startup/mobile-ui";
+import { Button, Card, Chip, FadedScrollView, Header, Skeleton, useToastFeedback } from "@startup/mobile-ui";
 import type { MedicinesScreenProps } from "../types/medicines";
 import { supabase } from "../../../services/supabase";
 
@@ -41,10 +41,7 @@ export function MedicinesScreen({
         showsVerticalScrollIndicator={false}
       >
         {clinicalRecords.isLoading ? (
-          <View style={styles.centerBox}>
-            <ActivityIndicator color={colors.patient.primary} size="large" />
-            <Text style={styles.stateText}>Loading medicines…</Text>
-          </View>
+          <Skeleton theme="patient" height={180} radius={14} />
         ) : clinicalRecords.isError ? (
           <View style={styles.centerBox}>
             <Button label="Retry" onPress={() => void clinicalRecords.refetch()} />

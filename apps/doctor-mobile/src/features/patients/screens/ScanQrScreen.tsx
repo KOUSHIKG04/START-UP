@@ -74,7 +74,7 @@ export function ScanQrScreen() {
     } catch { setError("Camera is unavailable. Enter the patient ID below."); }
   }
 
-  return <DoctorScreen title="Scan QR code" subtitle="Scan the appointment QR to confirm arrival" bottomNav={false}>
+  return <DoctorScreen title="Scan QR code" bottomNav={false}>
     <View style={{ height: 280, backgroundColor: palette.surface, borderRadius: 18, overflow: "hidden", alignItems: "center", justifyContent: "center", gap: 20 }}>
       {camera && focused && permission?.granted ? <CameraView style={{ width: "100%", height: "100%" }} facing="back"
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={({ data }) => {

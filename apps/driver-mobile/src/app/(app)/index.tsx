@@ -1,4 +1,5 @@
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Loader } from "@startup/mobile-ui";
 import { Redirect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDriverProfile, listMyAmbulanceFleet } from "@startup/data-access";
@@ -19,7 +20,7 @@ export default function DriverAppIndex() {
   if (personal.isLoading || fleet.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator />
+        <Loader theme="driver" size="large" />
       </View>
     );
   if (personal.error || fleet.error)

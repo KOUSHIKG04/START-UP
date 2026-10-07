@@ -11,7 +11,7 @@ import {
   refreshMyAmbulanceDispatch,
   requestMySos,
 } from "@startup/data-access";
-import { Button, Header, Input, SafeAreaView, useToast, type ToastType } from "@startup/mobile-ui";
+import { Button, Header, Input, Loader, SafeAreaView, useToast, type ToastType } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 const sosDispatchEnabled = process.env.EXPO_PUBLIC_ENABLE_SOS_DISPATCH === "true";
@@ -104,7 +104,7 @@ export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
         ) : <Text>Waiting for a current driver location.</Text> : null}
         {pinVisible ? <View style={styles.card}>
           <Text style={styles.subtitle}>Your completion PIN</Text>
-          {verificationPin.isLoading ? <Text>Loading verification PIN…</Text> : null}
+          {verificationPin.isLoading ? <Loader theme="patient" style={{ minHeight: 36 }} /> : null}
           {verificationPin.data ? <Text accessibilityLabel="Four-digit completion PIN" style={styles.pin}>{verificationPin.data}</Text> : null}
           <Text>Give this PIN to the driver only when you reach your destination.</Text>
         </View> : null}
@@ -116,7 +116,7 @@ export function LiveSosScreen({ onBackPress }: { onBackPress: () => void }) {
         </> : null}
       </View> : <>
         <Text style={styles.subtitle}>Request an ALS ambulance</Text>
-        <Button label={locating ? "Finding location…" : pickup ? "Refresh location" : "Use my current location"}
+        <Button label={pickup ? "Refresh location" : "Use my current location"} accessibilityLabel={locating ? "Locating pickup" : pickup ? "Refresh location" : "Use my current location"} leftIcon={locating ? <Loader theme="patient" /> : undefined}
           disabled={locating} variant="outline" onPress={() => void locate()} />
         <Input label="Pickup address or landmark" value={address}
           onChangeText={(value) => { setAddress(value); setRequestKey(Crypto.randomUUID()); }} />

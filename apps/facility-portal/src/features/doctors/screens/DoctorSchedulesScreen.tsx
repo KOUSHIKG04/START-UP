@@ -28,9 +28,6 @@ export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: 
           <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
             Doctor Schedules
           </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Manage, monitor, and optimize physical rosters and on-duty rotations
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

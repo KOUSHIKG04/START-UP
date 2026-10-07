@@ -170,11 +170,6 @@ export function HomeScreen() {
     <View style={ui.screen}>
       <PageHeader
         title="CLINZO Driver"
-        subtitle={
-          online
-            ? "Online — You will now receive rides"
-            : "Offline — Switch online to receive rides"
-        }
         right={
           <Switch
             accessibilityLabel="Receive emergency requests"

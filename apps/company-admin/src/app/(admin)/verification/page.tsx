@@ -46,9 +46,6 @@ export default async function VerificationQueue({
         <h1 className="text-2xl font-semibold tracking-tight">
           Verification queue
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Review evidence, give clear decisions, and track replacements.
-        </p>
       </header>
       <VerificationFilters
         initialType={type ?? "all"}

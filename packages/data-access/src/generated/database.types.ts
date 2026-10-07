@@ -5,6 +5,12 @@ export type Database = {
     Tables: Record<string, never>;
     Views: Record<string, never>;
     Functions: {
+      list_my_patient_locations: { Args: Record<string, never>; Returns: unknown };
+      save_my_patient_location: { Args: { p_location: unknown; p_location_id?: string | null }; Returns: string };
+      select_my_patient_location: { Args: { p_location_id: string }; Returns: boolean };
+      delete_my_patient_location: { Args: { p_location_id: string }; Returns: boolean };
+      get_my_doctor_review: { Args: { p_appointment_id: string }; Returns: unknown };
+      submit_my_doctor_review: { Args: { p_appointment_id: string; p_rating: number; p_comment?: string | null }; Returns: string };
       publish_doctor_service_session: { Args: { p_practice_id: string; p_mode: string; p_starts_at: string; p_ends_at: string; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string };
       publish_selected_doctor_slots: { Args: { p_practice_id: string; p_mode: string; p_slot_starts: string[]; p_slot_minutes: number; p_fee_minor: number; p_currency: string }; Returns: string[] };
       get_my_doctor_daily_slot_usage: { Args: { p_practice_id: string; p_local_day: string }; Returns: unknown };
@@ -63,6 +69,7 @@ export type Database = {
       invite_doctor_to_my_facility: { Args: { p_facility_id: string; p_doctor_code: string; p_name: string; p_specialization?: string | null; p_phone?: string | null }; Returns: string };
       respond_to_my_facility_invitation: { Args: { p_request_id: string; p_accept: boolean }; Returns: unknown };
       submit_my_doctor_degree: { Args: { p_degree_path: string }; Returns: boolean };
+      submit_my_doctor_qualification: { Args: { p_qualification: string }; Returns: boolean };
       has_my_doctor_claim: { Args: Record<string, never>; Returns: boolean };
       create_driver_invitation: {
         Args: { p_organization_id: string; p_phone: string };
@@ -201,6 +208,19 @@ export type Database = {
           p_longitude?: number | null;
           p_limit?: number;
           p_practice_id?: string | null;
+        };
+        Returns: unknown;
+      };
+      search_public_practices_for_mode: {
+        Args: {
+          p_query: string | null;
+          p_specialty_code: string | null;
+          p_latitude: number | null;
+          p_longitude: number | null;
+          p_limit: number;
+          p_practice_id: string | null;
+          p_service_mode: "clinic" | "online" | "home";
+          p_offset: number;
         };
         Returns: unknown;
       };

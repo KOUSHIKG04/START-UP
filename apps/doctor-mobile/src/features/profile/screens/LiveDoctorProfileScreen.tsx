@@ -6,7 +6,7 @@ import {
   getMyDoctorProfile,
   updateMyDoctorProfile,
 } from "@startup/data-access";
-import { Button, Input, SafeAreaView, useToast, useToastFeedback } from "@startup/mobile-ui";
+import { Button, Input, SafeAreaView, Skeleton, useToast, useToastFeedback } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
 import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 
@@ -50,7 +50,7 @@ export function LiveDoctorProfileScreen() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Doctor profile</Text>
-        {profile.isLoading ? <Text>Loading profile…</Text> : null}
+        {profile.isLoading ? <Skeleton theme="doctor" height={120} radius={12} /> : null}
         {profile.data ? (
           <>
             <Text>Status: {profile.data.credential_status}</Text>

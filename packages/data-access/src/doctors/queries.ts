@@ -4,14 +4,21 @@ import type { PracticeSearchInput } from "@startup/contracts";
 
 export async function searchPublicPractices(client: AppSupabaseClient, input: PracticeSearchInput = {}) {
   const request = practiceSearchInputSchema.parse(input);
-  const { data, error } = await client.rpc("search_public_practices", {
+  const args = {
     p_query: request.query || null,
     p_specialty_code: request.specialtyCode || null,
     p_latitude: request.latitude ?? null,
     p_longitude: request.longitude ?? null,
     p_limit: request.limit,
     p_practice_id: request.practiceId ?? null,
-  });
+  };
+  const { data, error } = request.serviceMode
+    ? await client.rpc("search_public_practices_for_mode", {
+      ...args,
+      p_service_mode: request.serviceMode,
+      p_offset: request.offset,
+    })
+    : await client.rpc("search_public_practices", args);
   if (error) throw error;
   return publicPracticeSchema.array().parse(data);
 }
