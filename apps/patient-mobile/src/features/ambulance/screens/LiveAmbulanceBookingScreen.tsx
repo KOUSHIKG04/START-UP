@@ -172,7 +172,7 @@ export function LiveAmbulanceBookingScreen({
           Choose a hospital and required ambulance type. We will show assignment
           status here.
         </Text>
-        <Button
+        <Button loading={locating}
           label={pickup ? "Refresh pickup location" : "Use current pickup location"}
           accessibilityLabel={locating ? "Locating pickup" : pickup ? "Refresh pickup location" : "Use current pickup location"}
           leftIcon={locating ? <Loader theme="patient" /> : undefined}
@@ -234,7 +234,7 @@ export function LiveAmbulanceBookingScreen({
             />
           </View>
         ))}
-        <Button
+        <Button loading={request.isPending}
           label="Request ambulance"
           disabled={
             request.isPending ||

@@ -1,6 +1,7 @@
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { sendPhoneOtp } from "@startup/data-access";
@@ -49,7 +50,7 @@ export default function PhoneScreen() {
         <View style={styles.number}>
           <Text style={styles.country}>+91</Text>
           <View style={styles.divider} />
-          <TextInput
+          <Input variant="unstyled"
             accessibilityLabel="Mobile number"
             keyboardType="phone-pad"
             textContentType="telephoneNumber"
@@ -63,7 +64,7 @@ export default function PhoneScreen() {
         </View>
 
         <View style={styles.action}>
-          <OnboardingButton
+          <OnboardingButton loading={busy}
             label={busy ? "Sending…" : "Send OTP"}
             disabled={busy || phone.replace(/\D/g, "").length !== 10}
             onPress={() => void submit()}
@@ -77,7 +78,7 @@ export default function PhoneScreen() {
 
 
 const styles = StyleSheet.create({
-  body: { alignItems: "center", paddingTop: 135 },
+  body: { alignItems: "center", paddingTop: 24 },
   title: {
     fontFamily: fontFamilies.medium,
     fontSize: 24,

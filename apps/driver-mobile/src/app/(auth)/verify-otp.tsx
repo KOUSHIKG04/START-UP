@@ -1,3 +1,5 @@
+import { Button } from "@startup/mobile-ui";
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -9,6 +11,7 @@ import { mobileSession, supabase } from "../../services/supabase";
 export default function DriverVerifyOtp() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
   const [code, setCode] = useState("");
+  const [resending, setResending] = useState(false);
   const [seconds, setSeconds] = useState(30);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +45,8 @@ export default function DriverVerifyOtp() {
   }
 
   async function resend() {
-    if (!supabase || !phone || seconds > 0) return;
+    if (!supabase || !phone || seconds > 0 || busy || resending) return;
+    setResending(true);
     try {
       await sendPhoneOtp(supabase, phone);
       setSeconds(30);
@@ -52,6 +56,7 @@ export default function DriverVerifyOtp() {
         cause instanceof Error ? cause.message : "Could not resend the code."
       );
     }
+    finally { setResending(false); }
   }
 
   return (
@@ -73,7 +78,7 @@ export default function DriverVerifyOtp() {
               <Text style={styles.digitText}>{code[index] ?? ""}</Text>
             </View>
           ))}
-          <TextInput
+          <Input variant="unstyled"
             ref={input}
             accessibilityLabel="Six-digit verification code"
             keyboardType="number-pad"
@@ -90,9 +95,9 @@ export default function DriverVerifyOtp() {
           />
         </Pressable>
 
-        <Pressable
+        <Button loading={resending} label="Resend OTP" variant="ghost" labelStyle={styles.resendText}
           accessibilityRole="button"
-          disabled={seconds > 0 || busy}
+          disabled={seconds > 0 || busy || resending}
           onPress={() => void resend()}
           style={styles.resend}
         >
@@ -100,7 +105,7 @@ export default function DriverVerifyOtp() {
             Resend OTP{" "}
             {seconds > 0 ? `in 00:${String(seconds).padStart(2, "0")}` : "now"}
           </Text>
-        </Pressable>
+        </Button>
       </View>
     </View>
   );
@@ -108,7 +113,7 @@ export default function DriverVerifyOtp() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "white", padding: 24, paddingTop: 58 },
   back: { color: colors.driver.primary, fontSize: 17 },
-  content: { alignItems: "center", paddingTop: 110 },
+  content: { alignItems: "center", paddingTop: 24 },
   title: {
     fontFamily: fontFamilies.medium,
     fontSize: 24,

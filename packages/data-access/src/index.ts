@@ -10,6 +10,7 @@ export * from "./doctors/onboarding";
 export * from "./doctors/reviews";
 export * from "./auth/operations";
 export * from "./patients/profiles";
+export * from "./profiles/photos";
 export * from "./patients/locations";
 export * from "./auth/mobileSession";
 export * from "./auth/secureSessionStorage";

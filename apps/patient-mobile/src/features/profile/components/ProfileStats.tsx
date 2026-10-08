@@ -1,59 +1,54 @@
 import { StyleSheet, Text, View } from "react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
+import { Card } from "@startup/mobile-ui";
 
-export function ProfileStats({
-  age,
-  blood,
-  bookings,
-}: {
-  age: string;
-  blood: string;
-  bookings: string;
-}) {
+export function ProfileStats({ age, blood }: { age: string; blood: string }) {
   return (
     <View style={styles.stats}>
       <ProfileStat label="Age" value={age} />
-      <ProfileStat label="Blood" value={blood} />
-      <ProfileStat label="Bookings" value={bookings} />
+      <ProfileStat label="Blood group" value={blood} />
     </View>
   );
 }
 
 function ProfileStat({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-    </View>
+    <Card
+      theme="patient"
+      variant="outlined"
+      borderColor={colors.border}
+      borderRadius={12}
+      padding={12}
+      gap={4}
+      style={styles.stat}
+    >
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  stats: {
-    flexDirection: "row",
-    gap: 10,
-  },
+  stats: { flexDirection: "row", gap: 8 },
   stat: {
     flex: 1,
-    alignItems: "center",
-    gap: 2,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: colors.patient.surfaceBorder,
-    borderRadius: radius.md,
-    backgroundColor: "#F0FAF9",
+    height: 65.5,
+    paddingVertical: 0,
+    justifyContent: "center",
+    elevation: 0,
+    shadowOpacity: 0,
+    boxShadow: "none",
   },
-  statLabel: {
-    color: colors.patient.primaryDark,
+  label: {
+    color: colors.patient.textSecondary,
     fontFamily: fontFamilies.medium,
-    fontSize: 9,
-    fontWeight: "500",
-    textTransform: "uppercase",
+    fontSize: 11,
+    lineHeight: 16,
   },
-  statValue: {
+  value: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
+    fontFamily: fontFamilies.semibold,
     fontSize: 15,
-    fontWeight: "700",
+    lineHeight: 21,
   },
 });

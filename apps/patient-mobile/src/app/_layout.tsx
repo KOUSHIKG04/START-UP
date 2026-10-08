@@ -72,8 +72,8 @@ export default function RootLayout() {
                   contentStyle: styles.scene,
                 }}
               >
-                <Stack.Protected guard={Boolean(auth.session && auth.profile?.patient_id)}><Stack.Screen name="(app)" /></Stack.Protected>
-                <Stack.Protected guard={!auth.session || !auth.profile?.patient_id}><Stack.Screen name="(auth)" /></Stack.Protected>
+                <Stack.Protected guard={Boolean(auth.session && auth.profile?.patient_id && auth.profile.patient_profile_complete)}><Stack.Screen name="(app)" /></Stack.Protected>
+                <Stack.Protected guard={!auth.session || !auth.profile?.patient_id || !auth.profile.patient_profile_complete}><Stack.Screen name="(auth)" /></Stack.Protected>
               </Stack>
             </View>
           </ThemeProvider>

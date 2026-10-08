@@ -105,6 +105,7 @@ export function ScheduleScreen() {
   const [sessionLimits, setSessionLimits] = useState<Record<string, string>>({});
   const [leaveDate, setLeaveDate] = useState(""); const [leaveStart, setLeaveStart] = useState(""); const [leaveEnd, setLeaveEnd] = useState(""); const [leaveReason, setLeaveReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   const reportError = (text: string) => showToast({ title: "Schedule error", message: text, type: "error" });
   const reportSuccess = (text: string) => showToast({ title: text, type: "success" });
   const failPublish = (mode: "clinic" | "online" | "home", message: string) => {
@@ -151,14 +152,14 @@ export function ScheduleScreen() {
     const problem = scheduleError(draft);
     if (problem) { reportError(problem); return; }
     if (!supabase || !selectedPracticeId) { reportError("Choose your clinic first."); return; }
-    setBusy(true);
+    setBusy(true); setPendingAction("save");
     try {
       const savedSchedule = await saveMySchedulePreferences(supabase, selectedPracticeId, { workingDays: draft.days.map(day => day + 1), clinicStart: draft.start, clinicEnd: draft.end, slotMinutes: draft.duration, onlineSlotMinutes: draft.onlineDuration, homeSlotMinutes: draft.homeDuration, onlineDailyLimit: draft.online, walkinDailyLimit: draft.walkIn, autoAccept: draft.autoAccept, autoAcceptLimit: draft.autoAccept ? draft.autoLimit : 0, homeVisits: draft.homeVisits, homeRadiusKm: draft.homeRadius ? Number(draft.homeRadius) : null, onlineFeeMinor: Math.round(Number(draft.onlineFee) * 100), clinicFeeMinor: Math.round(Number(draft.clinicFee) * 100), homeFeeMinor: Math.round(Number(draft.homeFee) * 100) }, Number(saved.data?.row_version ?? 0));
       queryClient.setQueryData(["my-doctor-schedule", selectedPracticeId], savedSchedule);
       setSelectedSlots({ clinic: [], online: [], home: [] });
       reportSuccess("Schedule saved. Publish service slots below to show availability to patients.");
     } catch (cause) { reportError(cause instanceof Error ? cause.message : "Could not save schedule."); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setPendingAction(null); }
   }
   async function publish(mode: "clinic" | "online" | "home") {
     if (!supabase || !selectedPracticeId || !saved.data) { failPublish(mode, "Save your schedule first."); return; }
@@ -184,7 +185,7 @@ export function ScheduleScreen() {
     if (mode === "clinic" && chosen.length > remainingSlots.clinic) { failPublish(mode, "Selected clinic slots exceed the remaining daily limit."); return; }
     const overlap = slotStarts.some(start => sessions.data?.some(item => item.state !== "cancelled" && start < new Date(item.ends_at) && new Date(start.getTime() + slotMinutes * 60000) > new Date(item.starts_at)));
     if (overlap) { failPublish(mode, "One or more selected slots overlap a published session. Choose different slots."); return; }
-    setBusy(true);
+    setBusy(true); setPendingAction(`publish:${mode}`);
     try {
       if (mode !== "home" && (draft.online !== saved.data.online_daily_limit || draft.walkIn !== saved.data.walkin_daily_limit)) {
         const problem = scheduleError(draft);
@@ -223,14 +224,14 @@ export function ScheduleScreen() {
       if (autoAcceptFailed) reportError("Slots were published, but the auto-accept limit could not be set. Review the published sessions below.");
       else reportSuccess(`Published ${chosen.length} ${mode === "online" ? "online" : mode === "home" ? "home-visit" : "clinic"} slots for ${publishDate}.`);
     } catch (cause) { failPublish(mode, cause instanceof Error ? cause.message : "Could not publish slots."); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setPendingAction(null); }
   }
   async function addLeave() {
     if (!supabase || !selectedPracticeId) return;
-    setBusy(true);
+    setBusy(true); setPendingAction("add-leave");
     try { const leaveDateIso = parseDisplayDate(leaveDate); if (!leaveDateIso) throw new Error("Enter a valid date as DD-MM-YYYY."); if (!Number.isFinite(minutes(leaveStart)) || !Number.isFinite(endMinutes(leaveEnd))) throw new Error("Enter a valid unavailable time; the end may be 24:00."); const startsAt = new Date(`${leaveDateIso}T${leaveStart}:00`); const endsAt = leaveEnd === "24:00" ? new Date(`${leaveDateIso}T00:00:00`) : new Date(`${leaveDateIso}T${leaveEnd}:00`); if (leaveEnd === "24:00") endsAt.setDate(endsAt.getDate() + 1); if (Number.isNaN(startsAt.getTime()) || endsAt <= startsAt) throw new Error("Enter a valid unavailable time."); await addClinicUnavailability(supabase, { practiceId: selectedPracticeId, startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(), reason: leaveReason }); await queryClient.invalidateQueries({ queryKey: ["doctor-clinic-unavailability", selectedPracticeId] }); setLeaveDate(""); setLeaveStart(""); setLeaveEnd(""); setLeaveReason(""); reportSuccess("Unavailable time saved."); }
     catch (cause) { reportError(cause instanceof Error ? cause.message : "Could not save unavailable time."); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setPendingAction(null); }
   }
   return (
     <DoctorScreen
@@ -373,7 +374,7 @@ export function ScheduleScreen() {
                 : "An active clinic or hospital association is required before you can save a schedule."}
         </Label>
       ) : null}
-      <Button
+      <Button loading={pendingAction === "save"}
         theme="doctor"
         label={busy ? "Saving…" : "Save Schedule"}
         leftIcon={<Calendar size={17} color="white" />}
@@ -398,6 +399,7 @@ export function ScheduleScreen() {
             slotMinutes={{ clinic: draft.duration, online: draft.onlineDuration, home: draft.homeDuration }}
             onToggleSlot={toggleSlot}
             busy={busy}
+            pendingAction={pendingAction}
             disabled={!selectedPractice?.verified || !saved.data || !publishDateIso}
             onPublish={() => void publish("clinic")}
             onPublishOnline={() => void publish("online")}
@@ -412,8 +414,10 @@ export function ScheduleScreen() {
               setSessionLimits((current) => ({ ...current, [id]: value }))
             }
             busy={busy}
+            pendingAction={pendingAction}
             onSaveLimit={async (session) => {
-              if (!supabase) return;
+              if (!supabase || busy) return;
+              setBusy(true); setPendingAction(`limit:${session.id}`);
               try {
                 await setClinicAutoConfirmLimit(supabase, {
                   sessionId: session.id,
@@ -430,7 +434,7 @@ export function ScheduleScreen() {
                 reportSuccess("Approval limit updated.");
               } catch {
                 reportError("Could not update approval limit.");
-              }
+              } finally { setBusy(false); setPendingAction(null); }
             }}
             isError={sessions.isError}
           />
@@ -444,6 +448,7 @@ export function ScheduleScreen() {
             leaveReason={leaveReason}
             onLeaveReasonChange={setLeaveReason}
             busy={busy}
+            pendingAction={pendingAction}
             canAdd={
               Boolean(
                 leaveDate &&
@@ -455,7 +460,8 @@ export function ScheduleScreen() {
             onAddLeave={() => void addLeave()}
             unavailable={unavailable.data}
             onRemoveLeave={async (item) => {
-              if (!supabase) return;
+              if (!supabase || busy) return;
+              setBusy(true); setPendingAction(`remove-leave:${item.id}`);
               try {
                 await revokeClinicUnavailability(supabase, {
                   exceptionId: item.id,
@@ -470,7 +476,7 @@ export function ScheduleScreen() {
                 reportSuccess("Unavailable time removed.");
               } catch {
                 reportError("Could not remove unavailable time.");
-              }
+              } finally { setBusy(false); setPendingAction(null); }
             }}
             isError={unavailable.isError}
           />

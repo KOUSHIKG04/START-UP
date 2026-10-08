@@ -1,10 +1,10 @@
+import { ModalSurface } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
 import { supabase } from "../../../services/supabase";
 import {
   Keyboard,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -93,9 +93,9 @@ export function HomeSearchOverlay({
   };
 
   return (
-    <Modal
+    <ModalSurface layout="custom"
       animationType="fade"
-      onRequestClose={handleClose}
+      onClose={handleClose}
       statusBarTranslucent={true}
       transparent={false}
       visible={visible}
@@ -288,7 +288,7 @@ export function HomeSearchOverlay({
           )}
         </ScrollView>
       </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 

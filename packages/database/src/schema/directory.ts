@@ -51,6 +51,7 @@ export const doctor = clinzo
       ),
       public_code: text("public_code").notNull(),
       full_name: text("full_name").notNull(),
+      profile_photo_path: text("profile_photo_path"),
       qualification: text("qualification"),
       bio: text("bio"),
       registration_authority: text("registration_authority").notNull(),

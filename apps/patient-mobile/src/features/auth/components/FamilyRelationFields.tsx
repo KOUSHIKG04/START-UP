@@ -2,13 +2,14 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Controller, type Control } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SelectDropdown } from "./SelectDropdown";
 import type { ProfileFormValues } from "./ProfileForm";
+import { PROFILE_PLACEHOLDER_COLOR, profileFormStyles } from "./profileFormStyles";
+import { Checkbox, Input } from "@startup/mobile-ui";
 
 const relations = [
   "Son",
@@ -16,8 +17,7 @@ const relations = [
   "Spouse",
   "Father",
   "Mother",
-  "Brother",
-  "Sister",
+  "Sibling",
   "Other",
 ];
 
@@ -44,7 +44,6 @@ export function FamilyRelationFields({
         )}
       />
 
-      <Text style={[styles.label, styles.sectionLabel]}>Phone Number</Text>
       <Controller
         control={control}
         name="phone"
@@ -56,8 +55,12 @@ export function FamilyRelationFields({
             );
           },
         }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
+        render={({ field: { onChange, onBlur, value }, fieldState }) => (
+          <Input
+            label="Phone Number"
+            invalid={fieldState.invalid}
+            labelStyle={profileFormStyles.label}
+            containerStyle={styles.sectionLabel}
             accessibilityLabel="Family member phone number"
             keyboardType="phone-pad"
             placeholder="+91"
@@ -68,7 +71,8 @@ export function FamilyRelationFields({
               onChange(text);
             }}
             onBlur={onBlur}
-            style={styles.input}
+            placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
+            style={[profileFormStyles.control, profileFormStyles.text]}
           />
         )}
       />
@@ -77,17 +81,8 @@ export function FamilyRelationFields({
         control={control}
         name="notify"
         render={({ field: { onChange, value } }) => (
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: value }}
-            onPress={() => onChange(!value)}
-            style={styles.checkboxRow}
-          >
-            <View style={[styles.checkbox, value && styles.checked]} />
-            <Text style={styles.checkboxText}>
-              Notify this contact with emergency updates
-            </Text>
-          </Pressable>
+          <Checkbox theme="patient" checked={value} onCheckedChange={onChange}
+            label="Notify this contact with emergency updates" labelStyle={{ fontSize: 15, lineHeight: 21 }} style={{ marginTop: 14 }} />
         )}
       />
     </>
@@ -98,11 +93,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontFamily: fontFamilies.medium,
-    color: colors.patient.text,
-    marginBottom: 6,
+    color: colors.textPrimary,
+    marginBottom: 8,
   },
   sectionLabel: {
-    marginTop: 14,
+    marginTop: 16,
   },
   input: {
     borderWidth: 1,

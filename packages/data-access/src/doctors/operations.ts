@@ -1,5 +1,12 @@
-import { doctorProfileSchema, ownedClinicLocationSchema, updateDoctorProfileSchema } from "@startup/contracts";
-import type { OwnedClinicLocationInput, UpdateDoctorProfileInput } from "@startup/contracts";
+import {
+  doctorProfileSchema,
+  ownedClinicLocationSchema,
+  updateDoctorProfileSchema,
+} from "@startup/contracts";
+import type {
+  OwnedClinicLocationInput,
+  UpdateDoctorProfileInput,
+} from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
 export async function getMyDoctorProfile(client: AppSupabaseClient) {
@@ -8,7 +15,10 @@ export async function getMyDoctorProfile(client: AppSupabaseClient) {
   return data === null ? null : doctorProfileSchema.parse(data);
 }
 
-export async function updateMyDoctorProfile(client: AppSupabaseClient, input: UpdateDoctorProfileInput) {
+export async function updateMyDoctorProfile(
+  client: AppSupabaseClient,
+  input: UpdateDoctorProfileInput
+) {
   const request = updateDoctorProfileSchema.parse(input);
   const { data, error } = await client.rpc("update_my_doctor_profile", {
     p_full_name: request.fullName,
@@ -19,7 +29,10 @@ export async function updateMyDoctorProfile(client: AppSupabaseClient, input: Up
   return doctorProfileSchema.parse(data);
 }
 
-export async function updateMyOwnedClinicLocation(client: AppSupabaseClient, input: OwnedClinicLocationInput) {
+export async function updateMyOwnedClinicLocation(
+  client: AppSupabaseClient,
+  input: OwnedClinicLocationInput
+) {
   const location = ownedClinicLocationSchema.parse(input);
   const { data, error } = await client.rpc("update_my_owned_clinic_location", {
     p_facility_id: location.facilityId,
@@ -34,6 +47,8 @@ export async function updateMyOwnedClinicLocation(client: AppSupabaseClient, inp
       longitude: location.longitude,
     },
   });
+  
   if (error) throw error;
+  
   return data;
 }

@@ -1,12 +1,13 @@
+import { Button } from "@startup/mobile-ui";
+import { Input } from "@startup/mobile-ui";
 import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { OnboardingButton } from "./OnboardingShell";
+import { onboardingButtonStyles } from "./OnboardingShell";
 
 type DevEmailAuthFormProps = {
   confirmationPending: boolean;
@@ -37,7 +38,7 @@ function EmailConfirmationNotice({
         confirmation link. Open it, then return here and sign in to create your
         patient profile.
       </Text>
-      <OnboardingButton label="Back to sign in" onPress={onBackToSignIn} />
+      <Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>} label="Back to sign in" onPress={onBackToSignIn} />
     </>
   );
 }
@@ -68,7 +69,7 @@ function EmailCredentialsForm({
 
   return (
     <>
-      <TextInput
+      <Input variant="unstyled"
         accessibilityLabel="Email"
         autoCapitalize="none"
         autoComplete="email"
@@ -79,7 +80,7 @@ function EmailCredentialsForm({
         style={styles.input}
         editable={!busy}
       />
-      <TextInput
+      <Input variant="unstyled"
         accessibilityLabel="Password"
         autoComplete={isSignUp ? "new-password" : "password"}
         secureTextEntry
@@ -90,7 +91,7 @@ function EmailCredentialsForm({
         editable={!busy}
       />
       {isSignUp ? (
-        <TextInput
+        <Input variant="unstyled"
           accessibilityLabel="Confirm password"
           autoComplete="new-password"
           secureTextEntry
@@ -101,7 +102,7 @@ function EmailCredentialsForm({
           editable={!busy}
         />
       ) : null}
-      <OnboardingButton
+      <Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>}
         label={submitLabel}
         disabled={isSubmitDisabled}
         onPress={onSubmit}

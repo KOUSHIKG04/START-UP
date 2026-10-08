@@ -1,8 +1,8 @@
+import { Input } from "@startup/mobile-ui";
 import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { MapPin, Search, X } from "lucide-react-native";
@@ -34,7 +34,7 @@ export function LocationFields({
 
       <View style={styles.locationCard}>
         <View style={styles.dropDot} />
-        <TextInput
+        <Input variant="unstyled"
           value={destination}
           onChangeText={onChange}
           onFocus={onFocus}

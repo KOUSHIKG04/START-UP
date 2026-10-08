@@ -88,7 +88,7 @@ export function ScanQrScreen() {
     {permission && !permission.granted && !permission.canAskAgain && Platform.OS !== "web" ? <Button theme="doctor" variant="secondary"
       label="Open camera settings" onPress={() => void Linking.openSettings().catch(() => setError("Open your device settings and allow camera access."))} /> : null}
     <Input label="Patient ID" accessibilityLabel="Patient ID" autoCapitalize="characters" placeholder="e.g. PAT-..." value={value} onChangeText={setValue} onSubmitEditing={() => lookup(value)} containerStyle={ui.field} />
-    <Button theme="doctor" variant="secondary" label="Look up patient" disabled={redeem.isPending || appointments.isLoading} onPress={() => lookup(value)} />
+    <Button loading={redeem.isPending} theme="doctor" variant="secondary" label="Look up patient" disabled={redeem.isPending || appointments.isLoading} onPress={() => lookup(value)} />
     {patientAppointment ? <Panel>
       <View style={ui.row}>
         <User size={28} color={palette.primary} />

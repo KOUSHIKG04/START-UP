@@ -1,13 +1,23 @@
+import { Button } from "@startup/mobile-ui";
+import { useCallback } from "react";
+import { setStatusBarStyle } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, UserRound, Users } from "lucide-react-native";
 import { listMyFamilyProfiles } from "@startup/data-access";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { OnboardingButton, OnboardingShell } from "../components/OnboardingShell";
+import {
+  onboardingButtonStyles,
+  OnboardingShell,
+} from "../components/OnboardingShell";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 export default function AddFamilyScreen() {
+  useFocusEffect(useCallback(() => {
+    setStatusBarStyle("dark");
+    return () => setStatusBarStyle("light");
+  }, []));
   const { profile } = useMobileSession();
 
   const familyQuery = useQuery({
@@ -21,7 +31,7 @@ export default function AddFamilyScreen() {
   return (
     <OnboardingShell
       onBack={() => router.replace("/(app)/(tabs)")}
-      bottomArt
+      bottomArt={false}
       scroll
     >
       <View style={styles.body}>
@@ -65,10 +75,7 @@ export default function AddFamilyScreen() {
             accessibilityRole="button"
             accessibilityLabel="Add Family Member"
             onPress={() => router.push("/(app)/add-family-member")}
-            style={({ pressed }) => [
-              styles.addCard,
-              pressed && styles.pressed,
-            ]}
+            style={({ pressed }) => [styles.addCard, pressed && styles.pressed]}
           >
             <UserRound
               size={22}
@@ -85,7 +92,11 @@ export default function AddFamilyScreen() {
         </View>
 
         <View style={styles.bottomSection}>
-          <OnboardingButton
+          <Button
+            theme="patient"
+            style={onboardingButtonStyles.button}
+            labelStyle={onboardingButtonStyles.label}
+            rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>}
             label={familyMembers.length > 0 ? "Continue" : "Skip and Continue"}
             onPress={() => router.replace("/(app)/(tabs)")}
           />

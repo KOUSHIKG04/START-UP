@@ -1,3 +1,4 @@
+import { Button } from "@startup/mobile-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect, type Href } from "expo-router";
@@ -152,7 +153,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
         contextLabel={consultationType === "Online" ? "Video consultation" : consultationType === "Home Visit" ? "Home Visit" : "Clinic Visit"}
         onPress={() => router.push({ pathname: "/doctor-profile", params: { practiceId: practice.practice_id, serviceId: practice.practice_service_id, consultationType } } as unknown as Href)}
       />)}</View>
-      {isOnline && onlineQuery.data?.length === 50 ? <Pressable accessibilityRole="button" accessibilityLabel="Load more online doctors" disabled={onlineQuery.isFetching} onPress={() => setOnlineOffset(value => value + 50)} style={styles.moreButton}><Text style={styles.moreLabel}>{onlineQuery.isFetching ? "Loading doctors…" : "Load more doctors"}</Text></Pressable> : null}
+      {isOnline && onlineQuery.data?.length === 50 ? <Button loading={onlineQuery.isFetching} variant="ghost" label="Load more doctors" labelStyle={styles.moreLabel} accessibilityRole="button" accessibilityLabel="Load more online doctors" disabled={onlineQuery.isFetching} onPress={() => setOnlineOffset(value => value + 50)} style={styles.moreButton}><Text style={styles.moreLabel}>{onlineQuery.isFetching ? "Loading doctors…" : "Load more doctors"}</Text></Button> : null}
     </FadedScrollView>
   </View>;
 }

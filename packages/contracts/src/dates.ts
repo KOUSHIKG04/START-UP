@@ -1,4 +1,13 @@
 /** Dates shown or entered by people use DD-MM-YYYY; APIs continue to use ISO dates. */
+export function ageFromBirthDate(value: string, today = new Date()): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const birth = new Date(Date.UTC(year, month - 1, day));
+  if (birth.getUTCFullYear() !== year || birth.getUTCMonth() !== month - 1 || birth.getUTCDate() !== day) return null;
+  const age = today.getFullYear() - year - (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day) ? 1 : 0);
+  return age >= 0 && age <= 120 ? age : null;
+}
+
 export function parseDisplayDate(value: string): string | null {
   const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(value.trim());
   if (!match) return null;

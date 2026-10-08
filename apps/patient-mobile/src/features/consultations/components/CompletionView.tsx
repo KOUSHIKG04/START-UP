@@ -175,7 +175,7 @@ export function CompletionView({
           </View>
 
           {!ratingSubmitted ? (
-            <Button
+            <Button loading={submitting}
               label="Submit"
               variant="outline"
               disabled={rating === undefined || submitting}

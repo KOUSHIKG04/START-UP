@@ -189,7 +189,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
               keyboardType="decimal-pad"
             />
           </View>
-          <Button
+          <Button loading={vital.isPending && vital.variables === code}
             label="Save"
             variant="outline"
             disabled={vital.isPending || !Number.isFinite(Number(vitalValues[code])) || Number(vitalValues[code]) <= 0}
@@ -203,7 +203,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         onChangeText={setDiagnosis}
         multiline
       />
-      <Button
+      <Button loading={diagnosisMutation.isPending}
         label="Save primary diagnosis"
         variant="outline"
         disabled={diagnosisMutation.isPending || diagnosis.trim().length < 2}
@@ -295,7 +295,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
           />
         </View>
       ))}
-      <Button
+      <Button loading={prescription.isPending}
         label={`Sign prescription (${items.length} ${items.length === 1 ? "medicine" : "medicines"})`}
         disabled={prescription.isPending || items.length === 0}
         onPress={() => prescription.mutate()}
@@ -313,7 +313,7 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         onChangeText={setFollowupReason}
         multiline
       />
-      <Button
+      <Button loading={followup.isPending}
         label="Recommend follow-up"
         variant="outline"
         disabled={

@@ -3,10 +3,21 @@ import { onboardingSchema, phoneSchema } from "../src/validation";
 import { clinicBookingSchema, clinicTransitionSchema } from "../src/clinic";
 import { updateBedInventorySchema } from "../src/facilities";
 import { driverRegistrationDetailsSchema, driverRegistrationSubmissionSchema } from "../src/driver-profile";
-import { formatDisplayDate, parseDisplayDate } from "../src/dates";
+import { ageFromBirthDate, formatDisplayDate, parseDisplayDate } from "../src/dates";
 import { doctorScheduleSettingsSchema } from "../src/doctor-schedule";
 
 const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
+
+test("DOB age changes on the birthday and rejects invalid or future dates", () => {
+  const today = new Date(2026, 9, 8);
+  expect(ageFromBirthDate("2000-10-09", today)).toBe(25);
+  expect(ageFromBirthDate("2000-10-08", today)).toBe(26);
+  expect(ageFromBirthDate("2026-10-08", today)).toBe(0);
+  expect(ageFromBirthDate("2026-10-09", today)).toBeNull();
+  expect(ageFromBirthDate("2025-02-29", today)).toBeNull();
+  expect(ageFromBirthDate("2004-02-29", today)).toBe(22);
+  expect(ageFromBirthDate("1900-01-01", today)).toBeNull();
+});
 
 test("display dates round-trip without changing the ISO database date", () => {
   expect(parseDisplayDate("05-10-2026")).toBe("2026-10-05");

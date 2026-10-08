@@ -94,7 +94,6 @@ export function BookSlots({
     );
   }, [today, selectedMonthOffset]);
 
-
   const dateSlots = slots.filter(
     (slot) => localDateKey(new Date(slot.starts_at)) === selectedDate
   );
@@ -341,7 +340,7 @@ export function BookSlots({
           //   />
           // }
         />
-        <Button
+        <Button loading={busy}
           label="Book Appointment"
           disabled={
             busy ||

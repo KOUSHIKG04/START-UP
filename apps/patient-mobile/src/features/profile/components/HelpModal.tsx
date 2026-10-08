@@ -1,7 +1,7 @@
-import { Linking, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { ChevronRight, HelpCircle, Mail, Phone, X } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Button } from "@startup/mobile-ui";
+import { Button, ModalSurface } from "@startup/mobile-ui";
 import { supportContacts } from "../utils/profileConstants";
 
 export function HelpModal({
@@ -12,14 +12,7 @@ export function HelpModal({
   onClose: () => void;
 }) {
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalBackdrop}>
-        <View style={styles.modalCard}>
+    <ModalSurface visible={visible} onClose={onClose} contentStyle={styles.modalCard}>
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleRow}>
               <HelpCircle color={colors.patient.primaryDark} size={20} />
@@ -70,9 +63,7 @@ export function HelpModal({
             onPress={onClose}
             style={styles.modalButton}
           />
-        </View>
-      </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 
@@ -80,7 +71,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(12, 36, 52, 0.45)",
+    backgroundColor: colors.ui.overlay,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,

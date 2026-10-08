@@ -19,9 +19,11 @@ export async function completePatientProfile(
     p_profile: {
       full_name: value.fullName,
       age_years: value.age,
+      ...(value.dateOfBirth ? { birth_date: value.dateOfBirth } : {}),
       gender: value.gender,
       blood_group: value.bloodGroup,
       email: value.email ?? "",
+      ...(value.phone ? { contact_phone: value.phone } : {}),
       ...(value.address ? { address: value.address } : {}),
     },
   });
@@ -38,11 +40,13 @@ export async function addMyFamilyProfile(
     p_profile: {
       full_name: value.fullName,
       age_years: value.age,
+      ...(value.dateOfBirth ? { birth_date: value.dateOfBirth } : {}),
       gender: value.gender,
       blood_group: value.bloodGroup,
       relation: value.relation,
       phone: value.phone,
       notify: value.notify,
+      ...(value.profilePhotoPath ? { profile_photo_path: value.profilePhotoPath } : {}),
     },
   });
   if (error) throw error;

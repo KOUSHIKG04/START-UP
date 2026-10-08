@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Button } from "../primitives/Button";
@@ -88,10 +88,9 @@ export function PhoneOtpForm({
           {configurationError ?? error}
         </Text>
       ) : null}
-      {busy ? <ActivityIndicator color={theme.primary} /> : null}
       {sent ? (
         <>
-          <Button
+          <Button loading={busy}
             label="Verify and continue"
             disabled={busy || !!configurationError}
             onPress={() => void handleVerify()}
@@ -108,7 +107,7 @@ export function PhoneOtpForm({
           />
         </>
       ) : (
-        <Button
+        <Button loading={busy}
           label="Send sign-in code"
           disabled={busy || !!configurationError}
           onPress={() => void handleSend()}

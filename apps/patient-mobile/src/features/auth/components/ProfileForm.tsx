@@ -1,29 +1,36 @@
+import { Button } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { LockKeyhole } from "lucide-react-native";
+import {
+  ageFromBirthDate,
+  formatDisplayDate,
+  parseDisplayDate,
+} from "@startup/contracts";
 import { Controller, useForm } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SelectDropdown } from "./SelectDropdown";
 import { AddressSheet, type PatientAddress } from "./AddressSheet";
 import { emptyAddress } from "./addressTypes";
-import { OnboardingButton, OnboardingShell } from "./OnboardingShell";
-import { useToastFeedback } from "@startup/mobile-ui";
-
+import { onboardingButtonStyles, OnboardingShell } from "./OnboardingShell";
+import {
+  Input,
+  ProfilePhotoButton,
+  useToastFeedback,
+} from "@startup/mobile-ui";
 import { BloodGroupSelector } from "./BloodGroupSelector";
 import { FamilyRelationFields } from "./FamilyRelationFields";
 import { PersonalAddressFields } from "./PersonalAddressFields";
-
-const city = require("../../../../assets/images/onboarding/city.png");
+import { supabase } from "../../../services/supabase";
+import {
+  PROFILE_PLACEHOLDER_COLOR,
+  profileFormStyles,
+} from "./profileFormStyles";
 
 const bloodGroups = ["A+", "A−", "B+", "B−", "O+", "O−", "AB+", "AB−"] as const;
-const genders = ["Male", "Female", "Other", "Prefer not to say"] as const;
+const genders = ["Male", "Female", "Other / Prefer not to say"] as const;
 const relations = [
   "Son",
   "Daughter",
@@ -37,6 +44,7 @@ const relations = [
 export type ProfileDetails = {
   fullName: string;
   age: number;
+  dateOfBirth: string;
   gender: string;
   bloodGroup: string;
   email?: string;
@@ -44,11 +52,12 @@ export type ProfileDetails = {
   relation?: string;
   phone?: string;
   notify?: boolean;
+  photo?: { uri: string; mimeType: string };
 };
 
 export type ProfileFormValues = {
   fullName: string;
-  age: string;
+  dateOfBirth: string;
   gender: string;
   bloodGroup: string;
   email: string;
@@ -62,57 +71,79 @@ function getInitialFormValues(
   initialProfile?: {
     full_name: string;
     age_years: number | null;
+    birth_date?: string | null;
     gender: string | null;
     blood_group: string | null;
     email: string | null;
+    contact_phone?: string | null;
     address: PatientAddress | null;
   },
   family = false,
-  initialEmail = ""
+  initialEmail = "",
+  initialPhone = ""
 ): ProfileFormValues {
-  const ageStr =
-    initialProfile?.age_years !== null && initialProfile?.age_years !== undefined
-      ? String(initialProfile.age_years)
-      : "";
   return {
     fullName: initialProfile?.full_name ?? "",
-    age: ageStr,
+    dateOfBirth: initialProfile?.birth_date
+      ? formatDisplayDate(initialProfile.birth_date)
+      : "",
     gender: initialProfile?.gender ?? "Male",
     bloodGroup: (initialProfile?.blood_group ?? "").replace("-", "−"),
     email: initialProfile?.email ?? (!family ? initialEmail : ""),
     address: initialProfile?.address ?? undefined,
     relation: "Son",
-    phone: "",
+    phone: initialProfile?.contact_phone || (!family ? initialPhone : ""),
     notify: false,
   };
 }
 
-function formatProfilePayload(values: ProfileFormValues, family: boolean): ProfileDetails {
-  const years = Number(values.age);
+function formatProfilePayload(
+  values: ProfileFormValues,
+  family: boolean
+): ProfileDetails {
+  const birthDate = parseDisplayDate(values.dateOfBirth)!;
+  const years = ageFromBirthDate(birthDate)!;
   return {
     fullName: values.fullName.trim(),
     age: years,
+    dateOfBirth: birthDate,
     gender: values.gender,
     bloodGroup: values.bloodGroup.replace("−", "-"),
     email: values.email?.trim() || undefined,
     address: values.address,
     relation: family ? values.relation : undefined,
-    phone: family ? `+91${values.phone.replace(/\D/g, "")}` : undefined,
+    phone: values.phone.trim().startsWith("+")
+      ? `+${values.phone.replace(/\D/g, "")}`
+      : `+91${values.phone.replace(/\D/g, "")}`,
     notify: family ? values.notify : undefined,
   };
 }
 
-function ProfileHeader({ family }: { family: boolean }) {
+function ProfileHeader({
+  family,
+  photoUrl,
+  onPickPhoto,
+}: {
+  family: boolean;
+  photoUrl?: string;
+  onPickPhoto?: () => void;
+}) {
   return (
     <View style={styles.head}>
-      <View style={styles.avatar}>
-        <View style={styles.avatarHead} />
-        <View style={styles.avatarBody} />
-      </View>
+      <ProfilePhotoButton
+        theme="patient"
+        source={photoUrl ? { uri: photoUrl } : undefined}
+        onPress={onPickPhoto}
+      />
       <View style={styles.headText}>
         <Text style={styles.title}>
           {family ? "Family member Profile" : "Your Profile"}
         </Text>
+        {
+          <Text style={styles.photoHint}>
+            Tap the plus button on your profile icon to add a photo.
+          </Text>
+        }
       </View>
     </View>
   );
@@ -121,22 +152,75 @@ function ProfileHeader({ family }: { family: boolean }) {
 export function ProfileForm({
   family = false,
   initialEmail = "",
+  initialPhone = "",
   initialProfile,
   onSave,
 }: {
   family?: boolean;
   initialEmail?: string;
+  initialPhone?: string;
   initialProfile?: {
     full_name: string;
     age_years: number | null;
+    birth_date?: string | null;
     gender: string | null;
     blood_group: string | null;
     email: string | null;
+    contact_phone?: string | null;
     address: PatientAddress | null;
+    profile_photo_path?: string | null;
   };
   onSave: (details: ProfileDetails) => Promise<void>;
 }) {
   const [submitError, setSubmitError] = useState("");
+  const [photo, setPhoto] = useState<ProfileDetails["photo"]>();
+  const [photoUrl, setPhotoUrl] = useState<string>();
+
+  useEffect(() => {
+    if (!initialProfile?.profile_photo_path || !supabase) return;
+    let active = true;
+    void supabase.storage
+      .from("patient-profile-photos")
+      .createSignedUrl(initialProfile.profile_photo_path, 3600)
+      .then(({ data }) => {
+        if (active && data?.signedUrl) setPhotoUrl(data.signedUrl);
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialProfile?.profile_photo_path, family]);
+
+  async function pickPhoto() {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setSubmitError("Allow photo access to choose a profile picture.");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      if ((asset.fileSize ?? 0) > 5 * 1024 * 1024) {
+        setSubmitError("Choose a photo under 5 MB.");
+        return;
+      }
+      if (asset.mimeType !== "image/jpeg" && asset.mimeType !== "image/png") {
+        setSubmitError("Choose a JPG or PNG photo.");
+        return;
+      }
+      setPhoto({ uri: asset.uri, mimeType: asset.mimeType });
+      setPhotoUrl(asset.uri);
+      setSubmitError("");
+    } catch {
+      setSubmitError("Could not select a photo. Try again.");
+    }
+  }
 
   const {
     control,
@@ -145,21 +229,34 @@ export function ProfileForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
-    defaultValues: getInitialFormValues(initialProfile, family, initialEmail),
+    defaultValues: getInitialFormValues(
+      initialProfile,
+      family,
+      initialEmail,
+      initialPhone
+    ),
   });
 
   useEffect(() => {
     if (initialProfile) {
-      reset(getInitialFormValues(initialProfile, family, initialEmail));
+      reset(
+        getInitialFormValues(initialProfile, family, initialEmail, initialPhone)
+      );
     } else if (!family && initialEmail) {
       setValue("email", initialEmail);
     }
-  }, [initialProfile, initialEmail, family, reset, setValue]);
+    if (!initialProfile && !family && initialPhone) {
+      setValue("phone", initialPhone);
+    }
+  }, [initialProfile, initialEmail, initialPhone, family, reset, setValue]);
 
   const onSubmit = async (values: ProfileFormValues) => {
     setSubmitError("");
     try {
-      await onSave(formatProfilePayload(values, family));
+      await onSave({
+        ...formatProfilePayload(values, family),
+        photo,
+      });
     } catch (cause) {
       setSubmitError(
         cause instanceof Error ? cause.message : "Could not save the profile."
@@ -170,73 +267,132 @@ export function ProfileForm({
   const displayError =
     submitError ||
     errors.fullName?.message ||
-    errors.age?.message ||
+    errors.email?.message ||
+    errors.dateOfBirth?.message ||
     errors.bloodGroup?.message ||
-    errors.phone?.message;
+    errors.phone?.message ||
+    errors.address?.message;
   useToastFeedback({ error: displayError });
 
   return (
-    <OnboardingShell onBack={() => router.back()} bottomArt={false} scroll>
+    <OnboardingShell
+      scroll
+      showArt
+      bottomArt={false}
+      keepArtFixed
+      centerContent
+      onBack={() => {
+        if (router.canGoBack()) router.back();
+        else router.replace(initialProfile || family ? "/(app)/(tabs)/profile" : "/login");
+      }}
+    >
       <View style={styles.body}>
-        <ProfileHeader family={family} />
+        <ProfileHeader
+          family={family}
+          photoUrl={photoUrl}
+          onPickPhoto={() => void pickPhoto()}
+        />
 
-        <Text style={styles.label}>Full Name</Text>
         <Controller
           control={control}
           name="fullName"
           rules={{
-            required: "Enter a name, valid age, and blood group.",
+            required: "Enter a name, valid date of birth, and blood group.",
             validate: (val) =>
-              val.trim().length >= 2 || "Enter a name, valid age, and blood group.",
+              val.trim().length >= 2 ||
+              "Enter a name, valid date of birth, and blood group.",
           }}
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
+              label="Full Name"
+              invalid={Boolean(errors.fullName)}
+              labelStyle={profileFormStyles.label}
               accessibilityLabel="Full name"
               autoComplete="name"
               placeholder="Enter your full name"
+              placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
               value={value}
               onChangeText={(text) => {
                 setSubmitError("");
                 onChange(text);
               }}
               onBlur={onBlur}
-              style={styles.input}
+              style={[profileFormStyles.control, profileFormStyles.text]}
             />
           )}
         />
 
+        {!family ? (
+          <PersonalAddressFields
+            field="email"
+            control={control}
+            onClearError={() => setSubmitError("")}
+          />
+        ) : null}
+
+        {!family ? (
+          <Controller
+            control={control}
+            name="phone"
+            rules={{
+              required: "Enter your phone number.",
+              validate: (value) =>
+                (value.trim().startsWith("+")
+                  ? /^\+[1-9]\d{7,14}$/.test(value.trim())
+                  : /^\d{10}$/.test(value.replace(/\D/g, ""))) ||
+                "Enter a valid mobile number, including the country code for international numbers.",
+            }}
+            render={({ field, fieldState }) => (
+              <Input
+                label="Phone Number"
+                labelStyle={profileFormStyles.label}
+                containerStyle={styles.sectionLabel}
+                invalid={fieldState.invalid}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                placeholder="+91 mobile number"
+                placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                style={[profileFormStyles.control, profileFormStyles.text]}
+              />
+            )}
+          />
+        ) : null}
         <View style={styles.twoColumns}>
           <View style={styles.ageColumn}>
-            <Text style={styles.label}>Age</Text>
             <Controller
               control={control}
-              name="age"
+              name="dateOfBirth"
               rules={{
-                required: "Enter a name, valid age, and blood group.",
+                required: "Enter your date of birth in DD-MM-YYYY format.",
                 validate: (val) => {
-                  const years = Number(val);
+                  const birthDate = parseDisplayDate(val);
                   return (
-                    (val.trim() !== "" &&
-                      Number.isInteger(years) &&
-                      years >= 0 &&
-                      years <= 120) ||
-                    "Enter a name, valid age, and blood group."
+                    (birthDate !== null &&
+                      ageFromBirthDate(birthDate) !== null) ||
+                    "Enter a valid date of birth in DD-MM-YYYY format."
                   );
                 },
               }}
               render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  accessibilityLabel="Age"
-                  keyboardType="number-pad"
-                  maxLength={3}
-                  placeholder="Age"
+                <Input
+                  label="Date of Birth"
+                  invalid={Boolean(errors.dateOfBirth)}
+                  labelStyle={profileFormStyles.label}
+                  accessibilityLabel="Date of birth"
+                  keyboardType="numbers-and-punctuation"
+                  maxLength={10}
+                  placeholder="DD-MM-YYYY"
+                  placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
                   value={value}
                   onChangeText={(text) => {
                     setSubmitError("");
                     onChange(text);
                   }}
                   onBlur={onBlur}
-                  style={styles.input}
+                  style={[profileFormStyles.text, profileFormStyles.control]}
                 />
               )}
             />
@@ -250,9 +406,19 @@ export function ProfileForm({
               render={({ field: { onChange, value } }) => (
                 <SelectDropdown
                   label="Gender"
-                  value={value}
+                  value={
+                    value === "Other" || value === "Prefer not to say"
+                      ? "Other / Prefer not to say"
+                      : value
+                  }
                   options={genders as unknown as string[]}
-                  onChange={onChange}
+                  onChange={(selected) =>
+                    onChange(
+                      selected === "Other / Prefer not to say"
+                        ? "Other"
+                        : selected
+                    )
+                  }
                 />
               )}
             />
@@ -264,13 +430,15 @@ export function ProfileForm({
           control={control}
           name="bloodGroup"
           rules={{
-            required: "Enter a name, valid age, and blood group.",
+            required: "Enter a name, valid date of birth, and blood group.",
             validate: (val) =>
-              Boolean(val) || "Enter a name, valid age, and blood group.",
+              Boolean(val) ||
+              "Enter a name, valid date of birth, and blood group.",
           }}
           render={({ field: { onChange, value } }) => (
             <BloodGroupSelector
               bloodGroups={bloodGroups}
+              invalid={Boolean(errors.bloodGroup)}
               value={value}
               onChange={(item) => {
                 setSubmitError("");
@@ -292,32 +460,44 @@ export function ProfileForm({
           />
         )}
 
-
-        <View style={styles.save}>
-          <OnboardingButton
-            label={isSubmitting ? "Saving…" : "Save Profile"}
-            disabled={isSubmitting}
-            onPress={handleSubmit(onSubmit)}
-          />
+        <View
+          style={[styles.save, family && { flexDirection: "row", gap: 12 }]}
+        >
+          {family ? (
+            <View style={{ flex: 1 }}>
+              <Button
+                theme="patient"
+                style={[
+                  onboardingButtonStyles.button,
+                  onboardingButtonStyles.outline,
+                ]}
+                labelStyle={onboardingButtonStyles.outlineLabel}
+               
+                label="Skip for now"
+                variant="outline"
+                disabled={isSubmitting}
+                onPress={() => router.back()}
+              />
+            </View>
+          ) : null}
+          <View style={family ? { flex: 1 } : undefined}>
+            <Button loading={isSubmitting}
+              theme="patient"
+              style={onboardingButtonStyles.button}
+              labelStyle={onboardingButtonStyles.label}
+           
+              label={isSubmitting ? "Saving…" : "Save Profile"}
+              disabled={isSubmitting}
+              onPress={handleSubmit(onSubmit)}
+            />
+          </View>
         </View>
-
-        {family ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace("/(app)/(tabs)")}
-            style={styles.skip}
-          >
-            <Text style={styles.skipText}>Skip for now</Text>
-          </Pressable>
-        ) : null}
-
-        <Text style={styles.privacy}>
-          ♢ Your Information is secure and private
-        </Text>
-
-        {!family ? (
-          <Image source={city} resizeMode="stretch" style={styles.bottomArt} />
-        ) : null}
+        <View style={styles.privacyRow}>
+          <LockKeyhole size={16} color={colors.textSecondary} />
+          <Text style={styles.privacy}>
+            Your Information is secure and private
+          </Text>
+        </View>
       </View>
     </OnboardingShell>
   );
@@ -325,8 +505,7 @@ export function ProfileForm({
 
 const styles = StyleSheet.create({
   body: {
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingVertical: 24,
     width: "100%",
     maxWidth: 360,
     alignSelf: "center",
@@ -338,6 +517,13 @@ const styles = StyleSheet.create({
     marginBottom: 29,
   },
   headText: { flex: 1 },
+  photoHint: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.textSecondary,
+    marginTop: 6,
+  },
   avatar: {
     width: 76,
     height: 76,
@@ -345,6 +531,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.patient.primaryDark,
     alignItems: "center",
     overflow: "hidden",
+  },
+  avatarImage: { width: 76, height: 76, borderRadius: 38 },
+  cameraBadge: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 27,
+    height: 27,
+    borderRadius: 14,
+    backgroundColor: colors.patient.primaryDark,
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarHead: {
     width: 21,
@@ -367,13 +565,13 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   label: {
-    fontFamily: fontFamilies.regular,
+    fontFamily: fontFamilies.medium,
     fontSize: 14,
-    color: colors.black,
+    color: colors.textPrimary,
     marginLeft: 6,
     marginBottom: 8,
   },
-  sectionLabel: { marginTop: 20 },
+  sectionLabel: { marginTop: 16 },
   input: {
     width: "100%",
     height: 54,
@@ -385,9 +583,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     backgroundColor: colors.white,
   },
-  twoColumns: { flexDirection: "row", gap: 18, marginTop: 19 },
-  ageColumn: { flex: 0.8 },
-  genderColumn: { flex: 1.2 },
+  twoColumns: { flexDirection: "row", gap: 18, marginTop: 16 },
+  ageColumn: { flex: 1 },
+  genderColumn: { flex: 1 },
   select: {
     width: "100%",
     minHeight: 54,
@@ -454,11 +652,18 @@ const styles = StyleSheet.create({
   },
   save: { marginTop: 18 },
   privacy: {
+    flexShrink: 1,
     textAlign: "center",
-    marginTop: 18,
     color: "#777",
     fontFamily: fontFamilies.regular,
     fontSize: 14,
+  },
+  privacyRow: {
+    marginTop: 18,
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
   error: {
     color: colors.danger,
@@ -471,5 +676,4 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.medium,
     fontSize: 15,
   },
-  bottomArt: { width: "115%", height: 175, alignSelf: "center", marginTop: 2 },
 });

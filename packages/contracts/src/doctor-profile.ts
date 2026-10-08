@@ -6,6 +6,7 @@ export const doctorQualificationSchema = z.string().trim().min(2).max(160);
 export const doctorProfileSchema = z.object({
   id: uuidSchema,
   full_name: z.string(),
+  profile_photo_path: z.string().nullable().optional(),
   bio: z.string().nullable(),
   qualification: z.string().nullable(),
   qualification_claim: z.string().nullable(),

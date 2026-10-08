@@ -1,81 +1,47 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ChevronDown } from "lucide-react-native";
+import { StyleSheet } from "react-native";
+import type { ReactNode } from "react";
+import { Dropdown } from "@startup/mobile-ui";
 import { colors, fontFamilies } from "@startup/design-tokens";
+import { profileFormStyles } from "./profileFormStyles";
 
 export function SelectDropdown({
   label,
   value,
   options,
   onChange,
+  leftIcon,
 }: {
   label: string;
   value: string;
   options: string[];
   onChange: (val: string) => void;
+  leftIcon?: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${label}: ${value}`}
-        onPress={() => setOpen(!open)}
-        style={styles.select}
-      >
-        <Text style={styles.selectText}>{value}</Text>
-        <ChevronDown size={18} color={colors.patient.primaryDark} />
-      </Pressable>
-      {open ? (
-        <View style={styles.options}>
-          {options.map((item) => (
-            <Pressable
-              key={item}
-              onPress={() => {
-                onChange(item);
-                setOpen(false);
-              }}
-              style={styles.option}
-            >
-              <Text>{item}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
-    </>
+    <Dropdown
+      accessibilityLabel={`${label}: ${value}`}
+      options={options.map((item) => ({ label: item, value: item }))}
+      value={value}
+      onValueChange={onChange}
+      triggerStyle={[profileFormStyles.control, styles.select]}
+      leftIcon={leftIcon}
+      valueStyle={styles.selectText}
+      chevronColor={colors.patient.primaryDark}
+      backdropColor="#00000066"
+      selectedOptionBackgroundColor="#F3F4F6"
+      menuStyle={{ backgroundColor: colors.white }}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   select: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: "#FAFAFA",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    minHeight: 54,
+    paddingVertical: 0,
   },
   selectText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontFamilies.regular,
     color: colors.patient.text,
-  },
-  options: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
-    marginTop: 4,
-    overflow: "hidden",
-  },
-  option: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
   },
 });

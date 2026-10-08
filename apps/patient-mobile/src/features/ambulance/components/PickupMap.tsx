@@ -1,8 +1,8 @@
+import { Input } from "@startup/mobile-ui";
 import {
   Image,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { Search } from "lucide-react-native";
@@ -38,7 +38,7 @@ export function PickupMap({
           </Text>
           <Search color="#71818F" size={18} />
         </View>
-        <TextInput
+        <Input variant="unstyled"
           value={address}
           onChangeText={onAddressChange}
           placeholder="Add Building , gate /Floor (Optional)"

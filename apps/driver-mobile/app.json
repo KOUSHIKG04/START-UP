@@ -27,6 +27,7 @@
       "expo-router",
       "expo-notifications",
       "expo-document-picker",
+      ["expo-image-picker", { "photosPermission": "Allow Clinzo Ambulance to select a profile photo." }],
       [
         "expo-location",
         {

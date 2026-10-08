@@ -1,10 +1,10 @@
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Button } from "@startup/mobile-ui";
+import { Button, ModalSurface } from "@startup/mobile-ui";
 import { mobileSession, supabase } from "../../../services/supabase";
 import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 
@@ -45,14 +45,7 @@ export function LogoutModal({
   }
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalBackdrop}>
-        <View style={styles.modalCard}>
+    <ModalSurface visible={visible} onClose={onClose} contentStyle={styles.modalCard}>
           <View style={styles.logoutModalHero}>
             <View style={styles.logoutModalIconWrap}>
               <LogOut color="#DC2626" size={26} />
@@ -72,7 +65,7 @@ export function LogoutModal({
               disabled={busy}
               style={styles.logoutCancelBtn}
             />
-            <Button
+            <Button loading={busy}
               label={busy ? "Signing out…" : "Log Out"}
               variant="primary"
               onPress={() => void signOut()}
@@ -81,16 +74,14 @@ export function LogoutModal({
               labelStyle={styles.logoutConfirmLabel}
             />
           </View>
-        </View>
-      </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(12, 36, 52, 0.45)",
+    backgroundColor: colors.ui.overlay,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,

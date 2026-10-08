@@ -1,3 +1,4 @@
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
@@ -5,7 +6,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -143,7 +143,7 @@ export default function LoginScreen() {
               </>
             ) : (
               <>
-                <TextInput
+                <Input variant="unstyled"
                   accessibilityLabel="Email"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -155,7 +155,7 @@ export default function LoginScreen() {
                   style={styles.input}
                   editable={!busy}
                 />
-                <TextInput
+                <Input variant="unstyled"
                   accessibilityLabel="Password"
                   autoComplete={
                     emailMode === "signup" ? "new-password" : "password"
@@ -169,7 +169,7 @@ export default function LoginScreen() {
                   editable={!busy}
                 />
                 {emailMode === "signup" ? (
-                  <TextInput
+                  <Input variant="unstyled"
                     accessibilityLabel="Confirm password"
                     autoComplete="new-password"
                     secureTextEntry
@@ -182,7 +182,7 @@ export default function LoginScreen() {
                   />
                 ) : null}
 
-                <OnboardingButton
+                <OnboardingButton loading={busy}
                   label={
                     busy
                       ? "Please wait…"

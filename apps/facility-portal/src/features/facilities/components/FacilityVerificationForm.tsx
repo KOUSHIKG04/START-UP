@@ -8,7 +8,7 @@ import { Label } from "@startup/web-ui/components/ui/label";
 import { Skeleton } from "@startup/web-ui/components/ui/skeleton";
 import { Spinner } from "@startup/web-ui/components/ui/spinner";
 import { toast } from "@startup/web-ui/components/ui/toast";
-import { listBedTypeCatalog, registerMyCareFacility } from "@startup/data-access";
+import { listBedTypeCatalog, registerMyCareFacility, setMyProfilePhoto } from "@startup/data-access";
 import type { BedTypeCatalogItem } from "@startup/contracts";
 import { useRouter } from "next/navigation";
 
@@ -46,6 +46,7 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   const [registration,setRegistration] = useState("");
   const certificateRef = useRef<File | null>(null);
   const licenceRef = useRef<File | null>(null);
+  const logoRef = useRef<File | null>(null);
   const [status,setStatus] = useState<Status | null>(null);
   const [statusLoading,setStatusLoading] = useState(facilities.length > 0);
   const [busy,setBusy] = useState(false);
@@ -146,14 +147,31 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
       const location = facilityLocation ?? await getFacilityLocation();
       const address = [facilityAddress,facilityLocality,facilityCity,facilityState,facilityPincode]
         .map(part => part.trim()).join(", ");
-      await registerMyCareFacility(createBrowserSupabaseClient(), {
+      const client = createBrowserSupabaseClient();
+      const registeredId = await registerMyCareFacility(client, {
         name:facilityName.trim(),kind:facilityKind,address,
         locality:facilityLocality.trim(),city:facilityCity.trim(),
         state:facilityState.trim(),pincode:facilityPincode.trim(),
         offersBeds,bedTypeCodes:offersBeds ? bedTypeCodes : [],
         latitude:location.latitude,longitude:location.longitude,
       });
-      toast.add({title:"Facility registered",description:"Upload its registration certificate and operating licence next.",type:"success"});
+      let logoWarning = "";
+      if (logoRef.current) {
+        try {
+          const logo = logoRef.current;
+          if (logo.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png"].includes(logo.type))
+            throw new Error("Choose a JPG or PNG logo under 5 MB.");
+          const { data, error } = await client.auth.getUser();
+          if (error || !data.user) throw error ?? new Error("Sign in to upload a logo.");
+          const path = `${data.user.id}/${crypto.randomUUID()}.${logo.type === "image/png" ? "png" : "jpg"}`;
+          const uploaded = await client.storage.from("provider-profile-photos").upload(path, logo, { contentType: logo.type, upsert: false });
+          if (uploaded.error) throw uploaded.error;
+          await setMyProfilePhoto(client, "facility", path, registeredId);
+        } catch (cause) {
+          logoWarning = cause instanceof Error ? cause.message : "Logo upload failed.";
+        }
+      }
+      toast.add({ title: logoWarning ? "Facility registered; logo upload failed" : "Facility registered", description: logoWarning || "Upload its registration certificate and operating licence next.", type: logoWarning ? "warning" : "success" });
       setStatusLoading(true);
       router.refresh();
     } catch (cause) {
@@ -221,7 +239,7 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   </div>;
 
   return <div className="space-y-5">
-    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}<Button disabled={registering || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button></form> : statusLoading ? <div role="status" aria-label="Loading verification status" className="space-y-3 rounded-xl border bg-card p-6"><Skeleton className="h-5 w-48" /><Skeleton className="h-4 w-full" /><Skeleton className="h-9 w-28" /></div> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button></section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
+    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div><div className="space-y-2"><Label htmlFor="facility-logo">Facility logo or photo (optional)</Label><Input id="facility-logo" type="file" accept="image/jpeg,image/png" onChange={event => { logoRef.current = event.target.files?.[0] ?? null; }} /><p className="text-xs text-muted-foreground">JPG or PNG, up to 5 MB.</p></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}<Button disabled={registering || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button></form> : statusLoading ? <div role="status" aria-label="Loading verification status" className="space-y-3 rounded-xl border bg-card p-6"><Skeleton className="h-5 w-48" /><Skeleton className="h-4 w-full" /><Skeleton className="h-9 w-28" /></div> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button></section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
       <div className="space-y-2"><Label htmlFor="facility">Facility</Label><select id="facility" value={activeFacilityId} onChange={(event) => { setFacilityId(event.target.value); setStatus(null); setStatusLoading(true); }} className="h-10 w-full rounded-md border bg-background px-3 text-sm">{facilities.map((facility) => <option key={facility.facility_id} value={facility.facility_id}>{facility.facility_name}</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="registration">Registration number</Label><Input id="registration" value={registration} onChange={(event) => setRegistration(event.target.value)} minLength={4} maxLength={120} required /></div>
       <div className="space-y-2"><Label htmlFor="certificate">Registration certificate</Label><Input id="certificate" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => { certificateRef.current = event.target.files?.[0] ?? null; }} required /><p className="text-xs text-muted-foreground">PDF, JPG or PNG, up to 10 MB.</p></div>

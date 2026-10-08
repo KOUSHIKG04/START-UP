@@ -1,21 +1,29 @@
-import { useToastFeedback } from "@startup/mobile-ui";
+import { Button } from "@startup/mobile-ui";
+import { ModalSurface } from "@startup/mobile-ui";
+import { Input, useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import * as Location from "expo-location";
-import { MapPin, XCircle } from "lucide-react-native";
+import { MapPin, X } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { emptyAddress, type PatientAddress } from "./addressTypes";
+import {
+  PROFILE_FIELD_HEIGHT,
+  PROFILE_PLACEHOLDER_COLOR,
+  profileFormStyles,
+} from "./profileFormStyles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { patientAddressSchema } from "@startup/contracts";
 
 export type { PatientAddress };
 
@@ -30,22 +38,22 @@ export function AddressSheet({
   onClose: () => void;
   onConfirm: (address: PatientAddress) => void;
 }) {
+  const insets = useSafeAreaInsets();
   const [address, setAddress] = useState<PatientAddress>(value);
   const [error, setError] = useState("");
   useToastFeedback({ error });
   const [isLocating, setIsLocating] = useState(false);
+  const [attemptedConfirm, setAttemptedConfirm] = useState(false);
 
-  const [prevVisible, setPrevVisible] = useState(visible);
-  const [prevValue, setPrevValue] = useState(value);
-
-  if (visible !== prevVisible || value !== prevValue) {
-    setPrevVisible(visible);
-    setPrevValue(value);
-    if (visible) {
-      setAddress(value || emptyAddress);
-      setError("");
-    }
-  }
+  // Only a new confirmed address replaces the draft. Dismissing the drawer
+  // must not reset partially entered fields when it is opened again.
+  useEffect(() => {
+    setAddress(value || emptyAddress);
+    setAttemptedConfirm(false);
+  }, [value]);
+  useEffect(() => {
+    if (visible) setError("");
+  }, [visible]);
 
   async function fetchLocation() {
     try {
@@ -84,6 +92,7 @@ export function AddressSheet({
   }
 
   function handleConfirm() {
+    setAttemptedConfirm(true);
     const trimmed: PatientAddress = {
       building: address.building.trim(),
       line1: address.line1.trim(),
@@ -115,6 +124,7 @@ export function AddressSheet({
     }
 
     setError("");
+    Keyboard.dismiss();
     onConfirm(trimmed);
   }
 
@@ -126,31 +136,34 @@ export function AddressSheet({
     maxLength?: number
   ) {
     return (
-      <View style={styles.field}>
-        <Text style={styles.label}>{label}</Text>
-        <TextInput
-          accessibilityLabel={label}
-          placeholder={placeholder}
-          placeholderTextColor="#A6A6A6"
-          value={address[key]}
-          keyboardType={keyboardType}
-          maxLength={maxLength}
-          onChangeText={(text) => {
-            setError("");
-            setAddress((current) => ({ ...current, [key]: text }));
-          }}
-          style={styles.input}
-        />
-      </View>
+      <Input
+        label={label}
+          invalid={attemptedConfirm && !patientAddressSchema.shape[key].safeParse(address[key].trim()).success}
+        labelStyle={styles.label}
+        containerStyle={styles.field}
+        accessibilityLabel={label}
+        placeholder={placeholder}
+        placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
+        value={address[key]}
+        keyboardType={keyboardType}
+        maxLength={maxLength}
+        onChangeText={(text) => {
+          setError("");
+          setAddress((current) => ({ ...current, [key]: text }));
+        }}
+        style={[profileFormStyles.control, profileFormStyles.text]}
+      />
     );
   }
 
   return (
-    <Modal
+    <ModalSurface layout="custom"
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      statusBarTranslucent
+      navigationBarTranslucent
+      onClose={onClose}
     >
       <View style={styles.overlay}>
         <Pressable
@@ -178,7 +191,7 @@ export function AddressSheet({
                 onPress={onClose}
                 style={styles.closeButton}
               >
-                <XCircle size={22} color="#8E9BAE" />
+                <X size={22} color="#8E9BAE" />
               </Pressable>
             </View>
 
@@ -186,46 +199,19 @@ export function AddressSheet({
             <ScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.content}
+              style={styles.scroll}
+              contentContainerStyle={[
+                styles.content,
+                { paddingBottom: Math.max(insets.bottom, 16) },
+              ]}
             >
-              {/* Fetch Location Card */}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => void fetchLocation()}
-                style={styles.locationCard}
-              >
-                <View style={styles.iconContainer}>
-                  {isLocating ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={colors.patient.primaryDark}
-                    />
-                  ) : (
-                    <MapPin size={18} color={colors.patient.primaryDark} />
-                  )}
-                </View>
-                <View style={styles.locationTextContainer}>
-                  <Text style={styles.locationTitle}>Fetch current location</Text>
-                  <Text style={styles.locationSub}>
-                    Use your device location to fill in your address details.
-                  </Text>
-                </View>
-              </Pressable>
-
-
-
-              {/* Form Fields */}
               <View style={styles.fieldsContainer}>
                 {renderField(
                   "House No. / Flat / Building",
                   "building",
                   "e.g. 42, Sunshine Apartments"
                 )}
-                {renderField(
-                  "Address Line 1",
-                  "line1",
-                  "Street name, area"
-                )}
+                {renderField("Address Line 1", "line1", "Street name, area")}
                 {renderField(
                   "Address Line 2",
                   "line2",
@@ -244,6 +230,32 @@ export function AddressSheet({
                 )}
               </View>
 
+              {/* Fetch Location Card */}
+              <Button loading={isLocating} label="Fetch current location" variant="ghost"
+                accessibilityRole="button"
+                onPress={() => void fetchLocation()}
+                style={styles.locationCard}
+              >
+                <View style={styles.iconContainer}>
+                  {isLocating ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.patient.primaryDark}
+                    />
+                  ) : (
+                    <MapPin size={18} color={colors.patient.primaryDark} />
+                  )}
+                </View>
+                <View style={styles.locationTextContainer}>
+                  <Text style={styles.locationTitle}>
+                    Tap here to fetch current location
+                  </Text>
+                  <Text style={styles.locationSub}>
+                    Use device location to fill in your address details.
+                  </Text>
+                </View>
+              </Button>
+
               {/* Confirm Address Button */}
               <Pressable
                 accessibilityRole="button"
@@ -257,7 +269,7 @@ export function AddressSheet({
           </View>
         </KeyboardAvoidingView>
       </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 
@@ -265,13 +277,14 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: "#00000066",
   },
   sheetContainer: {
     width: "100%",
+    maxHeight: "88%",
   },
   sheet: {
-    maxHeight: "88%",
+    flexShrink: 1,
     backgroundColor: colors.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -311,9 +324,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
-    gap: 20,
+    gap: 16,
   },
+  scroll: { flexShrink: 1 },
   locationCard: {
     backgroundColor: colors.white,
     borderWidth: 1,
@@ -352,22 +365,15 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1,
-    gap: 6,
+    width: undefined,
+    gap: 8,
   },
   label: {
     fontFamily: fontFamilies.medium,
+    fontWeight: "500",
     fontSize: 13,
-    color: "#666666",
-  },
-  input: {
-    height: 40,
-    backgroundColor: "#F7F7F7",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 0,
     color: colors.textPrimary,
   },
   row: {
@@ -375,7 +381,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   confirmButton: {
-    height: 44,
+    height: PROFILE_FIELD_HEIGHT,
     borderRadius: 12,
     backgroundColor: colors.patient.primaryDark,
     alignItems: "center",
@@ -385,7 +391,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: colors.white,
     fontFamily: fontFamilies.semibold,
-    fontSize: 14,
+    fontSize: 15,
   },
   error: {
     color: colors.danger,

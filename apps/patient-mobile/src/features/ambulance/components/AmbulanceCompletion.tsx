@@ -170,7 +170,7 @@ export function AmbulanceCompletion({
           </View>
 
           {!ratingSubmitted ? (
-            <Button
+            <Button loading={ratingPending}
               label="Submit"
               variant="outline"
               disabled={rating === undefined || ratingPending}

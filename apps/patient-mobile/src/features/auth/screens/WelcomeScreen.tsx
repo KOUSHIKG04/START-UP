@@ -1,12 +1,13 @@
+import { Button } from "@startup/mobile-ui";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { OnboardingButton, OnboardingShell } from "../components/OnboardingShell";
+import { onboardingButtonStyles, OnboardingShell } from "../components/OnboardingShell";
 
 export default function WelcomeScreen() {
   return <OnboardingShell><View style={styles.body}>
     <View style={styles.brand}><Text style={styles.name}>Clinzo<Text style={styles.plus}>+</Text></Text><Text style={styles.tagline}>Right Care. Right Time.</Text></View>
-    <View style={styles.action}><OnboardingButton label="GET STARTED" onPress={() => router.push("/login")} /><Text style={styles.trust}>Your care journey starts here</Text></View>
+    <View style={styles.action}><Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>} label="GET STARTED" onPress={() => router.push("/login")} /><Text style={styles.trust}>Your care journey starts here</Text></View>
   </View></OnboardingShell>;
 }
 

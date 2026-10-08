@@ -78,6 +78,7 @@ function openNotification(response: NotificationResponse) {
 export function useDeviceNotifications(identityId: string | undefined, showToast: (input: ToastInput) => void) {
   useEffect(() => {
     if (!identityId || !Notifications || Platform.OS === "web") return;
+    let active = true;
     const tokenListener = Notifications.addPushTokenListener(() => {
       void register().catch(() => {});
     });
@@ -93,7 +94,7 @@ export function useDeviceNotifications(identityId: string | undefined, showToast
     
       void Notifications.getLastNotificationResponseAsync()
       .then((response) => {
-        if (response) {
+        if (active && response) {
           openNotification(response);
           void Notifications.clearLastNotificationResponseAsync();
         }
@@ -101,6 +102,7 @@ export function useDeviceNotifications(identityId: string | undefined, showToast
       .catch(() => {});
 
     return () => {
+      active = false;
       tokenListener?.remove();
       responseListener.remove();
       foregroundListener.remove();

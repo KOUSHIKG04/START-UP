@@ -58,7 +58,7 @@ export default function EditDriverProfile() {
     if (!supabase || !session) throw new Error("Sign in to continue.");
     let photoPath = saved.profile_photo_path ?? undefined;
     if (value.photo?.startsWith("file:")) {
-      const isPng = value.photo.toLowerCase().endsWith(".png");
+      const isPng = value.photoMimeType === "image/png" || (!value.photoMimeType && value.photo.toLowerCase().endsWith(".png"));
       const path = `${session.user.id}/profile/${Crypto.randomUUID()}.${isPng ? "png" : "jpg"}`;
       const bytes = await new File(value.photo).arrayBuffer();
       const upload = await supabase.storage

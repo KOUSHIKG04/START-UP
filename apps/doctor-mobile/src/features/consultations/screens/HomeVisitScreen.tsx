@@ -1,3 +1,4 @@
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useRef, useState } from "react";
 import { Image, Linking, TextInput, View } from "react-native";
@@ -87,7 +88,7 @@ export function HomeVisitScreen() {
         </Heading>
         <View style={ui.row}>
           {[0, 1, 2, 3].map((index) => (
-            <TextInput
+            <Input variant="unstyled"
               key={index}
               ref={(ref) => {
                 inputs.current[index] = ref;

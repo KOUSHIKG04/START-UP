@@ -68,7 +68,7 @@ export function LiveDoctorProfileScreen() {
               <Input label="Full name" value={name} onChangeText={setName} />
               <Input label="Bio" value={bio} onChangeText={setBio} multiline />
               <Input label="Languages (codes separated by commas)" value={languages} onChangeText={setLanguages} placeholder="en, hi" />
-              <Button label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => save.mutate()} />
+              <Button loading={save.isPending} label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => save.mutate()} />
               <Button label="Cancel" variant="outline" disabled={save.isPending} onPress={() => { if (profile.data) { setName(profile.data.full_name); setBio(profile.data.bio ?? ""); setLanguages(profile.data.languages.join(", ")); } setEditing(false); }} />
             </> : <>
               <Text>{profile.data.bio || "Add a bio to introduce yourself to patients."}</Text>

@@ -48,6 +48,8 @@ if ($UseCli) {
       @{ Name = "Inventory"; File = "inventory.cli-smoke.sql"; Result = "inventory_smoke_passed" },
       @{ Name = "Ambulance"; File = "ambulance.cli-smoke.sql"; Result = "ambulance_smoke_passed" }
       @{ Name = "Patient email"; File = "patient-email.cli-smoke.sql"; Result = "patient_email_smoke_passed" }
+      @{ Name = "Patient DOB"; File = "patient-birth-date.cli-smoke.sql"; Result = "patient_birth_date_smoke_passed" }
+      @{ Name = "Patient contact and family photo"; File = "patient-contact-photo.cli-smoke.sql"; Result = "patient_contact_photo_smoke_passed" }
       @{ Name = "Patient and doctor onboarding"; File = "onboarding.cli-smoke.sql"; Result = "onboarding_smoke_passed" }
       @{ Name = "Mobile email and driver"; File = "mobile-email-driver.cli-smoke.sql"; Result = "mobile_email_driver_smoke_passed" }
       @{ Name = "Doctor schedule"; File = "doctor-schedule.cli-smoke.sql"; Result = "doctor_schedule_smoke_passed" }
@@ -61,6 +63,8 @@ if ($UseCli) {
       @{ Name = "Specialty discovery"; File = "../tooling/specialty-discovery.cli-smoke.sql"; Result = "specialty_discovery_smoke_passed" }
       @{ Name = "Facility bed declaration"; File = "facility-bed-declaration.cli-smoke.sql"; Result = "facility_bed_declaration_smoke_passed" }
       @{ Name = "Online consultation"; File = "../tooling/online-consultation.cli-smoke.sql"; Result = "online_consultation_smoke_passed" }
+      @{ Name = "Profile photos"; File = "profile-photos.cli-smoke.sql"; Result = "profile_photos_smoke_passed" }
+      @{ Name = "Onboarding SOS"; File = "onboarding-sos.cli-smoke.sql"; Result = "onboarding_sos_smoke_passed" }
     )
     foreach ($smoke in $smokeTests) {
       $smokeSql = Join-Path $repoRoot "packages/database/tests/$($smoke.File)"
@@ -72,12 +76,14 @@ if ($UseCli) {
         throw "$($smoke.Name) smoke test failed."
       }
       $queryJson = $queryOutput -join "`n"
-      try { $queryResult = ConvertFrom-Json -InputObject $queryJson -NoEnumerate } catch {
-        throw "Could not parse the $($smoke.Name) smoke test result."
+      # Windows PowerShell 5.1 does not support ConvertFrom-Json -NoEnumerate.
+      # Normalize the parsed rows explicitly so one-row arrays work in both shells.
+      try { $queryResult = ConvertFrom-Json -InputObject $queryJson } catch {
+        throw "Could not parse the $($smoke.Name) smoke test result: $($_.Exception.Message)"
       }
-      $queryRows = if ($queryResult -is [array]) { $queryResult } elseif ($null -ne $queryResult.rows) {
+      $queryRows = @(if ($queryResult -is [array]) { $queryResult } elseif ($null -ne $queryResult.rows) {
         $queryResult.rows
-      } else { @($queryResult) }
+      } else { $queryResult })
       $resultField = $smoke.Result
       if ($queryRows.Count -ne 1 -or $queryRows[0].$resultField -ne $true) {
         throw "$($smoke.Name) smoke test did not report success."

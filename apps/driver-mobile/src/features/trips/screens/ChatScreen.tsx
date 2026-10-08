@@ -1,3 +1,4 @@
+import { Input } from "@startup/mobile-ui";
 import { memo, useCallback, useRef, useState } from "react";
 import {
   FlatList,
@@ -6,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -124,7 +124,7 @@ export function ChatScreen() {
               )}
             </ScrollView>
             <View style={ui.row}>
-              <TextInput
+              <Input variant="unstyled"
                 accessibilityLabel="Message to patient"
                 value={draft}
                 onChangeText={setDraft}

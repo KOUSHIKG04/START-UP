@@ -9,6 +9,7 @@ export function PublishSessionPanel({
   publishDate,
   onPublishDateChange,
   busy,
+  pendingAction,
   disabled,
   disabledReason,
   publishIssue,
@@ -31,6 +32,7 @@ export function PublishSessionPanel({
   publishDate: string;
   onPublishDateChange: (date: string) => void;
   busy: boolean;
+  pendingAction: string | null;
   disabled: boolean;
   disabledReason: string | null;
   publishIssue: { mode: "clinic" | "online" | "home"; message: string } | null;
@@ -87,7 +89,7 @@ export function PublishSessionPanel({
             {available.map(slot => { const selected = selectedSlots[mode].includes(slot); const atLimit = !selected && (mode === "home" ? selectedSlots[mode].length >= 100 : !dailyUsageReady || limitReached); const past = Boolean(isoDate && new Date(`${isoDate}T${slot}:00`) <= new Date()); const pillDisabled = busy || disabled || atLimit || (!selected && past); return <Chip key={slot} label={formatTime(minutes(slot))} theme="doctor" selected={selected} disabled={pillDisabled} accessibilityRole="checkbox" accessibilityState={{ checked: selected }} accessibilityHint={selected ? "Tap to remove this time from publication" : past ? "This time has already started" : pillDisabled ? "Daily slot limit reached or schedule unavailable" : "Tap to include this time when publishing"} onPress={() => onToggleSlot(mode, slot)} style={{ minHeight: 48, paddingHorizontal: 14, borderWidth: 1, borderColor: selected ? palette.primary : palette.border, backgroundColor: selected ? palette.primary : pillDisabled ? palette.subtle : palette.surface }} labelStyle={{ color: selected ? palette.white : pillDisabled ? palette.muted : palette.header, fontSize: 13 }} />; })}
             {!available.length ? <Label muted>Enter valid start and end times.</Label> : null}
           </FadedScrollView>
-          <Button theme="doctor" variant={mode === "clinic" ? undefined : "outline"}
+          <Button loading={pendingAction === `publish:${mode}`} theme="doctor" variant={mode === "clinic" ? undefined : "outline"}
             label={`Publish ${selectedSlots[mode].length} ${mode === "online" ? "online" : mode === "home" ? "home visit" : "clinic"} slots`}
             disabled={busy}
             onPress={mode === "clinic" ? onPublish : mode === "online" ? onPublishOnline : onPublishHome} />
@@ -103,6 +105,7 @@ export function PublishedSessionsPanel({
   sessionLimits,
   onLimitChange,
   busy,
+  pendingAction,
   onSaveLimit,
   isError,
 }: {
@@ -110,6 +113,7 @@ export function PublishedSessionsPanel({
   sessionLimits: Record<string, string>;
   onLimitChange: (sessionId: string, value: string) => void;
   busy: boolean;
+  pendingAction: string | null;
   onSaveLimit: (session: ClinicSession) => Promise<void>;
   isError: boolean;
 }) {
@@ -136,7 +140,7 @@ export function PublishedSessionsPanel({
             onChangeText={(value) => onLimitChange(session.id, value)}
             keyboardType="number-pad"
           />
-          <Button
+          <Button loading={pendingAction === `limit:${session.id}`}
             theme="doctor"
             variant="outline"
             label="Save approval limit"
@@ -162,6 +166,7 @@ export function UnavailableTimePanel({
   leaveReason,
   onLeaveReasonChange,
   busy,
+  pendingAction,
   canAdd,
   onAddLeave,
   unavailable,
@@ -177,6 +182,7 @@ export function UnavailableTimePanel({
   leaveReason: string;
   onLeaveReasonChange: (val: string) => void;
   busy: boolean;
+  pendingAction: string | null;
   canAdd: boolean;
   onAddLeave: () => void;
   unavailable?: ClinicUnavailability[];
@@ -210,7 +216,7 @@ export function UnavailableTimePanel({
         value={leaveReason}
         onChangeText={onLeaveReasonChange}
       />
-      <Button
+      <Button loading={pendingAction === "add-leave"}
         theme="doctor"
         variant="outline"
         label="Add unavailable time"
@@ -226,7 +232,7 @@ export function UnavailableTimePanel({
               {formatDisplayDateTime(item.ends_at)}
             </Label>
             <Label muted>{item.reason}</Label>
-            <Button
+            <Button loading={pendingAction === `remove-leave:${item.id}`}
               theme="doctor"
               variant="outline"
               label="Remove"

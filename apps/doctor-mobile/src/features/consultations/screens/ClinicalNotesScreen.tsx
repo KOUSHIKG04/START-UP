@@ -87,7 +87,7 @@ export function ClinicalNotesScreen() {
               multiline
               placeholder="Enter clinical assessment before completing..."
             />
-            <Button
+            <Button loading={completeMutation.isPending}
               theme="doctor"
               label="Sign assessment and complete consultation"
               disabled={completeMutation.isPending || !assessment.trim()}

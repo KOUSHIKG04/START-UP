@@ -92,13 +92,13 @@ export function LiveAmbulanceRequestsList({
           ) : null}
           {booking.status === "searching" ? (
             <View style={styles.options}>
-              <Button
+              <Button loading={isRefreshPending}
                 label="Search again"
                 variant="outline"
                 disabled={isRefreshPending}
                 onPress={() => onRefreshDispatch(booking.id)}
               />
-              <Button
+              <Button loading={isCancelPending}
                 label="Cancel request"
                 variant="outline"
                 disabled={isCancelPending}

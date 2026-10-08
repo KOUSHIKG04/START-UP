@@ -76,6 +76,7 @@ export const patient = clinzo
         .default(sql`1`),
       public_code: text("public_code").notNull(),
       full_name: text("full_name").notNull(),
+      profile_photo_path: text("profile_photo_path"),
       birth_date: date("birth_date", { mode: "string" }),
       sex_at_birth: text("sex_at_birth"),
       contact_phone: text("contact_phone"),

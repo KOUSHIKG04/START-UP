@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+import { Button } from "@startup/mobile-ui";
 
 const city = require("../../../../assets/images/onboarding/city.png");
 
@@ -20,11 +21,15 @@ export function OnboardingShell({
   onBack,
   bottomArt = true,
   scroll = false,
+  keepArtFixed = false,
+  showArt = true,
 }: {
   children: ReactNode;
   onBack?: () => void;
   bottomArt?: boolean;
   scroll?: boolean;
+  keepArtFixed?: boolean;
+  showArt?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const content = (
@@ -32,21 +37,11 @@ export function OnboardingShell({
       style={[
         styles.content,
         {
-          paddingTop: Math.max(insets.top, 22) + 18,
+          paddingTop: onBack ? 8 : Math.max(insets.top, 12) + 8,
           paddingBottom: Math.max(insets.bottom, 12),
         },
       ]}
     >
-      {onBack ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={onBack}
-          style={styles.back}
-        >
-          <ArrowLeft size={24} color={colors.patient.primaryDark} />
-        </Pressable>
-      ) : null}
       {children}
     </View>
   );
@@ -55,16 +50,29 @@ export function OnboardingShell({
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View pointerEvents="none" style={styles.topCrop}>
+      {showArt ? <View pointerEvents="none" style={styles.topCrop}>
         <Image source={city} style={styles.topImage} resizeMode="stretch" />
-      </View>
-      {bottomArt ? (
-        <View pointerEvents="none" style={styles.bottomImage}>
+      </View> : null}
+      {showArt && bottomArt ? (
+        <View pointerEvents="none" style={[styles.bottomImage, keepArtFixed && styles.fixedProfileArt]}>
           <Image source={city} style={styles.fill} resizeMode="stretch" />
         </View>
       ) : null}
+      {onBack ? (
+      <View style={{ paddingTop: Math.max(insets.top, 12) + 4, paddingHorizontal: 24 }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={onBack}
+          style={styles.back}
+        >
+          <ArrowLeft size={24} color={colors.patient.primaryDark} />
+        </Pressable>
+      </View>
+      ) : null}
       {scroll ? (
         <ScrollView
+          style={keepArtFixed && showArt ? styles.scrollBetweenArt : undefined}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -83,35 +91,30 @@ export function OnboardingButton({
   onPress,
   variant = "solid",
   disabled = false,
+  loading = false,
 }: {
   label: string;
   onPress: () => void;
   variant?: "solid" | "outline";
   disabled?: boolean;
+  loading?: boolean;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
+    <Button
+      label={label}
+      theme="doctor"
+      variant={variant === "outline" ? "outline" : "primary"}
+      loading={loading}
       disabled={disabled}
       onPress={onPress}
+      labelStyle={[styles.buttonText, variant === "outline" && styles.outlineText]}
+      rightIcon={<Text style={[styles.buttonText, variant === "outline" && styles.outlineText]}>›</Text>}
       style={({ pressed }) => [
         styles.button,
         variant === "outline" && styles.outline,
         (pressed || disabled) && styles.dim,
       ]}
-    >
-      <Text
-        style={[styles.buttonText, variant === "outline" && styles.outlineText]}
-      >
-        {label}
-      </Text>
-      <Text
-        style={[styles.buttonText, variant === "outline" && styles.outlineText]}
-      >
-        ›
-      </Text>
-    </Pressable>
+    />
   );
 }
 
@@ -142,6 +145,8 @@ const styles = StyleSheet.create({
   },
   fill: { width: "100%", height: "100%" },
   scroll: { flexGrow: 1 },
+  scrollBetweenArt: { flex: 1, marginTop: 16, marginBottom: 175, backgroundColor: colors.white },
+  fixedProfileArt: { height: 175 },
   content: { flex: 1, paddingHorizontal: 24 },
   back: {
     width: 42,

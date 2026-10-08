@@ -1,7 +1,8 @@
+import { ModalSurface } from "@startup/mobile-ui";
+import { colors } from "@startup/design-tokens";
 import { useEffect, useState } from "react";
 import {
   Image,
-  Modal,
   Pressable,
   StyleSheet,
   Switch,
@@ -35,6 +36,7 @@ export function HomeScreen() {
   const { profile } = useMobileSession();
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
+  const [responding, setResponding] = useState<boolean | null>(null);
   const client = useQueryClient();
   const { showToast } = useToast();
   const driverId = profile?.driver?.id;
@@ -140,13 +142,13 @@ export function HomeScreen() {
       const feedback = cause instanceof Error ? cause.message : "Could not update availability.";
       showToast({ title: "Availability update failed", message: feedback, type: "error" });
     } finally {
-      setBusy(false);
+      setBusy(false); setResponding(null);
     }
   }
 
   async function respond(accept: boolean) {
     if (!supabase || !offer || busy) return;
-    setBusy(true);
+    setBusy(true); setResponding(accept);
     try {
       await respondMyDriverOffer(supabase, offer.id, accept);
       void Haptics.notificationAsync(
@@ -162,7 +164,7 @@ export function HomeScreen() {
       const feedback = "The request expired or is no longer available. Refresh and try again.";
       showToast({ title: "Request unavailable", message: feedback, type: "error" });
     } finally {
-      setBusy(false);
+      setBusy(false); setResponding(null);
     }
   }
   
@@ -252,11 +254,11 @@ export function HomeScreen() {
           </Card>
         ) : null}
       </Body>
-      <Modal
+      <ModalSurface layout="custom"
         visible={Boolean(offer)}
         transparent
         animationType="fade"
-        onRequestClose={() => void respond(false)}
+        onClose={() => void respond(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.request}>
@@ -299,7 +301,7 @@ export function HomeScreen() {
               ]}
             />
             <View style={[ui.row, { marginTop: 20 }]}>
-              <Button
+              <Button loading={busy && responding === false}
                 theme="driver"
                 variant="outline"
                 label="Reject"
@@ -307,7 +309,7 @@ export function HomeScreen() {
                 disabled={busy}
                 onPress={() => void respond(false)}
               />
-              <Button
+              <Button loading={busy && responding === true}
                 theme="driver"
                 label="Accept"
                 style={ui.grow}
@@ -317,7 +319,7 @@ export function HomeScreen() {
             </View>
           </View>
         </View>
-      </Modal>
+      </ModalSurface>
     </View>
   );
 }
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
   total: { fontSize: 28, lineHeight: 36, fontWeight: "700" },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.72)",
+    backgroundColor: colors.ui.overlay,
     justifyContent: "center",
     padding: 16,
   },

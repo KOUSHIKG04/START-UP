@@ -8,6 +8,8 @@ export * from "./components";
 export { ToastProvider, useToast, useToastFeedback, type ToastInput, type ToastType } from "./primitives/Toast";
 export { Loader } from "./primitives/Loader";
 export { Skeleton } from "./primitives/Skeleton";
+export { ModalSurface, type ModalSurfaceProps } from "./primitives/ModalSurface";
+export { ProfilePhotoButton } from "./primitives/ProfilePhotoButton";
 export { PhoneOtpForm } from "./components/PhoneOtpForm";
 export { Screen, type ScreenProps } from "./layout/Screen";
 export {
@@ -72,3 +74,5 @@ export {
   MobileThemeProvider,
   useMobileTheme,
 } from "./theme/MobileThemeProvider";
+
+export * from "./primitives/Checkbox";

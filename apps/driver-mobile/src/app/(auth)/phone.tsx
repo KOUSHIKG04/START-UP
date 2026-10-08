@@ -1,6 +1,8 @@
+import { Button } from "@startup/mobile-ui";
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { sendPhoneOtp } from "@startup/data-access";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -39,7 +41,7 @@ export default function DriverPhone() {
         <Text style={styles.title}>Enter your mobile number</Text>
         <View style={styles.number}>
           <Text style={styles.country}>+91</Text>
-          <TextInput
+          <Input variant="unstyled"
             accessibilityLabel="Mobile number"
             keyboardType="phone-pad"
             autoComplete="tel"
@@ -51,7 +53,7 @@ export default function DriverPhone() {
           />
         </View>
 
-        <Pressable
+        <Button loading={busy} label="Send OTP" variant="primary" labelStyle={styles.buttonText}
           accessibilityRole="button"
           disabled={busy || phone.replace(/\D/g, "").length !== 10}
           onPress={() => void submit()}
@@ -60,7 +62,7 @@ export default function DriverPhone() {
           <Text style={styles.buttonText}>
             {busy ? "Sending…" : "Send OTP"}
           </Text>
-        </Pressable>
+        </Button>
         <Text style={styles.safe}>Your number is safe with us.</Text>
       </View>
     </View>
@@ -69,7 +71,7 @@ export default function DriverPhone() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "white", padding: 24, paddingTop: 58 },
   back: { color: colors.driver.primary, fontSize: 17 },
-  content: { alignItems: "center", paddingTop: 110 },
+  content: { alignItems: "center", paddingTop: 24 },
   title: {
     fontFamily: fontFamilies.medium,
     fontSize: 24,

@@ -1,6 +1,7 @@
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -24,6 +25,7 @@ export type ButtonProps = Omit<
   variant?: ButtonVariant;
   theme?: AppTheme;
   disabled?: boolean;
+  loading?: boolean;
   style?: PressableProps["style"];
   labelStyle?: StyleProp<TextStyle>;
   leftIcon?: ReactNode;
@@ -41,33 +43,62 @@ export function Button({
   variant = "primary",
   theme,
   disabled = false,
+  loading = false,
   style,
   labelStyle,
   leftIcon,
   rightIcon,
   accessibilityLabel = label,
   accessibilityState,
+  onLayout,
   ...props
 }: ButtonProps) {
   const themeColors = useMobileTheme(theme);
   const palette = getButtonPalette(variant, themeColors);
+  const idleSize = useRef<{ width: number; height: number } | null>(null);
 
   return (
     <Pressable
       {...props}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
-      accessibilityState={{ ...accessibilityState, disabled }}
-      disabled={disabled}
-      style={(state) => [
+      accessibilityState={{
+        ...accessibilityState,
+        disabled: disabled || loading,
+        busy: loading || accessibilityState?.busy,
+      }}
+      disabled={disabled || loading}
+      onLayout={(event) => {
+        if (!loading) {
+          const { width, height } = event.nativeEvent.layout;
+          idleSize.current = { width, height };
+        }
+        onLayout?.(event);
+      }}
+      style={(state) => {
+        const callerStyle = typeof style === "function" ? style(state) : style;
+        const layout = StyleSheet.flatten(callerStyle);
+        const widthControlled = layout?.width !== undefined ||
+          (typeof layout?.flex === "number" && layout.flex > 0) ||
+          (typeof layout?.flexGrow === "number" && layout.flexGrow > 0);
+        return [
         styles.button,
         palette.container,
-        state.pressed && !disabled ? styles.pressed : undefined,
-        disabled ? styles.disabled : undefined,
-        typeof style === "function" ? style(state) : style,
-      ]}
+        state.pressed && !disabled && !loading ? styles.pressed : undefined,
+        disabled && !loading ? styles.disabled : undefined,
+        loading && idleSize.current
+          ? { minWidth: widthControlled ? undefined : idleSize.current.width, minHeight: idleSize.current.height }
+          : undefined,
+        callerStyle,
+      ];
+      }}
     >
-      {children ?? (
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={StyleSheet.flatten(labelStyle)?.color ?? palette.label.color}
+        />
+      ) : children ?? (
         <>
           {leftIcon}
           {label ? (

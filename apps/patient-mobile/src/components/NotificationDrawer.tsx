@@ -1,9 +1,9 @@
+import { ModalSurface } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
   Dimensions,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -173,10 +173,14 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
   const fadeAnim = fadeAnimRef.current;
 
   useEffect(() => {
+    // No native animation views exist while the drawer is initially closed.
+    if (!visible && !showModal) return;
+    let active = true;
+    let animation: Animated.CompositeAnimation;
     if (visible) {
       setShowModal(true);
       slideAnim.setValue(SCREEN_WIDTH);
-      Animated.parallel([
+      animation = Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 280,
@@ -187,9 +191,9 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
           duration: 280,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]);
     } else {
-      Animated.parallel([
+      animation = Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: SCREEN_WIDTH,
           duration: 240,
@@ -200,11 +204,13 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
           duration: 240,
           useNativeDriver: true,
         }),
-      ]).start(() => {
-        setShowModal(false);
-      });
+      ]);
     }
-  }, [visible, slideAnim, fadeAnim]);
+    animation.start(({ finished }) => {
+      if (active && finished && !visible) setShowModal(false);
+    });
+    return () => { active = false; animation.stop(); };
+  }, [visible, showModal, slideAnim, fadeAnim]);
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -240,11 +246,11 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
   if (!showModal) return null;
 
   return (
-    <Modal
+    <ModalSurface layout="custom"
       transparent
       visible={showModal}
       animationType="none"
-      onRequestClose={onClose}
+      onClose={onClose}
       statusBarTranslucent
     >
       <View style={styles.overlay}>
@@ -302,7 +308,7 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
           </ScrollView>
         </Animated.View>
       </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 
@@ -313,7 +319,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(5, 28, 31, 0.45)",
+    backgroundColor: colors.ui.overlay,
   },
   drawer: {
     width: "100%",

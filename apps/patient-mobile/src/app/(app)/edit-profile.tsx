@@ -2,20 +2,66 @@ import { Text, View } from "react-native";
 import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { completePatientProfile, getMyPatientProfileDetail } from "@startup/data-access";
+import {
+  completePatientProfile,
+  getMyPatientProfileDetail,
+} from "@startup/data-access";
 import { ProfileForm } from "../../features/auth/components/ProfileForm";
-import { mobileSession, supabase, useMobileSession } from "../../services/supabase";
+import {
+  mobileSession,
+  supabase,
+  useMobileSession,
+} from "../../services/supabase";
+import { savePatientProfilePhoto } from "../../services/profile-photo";
 
 export default function EditPatientProfile() {
   const { profile, session } = useMobileSession();
   const client = useQueryClient();
-  const detail = useQuery({ queryKey: ["my-patient-profile-detail", profile?.patient_id], queryFn: () => getMyPatientProfileDetail(supabase!), enabled: Boolean(supabase && profile?.patient_id) });
-  if (detail.isLoading) return <View style={{ flex: 1, justifyContent: "center" }}><Loader theme="patient" size="large" /></View>;
-  if (detail.error || !detail.data) return <View style={{ padding: 24 }}><Text accessibilityRole="alert">Could not load your profile.</Text></View>;
-  return <ProfileForm initialEmail={session?.user.email ?? ""} initialProfile={detail.data} onSave={async value => {
-    if (!supabase) throw new Error("Supabase is not configured.");
-    await completePatientProfile(supabase, { fullName: value.fullName, age: value.age, gender: value.gender as "Male" | "Female" | "Other" | "Prefer not to say", bloodGroup: value.bloodGroup as "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-", email: value.email, address: value.address });
-    await Promise.all([client.invalidateQueries({ queryKey: ["my-patient-profile-detail"] }), mobileSession.refresh()]);
-    router.back();
-  }} />;
+  const detail = useQuery({
+    queryKey: ["my-patient-profile-detail", profile?.patient_id],
+    queryFn: () => getMyPatientProfileDetail(supabase!),
+    enabled: Boolean(supabase && profile?.patient_id),
+  });
+  if (detail.isLoading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <Loader theme="patient" size="large" />
+      </View>
+    );
+  if (detail.error || !detail.data)
+    return (
+      <View style={{ padding: 24 }}>
+        <Text accessibilityRole="alert">Could not load your profile.</Text>
+      </View>
+    );
+  return (
+    <ProfileForm
+      initialEmail={session?.user.email ?? ""}
+      initialPhone={
+        session?.user.phone ? "+" + session.user.phone.replace(/\D/g, "") : ""
+      }
+      initialProfile={detail.data}
+      onSave={async (value) => {
+        if (!supabase) throw new Error("Supabase is not configured.");
+        await completePatientProfile(supabase, {
+          fullName: value.fullName,
+          age: value.age,
+          dateOfBirth: value.dateOfBirth,
+          gender: value.gender as
+            "Male" | "Female" | "Other" | "Prefer not to say",
+          bloodGroup: value.bloodGroup as
+            "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-",
+          email: value.email,
+          phone: value.phone,
+          address: value.address,
+        });
+        await savePatientProfilePhoto(value.photo);
+        await Promise.all([
+          client.invalidateQueries({ queryKey: ["my-patient-profile-detail"] }),
+          mobileSession.refresh(),
+        ]);
+        router.back();
+      }}
+    />
+  );
 }

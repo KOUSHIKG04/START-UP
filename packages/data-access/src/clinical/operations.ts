@@ -1,5 +1,17 @@
-import { clinicalRecordSchema, issuePrescriptionSchema, recordDiagnosisSchema, recordVitalSchema, recommendFollowupSchema, uuidSchema } from "@startup/contracts";
-import type { IssuePrescriptionInput, RecordDiagnosisInput, RecordVitalInput, RecommendFollowupInput } from "@startup/contracts";
+import {
+  clinicalRecordSchema,
+  issuePrescriptionSchema,
+  recordDiagnosisSchema,
+  recordVitalSchema,
+  recommendFollowupSchema,
+  uuidSchema,
+} from "@startup/contracts";
+import type {
+  IssuePrescriptionInput,
+  RecordDiagnosisInput,
+  RecordVitalInput,
+  RecommendFollowupInput,
+} from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
 export async function listMyClinicalRecords(client: AppSupabaseClient) {
@@ -8,7 +20,10 @@ export async function listMyClinicalRecords(client: AppSupabaseClient) {
   return clinicalRecordSchema.array().parse(data);
 }
 
-export async function recordConsultationVital(client: AppSupabaseClient, input: RecordVitalInput) {
+export async function recordConsultationVital(
+  client: AppSupabaseClient,
+  input: RecordVitalInput
+) {
   const request = recordVitalSchema.parse(input);
   const { data, error } = await client.rpc("record_consultation_vital", {
     p_appointment_id: request.appointmentId,
@@ -20,7 +35,10 @@ export async function recordConsultationVital(client: AppSupabaseClient, input: 
   return uuidSchema.parse(data);
 }
 
-export async function recordConsultationDiagnosis(client: AppSupabaseClient, input: RecordDiagnosisInput) {
+export async function recordConsultationDiagnosis(
+  client: AppSupabaseClient,
+  input: RecordDiagnosisInput
+) {
   const request = recordDiagnosisSchema.parse(input);
   const { data, error } = await client.rpc("record_consultation_diagnosis", {
     p_appointment_id: request.appointmentId,
@@ -31,7 +49,10 @@ export async function recordConsultationDiagnosis(client: AppSupabaseClient, inp
   return uuidSchema.parse(data);
 }
 
-export async function issueConsultationPrescription(client: AppSupabaseClient, input: IssuePrescriptionInput) {
+export async function issueConsultationPrescription(
+  client: AppSupabaseClient,
+  input: IssuePrescriptionInput
+) {
   const request = issuePrescriptionSchema.parse(input);
   const { data, error } = await client.rpc("issue_consultation_prescription", {
     p_appointment_id: request.appointmentId,
@@ -42,7 +63,10 @@ export async function issueConsultationPrescription(client: AppSupabaseClient, i
   return uuidSchema.parse(data);
 }
 
-export async function recommendConsultationFollowup(client: AppSupabaseClient, input: RecommendFollowupInput) {
+export async function recommendConsultationFollowup(
+  client: AppSupabaseClient,
+  input: RecommendFollowupInput
+) {
   const request = recommendFollowupSchema.parse(input);
   const { data, error } = await client.rpc("recommend_consultation_followup", {
     p_appointment_id: request.appointmentId,

@@ -87,6 +87,7 @@ export const facility = clinzo
       public_code: text("public_code").notNull(),
       name: text("name").notNull(),
       kind: text("kind", { enum: ["hospital", "clinic"] }).notNull(),
+      logo_path: text("logo_path"),
       address: text("address").notNull(),
       locality: text("locality"),
       city: text("city"),

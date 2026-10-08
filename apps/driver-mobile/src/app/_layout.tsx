@@ -80,7 +80,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" />
               </Stack.Protected>
             </Stack>
-            <StatusBar style="light" />
+            <StatusBar style={auth.profile?.driver?.id ? "light" : "dark"} />
           </View>
         </QueryProvider>
         </ToastProvider>

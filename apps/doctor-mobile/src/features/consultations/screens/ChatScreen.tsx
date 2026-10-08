@@ -1,3 +1,4 @@
+import { Input } from "@startup/mobile-ui";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import * as Crypto from "expo-crypto";
@@ -9,7 +10,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -193,7 +193,7 @@ export function ChatScreen() {
         </ScrollView>
         {sendError ? <Label style={ui.error}>{sendError}</Label> : null}
         <View style={ui.row}>
-          <TextInput
+          <Input variant="unstyled"
             accessibilityLabel="Message"
             placeholder="Type a message..."
             placeholderTextColor={palette.muted}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Button } from "../primitives/Button";
@@ -79,8 +79,7 @@ export function DevPasswordForm({
           {configurationError ?? error}
         </Text>
       ) : null}
-      {busy ? <ActivityIndicator color={theme.primary} /> : null}
-      <Button
+      <Button loading={busy}
         label={mode === "signup" ? "Create account" : "Sign in to test account"}
         disabled={busy || !email.trim() || !password || !!configurationError || (mode === "signup" && !confirmPassword)}
         onPress={() => void submit()}

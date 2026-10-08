@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema } from "./validation";
+import { phoneSchema, uuidSchema } from "./validation";
 
 export const requestMySosSchema = z.object({
   patientId: uuidSchema,
@@ -11,3 +11,10 @@ export const requestMySosSchema = z.object({
 }).strict();
 
 export type RequestMySosInput = z.infer<typeof requestMySosSchema>;
+
+export const requestOnboardingSosSchema = requestMySosSchema.omit({ patientId: true }).extend({
+  fullName: z.string().trim().min(2).max(120),
+  contactPhone: phoneSchema,
+}).strict();
+
+export type RequestOnboardingSosInput = z.infer<typeof requestOnboardingSosSchema>;

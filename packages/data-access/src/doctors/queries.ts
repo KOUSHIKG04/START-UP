@@ -1,8 +1,15 @@
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
-import { practiceSearchInputSchema, publicPracticeSchema, uuidSchema } from "@startup/contracts";
+import {
+  practiceSearchInputSchema,
+  publicPracticeSchema,
+  uuidSchema,
+} from "@startup/contracts";
 import type { PracticeSearchInput } from "@startup/contracts";
 
-export async function searchPublicPractices(client: AppSupabaseClient, input: PracticeSearchInput = {}) {
+export async function searchPublicPractices(
+  client: AppSupabaseClient,
+  input: PracticeSearchInput = {}
+) {
   const request = practiceSearchInputSchema.parse(input);
   const args = {
     p_query: request.query || null,
@@ -14,16 +21,20 @@ export async function searchPublicPractices(client: AppSupabaseClient, input: Pr
   };
   const { data, error } = request.serviceMode
     ? await client.rpc("search_public_practices_for_mode", {
-      ...args,
-      p_service_mode: request.serviceMode,
-      p_offset: request.offset,
-    })
+        ...args,
+        p_service_mode: request.serviceMode,
+        p_offset: request.offset,
+      })
     : await client.rpc("search_public_practices", args);
   if (error) throw error;
   return publicPracticeSchema.array().parse(data);
 }
 
-export async function getPublicPracticeBio(client: AppSupabaseClient, practiceId: string, serviceId: string) {
+export async function getPublicPracticeBio(
+  client: AppSupabaseClient,
+  practiceId: string,
+  serviceId: string
+) {
   const { data, error } = await client.rpc("get_public_practice_bio", {
     p_practice_id: uuidSchema.parse(practiceId),
     p_service_id: uuidSchema.parse(serviceId),

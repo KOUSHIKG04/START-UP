@@ -16,7 +16,9 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     loading: Boolean(client),
     session: null,
     profile: null,
-    error: client ? null : "Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
+    error: client
+      ? null
+      : "Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
   };
   const listeners = new Set<() => void>();
   let started = false;
@@ -29,22 +31,36 @@ export function createMobileSession(client: AppSupabaseClient | null) {
   async function refresh(session: Session | null) {
     const request = ++version;
     if (!session || !client) {
-      emit({ loading: false, session: null, profile: null, error: state.error });
+      emit({
+        loading: false,
+        session: null,
+        profile: null,
+        error: state.error,
+      });
       return;
     }
     // Keep the router mounted during a sign-in or manual refresh. Only the
     // initial session restoration blocks navigation.
-    emit({ loading: state.loading, session, profile: state.profile, error: null });
+    emit({
+      loading: state.loading,
+      session,
+      profile: state.profile,
+      error: null,
+    });
     try {
       const profile = await getMyProfile(client);
-      if (request === version) emit({ loading: false, session, profile, error: null });
+      if (request === version)
+        emit({ loading: false, session, profile, error: null });
     } catch (error) {
       if (request === version) {
         emit({
           loading: false,
           session,
           profile: null,
-          error: error instanceof Error ? error.message : "Could not load your profile.",
+          error:
+            error instanceof Error
+              ? error.message
+              : "Could not load your profile.",
         });
       }
     }
@@ -53,17 +69,29 @@ export function createMobileSession(client: AppSupabaseClient | null) {
   function start() {
     if (!client || started) return;
     started = true;
-    void client.auth.getSession().then(({ data, error }) => {
-      if (error) emit({ loading: false, session: null, profile: null, error: error.message });
-      else void refresh(data.session);
-    }).catch((error: unknown) => {
-      emit({
-        loading: false,
-        session: null,
-        profile: null,
-        error: error instanceof Error ? error.message : "Could not restore your session.",
+    void client.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (error)
+          emit({
+            loading: false,
+            session: null,
+            profile: null,
+            error: error.message,
+          });
+        else void refresh(data.session);
+      })
+      .catch((error: unknown) => {
+        emit({
+          loading: false,
+          session: null,
+          profile: null,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Could not restore your session.",
+        });
       });
-    });
     // Supabase auth callbacks must not await another Supabase call.
     client.auth.onAuthStateChange((event, session) => {
       if (event === "INITIAL_SESSION") return;
@@ -80,6 +108,7 @@ export function createMobileSession(client: AppSupabaseClient | null) {
       start();
       return () => listeners.delete(listener);
     },
-    refresh: () => client?.auth.getSession().then(({ data }) => refresh(data.session)),
+    refresh: () =>
+      client?.auth.getSession().then(({ data }) => refresh(data.session)),
   };
 }

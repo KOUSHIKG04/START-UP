@@ -1,7 +1,7 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { CheckCircle2, ShieldCheck, X } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Button } from "@startup/mobile-ui";
+import { Button, ModalSurface } from "@startup/mobile-ui";
 import { privacyHighlights } from "../utils/profileConstants";
 
 export function PrivacyModal({
@@ -12,14 +12,7 @@ export function PrivacyModal({
   onClose: () => void;
 }) {
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalBackdrop}>
-        <View style={styles.modalCard}>
+    <ModalSurface visible={visible} onClose={onClose} contentStyle={styles.modalCard}>
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleRow}>
               <ShieldCheck color={colors.patient.primaryDark} size={20} />
@@ -54,9 +47,7 @@ export function PrivacyModal({
             onPress={onClose}
             style={styles.modalButton}
           />
-        </View>
-      </View>
-    </Modal>
+    </ModalSurface>
   );
 }
 
@@ -64,7 +55,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(12, 36, 52, 0.45)",
+    backgroundColor: colors.ui.overlay,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,

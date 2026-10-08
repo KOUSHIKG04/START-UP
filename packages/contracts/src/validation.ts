@@ -90,6 +90,7 @@ export const myProfileSchema = z.object({
   identity_id: uuidSchema,
   display_name: z.string(),
   patient_id: uuidSchema.nullable(),
+  patient_profile_complete: z.boolean().default(true),
   doctor: z
     .object({
       id: uuidSchema,

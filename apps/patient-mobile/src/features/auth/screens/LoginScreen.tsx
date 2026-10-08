@@ -21,7 +21,6 @@ import {
   supabase,
 } from "../../../services/supabase";
 import {
-  OnboardingButton,
   OnboardingShell,
 } from "../components/OnboardingShell";
 import { DevEmailAuthForm } from "../components/DevEmailAuthForm";

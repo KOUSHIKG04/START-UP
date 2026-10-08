@@ -40,21 +40,20 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
           padding={16}
           style={styles.cardNoShadow}
         >
-          <View style={styles.settingItemRow}>
+          <View style={[styles.settingItemRow, styles.disabledRow]}>
             <View style={styles.iconCircle}>
-              <Moon color={colors.patient.primaryDark} size={18} />
+              <Moon color="#64748B" size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text style={styles.rowTitle}>Dark Mode</Text>
+              <Text style={[styles.rowTitle, styles.disabledTitle]}>Dark Mode</Text>
               <Text style={styles.rowSubtitle}>
                 System default • Dark mode coming soon
               </Text>
             </View>
             <View style={styles.themeToggleArea}>
-              <View style={styles.disabledPill}>
-                <Text style={styles.disabledPillText}>Disabled</Text>
-              </View>
               <Switch
+                accessibilityLabel="Dark Mode"
+                accessibilityHint="Dark mode is not available yet."
                 disabled={true}
                 value={false}
                 trackColor={{ false: "#E2E8F0", true: "#087F78" }}
@@ -170,8 +169,12 @@ const styles = StyleSheet.create({
   cardNoShadow: {
     elevation: 0,
     shadowOpacity: 0,
+    boxShadow: "none",
+    overflow: "hidden",
   },
   actionRow: {
+    borderRadius: 12,
+    overflow: "hidden",
     minHeight: 46,
     flexDirection: "row",
     alignItems: "center",
@@ -205,15 +208,15 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
+    fontFamily: fontFamilies.medium,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   logoutItemTitle: {
     color: "#DC2626",
-    fontFamily: fontFamilies.bold,
+    fontFamily: fontFamilies.medium,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   rowSubtitle: {
     color: colors.patient.textSecondary,
@@ -225,16 +228,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  disabledPill: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: "#F1F5F9",
-  },
-  disabledPillText: {
-    color: "#64748B",
-    fontFamily: fontFamilies.medium,
-    fontSize: 10,
-  },
+  disabledRow: { opacity: 0.55 },
+  disabledTitle: { color: "#64748B" },
   pressed: { opacity: 0.72 },
 });

@@ -30,12 +30,18 @@ function notificationCopy(delivery: PushDelivery) {
       };
     }
     const status = delivery.safe_parameters.status;
-    const confirmed = delivery.template_key === "appointment.auto_confirmed" || delivery.template_key === "appointment.approve";
+    const confirmed =
+      delivery.template_key === "appointment.auto_confirmed" ||
+      delivery.template_key === "appointment.approve";
     const requested = delivery.template_key === "appointment.requested";
     return {
-      title: confirmed ? "Appointment confirmed" : requested ? "Appointment requested" : "Appointment update",
-      body:
-        requested ? "A new appointment request is waiting for review."
+      title: confirmed
+        ? "Appointment confirmed"
+        : requested
+          ? "Appointment requested"
+          : "Appointment update",
+      body: requested
+        ? "A new appointment request is waiting for review."
         : typeof status === "string"
           ? `Your appointment is ${status.replaceAll("_", " ")}.`
           : "An appointment changed.",

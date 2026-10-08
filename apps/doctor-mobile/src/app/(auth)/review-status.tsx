@@ -1,6 +1,7 @@
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { AppState, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as Crypto from "expo-crypto";
@@ -96,10 +97,10 @@ export default function ReviewStatus() {
     {review?.documents.filter((document) => document.status === "rejected").map((document) => <Text key={document.kind} style={styles.error}>{document.kind.replaceAll("_"," ")}: {document.rejection_reason}</Text>)}
     {submitted ? <View style={styles.qualificationAction}>
       <Text style={styles.qualificationLabel}>Qualifications shown on your degree certificate</Text>
-      <TextInput accessibilityLabel="Qualifications" style={styles.qualificationInput} value={qualification} onChangeText={setQualification} placeholder="e.g. MBBS, MD" maxLength={160} />
-      {qualification.trim() !== (claimedQualification ?? "") ? <OnboardingButton label={savingQualification ? "Submitting…" : "Submit qualifications for review"} disabled={savingQualification || !doctorQualificationSchema.safeParse(qualification).success} onPress={() => void saveQualification()} /> : null}
+      <Input variant="unstyled" accessibilityLabel="Qualifications" style={styles.qualificationInput} value={qualification} onChangeText={setQualification} placeholder="e.g. MBBS, MD" maxLength={160} />
+      {qualification.trim() !== (claimedQualification ?? "") ? <OnboardingButton loading={savingQualification} label={savingQualification ? "Submitting…" : "Submit qualifications for review"} disabled={savingQualification || !doctorQualificationSchema.safeParse(qualification).success} onPress={() => void saveQualification()} /> : null}
     </View> : null}
-    <View style={styles.actions}>{submitted === false || needsRegistrationReplacement ? <OnboardingButton label={submitted === false ? "Complete profile" : "Replace document"} onPress={() => router.push("/onboarding")} /> : <OnboardingButton variant="outline" label="Check status" onPress={() => void refresh()} />}{needsDegree ? <View style={styles.degreeAction}><OnboardingButton label={uploading ? "Uploading degree…" : "Upload degree certificate"} disabled={uploading} onPress={() => void uploadDegree()} /></View> : null}</View>
+    <View style={styles.actions}>{submitted === false || needsRegistrationReplacement ? <OnboardingButton label={submitted === false ? "Complete profile" : "Replace document"} onPress={() => router.push("/onboarding")} /> : <OnboardingButton variant="outline" label="Check status" onPress={() => void refresh()} />}{needsDegree ? <View style={styles.degreeAction}><OnboardingButton loading={uploading} label={uploading ? "Uploading degree…" : "Upload degree certificate"} disabled={uploading} onPress={() => void uploadDegree()} /></View> : null}</View>
     <Pressable accessibilityRole="button" onPress={() => void signOutWithPushCleanup()} style={styles.signOut}><Text style={styles.signOutText}>Sign out</Text></Pressable>
   </View></OnboardingShell>;
 }

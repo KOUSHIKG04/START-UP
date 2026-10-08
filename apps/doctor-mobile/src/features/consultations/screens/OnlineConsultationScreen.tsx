@@ -139,7 +139,7 @@ function LiveOnlineConsultation({ appointmentId }: { appointmentId: string }) {
   if (appointment.status === "confirmed") return <SafeAreaView style={styles.screen}>
     <Heading>{appointment.patient_name}</Heading>
     <Label>Start the scheduled consultation when the patient is ready.</Label>
-    <Button theme="doctor" label="Start consultation" disabled={start.isPending} onPress={() => start.mutate()} />
+    <Button loading={start.isPending} theme="doctor" label="Start consultation" disabled={start.isPending} onPress={() => start.mutate()} />
     {start.isError ? <Label style={ui.error}>Could not start consultation. Check its scheduled time and status.</Label> : null}
   </SafeAreaView>;
   if (appointment.status !== "in_consultation") return <MissingPatient />;

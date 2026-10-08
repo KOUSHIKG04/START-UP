@@ -1,7 +1,7 @@
+import { ModalSurface } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -47,9 +47,9 @@ export default function FeedbackBottomSheet({
   };
 
   return (
-    <Modal
+    <ModalSurface layout="custom"
       animationType="slide"
-      onRequestClose={submitted ? undefined : handleClose}
+      onClose={submitted ? undefined : handleClose}
       statusBarTranslucent
       transparent
       visible={visible}
@@ -90,7 +90,7 @@ export default function FeedbackBottomSheet({
                 onChangeText={setFeedback}
                 style={styles.textArea}
               />
-              <Button
+              <Button loading={submitting}
                 disabled={!feedback.trim() || submitting}
                 label="Submit"
                 onPress={() => void submit()}
@@ -100,7 +100,7 @@ export default function FeedbackBottomSheet({
           )}
         </View>
       </KeyboardAvoidingView>
-    </Modal>
+    </ModalSurface>
   );
 }
 
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   modal: { flex: 1, justifyContent: "flex-end" },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(5, 28, 31, 0.42)",
+    backgroundColor: colors.ui.overlay,
   },
   sheet: {
     gap: 12,

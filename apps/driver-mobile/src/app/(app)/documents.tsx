@@ -1,3 +1,5 @@
+import { Button } from "@startup/mobile-ui";
+import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
 import {
@@ -5,7 +7,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -232,7 +233,7 @@ export default function DriverDocuments() {
           "Describe crew qualifications"
         )}
 
-        <Pressable
+        <Button loading={busy} label="Submit for Verification" variant="primary" labelStyle={styles.buttonText}
           accessibilityRole="button"
           disabled={busy}
           onPress={() => void submit()}
@@ -241,7 +242,7 @@ export default function DriverDocuments() {
           <Text style={styles.buttonText}>
             {busy ? "Uploading…" : "Submit for Verification"}
           </Text>
-        </Pressable>
+        </Button>
       </ScrollView>
     </View>
   );
@@ -253,16 +254,16 @@ function field(
   placeholder: string
 ) {
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
+    <Input variant="unstyled"
+        label={label}
+        labelStyle={[styles.label, styles.inputLabel]}
+        containerStyle={styles.field}
         accessibilityLabel={label}
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
         style={styles.input}
       />
-    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -282,6 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   field: { gap: 7 },
+  inputLabel: { marginBottom: 0, fontWeight: "500", lineHeight: 18 },
   input: {
     height: 53,
     borderRadius: 12,

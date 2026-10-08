@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, Button, Input } from "@startup/mobile-ui";
+import { SafeAreaView, Button, Input, ProfilePhotoButton } from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -20,7 +20,6 @@ import {
   ArrowRight,
   Baby,
   BadgeCheck,
-  Camera,
   Check,
   CheckCheck,
   ClipboardCheck,
@@ -36,6 +35,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
 import { parseDisplayDate } from "@startup/contracts";
 
 export type DriverProfile = {
@@ -44,6 +44,7 @@ export type DriverProfile = {
   dob: string;
   city: string;
   photo?: string;
+  photoMimeType?: "image/jpeg" | "image/png";
 };
 export type RegistrationDocuments = {
   classification: "BLS" | "ALS" | "NICU";
@@ -81,7 +82,7 @@ function Frame({
 }) {
   return (
     <SafeAreaView style={s.headerSafeArea} edges={["top"]}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Header title={title} onBack={onBack} />
       <KeyboardAvoidingView
         style={s.screen}
@@ -98,7 +99,7 @@ function Frame({
 export function WelcomeScreen({ onNext }: { onNext: () => void }) {
   return (
     <SafeAreaView style={s.headerSafeArea} edges={["top"]}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <ScrollView style={s.screen} contentContainerStyle={s.welcomeScroll}>
         <View style={s.hero}>
           <Image
@@ -200,15 +201,18 @@ export function DetailsScreen({
     setPicking(true);
     setError("");
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ["image/jpeg", "image/png"],
-        copyToCacheDirectory: true,
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) { setError("Allow photo access to choose your profile picture."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.8,
       });
       if (!result.canceled) {
         const file = result.assets[0];
-        if ((file.size ?? 0) > 5 * 1024 * 1024)
+        if ((file.fileSize ?? 0) > 5 * 1024 * 1024)
           setError("Choose a profile photo smaller than 5 MB.");
-        else change("photo", file.uri);
+        else if (file.mimeType !== "image/jpeg" && file.mimeType !== "image/png")
+          setError("Choose a JPG or PNG photo.");
+        else setForm(old => ({ ...old, photo: file.uri, photoMimeType: file.mimeType as "image/jpeg" | "image/png" }));
       }
     } catch {
       setError("Could not open your photos. Please try again.");
@@ -256,36 +260,15 @@ export function DetailsScreen({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={s.detailsContent}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Choose profile photo"
-          disabled={picking}
-          onPress={pickPhoto}
-          style={s.photoButton}
-        >
-          <View style={s.avatar}>
-            {form.photo ? (
-              <Image source={{ uri: form.photo }} style={s.avatarImage} />
-            ) : (
-              <Text style={s.initials}>
-                {form.name
-                  .trim()
-                  .split(/\s+/)
-                  .map((part) => part[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase() || "DR"}
-              </Text>
-            )}
-            <View style={s.camera}>
-              <Camera size={16} color={teal} />
-            </View>
-          </View>
+        <View style={s.photoButton}>
+          <ProfilePhotoButton theme="driver" size={84} loading={picking} disabled={picking}
+            source={form.photo ? { uri: form.photo } : undefined}
+            onPress={() => void pickPhoto()} />
           <Text style={s.photoTitle}>
             {picking ? "Opening photos…" : "Add profile photo"}
           </Text>
           <Text style={s.caption}>JPG, PNG up to 5 MB</Text>
-        </Pressable>
+        </View>
         <View style={s.fields}>
           <Input
             label="Full name"
@@ -337,7 +320,7 @@ export function DetailsScreen({
               I agree to verification and safety checks
             </Text>
           </Pressable>
-          <Button
+          <Button loading={saving}
             theme="driver"
             label="Continue"
             disabled={saving}
@@ -478,7 +461,7 @@ export function DocumentsScreen({
         <Text style={s.sectionTitle}>Required documents</Text>
         <View style={s.documentGrid}>
           {documentTypes.map((doc) => (
-            <Pressable
+            <Button loading={picking === doc.name} variant="ghost" label={doc.name}
               key={doc.name}
               onPress={() => pick(doc)}
               disabled={picking !== null}
@@ -503,14 +486,14 @@ export function DocumentsScreen({
                 </Text>
               </View>
               {files[doc.name] && <Check size={13} color={teal} />}
-            </Pressable>
+            </Button>
           ))}
         </View>
         <Text style={s.fileHelp}>
           PDF, JPG or PNG up to 10 MB. Photos must be JPG or PNG.
         </Text>
         <View style={s.documentFooter}>
-          <Button
+          <Button loading={submitting}
             theme="driver"
             label="Submit for Verification"
             disabled={picking !== null || submitting}
@@ -623,7 +606,7 @@ const s = StyleSheet.create({
   headerSafeArea: { flex: 1, backgroundColor: teal },
   flex: { flex: 1 },
   header: {
-    minHeight: 82,
+    minHeight: 64,
     backgroundColor: teal,
     alignItems: "center",
     justifyContent: "center",
@@ -736,7 +719,7 @@ const s = StyleSheet.create({
   },
   welcomeButton: { minHeight: 56, borderRadius: 18 },
   detailsContent: { flexGrow: 1, paddingHorizontal: 20, paddingBottom: 24 },
-  photoButton: { alignItems: "center", paddingTop: 0, paddingBottom: 32 },
+  photoButton: { alignItems: "center", paddingTop: 16, paddingBottom: 24 },
   avatar: {
     height: 84,
     width: 84,

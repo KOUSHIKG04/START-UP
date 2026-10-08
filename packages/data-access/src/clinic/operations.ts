@@ -34,14 +34,24 @@ export async function listMyPractices(client: AppSupabaseClient) {
   return clinicPracticeSchema.array().parse(data);
 }
 
-export async function listMyClinicSessions(client: AppSupabaseClient, practiceId: string) {
-  const { data, error } = await client.rpc("list_my_clinic_sessions", { p_practice_id: uuidSchema.parse(practiceId) });
+export async function listMyClinicSessions(
+  client: AppSupabaseClient,
+  practiceId: string
+) {
+  const { data, error } = await client.rpc("list_my_clinic_sessions", {
+    p_practice_id: uuidSchema.parse(practiceId),
+  });
   if (error) throw error;
   return clinicSessionSchema.array().parse(data);
 }
 
-export async function getMyDoctorDailySlotUsage(client: AppSupabaseClient, practiceId: string, localDay: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDay)) throw new Error("Choose a valid date.");
+export async function getMyDoctorDailySlotUsage(
+  client: AppSupabaseClient,
+  practiceId: string,
+  localDay: string
+) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDay))
+    throw new Error("Choose a valid date.");
   const { data, error } = await client.rpc("get_my_doctor_daily_slot_usage", {
     p_practice_id: uuidSchema.parse(practiceId),
     p_local_day: localDay,
@@ -50,7 +60,10 @@ export async function getMyDoctorDailySlotUsage(client: AppSupabaseClient, pract
   return doctorDailySlotUsageSchema.parse(data);
 }
 
-export async function setClinicAutoConfirmLimit(client: AppSupabaseClient, input: SetClinicAutoConfirmLimitInput) {
+export async function setClinicAutoConfirmLimit(
+  client: AppSupabaseClient,
+  input: SetClinicAutoConfirmLimitInput
+) {
   const request = setClinicAutoConfirmLimitSchema.parse(input);
   const { data, error } = await client.rpc("set_clinic_auto_confirm_limit", {
     p_session_id: request.sessionId,
@@ -61,13 +74,21 @@ export async function setClinicAutoConfirmLimit(client: AppSupabaseClient, input
   return uuidSchema.parse(data);
 }
 
-export async function listClinicUnavailability(client: AppSupabaseClient, practiceId: string) {
-  const { data, error } = await client.rpc("list_clinic_unavailability", { p_practice_id: uuidSchema.parse(practiceId) });
+export async function listClinicUnavailability(
+  client: AppSupabaseClient,
+  practiceId: string
+) {
+  const { data, error } = await client.rpc("list_clinic_unavailability", {
+    p_practice_id: uuidSchema.parse(practiceId),
+  });
   if (error) throw error;
   return clinicUnavailabilitySchema.array().parse(data);
 }
 
-export async function addClinicUnavailability(client: AppSupabaseClient, input: AddClinicUnavailabilityInput) {
+export async function addClinicUnavailability(
+  client: AppSupabaseClient,
+  input: AddClinicUnavailabilityInput
+) {
   const request = addClinicUnavailabilitySchema.parse(input);
   const { data, error } = await client.rpc("add_clinic_unavailability", {
     p_practice_id: request.practiceId,
@@ -79,7 +100,10 @@ export async function addClinicUnavailability(client: AppSupabaseClient, input: 
   return uuidSchema.parse(data);
 }
 
-export async function revokeClinicUnavailability(client: AppSupabaseClient, input: RevokeClinicUnavailabilityInput) {
+export async function revokeClinicUnavailability(
+  client: AppSupabaseClient,
+  input: RevokeClinicUnavailabilityInput
+) {
   const request = revokeClinicUnavailabilitySchema.parse(input);
   const { data, error } = await client.rpc("revoke_clinic_unavailability", {
     p_exception_id: request.exceptionId,
@@ -108,7 +132,7 @@ export async function publishClinicSession(
 
 export async function publishDoctorServiceSession(
   client: AppSupabaseClient,
-  input: PublishDoctorServiceSessionInput,
+  input: PublishDoctorServiceSessionInput
 ) {
   const request = publishDoctorServiceSessionSchema.parse(input);
   const { data, error } = await client.rpc("publish_doctor_service_session", {
@@ -126,7 +150,7 @@ export async function publishDoctorServiceSession(
 
 export async function publishSelectedDoctorSlots(
   client: AppSupabaseClient,
-  input: PublishSelectedDoctorSlotsInput,
+  input: PublishSelectedDoctorSlotsInput
 ) {
   const request = publishSelectedDoctorSlotsSchema.parse(input);
   const { data, error } = await client.rpc("publish_selected_doctor_slots", {
@@ -162,9 +186,10 @@ export async function listPracticeClinicSlots(
   client: AppSupabaseClient,
   practiceId: string,
   serviceId?: string,
-  limit = 100,
+  limit = 100
 ) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Invalid slot limit");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100)
+    throw new Error("Invalid slot limit");
   const { data, error } = await client.rpc("list_practice_clinic_slots", {
     p_practice_id: uuidSchema.parse(practiceId),
     p_service_id: serviceId ? uuidSchema.parse(serviceId) : null,
@@ -203,9 +228,14 @@ export async function listClinicAppointments(
 
 export async function listMyPracticeAppointments(client: AppSupabaseClient) {
   const practices = await listMyPractices(client);
-  const groups = await Promise.all(practices.map(practice => listClinicAppointments(client, practice.practice_id)));
-  return [...new Map(groups.flat().map(item => [item.id, item])).values()]
-    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+  const groups = await Promise.all(
+    practices.map((practice) =>
+      listClinicAppointments(client, practice.practice_id)
+    )
+  );
+  return [
+    ...new Map(groups.flat().map((item) => [item.id, item])).values(),
+  ].sort((a, b) => b.starts_at.localeCompare(a.starts_at));
 }
 
 export async function transitionClinicAppointment(
@@ -223,14 +253,24 @@ export async function transitionClinicAppointment(
   return uuidSchema.parse(data);
 }
 
-export async function issueClinicCheckinToken(client: AppSupabaseClient, appointmentId: string) {
-  const { data, error } = await client.rpc("issue_clinic_checkin_token", { p_appointment_id: uuidSchema.parse(appointmentId) });
+export async function issueClinicCheckinToken(
+  client: AppSupabaseClient,
+  appointmentId: string
+) {
+  const { data, error } = await client.rpc("issue_clinic_checkin_token", {
+    p_appointment_id: uuidSchema.parse(appointmentId),
+  });
   if (error) throw error;
   return clinicCheckinTokenSchema.parse(data);
 }
 
-export async function redeemClinicCheckinToken(client: AppSupabaseClient, token: string) {
-  const { data, error } = await client.rpc("redeem_clinic_checkin_token", { p_token: clinicCheckinTokenSchema.parse(token) });
+export async function redeemClinicCheckinToken(
+  client: AppSupabaseClient,
+  token: string
+) {
+  const { data, error } = await client.rpc("redeem_clinic_checkin_token", {
+    p_token: clinicCheckinTokenSchema.parse(token),
+  });
   if (error) throw error;
   return uuidSchema.parse(data);
 }

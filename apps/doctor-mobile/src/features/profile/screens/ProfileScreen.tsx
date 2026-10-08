@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, Switch, View } from "react-native";
+import { Image, Pressable, Switch, View } from "react-native";
 import { router } from "expo-router";
 import {
   Bell,
@@ -31,10 +31,7 @@ import {
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
-import {
-  supabase,
-  useMobileSession,
-} from "../../../services/supabase";
+import { supabase, useMobileSession } from "../../../services/supabase";
 const rows = [
   {
     title: "Edit profile",
@@ -86,13 +83,44 @@ export function ProfileScreen() {
     queryFn: () => listMyPracticeAppointments(supabase!),
     enabled: Boolean(supabase),
   });
-  const registeredFacilities = useQuery({queryKey:["registered-care-facilities"],queryFn:()=>listRegisteredCareFacilities(supabase!),enabled:Boolean(supabase)});
-  const associationRequests = useQuery({queryKey:["my-doctor-facility-requests"],queryFn:()=>listMyDoctorFacilityRequests(supabase!),enabled:Boolean(supabase)});
-  const [selectedFacilityId,setSelectedFacilityId] = useState("");
-  const [facilityPickerOpen,setFacilityPickerOpen] = useState(false);
-  const [associationMessage,setAssociationMessage] = useState("");
-  const requestFacility = useMutation({mutationFn:()=>requestMyDoctorFacility(supabase!,selectedFacilityId),onSuccess:async()=>{setAssociationMessage("Request sent to the facility. Clinzo credential review is separate.");setFacilityPickerOpen(false);await client.invalidateQueries({queryKey:["my-doctor-facility-requests"]});},onError:(error)=>setAssociationMessage(error.message)});
-  const respondInvitation = useMutation({mutationFn:({id,accept}:{id:string;accept:boolean})=>respondToMyFacilityInvitation(supabase!,id,accept),onSuccess:async()=>{setAssociationMessage("Invitation response saved.");await Promise.all([client.invalidateQueries({queryKey:["my-doctor-facility-requests"]}),client.invalidateQueries({queryKey:["my-doctor-profile"]})]);},onError:(error)=>setAssociationMessage(error.message)});
+  const registeredFacilities = useQuery({
+    queryKey: ["registered-care-facilities"],
+    queryFn: () => listRegisteredCareFacilities(supabase!),
+    enabled: Boolean(supabase),
+  });
+  const associationRequests = useQuery({
+    queryKey: ["my-doctor-facility-requests"],
+    queryFn: () => listMyDoctorFacilityRequests(supabase!),
+    enabled: Boolean(supabase),
+  });
+  const [selectedFacilityId, setSelectedFacilityId] = useState("");
+  const [facilityPickerOpen, setFacilityPickerOpen] = useState(false);
+  const [associationMessage, setAssociationMessage] = useState("");
+  const requestFacility = useMutation({
+    mutationFn: () => requestMyDoctorFacility(supabase!, selectedFacilityId),
+    onSuccess: async () => {
+      setAssociationMessage(
+        "Request sent to the facility. Clinzo credential review is separate."
+      );
+      setFacilityPickerOpen(false);
+      await client.invalidateQueries({
+        queryKey: ["my-doctor-facility-requests"],
+      });
+    },
+    onError: (error) => setAssociationMessage(error.message),
+  });
+  const respondInvitation = useMutation({
+    mutationFn: ({ id, accept }: { id: string; accept: boolean }) =>
+      respondToMyFacilityInvitation(supabase!, id, accept),
+    onSuccess: async () => {
+      setAssociationMessage("Invitation response saved.");
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["my-doctor-facility-requests"] }),
+        client.invalidateQueries({ queryKey: ["my-doctor-profile"] }),
+      ]);
+    },
+    onError: (error) => setAssociationMessage(error.message),
+  });
   const [section, setSection] = useState<string | null>(null);
   const [logout, setLogout] = useState(false);
   const reset = useDoctorStore((s) => s.reset);
@@ -103,7 +131,7 @@ export function ProfileScreen() {
           Number(profile.data.practice_started_on.slice(0, 4))
       )
     : null;
-    
+
   const patientsSeen = new Set(
     appointments.data
       ?.filter((item) => item.status === "completed")
@@ -138,9 +166,21 @@ export function ProfileScreen() {
               justifyContent: "center",
             }}
           >
-            <Heading style={{ fontSize: 30, color: "#087F78" }}>
-              {profile.data?.full_name?.charAt(0).toUpperCase() ?? "D"}
-            </Heading>
+            {profile.data?.profile_photo_path && supabase ? (
+              <Image
+                source={{
+                  uri: supabase.storage
+                    .from("provider-profile-photos")
+                    .getPublicUrl(profile.data.profile_photo_path).data
+                    .publicUrl,
+                }}
+                style={{ width: 80, height: 80, borderRadius: 40 }}
+              />
+            ) : (
+              <Heading style={{ fontSize: 30, color: "#087F78" }}>
+                {profile.data?.full_name?.charAt(0).toUpperCase() ?? "D"}
+              </Heading>
+            )}
           </View>
           <View style={ui.flex}>
             <Heading style={{ fontSize: 18, color: palette.text }}>
@@ -181,11 +221,15 @@ export function ProfileScreen() {
         <Heading style={{ fontSize: 13 }}>Languages</Heading>
         {profile.data?.languages.length ? (
           <View style={ui.wrap}>
-            {Array.from(new Set(profile.data.languages.map(doctorLanguageName))).map(language => (
+            {Array.from(
+              new Set(profile.data.languages.map(doctorLanguageName))
+            ).map((language) => (
               <Chip key={language} label={language} theme="doctor" />
             ))}
           </View>
-        ) : <Label muted>No languages added yet.</Label>}
+        ) : (
+          <Label muted>No languages added yet.</Label>
+        )}
       </Panel>
       <View
         style={{
@@ -306,12 +350,89 @@ export function ProfileScreen() {
               ) : (
                 <Label muted>No facility linked yet.</Label>
               )}
-              {associationRequests.data?.map(item=><View key={item.id}><Label>{item.facility_name}: {item.initiated_by === "facility" && item.status === "pending" ? "invited you" : item.status}{item.rejection_reason ? ` — ${item.rejection_reason}` : ""}</Label>{item.initiated_by === "facility" && item.status === "pending" ? <View style={ui.between}><Button theme="doctor" label="Accept" disabled={respondInvitation.isPending} onPress={()=>respondInvitation.mutate({id:item.id,accept:true})} /><Button theme="doctor" variant="secondary" label="Decline" disabled={respondInvitation.isPending} onPress={()=>respondInvitation.mutate({id:item.id,accept:false})} /></View> : null}</View>)}
+              {associationRequests.data?.map((item) => (
+                <View key={item.id}>
+                  <Label>
+                    {item.facility_name}:{" "}
+                    {item.initiated_by === "facility" &&
+                    item.status === "pending"
+                      ? "invited you"
+                      : item.status}
+                    {item.rejection_reason ? ` — ${item.rejection_reason}` : ""}
+                  </Label>
+                  {item.initiated_by === "facility" &&
+                  item.status === "pending" ? (
+                    <View style={ui.between}>
+                      <Button loading={respondInvitation.isPending && respondInvitation.variables?.id === item.id && respondInvitation.variables.accept === true}
+                        theme="doctor"
+                        label="Accept"
+                        disabled={respondInvitation.isPending}
+                        onPress={() =>
+                          respondInvitation.mutate({
+                            id: item.id,
+                            accept: true,
+                          })
+                        }
+                      />
+                      <Button loading={respondInvitation.isPending && respondInvitation.variables?.id === item.id && respondInvitation.variables.accept === false}
+                        theme="doctor"
+                        variant="secondary"
+                        label="Decline"
+                        disabled={respondInvitation.isPending}
+                        onPress={() =>
+                          respondInvitation.mutate({
+                            id: item.id,
+                            accept: false,
+                          })
+                        }
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              ))}
               <Label>Registered hospital or clinic</Label>
-              <Pressable accessibilityRole="button" accessibilityLabel="Select registered hospital or clinic" onPress={()=>setFacilityPickerOpen(!facilityPickerOpen)} style={ui.between}><Label>{registeredFacilities.data?.find(item=>item.id===selectedFacilityId)?.name ?? "Select facility"}</Label><ChevronRight color="#93A4B9" size={18} /></Pressable>
-              {facilityPickerOpen && registeredFacilities.data?.map(item=><Pressable key={item.id} accessibilityRole="button" onPress={()=>{setSelectedFacilityId(item.id);setFacilityPickerOpen(false);}}><Label>{item.name} · {item.address}</Label></Pressable>)}
-              {!registeredFacilities.isLoading && !registeredFacilities.data?.length && <Label muted>No company-verified facility is registered yet.</Label>}
-              <Button theme="doctor" label={requestFacility.isPending ? "Sending…" : "Request association"} disabled={!selectedFacilityId || requestFacility.isPending} onPress={()=>requestFacility.mutate()} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Select registered hospital or clinic"
+                onPress={() => setFacilityPickerOpen(!facilityPickerOpen)}
+                style={ui.between}
+              >
+                <Label>
+                  {registeredFacilities.data?.find(
+                    (item) => item.id === selectedFacilityId
+                  )?.name ?? "Select facility"}
+                </Label>
+                <ChevronRight color="#93A4B9" size={18} />
+              </Pressable>
+              {facilityPickerOpen &&
+                registeredFacilities.data?.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    accessibilityRole="button"
+                    onPress={() => {
+                      setSelectedFacilityId(item.id);
+                      setFacilityPickerOpen(false);
+                    }}
+                  >
+                    <Label>
+                      {item.name} · {item.address}
+                    </Label>
+                  </Pressable>
+                ))}
+              {!registeredFacilities.isLoading &&
+                !registeredFacilities.data?.length && (
+                  <Label muted>
+                    No company-verified facility is registered yet.
+                  </Label>
+                )}
+              <Button loading={requestFacility.isPending}
+                theme="doctor"
+                label={
+                  requestFacility.isPending ? "Sending…" : "Request association"
+                }
+                disabled={!selectedFacilityId || requestFacility.isPending}
+                onPress={() => requestFacility.mutate()}
+              />
               {associationMessage ? <Label>{associationMessage}</Label> : null}
               <Button
                 theme="doctor"

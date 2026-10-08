@@ -2,7 +2,6 @@ import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { memo, useCallback, useRef, useState, type ReactNode } from "react";
 import {
   FlatList,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,6 +15,7 @@ import {
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
+import { ModalSurface } from "./ModalSurface";
 
 export type DropdownOption = {
   label: string;
@@ -45,6 +45,8 @@ export type DropdownProps = {
   chevronColor?: string;
   menuWidth?: number;
   menuStyle?: StyleProp<ViewStyle>;
+  backdropColor?: string;
+  selectedOptionBackgroundColor?: string;
 };
 
 type TriggerPosition = {
@@ -170,6 +172,8 @@ export function Dropdown({
   chevronColor,
   menuWidth,
   menuStyle,
+  backdropColor,
+  selectedOptionBackgroundColor,
 }: DropdownProps) {
   const triggerRef = useRef<View>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -213,7 +217,7 @@ export function Dropdown({
       <DropdownOptionRow
         option={item}
         isSelected={item.value === value}
-        softColor={themeColors.soft}
+        softColor={selectedOptionBackgroundColor ?? themeColors.soft}
         textColor={themeColors.text}
         primaryTextColor={themeColors.primaryText}
         primaryColor={themeColors.primary}
@@ -223,6 +227,7 @@ export function Dropdown({
     [
       value,
       themeColors.soft,
+      selectedOptionBackgroundColor,
       themeColors.text,
       themeColors.primaryText,
       themeColors.primary,
@@ -292,9 +297,9 @@ export function Dropdown({
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Modal
+      <ModalSurface layout="custom"
         animationType="fade"
-        onRequestClose={closeMenu}
+        onClose={closeMenu}
         statusBarTranslucent
         transparent
         visible={isOpen && Boolean(triggerPosition)}
@@ -303,7 +308,7 @@ export function Dropdown({
           <Pressable
             accessibilityLabel="Close options"
             onPress={closeMenu}
-            style={styles.backdrop}
+            style={[styles.backdrop, backdropColor ? { backgroundColor: backdropColor } : undefined]}
           />
 
           {triggerPosition ? (
@@ -332,7 +337,7 @@ export function Dropdown({
             </View>
           ) : null}
         </View>
-      </Modal>
+      </ModalSurface>
     </View>
   );
 }

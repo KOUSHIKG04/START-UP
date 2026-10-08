@@ -76,14 +76,14 @@ export function EditProfileScreen() {
           <Input label="About" value={bio} onChangeText={setBio} multiline />
           <Input label="Qualifications" value={qualification} onChangeText={setQualification} placeholder="e.g. MBBS, MD" maxLength={160} />
           <Label muted>Approved qualifications: {profile.data?.qualification ?? "Not verified yet"}</Label>
-          {qualification.trim() !== (profile.data?.qualification_claim ?? profile.data?.qualification ?? "") ? <Button theme="doctor" label={submitQualification.isPending ? "Submitting…" : "Submit qualifications for review"} disabled={submitQualification.isPending || !doctorQualificationSchema.safeParse(qualification).success} onPress={() => { setError(""); submitQualification.mutate(); }} /> : null}
+          {qualification.trim() !== (profile.data?.qualification_claim ?? profile.data?.qualification ?? "") ? <Button loading={submitQualification.isPending} theme="doctor" label={submitQualification.isPending ? "Submitting…" : "Submit qualifications for review"} disabled={submitQualification.isPending || !doctorQualificationSchema.safeParse(qualification).success} onPress={() => { setError(""); submitQualification.mutate(); }} /> : null}
           <Input label="Languages (separated by commas)" value={languages} onChangeText={setLanguages} placeholder="English, Hindi, Kannada" />
           <View style={ui.wrap}>
             {Array.from(new Set(languages.split(",").map(doctorLanguageName).filter(Boolean))).map(language => (
               <Chip key={language} label={language} theme="doctor" />
             ))}
           </View>
-          <Button theme="doctor" label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => { setError(""); save.mutate(); }} />
+          <Button loading={save.isPending} theme="doctor" label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => { setError(""); save.mutate(); }} />
         </> : null}
       </Panel>
     </DoctorScreen>

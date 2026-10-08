@@ -10,7 +10,7 @@ export const colors = {
     navBorder: "#E2E8F0",
     navMuted: "#8E9BAE",
     cardDescription: "#71818F",
-    overlay: "rgba(12, 36, 52, 0.12)",
+    overlay: "#00000066",
     menuBorder: "rgba(0, 0, 0, 0.08)",
     menuShadow: "#055B56",
     pressedOverlay: "rgba(0, 0, 0, 0.03)",

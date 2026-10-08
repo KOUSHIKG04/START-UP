@@ -1,14 +1,17 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
+import { PROFILE_FIELD_HEIGHT } from "./profileFormStyles";
 
 export function BloodGroupSelector({
   bloodGroups,
   value,
   onChange,
+  invalid = false,
 }: {
   bloodGroups: readonly string[];
   value: string;
   onChange: (group: string) => void;
+  invalid?: boolean;
 }) {
   return (
     <View style={styles.bloodGrid}>
@@ -16,9 +19,11 @@ export function BloodGroupSelector({
         <Pressable
           key={item}
           accessibilityRole="button"
+          accessibilityLabel={`Blood group ${item}`}
           accessibilityState={{ selected: value === item }}
+          hitSlop={6}
           onPress={() => onChange(item)}
-          style={[styles.blood, value === item && styles.selectedBlood]}
+          style={[styles.blood, value === item && styles.selectedBlood, invalid && styles.invalid]}
         >
           <Text
             style={[
@@ -35,24 +40,26 @@ export function BloodGroupSelector({
 }
 
 const styles = StyleSheet.create({
+  invalid: { borderColor: colors.danger },
   bloodGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    justifyContent: "space-between",
+    rowGap: 12,
   },
   blood: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    backgroundColor: "#FAFAFA",
-    minWidth: 48,
+    borderColor: "#D1D1D1",
+    borderRadius: 12,
+    height: PROFILE_FIELD_HEIGHT,
+    width: "22%",
+    backgroundColor: colors.white,
     alignItems: "center",
+    justifyContent: "center",
   },
   selectedBlood: {
-    borderColor: colors.patient.primary,
-    backgroundColor: "#E6F4F5",
+    borderColor: colors.patient.primaryDark,
+    backgroundColor: colors.patient.primaryDark,
   },
   bloodText: {
     fontSize: 14,
@@ -60,7 +67,7 @@ const styles = StyleSheet.create({
     color: colors.patient.text,
   },
   selectedBloodText: {
-    color: colors.patient.primaryDark,
+    color: colors.white,
     fontFamily: fontFamilies.bold,
   },
 });
