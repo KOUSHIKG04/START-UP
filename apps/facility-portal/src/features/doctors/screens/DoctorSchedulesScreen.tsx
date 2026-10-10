@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import {
@@ -18,6 +19,7 @@ export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: 
   }, [loadError]);
   const [activeTab, setActiveTab] =
     React.useState<(typeof scheduleTabs)[number]>("Today");
+  const router = useRouter();
   const schedule = facilitySchedule(doctors, sessions);
 
   return (
@@ -31,6 +33,10 @@ export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: 
         </div>
 
         <div className="flex items-center gap-3">
+          <select aria-label="Manage doctor schedule" className="h-9 max-w-64 rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm" value="" onChange={event => { if (event.target.value) router.push(`/doctor-schedules/${event.target.value}`); }}>
+            <option value="">Manage doctor schedule</option>
+            {doctors.filter(doctor => doctor.verified).map(doctor => <option key={doctor.practice_id} value={doctor.practice_id}>{doctor.name}</option>)}
+          </select>
           {/* Bell Button */}
           <button
             aria-label="Notifications"

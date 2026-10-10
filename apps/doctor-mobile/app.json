@@ -25,6 +25,7 @@
     "scheme": "doctor-mobile",
     "plugins": [
       "expo-router",
+      "expo-maps",
       "expo-notifications",
       ["expo-image-picker", { "photosPermission": "Allow Clinzo Doctor to select a profile photo." }],
       [

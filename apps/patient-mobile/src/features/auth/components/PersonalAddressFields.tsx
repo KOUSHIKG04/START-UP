@@ -95,6 +95,7 @@ export function PersonalAddressFields({
               visible={addressOpen}
               value={value ?? emptyAddress}
               onClose={() => setAddressOpen(false)}
+              onReopen={() => setAddressOpen(true)}
               onConfirm={(addr) => {
                 onClearError();
                 onChange(addr);

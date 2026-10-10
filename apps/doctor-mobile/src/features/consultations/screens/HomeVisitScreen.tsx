@@ -67,7 +67,6 @@ export function HomeVisitScreen() {
           leftIcon={<Navigation size={16} color="white" />}
           onPress={() => void navigate()}
           style={{ flex: 1, paddingHorizontal: 6 }}
-          labelStyle={{ fontSize: 12 }}
         />
       </View>
       <Panel style={{ marginTop: 16, gap: 0 }}>

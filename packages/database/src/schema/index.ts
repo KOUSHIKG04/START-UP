@@ -22,3 +22,6 @@ export * from "./trips";
 export * from "./bed-inventory";
 export * from "./onboarding";
 export * from "./verification";
+
+export * from "./doctor-locations";
+export * from "./driver-locations";

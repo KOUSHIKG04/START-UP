@@ -30,3 +30,6 @@ export type { Database } from "./generated/database.types";
 export * from "./verification/operations";
 export * from "./verification/my-case";
 export * from "./online/operations";
+
+export * from "./doctors/locations";
+export * from "./drivers/locations";

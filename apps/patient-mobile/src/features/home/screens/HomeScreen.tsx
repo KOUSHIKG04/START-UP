@@ -1,3 +1,4 @@
+import { useTimeGreeting } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -69,6 +70,7 @@ export function HomeScreen({
 }: {
   onNotificationPress?: () => void;
 } = {}) {
+  const greeting = useTimeGreeting();
   const { top: topInset } = useSafeAreaInsets();
   const { profile } = useMobileSession();
   const queryClient = useQueryClient();
@@ -220,7 +222,7 @@ export function HomeScreen({
         />
         <SafeAreaView edges={["top"]} style={styles.safeArea}>
           <View style={styles.headerRow}>
-            <Text style={styles.greeting}>Good Morning 👋</Text>
+            <Text style={styles.greeting}>{greeting} 👋</Text>
             <Pressable accessibilityRole="button" accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`} onPress={() => router.push("/select-location")} style={styles.locationButton}>
               <MapPin color={colors.white} size={15} strokeWidth={2} />
               <Text numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>{locationHeadline(selectedLocation)}</Text>

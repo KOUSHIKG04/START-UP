@@ -1,39 +1,49 @@
+import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { NotificationDrawer } from "../../../components/NotificationDrawer";
+import { locationHeadline } from "../../locations/savedLocationDisplay";
 import { ModalSurface } from "@startup/mobile-ui";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { useEffect, useState } from "react";
 import {
   Image,
   Pressable,
   StyleSheet,
   Switch,
+  Text,
   View,
 } from "react-native";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ambulance, CircleAlert, User } from "lucide-react-native";
+import { Ambulance, Bell, ChevronDown, MapPin, CircleAlert, User } from "lucide-react-native";
 import {
+  listMyDriverLocations,
+  getMyDriverProfile,
   listMyAmbulanceFleet,
   listMyDriverOffers,
   listMyDriverTrips,
   respondMyDriverOffer,
   setMyDriverAvailability,
 } from "@startup/data-access";
-import { Button, useToast, useToastFeedback } from "@startup/mobile-ui";
+import { Button, useToast, useToastFeedback, useTimeGreeting } from "@startup/mobile-ui";
 import {
   Body,
   Card,
   Copy,
   Heading,
   Metrics,
-  PageHeader,
 } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 export function HomeScreen() {
   const { profile } = useMobileSession();
+  const greeting = useTimeGreeting();
+  const insets = useSafeAreaInsets();
+  const [showNotifications, setShowNotifications] = useState(false);
+  useEffect(() => { router.prefetch("/select-location"); }, []);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
   const [responding, setResponding] = useState<boolean | null>(null);
@@ -41,6 +51,10 @@ export function HomeScreen() {
   const { showToast } = useToast();
   const driverId = profile?.driver?.id;
   
+  const locations = useQuery({ queryKey: ["my-driver-locations", driverId], queryFn: () => listMyDriverLocations(supabase!), enabled: Boolean(supabase && driverId) });
+  const selectedLocation = locations.data?.find(item => item.selected);
+  const driverProfile = useQuery({ queryKey: ["my-driver-profile", driverId], queryFn: () => getMyDriverProfile(supabase!), enabled: Boolean(supabase && driverId) });
+  useToastFeedback({ error: locations.isError ? "Could not load saved locations. Tap the location to retry." : "" });
   const fleet = useQuery({
     queryKey: ["driver-fleet", driverId],
     queryFn: () => listMyAmbulanceFleet(supabase!),
@@ -170,9 +184,22 @@ export function HomeScreen() {
   
   return (
     <View style={ui.screen}>
-      <PageHeader
-        title="CLINZO Driver"
-        right={
+      <StatusBar style="light" />
+      <View style={[styles.header, { minHeight: Math.max(165, insets.top + 88) }]}>
+        <View style={[styles.headerRow, { marginTop: insets.top + 18 }]}>
+          <Text style={styles.greeting} numberOfLines={1}>{greeting}! {driverProfile.data?.full_name ?? "Driver"}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`} onPress={() => router.push("/select-location")} style={styles.location}>
+            <MapPin size={15} strokeWidth={2} color={colors.white} />
+            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{locationHeadline(selectedLocation)}</Text>
+            <ChevronDown size={15} color={colors.white} />
+          </Pressable>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={10} onPress={() => setShowNotifications(true)} style={({ pressed }) => [styles.notificationButton, { top: insets.top + 22 }, pressed && styles.notificationButtonPressed]}>
+          <Bell size={20} strokeWidth={1.9} color={palette.primary} />
+        </Pressable>
+      </View>
+      <Body>
+        <View style={ui.between}><Heading>{online ? "Available" : "Offline"}</Heading>
           <Switch
             accessibilityLabel="Receive emergency requests"
             value={online}
@@ -180,12 +207,10 @@ export function HomeScreen() {
               busy || !vehicle?.ready_to_go_available || Boolean(active)
             }
             onValueChange={(value) => void changeAvailability(value)}
-            trackColor={{ false: "#075c65", true: "#075c65" }}
-            thumbColor="white"
+            trackColor={{ false: colors.borderDefault, true: palette.primary }}
+            thumbColor={online ? colors.white : palette.primary}
           />
-        }
-      />
-      <Body>
+        </View>
         {active ? (
           <Button
             theme="driver"
@@ -207,17 +232,17 @@ export function HomeScreen() {
               style={styles.map}
             />
             <Copy style={ui.caption}>
-              Reference map · live navigation is not connected
+              Reference map Â· live navigation is not connected
             </Copy>
           </>
         ) : null}
         <Card>
           <Copy style={{ color: palette.muted }}>
-            {online ? "TODAY’S WORK SUMMARY" : "TODAY’S SUMMARY"}
+            {online ? "TODAYâ€™S WORK SUMMARY" : "TODAYâ€™S SUMMARY"}
           </Copy>
           <View style={ui.between}>
             <View>
-              <Copy style={styles.total}>—</Copy>
+              <Copy style={styles.total}>â€”</Copy>
               <Copy style={ui.caption}>Total Earnings</Copy>
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -228,9 +253,9 @@ export function HomeScreen() {
         </Card>
         <Metrics
           items={[
-            ["—", "Acceptance"],
-            ["—", "Rating"],
-            ["—", "Online Hrs"],
+            ["â€”", "Acceptance"],
+            ["â€”", "Rating"],
+            ["â€”", "Online Hrs"],
           ]}
         />
         {!online && completedToday === 0 ? (
@@ -293,11 +318,11 @@ export function HomeScreen() {
                 [
                   offer
                     ? `${(offer.distance_meters / 1000).toFixed(1)} km`
-                    : "—",
+                    : "â€”",
                   "Distance",
                 ],
-                ["—", "ETA"],
-                ["—", "Est. fare"],
+                ["â€”", "ETA"],
+                ["â€”", "Est. fare"],
               ]}
             />
             <View style={[ui.row, { marginTop: 20 }]}>
@@ -320,6 +345,7 @@ export function HomeScreen() {
           </View>
         </View>
       </ModalSurface>
+      <NotificationDrawer visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 }
@@ -332,6 +358,13 @@ function Address({ label, text }: { label: string; text: string }) {
   );
 }
 const styles = StyleSheet.create({
+  header: { backgroundColor: palette.primary },
+  headerRow: { height: 70, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 24 },
+  greeting: { color: colors.white, fontFamily: fontFamilies.semibold, fontSize: 22, fontWeight: "600", lineHeight: 34, paddingRight: 52, maxWidth: "100%" },
+  notificationButton: { position: "absolute", right: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", ...shadows.card },
+  notificationButtonPressed: { opacity: 0.75, transform: [{ scale: 0.95 }] },
+  location: { flexDirection: "row", alignItems: "center", gap: 5, maxWidth: "75%", minHeight: 26 },
+  locationText: { color: colors.white, fontFamily: fontFamilies.medium, fontSize: 13, flexShrink: 1 },
   wait: {
     backgroundColor: palette.soft,
     borderRadius: 12,

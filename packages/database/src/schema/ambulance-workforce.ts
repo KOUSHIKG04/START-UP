@@ -56,6 +56,7 @@ export const driver = clinzo
       full_name: text("full_name").notNull(),
       date_of_birth: date("date_of_birth", { mode: "string" }),
       city: text("city"),
+      home_address: jsonb("home_address").$type<JsonValue>(),
       contact_phone: text("contact_phone"),
       profile_photo_path: text("profile_photo_path"),
       verification_consent_at: timestamp("verification_consent_at", {
@@ -77,6 +78,7 @@ export const driver = clinzo
       index("driver_identity_id_idx").on(table.identity_id),
       index("driver_organization_id_idx").on(table.organization_id),
       check("driver_ck_1", sql.raw("row_version > 0")),
+      check("driver_home_address_check", sql.raw("clinzo.valid_driver_address(home_address)")),
       check(
         "driver_city_length",
         sql.raw("city IS NULL OR length(city) BETWEEN 2 AND 120")
@@ -113,6 +115,7 @@ export const driverRegistrationApplication = clinzo
       contact_phone: text("contact_phone").notNull(),
       date_of_birth: date("date_of_birth", { mode: "string" }).notNull(),
       city: text("city").notNull(),
+      home_address: jsonb("home_address").$type<JsonValue>(),
       profile_photo_path: text("profile_photo_path"),
       consent_at: timestamp("consent_at", {
         withTimezone: true,
@@ -149,6 +152,7 @@ export const driverRegistrationApplication = clinzo
       uniqueIndex("driver_registration_application_identity_uq").on(
         table.identity_id
       ),
+      check("driver_registration_application_home_address_check", sql.raw("clinzo.valid_driver_address(home_address)")),
       check(
         "driver_registration_application_row_version_ck",
         sql.raw("row_version > 0")

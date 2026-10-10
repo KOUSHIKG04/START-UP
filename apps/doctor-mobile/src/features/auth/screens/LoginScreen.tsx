@@ -23,7 +23,10 @@ import {
 const doctor = require("../../../../assets/images/onboarding/doctor.png");
 
 export default function LoginScreen() {
-  const [emailOpen, setEmailOpen] = useState(false);
+  const [mode, setMode] = useState<"dev" | "prod">(
+    devPasswordLoginEnabled ? "dev" : "prod"
+  );
+  const emailOpen = devPasswordLoginEnabled && mode === "dev";
   const [emailMode, setEmailMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,6 +38,7 @@ export default function LoginScreen() {
 
 
   async function signIn() {
+    if (!devPasswordLoginEnabled || busy) return;
     if (!supabase) {
       setError("Supabase is not configured on this device.");
       return;
@@ -53,7 +57,7 @@ export default function LoginScreen() {
 
 
   async function signUp() {
-    if (!devPasswordLoginEnabled) return;
+    if (!devPasswordLoginEnabled || busy) return;
 
     if (!supabase) {
       setError("Supabase is not configured on this device.");
@@ -105,10 +109,32 @@ export default function LoginScreen() {
 
   return (
     <OnboardingShell
-      onBack={() => (emailOpen ? setEmailOpen(false) : router.back())}
+      onBack={() => router.back()}
       scroll={emailOpen}
     >
       <View style={styles.body}>
+        {devPasswordLoginEnabled ? (
+          <View style={styles.switchContainer}>
+            {(["dev", "prod"] as const).map((loginMode) => (
+              <Pressable
+                key={loginMode}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: mode === loginMode, disabled: busy }}
+                accessibilityLabel={loginMode === "dev" ? "Switch to Development mode" : "Switch to Production mode"}
+                disabled={busy}
+                onPress={() => {
+                  setMode(loginMode);
+                  setError("");
+                }}
+                style={[styles.modeButton, mode === loginMode && styles.modeButtonActive]}
+              >
+                <Text style={[styles.modeText, mode === loginMode && styles.modeTextActive]}>
+                  {loginMode === "dev" ? "Dev (Email)" : "Prod (Figma)"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
         <Text style={styles.heading}>
           Welcome to{" "}
           <Text style={styles.brand}>
@@ -220,19 +246,18 @@ export default function LoginScreen() {
           <>
             <Image source={doctor} style={styles.doctor} resizeMode="contain" />
             <View style={styles.choices}>
-              {devPasswordLoginEnabled ? (
-                <OnboardingButton
-                  variant="outline"
-                  label="Continue with Email"
-                  onPress={() => setEmailOpen(true)}
-                />
-              ) : (
-                <OnboardingButton
-                  variant="outline"
-                  label="Continue with Phone"
-                  onPress={() => router.push("/phone")}
-                />
-              )}
+              <OnboardingButton
+                variant="outline"
+                label="Continue with Google"
+                onPress={() => setError(devPasswordLoginEnabled
+                  ? "Google sign-in is not configured yet. Use Dev (Email) for testing."
+                  : "Google sign-in is not configured yet.")}
+              />
+              <OnboardingButton
+                variant="outline"
+                label="Continue with Phone"
+                onPress={() => router.push("/phone")}
+              />
             </View>
             <Text style={styles.terms}>
               By continuing, you agree to our{"\n"}
@@ -249,6 +274,19 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   body: { flex: 1, alignItems: "center", paddingTop: 24 },
+  switchContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F0F4F5",
+    borderRadius: 22,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: "#E1E7E8",
+    marginBottom: 16,
+  },
+  modeButton: { paddingVertical: 7, paddingHorizontal: 16, borderRadius: 18 },
+  modeButtonActive: { backgroundColor: colors.patient.primaryDark },
+  modeText: { fontFamily: fontFamilies.medium, fontSize: 13, color: "#64748B" },
+  modeTextActive: { color: colors.white, fontFamily: fontFamilies.bold },
   heading: {
     color: colors.black,
     fontFamily: fontFamilies.medium,
@@ -263,8 +301,8 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: colors.black,
   },
-  doctor: { width: 268, height: 194, marginTop: 50 },
-  choices: { width: "100%", maxWidth: 296, marginTop: 40 },
+  doctor: { width: 268, height: 194, marginTop: 28 },
+  choices: { width: "100%", maxWidth: 296, marginTop: 36, gap: 14 },
   terms: {
     marginTop: 44,
     textAlign: "center",
@@ -274,7 +312,7 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   link: { color: colors.patient.primaryDark },
-  form: { width: "100%", maxWidth: 330, gap: 14, marginTop: 74 },
+  form: { width: "100%", maxWidth: 330, gap: 14, marginTop: 32, paddingBottom: 24 },
   formHeading: {
     fontFamily: fontFamilies.medium,
     fontSize: 22,

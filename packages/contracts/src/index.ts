@@ -23,3 +23,6 @@ export * from "./online-consultation";
 export * from "./languages";
 export * from "./dates";
 export * from "./doctor-review";
+
+export * from "./doctor-locations";
+export * from "./driver-locations";

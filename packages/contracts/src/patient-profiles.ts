@@ -8,24 +8,32 @@ export const patientAddressSchema = z.object({
   city: z.string().trim().min(2).max(120),
   state: z.string().trim().min(2).max(120),
   pincode: z.string().regex(/^\d{6}$/),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
 });
-
 
 const core = z.object({
   fullName: z.string().trim().min(2).max(120),
   age: z.number().int().min(0).max(120),
-  dateOfBirth: z.iso.date().refine((value) => ageFromBirthDate(value) !== null, "Enter a valid date of birth.").optional(),
+  dateOfBirth: z.iso
+    .date()
+    .refine(
+      (value) => ageFromBirthDate(value) !== null,
+      "Enter a valid date of birth."
+    )
+    .optional(),
   gender: z.enum(["Male", "Female", "Other", "Prefer not to say"]),
   bloodGroup: z.enum(["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]),
 });
 
-
 export const patientProfileInputSchema = core.extend({
   email: z.email().optional(),
-  phone: z.string().regex(/^\+[1-9]\d{7,14}$/).optional(),
+  phone: z
+    .string()
+    .regex(/^\+[1-9]\d{7,14}$/)
+    .optional(),
   address: patientAddressSchema.optional(),
 });
-
 
 export const familyProfileInputSchema = core.extend({
   relation: z.enum([
@@ -41,7 +49,6 @@ export const familyProfileInputSchema = core.extend({
   notify: z.boolean(),
   profilePhotoPath: z.string().max(500).optional(),
 });
-
 
 export const familyProfileListSchema = z.array(
   z.object({

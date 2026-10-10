@@ -1,18 +1,24 @@
 import { z } from "zod";
 import { uuidSchema } from "./validation";
 
-export const practiceSearchInputSchema = z.object({
-  query: z.string().trim().max(100).optional(),
-  specialtyCode: z.string().trim().max(100).optional(),
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
-  practiceId: uuidSchema.optional(),
-  serviceMode: z.enum(["clinic", "online", "home"]).optional(),
-  offset: z.number().int().min(0).max(100000).default(0),
-  limit: z.number().int().min(1).max(50).default(20),
-}).refine((value) => (value.latitude === undefined) === (value.longitude === undefined), {
-  message: "Latitude and longitude must be provided together",
-});
+export const practiceSearchInputSchema = z
+  .object({
+    query: z.string().trim().max(100).optional(),
+    specialtyCode: z.string().trim().max(100).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    practiceId: uuidSchema.optional(),
+    serviceMode: z.enum(["clinic", "online", "home"]).optional(),
+    offset: z.number().int().min(0).max(100000).default(0),
+    limit: z.number().int().min(1).max(50).default(20),
+  })
+  .refine(
+    (value) =>
+      (value.latitude === undefined) === (value.longitude === undefined),
+    {
+      message: "Latitude and longitude must be provided together",
+    }
+  );
 
 export const publicPracticeSchema = z.object({
   practice_id: uuidSchema,

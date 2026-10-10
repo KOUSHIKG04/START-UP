@@ -5,6 +5,43 @@ export type Database = {
     Tables: Record<string, never>;
     Views: Record<string, never>;
     Functions: {
+      get_my_doctor_personal_address: { Args: Record<string, never>; Returns: unknown; };
+      save_my_doctor_profile_with_address: {
+        Args: { p_full_name: string; p_bio: string | null; p_languages: string[]; p_address: unknown };
+        Returns: unknown;
+      };
+      list_my_doctor_locations: {
+        Args: Record<string, never>;
+        Returns: unknown;
+      };
+      save_my_doctor_location: {
+        Args: { p_location: unknown; p_location_id?: string | null };
+        Returns: string;
+      };
+      select_my_doctor_location: {
+        Args: { p_location_id: string };
+        Returns: boolean;
+      };
+      delete_my_doctor_location: {
+        Args: { p_location_id: string };
+        Returns: boolean;
+      };
+      list_my_driver_locations: {
+        Args: Record<string, never>;
+        Returns: unknown;
+      };
+      save_my_driver_location: {
+        Args: { p_location: unknown; p_location_id?: string | null };
+        Returns: string;
+      };
+      select_my_driver_location: {
+        Args: { p_location_id: string };
+        Returns: boolean;
+      };
+      delete_my_driver_location: {
+        Args: { p_location_id: string };
+        Returns: boolean;
+      };
       list_my_patient_locations: {
         Args: Record<string, never>;
         Returns: unknown;
@@ -157,6 +194,7 @@ export type Database = {
         Args: { p_installation_id: string };
         Returns: void;
       };
+      dismiss_my_notification: { Args: { p_id: string }; Returns: boolean };
       list_my_notifications: { Args: Record<string, never>; Returns: unknown };
       mark_my_notifications_read: {
         Args: { p_ids?: string[] | null };
@@ -240,6 +278,10 @@ export type Database = {
       respond_to_my_facility_invitation: {
         Args: { p_request_id: string; p_accept: boolean };
         Returns: unknown;
+      };
+      submit_my_clinic_operating_licence: {
+        Args: { p_storage_path: string };
+        Returns: boolean;
       };
       submit_my_doctor_degree: {
         Args: { p_degree_path: string };

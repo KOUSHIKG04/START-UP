@@ -1,9 +1,10 @@
 import { Button } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { Input, useToastFeedback } from "@startup/mobile-ui";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
+import { router, useFocusEffect, type Href } from "expo-router";
+import { useLocationDraft } from "../../locations/locationDraft";
 import {
-  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -13,7 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import * as Location from "expo-location";
+import { useMobileSession } from "../../../services/supabase";
 import { MapPin, X } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { emptyAddress, type PatientAddress } from "./addressTypes";
@@ -32,18 +33,31 @@ export function AddressSheet({
   value,
   onClose,
   onConfirm,
+  onReopen,
 }: {
   visible: boolean;
   value: PatientAddress;
   onClose: () => void;
   onConfirm: (address: PatientAddress) => void;
+  onReopen: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { profile } = useMobileSession();
   const [address, setAddress] = useState<PatientAddress>(value);
   const [error, setError] = useState("");
   useToastFeedback({ error });
-  const [isLocating, setIsLocating] = useState(false);
   const [attemptedConfirm, setAttemptedConfirm] = useState(false);
+  const mapDraftId = useId();
+  const chosen = useLocationDraft(state => state.chosen);
+  const clearChosen = useLocationDraft(state => state.clear);
+  useFocusEffect(useCallback(() => {
+    if (!chosen || chosen.addressId !== mapDraftId) return;
+    setAddress(current => ({ ...current, line1: chosen.street || chosen.locality || current.line1,
+      line2: chosen.locality || current.line2, city: chosen.city || current.city, state: chosen.state || current.state, pincode: chosen.pincode || current.pincode,
+      latitude: chosen.latitude, longitude: chosen.longitude }));
+    clearChosen();
+    onReopen();
+  }, [chosen, mapDraftId, clearChosen, onReopen]));
 
   // Only a new confirmed address replaces the draft. Dismissing the drawer
   // must not reset partially entered fields when it is opened again.
@@ -55,42 +69,6 @@ export function AddressSheet({
     if (visible) setError("");
   }, [visible]);
 
-  async function fetchLocation() {
-    try {
-      setError("");
-      setIsLocating(true);
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== "granted") {
-        setError("Allow location access to fill in your address details.");
-        return;
-      }
-      const point = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      const [found] = await Location.reverseGeocodeAsync(point.coords);
-      if (found) {
-        setAddress((current) => ({
-          ...current,
-          building: current.building || found.name || "",
-          line1: found.street || found.district || current.line1,
-          line2:
-            found.subregion && found.subregion !== found.city
-              ? found.subregion
-              : current.line2,
-          city: found.city || current.city,
-          state: found.region || current.state,
-          pincode: found.postalCode
-            ? found.postalCode.replace(/\D/g, "").slice(0, 6)
-            : current.pincode,
-        }));
-      }
-    } catch {
-      setError("Location is unavailable. Enter the address manually.");
-    } finally {
-      setIsLocating(false);
-    }
-  }
-
   function handleConfirm() {
     setAttemptedConfirm(true);
     const trimmed: PatientAddress = {
@@ -100,6 +78,8 @@ export function AddressSheet({
       city: address.city.trim(),
       state: address.state.trim(),
       pincode: address.pincode.trim(),
+      ...(address.latitude !== undefined && address.longitude !== undefined
+        ? { latitude: address.latitude, longitude: address.longitude } : {}),
     };
 
     if (!trimmed.building) {
@@ -130,7 +110,7 @@ export function AddressSheet({
 
   function renderField(
     label: string,
-    key: keyof PatientAddress,
+    key: "building" | "line1" | "line2" | "city" | "state" | "pincode",
     placeholder: string,
     keyboardType: "default" | "number-pad" = "default",
     maxLength?: number
@@ -230,32 +210,19 @@ export function AddressSheet({
                 )}
               </View>
 
-              {/* Fetch Location Card */}
-              <Button loading={isLocating} label="Fetch current location" variant="ghost"
-                accessibilityRole="button"
-                onPress={() => void fetchLocation()}
-                style={styles.locationCard}
-              >
-                <View style={styles.iconContainer}>
-                  {isLocating ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={colors.patient.primaryDark}
-                    />
-                  ) : (
-                    <MapPin size={18} color={colors.patient.primaryDark} />
-                  )}
-                </View>
-                <View style={styles.locationTextContainer}>
-                  <Text style={styles.locationTitle}>
-                    Tap here to fetch current location
-                  </Text>
-                  <Text style={styles.locationSub}>
-                    Use device location to fill in your address details.
-                  </Text>
-                </View>
-              </Button>
-
+              <Button theme="patient" label="Choose location on map" variant="outline"
+                leftIcon={<MapPin size={18} color={colors.patient.primaryDark} />}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  onClose();
+                  clearChosen();
+                  router.push({ pathname: profile?.patient_profile_complete ? '/pick-location' : '/profile-location', params: {
+                    from: 'profile', id: mapDraftId,
+                    ...(address.latitude !== undefined && address.longitude !== undefined ? {
+                      latitude: String(address.latitude), longitude: String(address.longitude),
+                    } : {}),
+                  } } as Href);
+                }} style={[styles.locationCard, { height: PROFILE_FIELD_HEIGHT, paddingVertical: 0 }]} />
               {/* Confirm Address Button */}
               <Pressable
                 accessibilityRole="button"

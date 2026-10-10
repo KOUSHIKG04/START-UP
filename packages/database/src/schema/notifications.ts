@@ -300,6 +300,7 @@ export const notificationRead = clinzo.table("notification_read", {
   identity_id: uuid("identity_id").notNull().references((): AnyPgColumn => identity.id, { onDelete: "restrict" }),
   intent_id: uuid("intent_id").notNull().references((): AnyPgColumn => notificationIntent.id, { onDelete: "restrict" }),
   read_at: timestamp("read_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  dismissed_at: timestamp("dismissed_at", { withTimezone: true, mode: "date" }),
 }, (table) => [
   primaryKey({ columns: [table.identity_id, table.intent_id] }),
   index("notification_read_intent_id_idx").on(table.intent_id),

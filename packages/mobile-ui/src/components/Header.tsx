@@ -83,7 +83,11 @@ export function Header({
                 pressed && styles.backButtonPressed,
               ]}
             >
-              <ChevronLeft color={foregroundColor} size={30} strokeWidth={2.5} />
+              <ChevronLeft
+                color={foregroundColor}
+                size={30}
+                strokeWidth={2.5}
+              />
             </Pressable>
           ) : null}
 

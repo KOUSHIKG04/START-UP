@@ -36,7 +36,7 @@ export default function VerifyOtpScreen() {
       {Array.from({ length: 6 }, (_, index) => <View key={index} style={styles.digit}><Text style={styles.digitText}>{code[index] ?? ""}</Text></View>)}
       <Input variant="unstyled" ref={input} accessibilityLabel="Six-digit verification code" keyboardType="number-pad" textContentType="oneTimeCode" autoComplete="sms-otp" maxLength={6} value={code} onChangeText={value => { const digits = value.replace(/\D/g, "").slice(0, 6); setCode(digits); if (digits.length === 6) void verify(digits); }} style={styles.hiddenInput} />
     </Pressable>
-    <Button loading={resending} label="Resend OTP" variant="ghost" labelStyle={styles.resendText} accessibilityRole="button" accessibilityState={{ disabled: seconds > 0 || busy || resending }} disabled={seconds > 0 || busy || resending} onPress={() => void resend()} style={styles.resend}><Text style={styles.resendText}>Resend OTP {seconds > 0 ? `in 00:${String(seconds).padStart(2, "0")}` : "now"}</Text></Button>
+    <Button loading={resending} theme="doctor" label="Resend OTP" variant="ghost" labelStyle={styles.resendText} accessibilityRole="button" accessibilityState={{ disabled: seconds > 0 || busy || resending }} disabled={seconds > 0 || busy || resending} onPress={() => void resend()} style={styles.resend}><Text style={styles.resendText}>Resend OTP {seconds > 0 ? `in 00:${String(seconds).padStart(2, "0")}` : "now"}</Text></Button>
   </View></OnboardingShell>;
 }
 const styles = StyleSheet.create({
@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
   digit: { width: 40, height: 47, borderRadius: 12, borderWidth: 1, borderColor: "#BDBDBD", alignItems: "center", justifyContent: "center" },
   digitText: { fontFamily: fontFamilies.medium, fontSize: 23, color: colors.black },
   hiddenInput: { position: "absolute", width: 1, height: 1, opacity: 0 },
-  resend: { marginTop: 25, padding: 8 }, resendText: { fontFamily: fontFamilies.regular, fontSize: 14, color: colors.patient.primaryDark },
+  resend: { marginTop: 25, padding: 8 }, resendText: { fontFamily: fontFamilies.regular, fontSize: 16, lineHeight: 22, color: colors.patient.primaryDark },
   error: { marginTop: 12, color: colors.danger, textAlign: "center", fontSize: 13 },
 });

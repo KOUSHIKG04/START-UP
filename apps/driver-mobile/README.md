@@ -29,6 +29,27 @@ pnpm --filter driver-mobile typecheck
 pnpm --filter driver-mobile test
 ```
 
+## Profile address picker
+
+Personal Details and Edit Profile share the address drawer. Map selection starts
+at device GPS for new addresses, or preserves the saved pin while editing.
+Search, map panning and confirmation return a draft to the drawer; Confirm Address
+and Save persist it. Permission/lookup failures use toast feedback and allow manual
+address entry. This personal address does not replace live dispatch/tracking GPS.
+
+Android maps require a new development APK with `expo-maps` and a restricted
+`GOOGLE_MAPS_ANDROID_API_KEY` configured in the EAS development environment.
+Credentials are intentionally not configured yet. iOS uses Apple Maps.
+
+```powershell
+cd C:\startup\apps\driver-mobile
+pnpm dlx eas-cli build --platform android --profile development
+```
+
+Database support is in `20261009080829_driver_profile_map_address.sql`; it has
+been validated on the disposable project only. The rollback smoke test covers
+registration, company approval, profile editing and ownership isolation.
+
 ## Architecture
 
 The structure follows `apps/patient-mobile`: Expo Router files select and connect screens; screen implementations live outside the route tree.

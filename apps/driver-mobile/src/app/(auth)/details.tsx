@@ -43,6 +43,7 @@ export default function DetailsRoute() {
     mobile: saved?.contact_phone ?? session?.user.phone ?? "",
     dob: saved?.date_of_birth ? formatDisplayDate(saved.date_of_birth) : "",
     city: saved?.city ?? "",
+    address: saved?.home_address ?? undefined,
   };
 
   async function save(value: DriverProfile) {
@@ -75,6 +76,7 @@ export default function DetailsRoute() {
       contactPhone,
       dateOfBirth: toBirthDate(value.dob),
       city: value.city.trim(),
+      address: value.address,
       profilePhotoPath: photoPath,
       consent: true,
     });

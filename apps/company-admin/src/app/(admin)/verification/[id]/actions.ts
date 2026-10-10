@@ -52,7 +52,7 @@ export async function reviewDocument(
     documentApproved = parsed.data.decision === "approved";
     if (parsed.data.decision === "approved" && reviewedCase.subject_type === "doctor") {
       const currentDocuments = reviewedCase.documents.filter(document => document.status !== "superseded");
-      const requiredKinds = ["medical_registration", "medical_degree"];
+      const requiredKinds = ["medical_registration", "medical_degree", ...(reviewedCase.doctor?.requires_clinic_licence === true ? ["clinic_operating_licence"] : [])];
       if (requiredKinds.every(kind => currentDocuments.some(document => document.kind === kind && document.status === "approved"))
         && currentDocuments.every(document => document.status === "approved")) {
         await finalizeCompanyVerification(client, reviewedCase.id);

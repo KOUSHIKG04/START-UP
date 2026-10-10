@@ -31,7 +31,9 @@ export function DevPasswordForm({
     try {
       if (mode === "signup" && onSignUp) {
         if (password.length < 12 || password !== confirmPassword) {
-          throw new Error("Use matching passwords with at least 12 characters.");
+          throw new Error(
+            "Use matching passwords with at least 12 characters."
+          );
         }
         const signedIn = await onSignUp(email, password);
         if (!signedIn) setConfirmationNeeded(true);
@@ -47,45 +49,94 @@ export function DevPasswordForm({
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
-      <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.title, { color: theme.text }]}
+      >
         {title}
       </Text>
       <Text style={[styles.description, { color: theme.text }]}>
-        {confirmationNeeded ? "Check your email for a confirmation link, then sign in." : mode === "signup" ? "Create a development account on the disposable Supabase project." : "Development test login. Use a fixture account from the disposable Supabase project."}
+        {confirmationNeeded
+          ? "Check your email for a confirmation link, then sign in."
+          : mode === "signup"
+            ? "Create a development account on the disposable Supabase project."
+            : "Development test login. Use a fixture account from the disposable Supabase project."}
       </Text>
       {confirmationNeeded ? (
-        <Button label="Back to sign in" onPress={() => { setConfirmationNeeded(false); setMode("signin"); setPassword(""); setConfirmPassword(""); }} />
-      ) : <>
-      <Input
-        label="Test account email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoComplete="email"
-        value={email}
-        onChangeText={setEmail}
-        editable={!busy}
-      />
-      <Input
-        label="Password"
-        secureTextEntry
-        autoComplete={mode === "signup" ? "new-password" : "password"}
-        value={password}
-        onChangeText={setPassword}
-        editable={!busy}
-      />
-      {mode === "signup" ? <Input label="Confirm password" secureTextEntry autoComplete="new-password" value={confirmPassword} onChangeText={setConfirmPassword} editable={!busy} /> : null}
-      {configurationError || error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {configurationError ?? error}
-        </Text>
-      ) : null}
-      <Button loading={busy}
-        label={mode === "signup" ? "Create account" : "Sign in to test account"}
-        disabled={busy || !email.trim() || !password || !!configurationError || (mode === "signup" && !confirmPassword)}
-        onPress={() => void submit()}
-      />
-      {onSignUp ? <Button variant="ghost" label={mode === "signup" ? "Already have an account? Sign in" : "Create a test account"} disabled={busy} onPress={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(null); }} /> : null}
-      </>}
+        <Button
+          label="Back to sign in"
+          onPress={() => {
+            setConfirmationNeeded(false);
+            setMode("signin");
+            setPassword("");
+            setConfirmPassword("");
+          }}
+        />
+      ) : (
+        <>
+          <Input
+            label="Test account email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+            editable={!busy}
+          />
+          <Input
+            label="Password"
+            secureTextEntry
+            autoComplete={mode === "signup" ? "new-password" : "password"}
+            value={password}
+            onChangeText={setPassword}
+            editable={!busy}
+          />
+          {mode === "signup" ? (
+            <Input
+              label="Confirm password"
+              secureTextEntry
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              editable={!busy}
+            />
+          ) : null}
+          {configurationError || error ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {configurationError ?? error}
+            </Text>
+          ) : null}
+          <Button
+            loading={busy}
+            label={
+              mode === "signup" ? "Create account" : "Sign in to test account"
+            }
+            disabled={
+              busy ||
+              !email.trim() ||
+              !password ||
+              !!configurationError ||
+              (mode === "signup" && !confirmPassword)
+            }
+            onPress={() => void submit()}
+          />
+          {onSignUp ? (
+            <Button
+              variant="ghost"
+              label={
+                mode === "signup"
+                  ? "Already have an account? Sign in"
+                  : "Create a test account"
+              }
+              disabled={busy}
+              onPress={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setError(null);
+              }}
+            />
+          ) : null}
+        </>
+      )}
     </View>
   );
 }
@@ -93,6 +144,10 @@ export function DevPasswordForm({
 const styles = StyleSheet.create({
   screen: { flex: 1, justifyContent: "center", gap: 20, padding: 24 },
   title: { fontFamily: fontFamilies.bold, fontSize: 28 },
-  description: { fontFamily: fontFamilies.regular, fontSize: 15, lineHeight: 22 },
+  description: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 15,
+    lineHeight: 22,
+  },
   error: { color: "#B42318", fontFamily: fontFamilies.regular, fontSize: 14 },
 });

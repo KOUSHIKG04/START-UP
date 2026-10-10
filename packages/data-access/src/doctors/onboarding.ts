@@ -1,35 +1,61 @@
-import { doctorQualificationSchema } from "@startup/contracts";
+import {
+  clinicOperatingLicencePathSchema,
+  ageFromBirthDate,
+  doctorBirthDateSchema,
+  doctorContactEmailSchema,
+  doctorQualificationSchema,
+  doctorSpecialtiesSchema,
+} from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
 export type DoctorClaim = {
   ageYears: number;
+  dateOfBirth?: string;
   gender: string;
   specialty: string;
+  specialties?: string[];
   qualification: string;
   language: string;
   facilityName: string;
   facilityId?: string;
-  email?: string;
+  email: string;
   phone: string;
   licensePath: string;
   degreePath: string;
+  clinicLicensePath?: string;
 };
 
 export async function submitMyDoctorClaim(
   client: AppSupabaseClient,
   claim: DoctorClaim
 ) {
+  const birthDate =
+    claim.dateOfBirth === undefined
+      ? undefined
+      : doctorBirthDateSchema.parse(claim.dateOfBirth);
+  const specialties = doctorSpecialtiesSchema.parse(
+    claim.specialties ?? [claim.specialty]
+  );
   const p_claim = {
-    age_years: claim.ageYears,
+    age_years: birthDate ? ageFromBirthDate(birthDate)! : claim.ageYears,
+    ...(birthDate ? { birth_date: birthDate } : {}),
     gender: claim.gender,
-    specialty: claim.specialty,
+    specialty: specialties[0],
+    specialties,
     qualification: doctorQualificationSchema.parse(claim.qualification),
     language: claim.language,
     facility_name: claim.facilityName,
-    email: claim.email ?? "",
+    email: doctorContactEmailSchema.parse(claim.email),
     phone: claim.phone,
     license_path: claim.licensePath,
     degree_path: claim.degreePath,
+    ...(claim.clinicLicensePath
+      ? {
+          clinic_license_path: clinicOperatingLicencePathSchema.parse(
+            claim.clinicLicensePath
+          ),
+        }
+      : {}),
   };
 
   const { error } = claim.facilityId
@@ -72,4 +98,14 @@ export async function hasMyDoctorClaim(client: AppSupabaseClient) {
   if (error) throw error;
 
   return data;
+}
+
+export async function submitMyClinicOperatingLicence(
+  client: AppSupabaseClient,
+  storagePath: string
+) {
+  const { error } = await client.rpc("submit_my_clinic_operating_licence", {
+    p_storage_path: clinicOperatingLicencePathSchema.parse(storagePath),
+  });
+  if (error) throw error;
 }

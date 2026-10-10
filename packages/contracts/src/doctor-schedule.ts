@@ -57,3 +57,5 @@ export const doctorDailySlotUsageSchema = z.object({
   online: z.number().int().nonnegative(),
   home: z.number().int().nonnegative(),
 });
+
+export type DoctorSchedulePreferences = z.infer<typeof doctorSchedulePreferencesSchema>;

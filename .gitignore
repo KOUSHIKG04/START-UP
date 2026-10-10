@@ -37,6 +37,8 @@ packages/database/tests/*
 !packages/database/tests/profile-photos.cli-smoke.sql
 !packages/database/tests/onboarding-sos.cli-smoke.sql
 !packages/database/tests/patient-contact-photo.cli-smoke.sql
+!packages/database/tests/driver-address.cli-smoke.sql
+!packages/database/tests/solo-clinic-licence.cli-smoke.sql
 
 # Scripts
 scripts/
@@ -59,3 +61,20 @@ yarn-error.log*
 # Miscellaneous
 .DS_Store
 *.pem
+
+!packages/database/tests/doctor-profile-contacts.cli-smoke.sql
+
+!packages/database/tests/doctor-practice-settings.cli-smoke.sql
+
+!packages/database/tests/facility-schedule-management.cli-smoke.sql
+
+!apps/facility-portal/src/features/doctors/tests/
+apps/facility-portal/src/features/doctors/tests/*
+!apps/facility-portal/src/features/doctors/tests/scheduleEditor.test.mjs
+
+!packages/database/tests/doctor-personal-locations.cli-smoke.sql
+
+!packages/database/tests/notifications.cli-smoke.sql
+
+!packages/database/tests/driver-saved-locations.cli-smoke.sql
+!packages/database/tests/active-consultation-chat.cli-smoke.sql

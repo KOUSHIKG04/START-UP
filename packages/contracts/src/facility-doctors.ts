@@ -4,6 +4,7 @@ import { uuidSchema } from "./validation";
 export const facilityDoctorRosterItemSchema = z.object({
   id: uuidSchema,
   practice_id: uuidSchema,
+  booking_timezone: z.string().optional(),
   name: z.string(),
   clinzo_id: z.string(),
   specialization: z.string(),
@@ -13,4 +14,6 @@ export const facilityDoctorRosterItemSchema = z.object({
   on_leave: z.boolean(),
 });
 
-export type FacilityDoctorRosterItem = z.infer<typeof facilityDoctorRosterItemSchema>;
+export type FacilityDoctorRosterItem = z.infer<
+  typeof facilityDoctorRosterItemSchema
+>;

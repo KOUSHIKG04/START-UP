@@ -7,6 +7,8 @@ export const inAppNotificationSchema = z.object({
   template_key: z.string(),
   safe_parameters: z.record(z.string(), z.unknown()),
   is_read: z.boolean(),
+  is_important: z.boolean().default(false),
+  is_emergency: z.boolean().default(false),
 });
 
 export type InAppNotification = z.infer<typeof inAppNotificationSchema>;

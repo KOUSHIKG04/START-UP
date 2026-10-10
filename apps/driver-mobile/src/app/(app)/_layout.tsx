@@ -10,6 +10,8 @@ export default function GroupLayout() {
         animation: "none",
         contentStyle: { backgroundColor: "#FFFFFF" },
       }}
-    />
+    >
+      <Stack.Screen name="select-location" options={{ animation: "slide_from_right", statusBarStyle: "light" }} />
+    </Stack>
   );
 }

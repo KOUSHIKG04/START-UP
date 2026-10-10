@@ -5,6 +5,8 @@ export type PatientAddress = {
   city: string;
   state: string;
   pincode: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export const emptyAddress: PatientAddress = {

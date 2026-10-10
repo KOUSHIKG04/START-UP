@@ -5,7 +5,6 @@ export const phoneSchema = z
   .string()
   .regex(/^\+[1-9][0-9]{7,14}$/, "Use an international phone number");
 
-
 export const otpSchema = z
   .string()
   .regex(/^\d{4,8}$/, "Enter the code from your sign-in message");
@@ -28,14 +27,12 @@ const doctorDetails = z
   })
   .strict();
 
-
 export const doctorOnboardingSchema = z
   .object({
     kind: z.literal("doctor"),
     details: doctorDetails,
   })
   .strict();
-
 
 export const soloDoctorOnboardingSchema = z
   .object({
@@ -57,14 +54,12 @@ const driverDetails = z
   })
   .strict();
 
-  
 export const independentDriverOnboardingSchema = z
   .object({
     kind: z.literal("driver_independent"),
     details: driverDetails,
   })
   .strict();
-
 
 export const invitedDriverOnboardingSchema = z
   .object({
@@ -82,7 +77,6 @@ export const onboardingSchema = z.discriminatedUnion("kind", [
   independentDriverOnboardingSchema,
   invitedDriverOnboardingSchema,
 ]);
-
 
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
@@ -119,6 +113,5 @@ export const myProfileSchema = z.object({
     })
   ),
 });
-
 
 export type MyProfile = z.infer<typeof myProfileSchema>;

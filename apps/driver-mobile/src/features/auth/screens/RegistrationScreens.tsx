@@ -2,6 +2,7 @@ import { useToastFeedback } from "@startup/mobile-ui";
 import React, { useState, type ReactNode } from "react";
 import {
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -30,19 +31,23 @@ import {
   Headphones,
   HeartPulse,
   IdCard,
+  MapPin,
   Shield,
   Wallet,
   type LucideIcon,
 } from "lucide-react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
-import { parseDisplayDate } from "@startup/contracts";
+import { parseDisplayDate, driverAddressSchema } from "@startup/contracts";
+import { AddressSheet } from "./DriverAddressSheet";
+import { emptyAddress, type PatientAddress } from "./addressTypes";
 
 export type DriverProfile = {
   name: string;
   mobile: string;
   dob: string;
   city: string;
+  address?: PatientAddress;
   photo?: string;
   photoMimeType?: "image/jpeg" | "image/png";
 };
@@ -195,6 +200,7 @@ export function DetailsScreen({
   useToastFeedback({ error });
   const [picking, setPicking] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
   const change = (key: keyof DriverProfile, value: string) =>
     setForm((old) => ({ ...old, [key]: value }));
   const pickPhoto = async () => {
@@ -221,6 +227,8 @@ export function DetailsScreen({
     }
   };
   const save = async () => {
+    if (!driverAddressSchema.safeParse(form.address).success)
+      return setError("Add and confirm your address before continuing.");
     if (!form.name.trim() || !form.city.trim() || !form.dob.trim())
       return setError("Enter your full name, date of birth and city.");
     if (
@@ -300,11 +308,21 @@ export function DetailsScreen({
           <Input
             label="City"
             value={form.city}
+            editable={!form.address}
             onChangeText={(v) => change("city", v)}
             placeholder="City, State"
             containerStyle={s.inputContainer}
             style={s.input}
           />
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontFamily: fontFamilies.medium, fontSize: 14, color: "#172B34" }}>Address</Text>
+            <Button theme="driver" variant="outline"
+              style={{ height: 54, backgroundColor: "#FFFFFF", borderColor: "#D1D1D1", borderRadius: 12 }}
+              labelStyle={{ flexShrink: 1 }}
+              label={form.address ? [form.address.building, form.address.line1, form.address.city].filter(Boolean).join(", ") : "Add address"}
+              leftIcon={<MapPin size={18} color={teal} />}
+              onPress={() => { Keyboard.dismiss(); setAddressOpen(true); }} />
+          </View>
         </View>
         <View style={s.bottomForm}>
           <Pressable
@@ -328,6 +346,12 @@ export function DetailsScreen({
           />
         </View>
       </ScrollView>
+      <AddressSheet visible={addressOpen} value={form.address ?? emptyAddress}
+        onClose={() => setAddressOpen(false)} onReopen={() => setAddressOpen(true)}
+        onConfirm={address => {
+          setForm(current => ({ ...current, address, city: address.city }));
+          setAddressOpen(false);
+        }} />
     </Frame>
   );
 }

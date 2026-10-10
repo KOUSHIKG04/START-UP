@@ -76,3 +76,31 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Facility-managed doctor schedules
+
+An owner, organization admin, or facility admin can open **Doctor Schedules →
+Manage doctor schedule** for a verified doctor with an active accepted association.
+Receptionists do not have permission to edit scheduling preferences. The editor
+uses the existing doctor schedule RPCs, per-practice row versions, and atomic slot
+publisher. A doctor can still manage their own schedule in the Doctor App.
+Association requests do not require re-uploading approved doctor or facility licences.
+
+Manual cross-app check on disposable project `enjafragbcrrgaclwopd`:
+
+1. Accept the verified doctor's association in this facility.
+2. Open the doctor's schedule; save working days/hours, fees, separate service
+   durations and daily clinic/online limits.
+3. Enter a future date in DD-MM-YYYY format matching a working day; choose a
+   service and publishing window. Select the time pills and publish.
+4. In Doctor App, select the same practice and refresh Manage Schedule. Confirm
+   the settings and published sessions match.
+5. In Patient App, open that doctor/practice and consultation type. Select the
+   published date and confirm the exact available times and consultation fee.
+6. Edit the settings in Doctor App and refresh this portal. Existing booked
+   sessions retain their original duration/fee; new slots use the saved settings.
+7. Verify another facility cannot edit this practice; stale edits require refresh.
+
+Database regression tests use rollback-only fixtures:
+`packages/database/tests/facility-schedule-management.cli-smoke.sql` and
+`packages/database/tests/doctor-schedule.cli-smoke.sql`.

@@ -34,7 +34,7 @@ export function facilitySchedule(doctors: FacilityDoctorRosterItem[], sessions: 
   }
   const assignments = future.map(({ practiceId, session }) => {
     const doctor = byPractice.get(practiceId)!;
-    return { id: session.id, name: doctor.name, department: doctor.specialization || "Not specified",
+    return { id: session.id, practiceId, name: doctor.name, department: doctor.specialization || "Not specified",
       shiftTime: `${clock(new Date(session.starts_at), session.timezone)} – ${clock(new Date(session.ends_at), session.timezone)}`,
       status: session.service_mode === "online" ? "On Call" as const : "On Duty" as const,
       contact: doctor.phone };

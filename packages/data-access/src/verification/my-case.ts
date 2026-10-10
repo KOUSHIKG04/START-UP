@@ -2,6 +2,7 @@ import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
 export type MyVerificationCase = {
   id: string;
+  requires_clinic_licence?: boolean;
   status: "pending" | "under_review" | "needs_resubmission" | "verified";
   documents: Array<{ kind: string; status: string; rejection_reason: string | null; version: number }>;
 };

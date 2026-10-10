@@ -35,7 +35,7 @@ export const ui = StyleSheet.create({
     color: palette.header,
   },
   header: {
-    backgroundColor: palette.chart,
+    backgroundColor: palette.primary,
     paddingHorizontal: 16,
     paddingBottom: 16,
     minHeight: 96,

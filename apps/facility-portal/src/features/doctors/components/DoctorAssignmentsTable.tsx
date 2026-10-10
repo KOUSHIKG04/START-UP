@@ -1,10 +1,11 @@
+import Link from "next/link";
 import * as React from "react";
 import {
   Avatar,
   AvatarFallback,
 } from "@startup/web-ui/components/ui/avatar";
 
-type Assignment = { id: string; name: string; department: string; shiftTime: string; status: "On Duty" | "On Call" | "In Surgery"; contact: string };
+type Assignment = { id: string; practiceId: string; name: string; department: string; shiftTime: string; status: "On Duty" | "On Call" | "In Surgery"; contact: string };
 
 export function DoctorAssignmentsTable({ assignments }: { assignments: Assignment[] }) {
   return (
@@ -84,7 +85,7 @@ export function DoctorAssignmentsTable({ assignments }: { assignments: Assignmen
 
                 {/* Action */}
                 <td className="py-3.5 px-3 text-right">
-                  <span className="text-[13px] text-[#64748b]">Managed in Doctor App</span>
+                  <Link href={`/doctor-schedules/${doc.practiceId}`} className="text-[13px] font-medium text-[#00877B] hover:underline">Manage schedule</Link>
                 </td>
               </tr>
             ))}

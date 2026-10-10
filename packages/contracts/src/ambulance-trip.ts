@@ -2,7 +2,12 @@ import { z } from "zod";
 import { uuidSchema } from "./validation";
 
 export const driverTripStatusSchema = z.enum([
-  "heading_to_pickup", "arrived_at_pickup", "in_progress", "arrived_at_destination", "completed", "cancelled",
+  "heading_to_pickup",
+  "arrived_at_pickup",
+  "in_progress",
+  "arrived_at_destination",
+  "completed",
+  "cancelled",
 ]);
 
 export const myDriverTripSchema = z.object({
@@ -27,17 +32,23 @@ export const myDriverTripSchema = z.object({
   destination_longitude: z.number().nullable(),
 });
 
-export const transitionDriverTripSchema = z.object({
-  tripId: uuidSchema,
-  expectedVersion: z.coerce.number().int().positive().safe(),
-  action: z.enum(["arrive_pickup", "start", "arrive_destination"]),
-}).strict();
+export const transitionDriverTripSchema = z
+  .object({
+    tripId: uuidSchema,
+    expectedVersion: z.coerce.number().int().positive().safe(),
+    action: z.enum(["arrive_pickup", "start", "arrive_destination"]),
+  })
+  .strict();
 
-export const completeDriverTripSchema = z.object({
-  tripId: uuidSchema,
-  patientPin: z.string().regex(/^[0-9]{4}$/),
-}).strict();
+export const completeDriverTripSchema = z
+  .object({
+    tripId: uuidSchema,
+    patientPin: z.string().regex(/^[0-9]{4}$/),
+  })
+  .strict();
 
 export type MyDriverTrip = z.infer<typeof myDriverTripSchema>;
-export type TransitionDriverTripInput = z.infer<typeof transitionDriverTripSchema>;
+export type TransitionDriverTripInput = z.infer<
+  typeof transitionDriverTripSchema
+>;
 export type CompleteDriverTripInput = z.infer<typeof completeDriverTripSchema>;

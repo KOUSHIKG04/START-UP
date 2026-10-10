@@ -1,16 +1,17 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react-native";
+import { Calendar } from "lucide-react-native";
+import { fontFamilies } from "@startup/design-tokens";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMyPracticeAppointments, transitionClinicAppointment } from "@startup/data-access";
 import type { ClinicAppointment, ClinicTransitionInput } from "@startup/contracts";
 import type { VisitMode } from "../../../types/doctor";
 import { modeLabels } from "../../../data/demo";
 import { PatientCard } from "../../patients/components/PatientCard";
-import { Button, Input, Loader, useToast } from "@startup/mobile-ui";
-import { Choice, DoctorScreen, Heading, IconButton, Label, Panel } from "../../../components/DoctorScreen";
+import { Button, Chip, Dropdown, FadedScrollView, Input, Loader, useToast } from "@startup/mobile-ui";
+import { DoctorScreen, Heading, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { supabase } from "../../../services/supabase";
 
@@ -36,9 +37,9 @@ const DayPill = memo(function DayPill({
   const handlePress = () => onPress(day.key);
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="radio"
       accessibilityLabel={`${day.day} ${day.month}`}
-      accessibilityState={{ selected }}
+      accessibilityState={{ checked: selected }}
       onPress={handlePress}
       style={[styles.dayPill, selected && styles.dayPillSelected]}
     >
@@ -52,7 +53,9 @@ export function AppointmentsScreen() {
   const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
   const openedFromHome = useRef<string | null>(null);
   const [date, setDate] = useState(() => dayKey(new Date()));
-  const [week, setWeek] = useState(0);
+  const [month, setMonth] = useState(() => dayKey(new Date()).slice(0, 7));
+  const datesRef = useRef<ScrollView>(null);
+  const pendingScrollDate = useRef<string | null>(date);
   const [filter, setFilter] = useState<"all" | VisitMode>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -69,7 +72,10 @@ export function AppointmentsScreen() {
     const selected = appointments.data.find(item => item.id === appointmentId);
     if (!selected) return;
     openedFromHome.current = appointmentId;
-    setDate(dayKey(new Date(selected.starts_at)));
+    const selectedDay = dayKey(new Date(selected.starts_at));
+    pendingScrollDate.current = selectedDay;
+    setDate(selectedDay);
+    setMonth(selectedDay.slice(0, 7));
     setFilter("all");
     setExpandedId(selected.id);
   }, [appointmentId, appointments.data]);
@@ -83,12 +89,25 @@ export function AppointmentsScreen() {
     onSuccess: (_result, { action }) => { void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); const feedback = action === "approve" ? "Appointment confirmed." : "Appointment updated."; showToast({ title: feedback, type: "success" }); void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }); },
     onError: () => { const feedback = "Could not update the appointment. Refresh and check its current status."; showToast({ title: "Update failed", message: feedback, type: "error" }); },
   });
+  const monthOptions = useMemo(() => {
+    const values = new Set<string>([month]);
+    const today = new Date();
+    for (let offset = -12; offset <= 12; offset++) {
+      values.add(dayKey(new Date(today.getFullYear(), today.getMonth() + offset, 1)).slice(0, 7));
+    }
+    for (const item of appointments.data ?? []) {
+      values.add(dayKey(new Date(item.starts_at)).slice(0, 7));
+    }
+    return [...values].sort().map(value => {
+      const [year, monthNumber] = value.split("-").map(Number);
+      return { value, label: new Date(year, monthNumber - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" }) };
+    });
+  }, [appointments.data, month]);
   const days = useMemo(() => {
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + week * 7);
-    return Array.from({ length: 7 }, (_, index) => {
-      const value = new Date(startOfWeek);
-      value.setDate(value.getDate() + index);
+    const [year, monthNumber] = month.split("-").map(Number);
+    const count = new Date(year, monthNumber, 0).getDate();
+    return Array.from({ length: count }, (_, index) => {
+      const value = new Date(year, monthNumber - 1, index + 1);
       return {
         key: dayKey(value),
         day: value.getDate(),
@@ -96,40 +115,74 @@ export function AppointmentsScreen() {
         month: value.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
       };
     });
-  }, [week]);
+  }, [month]);
+  const scrollToSelectedDate = useCallback(() => {
+    const target = pendingScrollDate.current;
+    if (!target || !datesRef.current) return;
+    const index = days.findIndex(day => day.key === target);
+    if (index < 0) return;
+    datesRef.current.scrollTo({ x: Math.max(0, index * 62 - 110), animated: false });
+    pendingScrollDate.current = null;
+  }, [days]);
+  useEffect(() => {
+    if (!pendingScrollDate.current) return;
+    const frame = requestAnimationFrame(scrollToSelectedDate);
+    return () => cancelAnimationFrame(frame);
+  }, [scrollToSelectedDate, appointmentId, appointments.data]);
+  const selectDate = useCallback((value: string) => {
+    pendingScrollDate.current = null;
+    setDate(value);
+  }, []);
+  const selectMonth = (value: string) => {
+    if (value === month) return;
+    setMonth(value);
+    const today = dayKey(new Date());
+    const selectedDay = value === today.slice(0, 7) ? today : `${value}-01`;
+    pendingScrollDate.current = selectedDay;
+    setDate(selectedDay);
+  };
   const visible = appointments.data?.filter((item) => dayKey(new Date(item.starts_at)) === date && (filter === "all" || filter === item.visit_mode)) ?? [];
   const act = (item: ClinicAppointment, action: Action) => transition.mutate({ item, action });
 
-  const renderDay = useCallback(
-    ({ item }: { item: DayItem }) => (
-      <DayPill
-        day={item}
-        selected={date === item.key}
-        onPress={setDate}
-      />
-    ),
-    [date],
-  );
-
   return <DoctorScreen title="Appointments">
-    <View style={ui.between}>
-      <Heading style={{ fontSize: 18 }}>{days[0].month}</Heading>
-      <View style={ui.row}>
-        <IconButton label="Previous week" onPress={() => { setWeek((value) => value - 1); setDate(""); }}><ChevronLeft size={20} color={palette.primary} /></IconButton>
-        <IconButton label="Today" onPress={() => { setWeek(0); setDate(dayKey(new Date())); }}><Calendar size={20} color={palette.primary} /></IconButton>
-        <IconButton label="Next week" onPress={() => { setWeek((value) => value + 1); setDate(""); }}><ChevronRight size={20} color={palette.primary} /></IconButton>
-      </View>
+    <View style={styles.monthRow}>
+      <Heading style={styles.dateHeading}>Select date</Heading>
+      <Dropdown
+        theme="doctor"
+        leftIcon={<Calendar size={18} color={palette.primary} />}
+        accessibilityLabel="Select appointment month"
+        options={monthOptions}
+        value={month}
+        onValueChange={selectMonth}
+        containerStyle={styles.monthDropdown}
+        triggerStyle={styles.monthTrigger}
+        valueStyle={styles.monthLabel}
+      />
     </View>
-    <FlatList
-      horizontal
-      data={days}
-      keyExtractor={(day) => day.key}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.daysList}
-      renderItem={renderDay}
-    />
-    <View style={[ui.wrap, { justifyContent: "center", gap: 6 }]}>
-      {(["all", "clinic", "online", "home"] as const).map((mode) => <Choice key={mode} label={mode === "all" ? "All" : modeLabels[mode]} selected={filter === mode} onPress={() => setFilter(mode)} />)}
+    <View style={styles.dateControls}>
+      <FadedScrollView
+        edgeColor={palette.white}
+        containerStyle={styles.dateStrip}
+        style={styles.horizontalScroll}
+        ref={datesRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.daysList}
+        onContentSizeChange={scrollToSelectedDate}
+      >
+        {days.map(day => <DayPill key={day.key} day={day} selected={date === day.key} onPress={selectDate} />)}
+      </FadedScrollView>
+      <FadedScrollView horizontal edgeColor={palette.white} containerStyle={styles.filterStrip} style={styles.horizontalScroll} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+        {(["all", "clinic", "online", "home"] as const).map(mode => <Chip
+          key={mode}
+          theme="doctor"
+          variant="radio"
+          style={styles.filterPill}
+          label={mode === "all" ? "All" : modeLabels[mode]}
+          selected={filter === mode}
+          onPress={() => setFilter(mode)}
+        />)}
+      </FadedScrollView>
     </View>
     {appointments.isLoading ? <Loader theme="doctor" style={{ minHeight: 88 }} /> : null}
     {appointments.isError ? <Panel><Label style={ui.error}>Could not load appointments. Reopen this tab to retry.</Label></Panel> : null}
@@ -155,32 +208,56 @@ export function AppointmentsScreen() {
       {item.visit_mode === "clinic" && item.status === "in_consultation" && item.can_consult ? <Button theme="doctor" label="Consultation details" onPress={() => router.push({ pathname: "/clinical-notes", params: { appointmentId: item.id, patientId: item.patient_id, mode: "clinic" } })} /> : null}
       {item.visit_mode === "online" && item.status === "in_consultation" && item.can_consult ? <Button theme="doctor" label="Clinical notes" onPress={() => router.push({ pathname: "/clinical-notes", params: { appointmentId: item.id, patientId: item.patient_id, mode: "online" } })} /> : null}
     </Panel> : null}</View>)}
-    {date && visible.length === 0 && !appointments.isLoading && !appointments.isError ? <Panel><Heading>No appointments</Heading><Label muted>{filter === "home" ? "This visit type is not connected to live scheduling yet." : `No ${filter === "online" ? "online" : "clinic"} appointments match this day.`}</Label></Panel> : null}
+    {date && visible.length === 0 && !appointments.isLoading && !appointments.isError ? <View style={styles.emptyState}>
+      <Heading style={styles.emptyText}>No appointments</Heading>
+      <Label muted style={styles.emptyText}>{filter === "all" ? "No appointments for this date." : `No ${modeLabels[filter].toLowerCase()} appointments for this date.`}</Label>
+    </View> : null}
     {!date ? <Panel><Label muted>Choose a day to see appointments.</Label></Panel> : null}
   </DoctorScreen>;
 }
 
 const styles = StyleSheet.create({
+  monthRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 },
+  dateHeading: { fontSize: 18, fontFamily: fontFamilies.medium },
+  monthDropdown: { width: 180, maxWidth: "75%" },
+  dateControls: { gap: 24 },
+  emptyState: { flex: 1, minHeight: 180, alignItems: "center", justifyContent: "center", gap: 8 },
+  emptyText: { textAlign: "center" },
+  dateStrip: { height: 72, flexGrow: 0, flexShrink: 0 },
+  filterStrip: { height: 48, flexGrow: 0, flexShrink: 0 },
+  horizontalScroll: { flexGrow: 0 },
+  filterPill: { alignSelf: "center" },
+  monthTrigger: { minHeight: 44, height: 44, paddingHorizontal: 10 },
+  monthLabel: { fontSize: 13, fontFamily: fontFamilies.semibold },
+  filters: { gap: 8, paddingVertical: 4, alignItems: "center" },
   daysList: {
+    alignItems: "center",
     gap: 8,
+    paddingVertical: 4,
   },
   dayPill: {
-    width: 46,
+    width: 54,
     height: 64,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F0F2F5",
+    backgroundColor: palette.white,
+    borderWidth: 1,
+    borderColor: "#D2D2D2",
+    gap: 2,
   },
   dayPillSelected: {
     backgroundColor: palette.dark,
+    borderColor: palette.dark,
   },
   dayText: {
-    fontSize: 19,
+    fontSize: 17,
+    lineHeight: 22,
     color: palette.text,
   },
   dayTextSelected: {
-    fontSize: 19,
+    fontSize: 17,
+    lineHeight: 22,
     color: "white",
   },
   dayLabel: {

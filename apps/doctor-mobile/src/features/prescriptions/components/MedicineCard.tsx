@@ -40,7 +40,6 @@ export function MedicineCard({
               disabled={readOnly}
               label={timing}
               labelStyle={{
-                fontSize: 11,
                 color:
                   medicine.timing === timing ? palette.dark : palette.muted,
                 textDecorationLine:

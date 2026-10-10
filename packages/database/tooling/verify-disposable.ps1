@@ -44,21 +44,28 @@ if ($UseCli) {
     & $supabaseCli db push --project-ref $testRef --skip-vault --yes
     if ($LASTEXITCODE -ne 0) { throw "Disposable migration push failed. No tests were run." }
     $smokeTests = @(
+      @{ Name = "Facility schedule management"; File = "facility-schedule-management.cli-smoke.sql"; Result = "facility_schedule_management_smoke_passed" },
+      @{ Name = "Doctor practice settings"; File = "doctor-practice-settings.cli-smoke.sql"; Result = "doctor_practice_settings_smoke_passed" },
+      @{ Name = "Doctor profile contacts"; File = "doctor-profile-contacts.cli-smoke.sql"; Result = "doctor_profile_contacts_smoke_passed" },
       @{ Name = "Clinic"; File = "clinic.cli-smoke.sql"; Result = "clinic_smoke_passed" },
       @{ Name = "Inventory"; File = "inventory.cli-smoke.sql"; Result = "inventory_smoke_passed" },
       @{ Name = "Ambulance"; File = "ambulance.cli-smoke.sql"; Result = "ambulance_smoke_passed" }
       @{ Name = "Patient email"; File = "patient-email.cli-smoke.sql"; Result = "patient_email_smoke_passed" }
       @{ Name = "Patient DOB"; File = "patient-birth-date.cli-smoke.sql"; Result = "patient_birth_date_smoke_passed" }
+      @{ Name = "Doctor DOB"; File = "doctor-birth-date.cli-smoke.sql"; Result = "doctor_birth_date_smoke_passed" }
+      @{ Name = "Doctor multiple specialties"; File = "doctor-multiple-specialties.cli-smoke.sql"; Result = "doctor_multiple_specialties_smoke_passed" }
       @{ Name = "Patient contact and family photo"; File = "patient-contact-photo.cli-smoke.sql"; Result = "patient_contact_photo_smoke_passed" }
       @{ Name = "Patient and doctor onboarding"; File = "onboarding.cli-smoke.sql"; Result = "onboarding_smoke_passed" }
       @{ Name = "Mobile email and driver"; File = "mobile-email-driver.cli-smoke.sql"; Result = "mobile_email_driver_smoke_passed" }
       @{ Name = "Doctor schedule"; File = "doctor-schedule.cli-smoke.sql"; Result = "doctor_schedule_smoke_passed" }
       @{ Name = "Driver application"; File = "driver-application.cli-smoke.sql"; Result = "driver_application_smoke_passed" }
+      @{ Name = "Driver address"; File = "driver-address.cli-smoke.sql"; Result = "driver_address_smoke_passed" }
       @{ Name = "Notifications"; File = "notifications.cli-smoke.sql"; Result = "notification_smoke_passed" }
       @{ Name = "Push delivery"; File = "push-delivery.cli-smoke.sql"; Result = "push_delivery_smoke_passed" }
       @{ Name = "Facility doctors"; File = "facility-doctors.cli-smoke.sql"; Result = "facility_doctors_smoke_passed" }
       @{ Name = "Facility association"; File = "facility-association.cli-smoke.sql"; Result = "facility_association_smoke_passed" }
       @{ Name = "Company verification"; File = "company-verification.cli-smoke.sql"; Result = "company_verification_smoke_passed" }
+      @{ Name = "Solo clinic licence"; File = "solo-clinic-licence.cli-smoke.sql"; Result = "solo_clinic_licence_smoke_passed" }
       @{ Name = "General Physician discovery"; File = "../tooling/general-physician-discovery.cli-smoke.sql"; Result = "general_physician_discovery_smoke_passed" }
       @{ Name = "Specialty discovery"; File = "../tooling/specialty-discovery.cli-smoke.sql"; Result = "specialty_discovery_smoke_passed" }
       @{ Name = "Facility bed declaration"; File = "facility-bed-declaration.cli-smoke.sql"; Result = "facility_bed_declaration_smoke_passed" }

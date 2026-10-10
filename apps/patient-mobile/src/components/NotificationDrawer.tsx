@@ -1,9 +1,10 @@
-import { ModalSurface } from "@startup/mobile-ui";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Loader, useToastFeedback, ModalSurface, Dropdown } from "@startup/mobile-ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
   Dimensions,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,10 +13,16 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMyNotifications, markMyNotificationsRead } from "@startup/data-access";
-import { formatDisplayDate } from "@startup/contracts";
+import {
+  dismissMyNotification,
+  listMyNotifications,
+  markMyNotificationsRead,
+} from "@startup/data-access";
+import { type InAppNotification, formatDisplayDate } from "@startup/contracts";
 import {
   Bell,
+  Filter,
+  Trash2,
   CalendarCheck,
   FileText,
   Pill,
@@ -34,6 +41,8 @@ export type NotificationItem = {
   time: string;
   type: "appointment" | "prescription" | "medicine" | "queue" | "general";
   read: boolean;
+  important: boolean;
+  emergency: boolean;
 };
 
 export type NotificationDrawerProps = {
@@ -44,15 +53,27 @@ export type NotificationDrawerProps = {
 function renderIcon(type: NotificationItem["type"]) {
   switch (type) {
     case "appointment":
-      return <CalendarCheck color={colors.patient.primary} size={18} strokeWidth={2} />;
+      return (
+        <CalendarCheck
+          color={colors.patient.primary}
+          size={22}
+          strokeWidth={2}
+        />
+      );
     case "prescription":
-      return <FileText color="#0284C7" size={18} strokeWidth={2} />;
+      return <FileText color="#0284C7" size={22} strokeWidth={2} />;
     case "medicine":
-      return <Pill color="#D97706" size={18} strokeWidth={2} />;
+      return <Pill color="#D97706" size={22} strokeWidth={2} />;
     case "queue":
-      return <Stethoscope color={colors.patient.primaryDark} size={18} strokeWidth={2} />;
+      return (
+        <Stethoscope
+          color={colors.patient.primaryDark}
+          size={22}
+          strokeWidth={2}
+        />
+      );
     default:
-      return <Bell color={colors.patient.accent} size={18} strokeWidth={2} />;
+      return <Bell color={colors.patient.accent} size={22} strokeWidth={2} />;
   }
 }
 
@@ -73,7 +94,8 @@ function getIconBg(type: NotificationItem["type"]) {
 
 function notificationTime(createdAt: string) {
   const elapsed = Date.now() - new Date(createdAt).getTime();
-  if (!Number.isFinite(elapsed) || elapsed < 0) return formatDisplayDate(createdAt);
+  if (!Number.isFinite(elapsed) || elapsed < 0)
+    return formatDisplayDate(createdAt);
   const minutes = Math.floor(elapsed / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
@@ -87,16 +109,44 @@ function notificationTime(createdAt: string) {
 function NotificationCard({
   item,
   onPress,
+  onDelete,
+  deleting,
 }: {
   item: NotificationItem;
   onPress: (id: string) => void;
+  onDelete: (id: string) => void;
+  deleting: boolean;
 }) {
+  const translateX = useRef(new Animated.Value(0)).current;
+  const [open, setOpen] = useState(false);
+  const openRef = useRef(false);
+  const settle = useCallback((expanded: boolean) => {
+    openRef.current = expanded; setOpen(expanded);
+    Animated.spring(translateX, { toValue: expanded ? -76 : 0, useNativeDriver: true, bounciness: 0 }).start();
+  }, [translateX]);
+  const pan = useMemo(() => PanResponder.create({
+    onMoveShouldSetPanResponder: (_, g) => !deleting && Math.abs(g.dx) > 10 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+    onPanResponderGrant: () => translateX.stopAnimation(),
+    onPanResponderMove: (_, g) => translateX.setValue(Math.max(-76, Math.min(0, (openRef.current ? -76 : 0) + g.dx))),
+    onPanResponderRelease: (_, g) => settle((openRef.current ? -76 : 0) + g.dx < -32),
+    onPanResponderTerminate: () => settle(openRef.current),
+  }), [deleting, settle, translateX]);
   const handlePress = useCallback(() => {
+    if (openRef.current) { settle(false); return; }
     onPress(item.id);
-  }, [item.id, onPress]);
+  }, [item.id, onPress, settle]);
 
   return (
+    <View style={styles.swipeRow}>
+      <Pressable accessibilityRole="button" accessibilityLabel={`Delete notification: ${item.title}`} accessibilityElementsHidden={!open} importantForAccessibility={open ? "yes" : "no-hide-descendants"} disabled={deleting} onPress={() => onDelete(item.id)} style={styles.deleteAction}>
+        {deleting ? <Loader theme="patient" /> : <Trash2 size={22} color={colors.white} />}
+      </Pressable>
+      <Animated.View {...pan.panHandlers} style={{ transform: [{ translateX }] }}>
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${item.title}. ${item.message}. ${item.read ? "Read" : "Unread"}`}
+      accessibilityActions={[{ name: "delete", label: "Delete notification" }]}
+      onAccessibilityAction={(event) => { if (event.nativeEvent.actionName === "delete" && !deleting) onDelete(item.id); }}
       style={({ pressed }) => [
         styles.notificationCard,
         !item.read ? styles.unreadCard : undefined,
@@ -129,37 +179,75 @@ function NotificationCard({
         <Text style={styles.itemMessage}>{item.message}</Text>
       </View>
     </Pressable>
+      </Animated.View>
+    </View>
   );
 }
 
-export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps) {
+export function NotificationDrawer({
+  visible,
+  onClose,
+}: NotificationDrawerProps) {
   const insets = useSafeAreaInsets();
   const [showModal, setShowModal] = useState(visible);
   const queryClient = useQueryClient();
+  const [filter, setFilter] = useState("all");
   const notificationsQuery = useQuery({
     queryKey: ["my-notifications"],
     queryFn: () => listMyNotifications(supabase!),
     enabled: Boolean(supabase && showModal),
+    refetchInterval: showModal ? 15000 : false,
   });
   const markRead = useMutation({
     mutationFn: (ids?: string[]) => markMyNotificationsRead(supabase!, ids),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["my-notifications"] }),
+    onSuccess: () =>
+      void queryClient.invalidateQueries({ queryKey: ["my-notifications"] }),
   });
-  const notifications: NotificationItem[] = (notificationsQuery.data ?? []).map((item) => {
-    const status = item.safe_parameters.status;
-    const isAppointment = item.template_key.startsWith("appointment.");
-    const isAmbulance = item.template_key.startsWith("ambulance.");
-    return {
-      id: item.id,
-      title: item.template_key === "appointment.requested" ? "Appointment requested"
-        : item.template_key === "appointment.auto_confirmed" || item.template_key === "appointment.approve" ? "Appointment confirmed"
-        : isAppointment ? "Appointment update" : isAmbulance ? "Ambulance trip update" : item.template_key.startsWith("verification.") ? "Verification update" : "Notification",
-      message: typeof status === "string" ? `Status: ${status.replaceAll("_", " ")}` : "You have a new update.",
-      time: notificationTime(item.created_at),
-      type: isAppointment ? "appointment" as const : "general" as const,
-      read: item.is_read,
-    };
+  const removeNotification = useMutation({
+    mutationFn: (id: string) => dismissMyNotification(supabase!, id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData<InAppNotification[]>(["my-notifications"], current => current?.filter(item => item.id !== id));
+      void queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
+    },
   });
+  useToastFeedback({ error: removeNotification.isError ? "Could not delete notification. Try again." : notificationsQuery.isError ? "Could not load notifications. Close and reopen to retry." : markRead.isError ? "Could not mark notifications read. Try again." : "" });
+  const notifications: NotificationItem[] = (notificationsQuery.data ?? []).map(
+    (item) => {
+      const status = item.safe_parameters.status;
+      const isAppointment = item.template_key.startsWith("appointment.");
+      const isAmbulance = item.template_key.startsWith("ambulance.");
+      return {
+        id: item.id,
+        title:
+          item.template_key === "appointment.check_in"
+            ? "Clinic check-in confirmed"
+            : item.template_key === "appointment.requested"
+            ? "Appointment requested"
+            : item.template_key === "appointment.auto_confirmed" ||
+                item.template_key === "appointment.approve"
+              ? "Appointment confirmed"
+              : isAppointment
+                ? "Appointment update"
+                : isAmbulance
+                  ? "Ambulance trip update"
+                  : item.template_key.startsWith("verification.")
+                    ? "Verification update"
+                    : "Notification",
+        message:
+          item.template_key === "appointment.check_in" && typeof item.safe_parameters.booking_code === "string"
+            ? `Booking ${item.safe_parameters.booking_code} - Patient checked in`
+            : typeof status === "string"
+            ? `Status: ${status.replaceAll("_", " ")}`
+            : "You have a new update.",
+        time: notificationTime(item.created_at),
+        type: isAppointment ? ("appointment" as const) : ("general" as const),
+        read: item.is_read,
+        important: item.is_important,
+        emergency: item.is_emergency,
+      };
+    }
+  );
+  const filteredNotifications = notifications.filter(item => filter === "all" || (filter === "unread" && !item.read) || (filter === "read" && item.read) || (filter === "important" && item.important) || (filter === "emergency" && item.emergency));
   const slideAnimRef = useRef<Animated.Value | null>(null);
   if (slideAnimRef.current === null) {
     slideAnimRef.current = new Animated.Value(SCREEN_WIDTH);
@@ -175,10 +263,11 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
   useEffect(() => {
     // No native animation views exist while the drawer is initially closed.
     if (!visible && !showModal) return;
+    // Mount the native drawer before starting its entrance animation.
+    if (visible && !showModal) { setShowModal(true); return; }
     let active = true;
     let animation: Animated.CompositeAnimation;
     if (visible) {
-      setShowModal(true);
       slideAnim.setValue(SCREEN_WIDTH);
       animation = Animated.parallel([
         Animated.timing(slideAnim, {
@@ -209,7 +298,10 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
     animation.start(({ finished }) => {
       if (active && finished && !visible) setShowModal(false);
     });
-    return () => { active = false; animation.stop(); };
+    return () => {
+      active = false;
+      animation.stop();
+    };
   }, [visible, showModal, slideAnim, fadeAnim]);
 
   const onCloseRef = useRef(onClose);
@@ -246,7 +338,8 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
   if (!showModal) return null;
 
   return (
-    <ModalSurface layout="custom"
+    <ModalSurface
+      layout="custom"
       transparent
       visible={showModal}
       animationType="none"
@@ -264,47 +357,53 @@ export function NotificationDrawer({ visible, onClose }: NotificationDrawerProps
         </Animated.View>
 
         <Animated.View
-          style={[
-            styles.drawer,
-            { transform: [{ translateX: slideAnim }] },
-          ]}
+          style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
         >
-          <Header
-            title="Notification"
-            app="patient"
-            onBackPress={onClose}
-          />
+          <Header title="Notification" app="patient" onBackPress={onClose} />
 
           <View style={styles.drawerSubheader}>
-            <Text style={styles.unreadCountText}>
+            <Text style={styles.unreadCountText} numberOfLines={1}>
               {notifications.filter((n) => !n.read).length > 0
                 ? `${notifications.filter((n) => !n.read).length} new notification${
                     notifications.filter((n) => !n.read).length > 1 ? "s" : ""
                   }`
                 : "All caught up"}
             </Text>
+            <Dropdown theme="patient" accessibilityLabel="Filter notifications" value={filter} onValueChange={setFilter}
+              options={[{ label: "All", value: "all" }, { label: "Unread", value: "unread" }, { label: "Read", value: "read" }, { label: "Important", value: "important" }, { label: "Emergency", value: "emergency" }]}
+              leftIcon={<Filter size={17} color={colors.patient.primary} />} containerStyle={styles.filterContainer} triggerStyle={styles.filterTrigger} valueStyle={styles.filterText} chevronSize={16} menuWidth={180} />
+          </View>
+          <View style={styles.hintRow}>
             {notifications.some((n) => !n.read) ? (
-              <Pressable
-                accessibilityLabel="Mark all as read"
-                accessibilityRole="button"
-                onPress={markAllAsRead}
-                hitSlop={8}
-              >
+              <Pressable accessibilityLabel="Mark all as read" accessibilityRole="button" onPress={markAllAsRead} hitSlop={8}>
                 <Text style={styles.markReadText}>Mark all read</Text>
               </Pressable>
             ) : null}
+            <Text style={styles.swipeHint}>Swipe left, then tap trash to delete.</Text>
           </View>
 
           <ScrollView
+            style={styles.list}
             contentContainerStyle={[
               styles.listContent,
+              !notificationsQuery.isLoading && !notificationsQuery.isError && filteredNotifications.length === 0 && styles.emptyList,
               { paddingBottom: Math.max(insets.bottom, 20) + 20 },
             ]}
             showsVerticalScrollIndicator={false}
           >
-            {notificationsQuery.isError ? <Text accessibilityRole="alert" style={styles.itemMessage}>Could not load notifications.</Text> : null}
-            {!notificationsQuery.isError && notifications.length === 0 ? <Text style={styles.itemMessage}>No notifications yet.</Text> : null}
-            {notifications.map((item) => <NotificationCard key={item.id} item={item} onPress={handleCardPress} />)}
+            {notificationsQuery.isLoading ? <Loader theme="patient" /> : null}
+            {!notificationsQuery.isLoading && !notificationsQuery.isError && filteredNotifications.length === 0 ? (
+              <Text style={[styles.itemMessage, styles.emptyMessage]}>{filter === "all" ? "No notifications yet." : "No notifications match this filter."}</Text>
+            ) : null}
+            {filteredNotifications.map((item) => (
+              <NotificationCard
+                key={item.id}
+                item={item}
+                onPress={handleCardPress}
+                onDelete={(id) => removeNotification.mutate(id)}
+                deleting={removeNotification.isPending && removeNotification.variables === item.id}
+              />
+            ))}
           </ScrollView>
         </Animated.View>
       </View>
@@ -324,7 +423,7 @@ const styles = StyleSheet.create({
   drawer: {
     width: "100%",
     height: "100%",
-    backgroundColor: colors.patient.background,
+    backgroundColor: colors.white,
   },
   drawerSubheader: {
     flexDirection: "row",
@@ -332,21 +431,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderDefault,
+    gap: 8,
     backgroundColor: "#F8FCFB",
   },
+  hintRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
+  swipeHint: { flex: 1, textAlign: "right", fontFamily: fontFamilies.regular, fontSize: 12, lineHeight: 18, color: colors.textSecondary },
+  filterContainer: { width: 160, flexShrink: 0 },
+  filterTrigger: { width: "100%", minHeight: 40, height: 40, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 10 },
+  filterText: { flex: 1, fontSize: 14, lineHeight: 20, includeFontPadding: false },
+  swipeRow: { borderRadius: radius.md, overflow: "hidden" },
+  deleteAction: { position: "absolute", right: 0, top: 0, bottom: 0, width: 76, alignItems: "center", justifyContent: "center", backgroundColor: colors.danger },
   unreadCountText: {
-    color: colors.patient.textSecondary,
+    flex: 1,
+    color: colors.textSecondary,
     fontFamily: fontFamilies.medium,
-    fontSize: 12,
+    fontSize: 14,
   },
   markReadText: {
     color: colors.patient.primary,
     fontFamily: fontFamilies.semibold,
     fontSize: 12,
   },
+  list: { flex: 1 },
+  emptyList: { justifyContent: "center", alignItems: "center" },
+  emptyMessage: { textAlign: "center" },
   listContent: {
+    flexGrow: 1,
     padding: 12,
     gap: 10,
     paddingBottom: 40,
@@ -355,7 +465,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    minHeight: 88,
     borderRadius: radius.md,
     backgroundColor: colors.white,
     borderWidth: 1,
@@ -367,11 +479,11 @@ const styles = StyleSheet.create({
     borderColor: "#C8E8E7",
   },
   cardPressed: {
-    opacity: 0.76,
+    backgroundColor: "#F1F4F5",
   },
   iconContainer: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -392,7 +504,8 @@ const styles = StyleSheet.create({
   itemTitle: {
     color: colors.patient.text,
     fontFamily: fontFamilies.semibold,
-    fontSize: 13,
+    fontSize: 15,
+    lineHeight: 21,
     fontWeight: "600",
     flex: 1,
   },
@@ -402,15 +515,16 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   itemTime: {
-    color: colors.patient.muted,
-    fontFamily: fontFamilies.regular,
-    fontSize: 10,
-  },
-  itemMessage: {
-    color: colors.patient.textSecondary,
+    color: colors.disabledText,
     fontFamily: fontFamilies.regular,
     fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 18,
+  },
+  itemMessage: {
+    color: colors.textSecondary,
+    fontFamily: fontFamilies.regular,
+    fontSize: 14,
+    lineHeight: 20,
   },
   unreadDot: {
     width: 7,

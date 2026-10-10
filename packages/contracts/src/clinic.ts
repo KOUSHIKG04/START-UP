@@ -24,18 +24,26 @@ export const publishClinicSessionSchema = z
   })
   .strict();
 
-export const publishDoctorServiceSessionSchema = publishClinicSessionSchema.extend({
-  mode: z.enum(["clinic", "online", "home"]),
-});
-export type PublishDoctorServiceSessionInput = z.infer<typeof publishDoctorServiceSessionSchema>;
+export const publishDoctorServiceSessionSchema =
+  publishClinicSessionSchema.extend({
+    mode: z.enum(["clinic", "online", "home"]),
+  });
+export type PublishDoctorServiceSessionInput = z.infer<
+  typeof publishDoctorServiceSessionSchema
+>;
 
 export const publishSelectedDoctorSlotsSchema = publishClinicSessionSchema
   .omit({ startsAt: true, endsAt: true })
   .extend({
     mode: z.enum(["clinic", "online", "home"]),
-    slotStarts: z.array(z.iso.datetime({ offset: true })).min(1).max(100),
+    slotStarts: z
+      .array(z.iso.datetime({ offset: true }))
+      .min(1)
+      .max(100),
   });
-export type PublishSelectedDoctorSlotsInput = z.infer<typeof publishSelectedDoctorSlotsSchema>;
+export type PublishSelectedDoctorSlotsInput = z.infer<
+  typeof publishSelectedDoctorSlotsSchema
+>;
 
 export const clinicTransitionSchema = z
   .object({
@@ -91,11 +99,13 @@ export const clinicSessionSchema = z.object({
   row_version: z.string(),
 });
 
-export const setClinicAutoConfirmLimitSchema = z.object({
-  sessionId: uuidSchema,
-  expectedVersion: z.coerce.number().int().positive().safe(),
-  limit: z.number().int().nonnegative(),
-}).strict();
+export const setClinicAutoConfirmLimitSchema = z
+  .object({
+    sessionId: uuidSchema,
+    expectedVersion: z.coerce.number().int().positive().safe(),
+    limit: z.number().int().nonnegative(),
+  })
+  .strict();
 
 export const clinicUnavailabilitySchema = z.object({
   id: uuidSchema,
@@ -106,17 +116,21 @@ export const clinicUnavailabilitySchema = z.object({
   row_version: z.string(),
 });
 
-export const addClinicUnavailabilitySchema = z.object({
-  practiceId: uuidSchema,
-  startsAt: z.iso.datetime({ offset: true }),
-  endsAt: z.iso.datetime({ offset: true }),
-  reason: z.string().trim().min(2).max(500),
-}).strict();
+export const addClinicUnavailabilitySchema = z
+  .object({
+    practiceId: uuidSchema,
+    startsAt: z.iso.datetime({ offset: true }),
+    endsAt: z.iso.datetime({ offset: true }),
+    reason: z.string().trim().min(2).max(500),
+  })
+  .strict();
 
-export const revokeClinicUnavailabilitySchema = z.object({
-  exceptionId: uuidSchema,
-  expectedVersion: z.coerce.number().int().positive().safe(),
-}).strict();
+export const revokeClinicUnavailabilitySchema = z
+  .object({
+    exceptionId: uuidSchema,
+    expectedVersion: z.coerce.number().int().positive().safe(),
+  })
+  .strict();
 
 export const clinicAppointmentSchema = z.object({
   id: uuidSchema,
@@ -175,7 +189,13 @@ export type ClinicTransitionInput = z.infer<typeof clinicTransitionSchema>;
 export type ClinicAppointment = z.infer<typeof clinicAppointmentSchema>;
 export type ClinicPractice = z.infer<typeof clinicPracticeSchema>;
 export type ClinicSession = z.infer<typeof clinicSessionSchema>;
-export type SetClinicAutoConfirmLimitInput = z.infer<typeof setClinicAutoConfirmLimitSchema>;
+export type SetClinicAutoConfirmLimitInput = z.infer<
+  typeof setClinicAutoConfirmLimitSchema
+>;
 export type ClinicUnavailability = z.infer<typeof clinicUnavailabilitySchema>;
-export type AddClinicUnavailabilityInput = z.infer<typeof addClinicUnavailabilitySchema>;
-export type RevokeClinicUnavailabilityInput = z.infer<typeof revokeClinicUnavailabilitySchema>;
+export type AddClinicUnavailabilityInput = z.infer<
+  typeof addClinicUnavailabilitySchema
+>;
+export type RevokeClinicUnavailabilityInput = z.infer<
+  typeof revokeClinicUnavailabilitySchema
+>;

@@ -1,3 +1,5 @@
+import { uuidSchema } from "@startup/contracts";
+import { OnlineConsultationScreen } from "./OnlineConsultationScreen";
 import { Input } from "@startup/mobile-ui";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -84,12 +86,16 @@ const homeThread: MessageItem[] = [
 const ChatHeader = memo(function ChatHeader({ mode }: { mode?: string }) {
   return (
     <Label muted style={styles.headerLabel}>
-      TODAY · {mode === "home" ? "HOME VISIT" : "ONLINE CONSULTATION"}
+      TODAY Â· {mode === "home" ? "HOME VISIT" : "ONLINE CONSULTATION"}
     </Label>
   );
 });
 
 export function ChatScreen() {
+  const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
+  return uuidSchema.safeParse(appointmentId).success ? <OnlineConsultationScreen initialChat /> : <LegacyChatScreen />;
+}
+function LegacyChatScreen() {
   const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
   const live = useOnlineVisit(appointmentId);
   const { profile } = useMobileSession();

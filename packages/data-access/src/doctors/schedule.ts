@@ -40,7 +40,6 @@ export async function saveMySchedulePreferences(
   settings: DoctorScheduleSettings,
   expectedVersion: number
 ) {
-
   const value = doctorScheduleSettingsSchema.parse(settings);
   const { data, error } = await client.rpc("save_my_schedule_preferences", {
     p_practice_id: uuidSchema.parse(practiceId),

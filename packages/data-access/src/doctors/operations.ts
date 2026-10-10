@@ -20,11 +20,18 @@ export async function updateMyDoctorProfile(
   input: UpdateDoctorProfileInput
 ) {
   const request = updateDoctorProfileSchema.parse(input);
-  const { data, error } = await client.rpc("update_my_doctor_profile", {
-    p_full_name: request.fullName,
-    p_bio: request.bio,
-    p_languages: request.languages,
-  });
+  const { data, error } = request.personalAddress
+    ? await client.rpc("save_my_doctor_profile_with_address", {
+        p_full_name: request.fullName,
+        p_bio: request.bio,
+        p_languages: request.languages,
+        p_address: request.personalAddress,
+      })
+    : await client.rpc("update_my_doctor_profile", {
+        p_full_name: request.fullName,
+        p_bio: request.bio,
+        p_languages: request.languages,
+      });
   if (error) throw error;
   return doctorProfileSchema.parse(data);
 }
@@ -47,8 +54,8 @@ export async function updateMyOwnedClinicLocation(
       longitude: location.longitude,
     },
   });
-  
+
   if (error) throw error;
-  
+
   return data;
 }

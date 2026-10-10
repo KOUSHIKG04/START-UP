@@ -28,3 +28,9 @@ export async function revokeMyExpoPushToken(client: AppSupabaseClient, installat
   const { error } = await client.rpc("revoke_my_expo_push_token", { p_installation_id: installationId });
   if (error) throw error;
 }
+
+export async function dismissMyNotification(client: AppSupabaseClient, id: string) {
+  const { data, error } = await client.rpc("dismiss_my_notification", { p_id: uuidSchema.parse(id) });
+  if (error) throw error;
+  return data;
+}

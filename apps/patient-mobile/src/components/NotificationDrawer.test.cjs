@@ -40,6 +40,7 @@ function drawerEffect(visible, mounted) {
     if (id === '@tanstack/react-query') return {
       useQueryClient: () => ({}), useQuery: () => ({ data: [] }), useMutation: () => ({}),
     };
+    if (id === '@startup/mobile-ui') return { useToastFeedback() {} };
     if (id === '@startup/design-tokens') return { colors: { patient: {}, ui: { overlay: '#00000066' } }, fontFamilies: {}, radius: {} };
     return {};
   };

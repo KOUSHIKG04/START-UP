@@ -3,5 +3,14 @@ export { default as DoctorSchedulesScreen } from "./screens/DoctorSchedulesScree
 export { AddDoctorAction } from "./components/AddDoctorAction";
 export { DoctorTable } from "./components/DoctorTable";
 export { doctorColumns } from "./components/doctorColumns";
-export { useDoctorDirectory, useDoctors, doctorApi } from "./hooks/useDoctorDirectory";
-export { facilitySchedule, type PracticeSession } from "./utils/facilitySchedule";
+export {
+  useDoctorDirectory,
+  useDoctors,
+  doctorApi,
+} from "./hooks/useDoctorDirectory";
+export {
+  facilitySchedule,
+  type PracticeSession,
+} from "./utils/facilitySchedule";
+
+export { FacilityDoctorScheduleScreen } from "./screens/FacilityDoctorScheduleScreen";

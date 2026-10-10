@@ -9,6 +9,7 @@ import { DocumentActions, FinalizeAction } from "./review-forms";
 const documentNames: Record<string, string> = {
   medical_registration: "Medical registration certificate",
   medical_degree: "Medical degree certificate",
+  clinic_operating_licence: "Clinic operating licence",
   registration_certificate: "Registration certificate",
   operating_licence: "Operating licence",
   aadhaar: "Aadhaar",
@@ -37,7 +38,7 @@ export default async function CaseDetail({
     (document) => document.status !== "superseded"
   );
   const requiredKinds = item.subject_type === "doctor"
-    ? ["medical_registration", "medical_degree"]
+    ? ["medical_registration", "medical_degree", ...(item.doctor?.requires_clinic_licence === true ? ["clinic_operating_licence"] : [])]
     : item.subject_type === "facility"
       ? ["registration_certificate", "operating_licence"]
       : ["aadhaar", "pan", "driving_licence", "vehicle_rc", "insurance", "fitness", "ambulance_image", "equipment_images"];

@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import type { PropsWithChildren, ReactNode } from "react";
 import {
   KeyboardAvoidingView,
@@ -12,8 +13,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChevronLeft } from "lucide-react-native";
-import { FadedScrollView, Button } from "@startup/mobile-ui";
+import { FadedScrollView, Button, Header } from "@startup/mobile-ui";
 import { palette, ui } from "./theme";
 
 export function Label({
@@ -73,24 +73,10 @@ export function DoctorHeader({
   title: string;
   trailing?: ReactNode;
 }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[ui.header, { paddingTop: insets.top + 16 }]}>
-      <IconButton
-        label="Go back"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/")
-        }
-      >
-        <ChevronLeft size={26} color={palette.primary} />
-      </IconButton>
-      <View style={ui.flex}>
-        <Heading style={{ fontSize: 17 }}>{title}</Heading>
-      </View>
-      {trailing}
-    </View>
-  );
+  return <><StatusBar style="light" /><Header title={title} app="doctor" rightAction={trailing}
+    onBackPress={() => router.canGoBack() ? router.back() : router.replace("/")} /></>;
 }
+
 export function DoctorScreen({
   children,
   title,

@@ -106,6 +106,7 @@ export function Button({
               numberOfLines={1}
               style={[
                 styles.label,
+                themeColors === appThemeColors.doctor ? styles.doctorLabel : undefined,
                 palette.label,
                 disabled ? styles.disabledLabel : undefined,
                 labelStyle,
@@ -185,5 +186,9 @@ const styles = StyleSheet.create({
   },
   disabledLabel: {
     color: colors.disabledText,
+  },
+  doctorLabel: {
+    fontSize: 16,
+    lineHeight: 22,
   },
 });

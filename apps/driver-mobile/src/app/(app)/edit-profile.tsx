@@ -53,6 +53,7 @@ export default function EditDriverProfile() {
     mobile: saved.contact_phone ?? "",
     dob: saved.date_of_birth ? formatDisplayDate(saved.date_of_birth) : "",
     city: saved.city ?? "",
+    address: saved.home_address ?? undefined,
   };
   async function save(value: DriverProfile) {
     if (!supabase || !session) throw new Error("Sign in to continue.");
@@ -78,6 +79,7 @@ export default function EditDriverProfile() {
         : `+91${enteredPhone}`,
       dateOfBirth: toBirthDate(value.dob),
       city: value.city.trim(),
+      address: value.address,
       profilePhotoPath: photoPath,
       consent: true,
     });
