@@ -90,6 +90,7 @@ export function Button({
           ? { minWidth: widthControlled ? undefined : idleSize.current.width, minHeight: idleSize.current.height }
           : undefined,
         callerStyle,
+        loading ? styles.loading : undefined,
       ];
       }}
     >
@@ -173,6 +174,10 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.82,
+  },
+  loading: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   disabled: {
     backgroundColor: colors.disabledBackground,

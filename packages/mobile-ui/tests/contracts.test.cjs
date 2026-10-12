@@ -324,3 +324,14 @@ test("custom ModalSurface preserves full-screen and drawer transparency", () => 
   const drawer = render(jsx(ModalSurface, { layout: "custom", visible: true, transparent: true, children: jsx("Text", { children: "Address" }) }));
   assert.equal(drawer.find(node => node.type === "Modal").props.transparent, true);
 });
+
+test("Loading indicators are centered even in left-aligned address buttons", () => {
+  const Button = component("Button");
+  const style = { flex: 1, alignItems: "flex-start", justifyContent: "flex-start", paddingHorizontal: 12 };
+  const props = loading => themed("patient", jsx(Button, { label: "Select address", loading, style })).find(n => n.type === "Pressable").props;
+  const busy = flatten(props(true).style({ pressed: false }));
+  assert.equal(busy.alignItems, "center"); assert.equal(busy.justifyContent, "center");
+  assert.equal(busy.flex, 1); assert.equal(busy.paddingHorizontal, 12);
+  const idle = flatten(props(false).style({ pressed: false }));
+  assert.equal(idle.alignItems, "flex-start"); assert.equal(idle.justifyContent, "flex-start");
+});

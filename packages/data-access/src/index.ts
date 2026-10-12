@@ -33,3 +33,5 @@ export * from "./online/operations";
 
 export * from "./doctors/locations";
 export * from "./drivers/locations";
+
+export * from "./locations/search";

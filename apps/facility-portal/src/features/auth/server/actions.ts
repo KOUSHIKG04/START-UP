@@ -49,3 +49,14 @@ export async function signOut() {
   }
   redirect("/login");
 }
+
+export async function logout(_previous: LoginState): Promise<LoginState> {
+  try {
+    const client = await createClient();
+    const { error } = await client.auth.signOut({ scope: "local" });
+    if (error) return { error: "Could not log out. Please try again." };
+  } catch {
+    return { error: "Could not log out. Check your connection and try again." };
+  }
+  redirect("/login");
+}

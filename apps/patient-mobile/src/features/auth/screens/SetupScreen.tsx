@@ -5,10 +5,11 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { TriangleAlert } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { mobileSession } from "../../../services/supabase";
+import { mobileSession, useMobileSession } from "../../../services/supabase";
 import { onboardingButtonStyles, OnboardingShell } from "../components/OnboardingShell";
 
 export default function SetupScreen() {
+  const auth = useMobileSession();
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -20,18 +21,19 @@ export default function SetupScreen() {
     setReady(false);
     Promise.resolve(mobileSession.refresh()).then(() => {
       if (!active) return;
-      const { profile, error: accountError } = mobileSession.getSnapshot();
+      const { error: accountError } = mobileSession.getSnapshot();
       if (accountError) throw new Error(accountError);
-      if (profile?.patient_id && profile.patient_profile_complete) router.replace("/(app)/(tabs)");
-      else {
-        setReady(true);
-        router.replace("/onboarding");
-      }
+      setReady(true);
     }).catch(cause => {
       if (active) setError(cause instanceof Error ? cause.message : "Could not load your account.");
     });
     return () => { active = false; };
   }, [attempt]);
+  useEffect(() => {
+    if (auth.loading || auth.error || !auth.session) return;
+    if (auth.profile?.patient_id && auth.profile.patient_profile_complete) router.replace("/(app)/(tabs)");
+    else router.replace("/onboarding");
+  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile]);
 
   function openEmergency() {
     router.push("/onboarding-sos");

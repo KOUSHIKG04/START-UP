@@ -19,6 +19,7 @@ import {
 } from "@startup/web-ui/components/ui/avatar";
 
 import { navItems } from "./utils/sidebarConstants";
+import { LogoutButton } from "@/features/auth";
 
 export function AppSidebar({ facilityName, userName, ...props }: React.ComponentProps<typeof Sidebar> & { facilityName: string; userName: string }) {
   const pathname = usePathname();
@@ -81,6 +82,11 @@ export function AppSidebar({ facilityName, userName, ...props }: React.Component
       </SidebarContent>
 
       <SidebarFooter className="p-2.5 mt-auto">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <LogoutButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
         <div className="flex items-center gap-2.5 p-2 rounded-lg bg-[#f8fafc] border border-slate-100">
           <Avatar className="size-7 rounded-full border border-slate-200">
             <AvatarFallback className="bg-[#07595d] text-white text-[11px] font-semibold">

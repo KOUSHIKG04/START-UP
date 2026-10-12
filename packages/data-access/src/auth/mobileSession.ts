@@ -35,16 +35,18 @@ export function createMobileSession(client: AppSupabaseClient | null) {
         loading: false,
         session: null,
         profile: null,
-        error: state.error,
+        error: client ? null : state.error,
       });
       return;
     }
-    // Keep the router mounted during a sign-in or manual refresh. Only the
-    // initial session restoration blocks navigation.
+    const sameAccount = state.session?.user.id === session.user.id;
+    // A failed lookup is not a missing profile. Block route decisions during
+    // first sign-in, account switches and retries; preserve settled same-user
+    // navigation during ordinary background refreshes.
     emit({
-      loading: state.loading,
+      loading: state.loading || !sameAccount || Boolean(state.error),
       session,
-      profile: state.profile,
+      profile: sameAccount ? state.profile : null,
       error: null,
     });
     try {
@@ -56,7 +58,7 @@ export function createMobileSession(client: AppSupabaseClient | null) {
         emit({
           loading: false,
           session,
-          profile: null,
+          profile: sameAccount ? state.profile : null,
           error:
             error instanceof Error
               ? error.message
@@ -69,9 +71,11 @@ export function createMobileSession(client: AppSupabaseClient | null) {
   function start() {
     if (!client || started) return;
     started = true;
+    const restorationVersion = version;
     void client.auth
       .getSession()
       .then(({ data, error }) => {
+        if (restorationVersion !== version) return;
         if (error)
           emit({
             loading: false,
@@ -82,6 +86,7 @@ export function createMobileSession(client: AppSupabaseClient | null) {
         else void refresh(data.session);
       })
       .catch((error: unknown) => {
+        if (restorationVersion !== version) return;
         emit({
           loading: false,
           session: null,
@@ -108,7 +113,18 @@ export function createMobileSession(client: AppSupabaseClient | null) {
       start();
       return () => listeners.delete(listener);
     },
-    refresh: () =>
-      client?.auth.getSession().then(({ data }) => refresh(data.session)),
+    refresh: async () => {
+      if (!client) return;
+      const sessionVersion = version;
+      try {
+        const { data, error } = await client.auth.getSession();
+        if (sessionVersion !== version) return;
+        if (error) throw error;
+        await refresh(data.session);
+      } catch (error) {
+        if (sessionVersion !== version) return;
+        emit({ ...state, loading: false, error: error instanceof Error ? error.message : "Could not restore your session." });
+      }
+    },
   };
 }

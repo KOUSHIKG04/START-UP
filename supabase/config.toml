@@ -59,3 +59,7 @@ verify_jwt = true
 [functions.ambulance-hospitals]
 enabled = true
 verify_jwt = true
+
+[functions.search-map-places]
+enabled = true
+verify_jwt = true

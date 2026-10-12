@@ -27,3 +27,5 @@ export * from "./doctor-review";
 export * from "./doctor-locations";
 export * from "./driver-locations";
 export * from "./phone";
+
+export * from "./map-places";

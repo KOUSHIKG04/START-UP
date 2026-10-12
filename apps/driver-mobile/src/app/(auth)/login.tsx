@@ -15,9 +15,9 @@ import {
 export default function LoginRoute() {
   async function finishSignIn() {
     await mobileSession.refresh();
-    router.replace(
-      mobileSession.getSnapshot().profile?.driver ? "/(app)" : "/onboarding"
-    );
+    const auth = mobileSession.getSnapshot();
+    if (auth.loading || auth.error || !auth.session) return;
+    router.replace(auth.profile?.driver ? "/(app)" : "/onboarding");
   }
 
   if (devPasswordLoginEnabled) {

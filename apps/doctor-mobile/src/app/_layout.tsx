@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -30,6 +30,15 @@ function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
 export default function RootLayout() {
   const [loaded, error] = useFonts(albertSansFonts);
   const auth = useMobileSession();
+  const routedAccount = useRef<string | null>(null);
+  useEffect(() => {
+    if (auth.loading || (!loaded && !error)) return;
+    if (!auth.session) { routedAccount.current = null; return; }
+    if (auth.error || routedAccount.current === auth.session.user.id) return;
+    routedAccount.current = auth.session.user.id;
+    if (auth.profile?.doctor?.status !== "verified") router.replace(auth.profile?.doctor ? "/review-status" : "/onboarding");
+  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile, loaded, error]);
+
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync();
   }, [loaded, error]);
@@ -72,12 +81,12 @@ export default function RootLayout() {
               }}
             >
               <Stack.Protected
-                guard={auth.profile?.doctor?.status === "verified"}
+                guard={Boolean(auth.session && auth.profile?.doctor?.status === "verified")}
               >
                 <Stack.Screen name="(app)" />
               </Stack.Protected>
               <Stack.Protected
-                guard={auth.profile?.doctor?.status !== "verified"}
+                guard={!auth.session || auth.profile?.doctor?.status !== "verified"}
               >
                 <Stack.Screen name="(auth)" />
               </Stack.Protected>

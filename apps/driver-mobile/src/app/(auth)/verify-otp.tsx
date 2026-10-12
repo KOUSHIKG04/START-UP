@@ -31,9 +31,9 @@ export default function DriverVerifyOtp() {
     try {
       await verifyPhoneOtp(supabase, phone, value);
       await mobileSession.refresh();
-      router.replace(
-        mobileSession.getSnapshot().profile?.driver ? "/(app)" : "/onboarding"
-      );
+      const auth = mobileSession.getSnapshot();
+      if (auth.loading || auth.error || !auth.session) return;
+      router.replace(auth.profile?.driver ? "/(app)" : "/onboarding");
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Incorrect code. Try again."
