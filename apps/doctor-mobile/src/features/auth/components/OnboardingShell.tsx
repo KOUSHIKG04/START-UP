@@ -53,26 +53,49 @@ export function OnboardingShell({
       const focusedInput = TextInput.State.currentlyFocusedInput();
       const keyboardY = keyboardTop.current ?? Keyboard.metrics()?.screenY;
       const viewport = scrollRef.current?.getNativeScrollRef();
-      if (!focusedInput || keyboardY === undefined || keyboardY === null || !viewport) return;
+      if (
+        !focusedInput ||
+        keyboardY === undefined ||
+        keyboardY === null ||
+        !viewport
+      )
+        return;
       viewport.measureInWindow((_x, viewportY, _width, viewportHeight) => {
         if (!mounted.current || !Keyboard.isVisible()) return;
         // Supply scroll room when Android overlays instead of resizing the window.
-        setKeyboardInset(Math.max(0, viewportY + viewportHeight - keyboardY) + 24);
-        focusedInput.measureInWindow((_inputX, inputY, _inputWidth, inputHeight) => {
-          if (!mounted.current || TextInput.State.currentlyFocusedInput() !== focusedInput || !Keyboard.isVisible()) return;
-          const delta = keyboardScrollAdjustment({ inputTop: inputY, inputHeight,
-            viewportTop: viewportY, viewportHeight, keyboardTop: keyboardY });
-          if (Math.abs(delta) > 1) {
-            scrollRef.current?.scrollTo({ y: Math.max(0, scrollOffset.current + delta), animated: true });
+        setKeyboardInset(
+          Math.max(0, viewportY + viewportHeight - keyboardY) + 24
+        );
+        focusedInput.measureInWindow(
+          (_inputX, inputY, _inputWidth, inputHeight) => {
+            if (
+              !mounted.current ||
+              TextInput.State.currentlyFocusedInput() !== focusedInput ||
+              !Keyboard.isVisible()
+            )
+              return;
+            const delta = keyboardScrollAdjustment({
+              inputTop: inputY,
+              inputHeight,
+              viewportTop: viewportY,
+              viewportHeight,
+              keyboardTop: keyboardY,
+            });
+            if (Math.abs(delta) > 1) {
+              scrollRef.current?.scrollTo({
+                y: Math.max(0, scrollOffset.current + delta),
+                animated: true,
+              });
+            }
           }
-        });
+        );
       });
     });
   }
 
   useEffect(() => {
     mounted.current = true;
-    const show = Keyboard.addListener("keyboardDidShow", event => {
+    const show = Keyboard.addListener("keyboardDidShow", (event) => {
       keyboardTop.current = event.endCoordinates.screenY;
       setKeyboardVisible(true);
       setKeyboardInset(event.endCoordinates.height + 24);
@@ -111,7 +134,10 @@ export function OnboardingShell({
     >
       <StatusBar style="dark" />
       {showArt && !(keepArtFixed && keyboardVisible) ? (
-        <View pointerEvents="none" style={[styles.topCrop, keepArtFixed && styles.profileTopCrop]}>
+        <View
+          pointerEvents="none"
+          style={[styles.topCrop, keepArtFixed && styles.profileTopCrop]}
+        >
           <Image source={city} style={styles.topImage} resizeMode="stretch" />
         </View>
       ) : null}
@@ -120,7 +146,11 @@ export function OnboardingShell({
           pointerEvents="none"
           style={[styles.bottomImage, keepArtFixed && styles.fixedProfileArt]}
         >
-          <Image source={city} style={keepArtFixed ? styles.profileBottomImage : styles.fill} resizeMode="stretch" />
+          <Image
+            source={city}
+            style={keepArtFixed ? styles.profileBottomImage : styles.fill}
+            resizeMode="stretch"
+          />
         </View>
       ) : null}
       {onBack ? (
@@ -146,37 +176,54 @@ export function OnboardingShell({
             ref={scrollRef}
             containerStyle={[
               styles.scrollBetweenArt,
-              { marginTop: keyboardVisible ? 16 : Math.max(16, 101 - (onBack ? Math.max(insets.top, 12) + 46 : 0)) },
+              {
+                marginTop: keyboardVisible
+                  ? 16
+                  : Math.max(
+                      16,
+                      101 - (onBack ? Math.max(insets.top, 12) + 46 : 0)
+                    ),
+              },
               (!bottomArt || keyboardVisible) && { marginBottom: 0 },
             ]}
-            contentContainerStyle={[styles.scroll, { paddingBottom: keyboardInset }]}
+            contentContainerStyle={[
+              styles.scroll,
+              { paddingBottom: keyboardInset },
+            ]}
             edgeColor={colors.white}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             onFocus={revealFocusedInput}
             onLayout={revealFocusedInput}
             onContentSizeChange={revealFocusedInput}
-            onScroll={event => { scrollOffset.current = event.nativeEvent.contentOffset.y; }}
+            onScroll={(event) => {
+              scrollOffset.current = event.nativeEvent.contentOffset.y;
+            }}
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
           >
             {content}
           </FadedScrollView>
         ) : (
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={[styles.scroll, { paddingBottom: keyboardInset }]}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          onFocus={revealFocusedInput}
-          onLayout={revealFocusedInput}
-          onContentSizeChange={revealFocusedInput}
-          onScroll={event => { scrollOffset.current = event.nativeEvent.contentOffset.y; }}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
-        >
-          {content}
-        </ScrollView>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={[
+              styles.scroll,
+              { paddingBottom: keyboardInset },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            onFocus={revealFocusedInput}
+            onLayout={revealFocusedInput}
+            onContentSizeChange={revealFocusedInput}
+            onScroll={(event) => {
+              scrollOffset.current = event.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+          >
+            {content}
+          </ScrollView>
         )
       ) : (
         content

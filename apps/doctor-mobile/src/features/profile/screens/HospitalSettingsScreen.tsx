@@ -35,7 +35,7 @@ export function HospitalSettingsScreen() {
     queryFn: () => getMyDoctorProfile(supabase!),
     enabled: Boolean(supabase && sessionProfile?.doctor?.id),
   });
-  
+
   const registeredFacilities = useQuery({
     queryKey: ["registered-care-facilities"],
     queryFn: () => listRegisteredCareFacilities(supabase!),
@@ -98,6 +98,7 @@ export function HospitalSettingsScreen() {
       getMyVerificationCase(supabase!, "doctor", sessionProfile!.doctor!.id),
     enabled: Boolean(supabase && sessionProfile?.doctor?.id),
   });
+  
   const [openingPractice, setOpeningPractice] = useState<string | null>(null);
   async function manageSchedule(practiceId: string) {
     if (!sessionProfile?.doctor?.id || openingPractice) return;
@@ -119,7 +120,9 @@ export function HospitalSettingsScreen() {
       setOpeningPractice(null);
     }
   }
+
   const active = profile.data?.facilities.filter((item) => item.active) ?? [];
+
   const available =
     registeredFacilities.data?.filter(
       (item) =>

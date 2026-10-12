@@ -1,4 +1,4 @@
-import { Input } from "@startup/mobile-ui";
+import { Input, Loader } from "@startup/mobile-ui";
 import {
   Pressable,
   StyleSheet,
@@ -10,11 +10,15 @@ import { fontFamilies, shadows } from "@startup/design-tokens";
 
 export function LocationFields({
   destination,
+  pickupAddress,
+  locating,
   onChange,
   onFocus,
   onCurrentLocationPress,
 }: {
   destination: string;
+  pickupAddress: string;
+  locating?: boolean;
   onChange: (value: string) => void;
   onFocus: () => void;
   onCurrentLocationPress: () => void;
@@ -28,8 +32,8 @@ export function LocationFields({
         accessibilityLabel="Current location, tap to set pickup on map"
       >
         <View style={styles.pickupDot} />
-        <Text style={styles.locationText}>Current Location</Text>
-        <MapPin color="#008877" size={19} />
+        <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{pickupAddress || "Current Location"}</Text>
+        {locating ? <Loader theme="patient" size="small" /> : <MapPin color="#008877" size={19} />}
       </Pressable>
 
       <View style={styles.locationCard}>
@@ -58,8 +62,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   locations: {
     paddingHorizontal: 16,
-    marginTop: -25,
-    zIndex: 2,
+    marginTop: 12,
     position: "relative",
     gap: 12,
   },

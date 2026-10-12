@@ -1,8 +1,8 @@
-import { useToastFeedback } from "@startup/mobile-ui";
-import { useCallback, useEffect, useState } from "react";
+import { useToast, useToastFeedback } from "@startup/mobile-ui";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
-  Alert,
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,9 +12,12 @@ import {
 import { Clock3, MapPin, ShieldCheck } from "lucide-react-native";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
+import { formatGeocodedAddress } from "../../locations/locationDisplay";
+import { router, useFocusEffect } from "expo-router";
+import { useLocationDraft } from "../../locations/locationDraft";
 import * as SecureStore from "expo-secure-store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelMyAmbulanceBooking, getMyActiveAmbulanceTracking, getMyPatientVerificationPin, listMyAmbulanceBookings, listPublicHospitals, requestAmbulanceBooking, submitMyAmbulanceReview } from "@startup/data-access";
+import { cancelMyAmbulanceBooking, getMyActiveAmbulanceTracking, getMyPatientVerificationPin, listMyAmbulanceBookings, listPublicHospitals, searchGoogleAmbulanceHospitals, requestGoogleAmbulanceBooking, requestAmbulanceBooking, submitMyAmbulanceReview } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontFamilies, gradients } from "@startup/design-tokens";
@@ -24,6 +27,7 @@ import {
   type AmbulanceFlowStep,
   type AmbulanceType,
 } from "../utils/ambulanceConstants";
+import type { GoogleHospital } from "@startup/contracts";
 import type { AmbulanceBookingScreenProps } from "../types/ambulance";
 import {
   AmbulanceCompletion,
@@ -53,8 +57,17 @@ export function AmbulanceBookingScreen({
   onComplete,
   onFullscreenChange,
 }: AmbulanceBookingScreenProps) {
+  const { showToast } = useToast();
+  const devicePickupAttempted = useRef(false);
+  const manualPickupChosen = useRef(false);
+  const [locatingPickup, setLocatingPickup] = useState(false);
+  const pickupDraftId = "ambulance-pickup";
+  const chosenPickup = useLocationDraft(state => state.chosen);
+  const clearPickup = useLocationDraft(state => state.clear);
   const [localStep, setLocalStep] = useState<"booking" | "pickup">("booking");
   const [destination, setDestination] = useState("");
+  const [externalHospital, setExternalHospital] = useState<GoogleHospital | null>(null);
+  const [hospitalSearch, setHospitalSearch] = useState("");
   const [hospitalId, setHospitalId] = useState<string | null>(null);
   const [pickup, setPickup] = useState<{ latitude: number; longitude: number } | null>(null);
   const [pickupAddress, setPickupAddress] = useState("");
@@ -68,8 +81,38 @@ export function AmbulanceBookingScreen({
   const { profile } = useMobileSession();
   const queryClient = useQueryClient();
   const hospitals = useQuery({ queryKey: ["public-hospitals", pickup], queryFn: () => listPublicHospitals(supabase!, pickup ?? undefined), enabled: Boolean(supabase) });
+  useEffect(() => {
+    const timer = setTimeout(() => setHospitalSearch(searching ? destination.trim() : ""), 600);
+    return () => clearTimeout(timer);
+  }, [searching, destination]);
+  const googleHospitals = useQuery({
+    queryKey: ["google-ambulance-hospitals", pickup, hospitalSearch],
+    queryFn: () => searchGoogleAmbulanceHospitals(supabase!, { ...pickup!, query: hospitalSearch }),
+    enabled: Boolean(supabase && profile?.patient_id && pickup), retry: false, staleTime: 60000, gcTime: 0,
+  });
+  useToastFeedback({ error: googleHospitals.isError ? "Additional hospital search is unavailable. You can still choose a Clinzo hospital." : "" });
   const bookings = useQuery({ queryKey: ["my-ambulance-bookings"], queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && profile?.patient_id), refetchInterval: 15000 });
   const activeBooking = bookings.data?.find(item => item.status === "searching" || item.status === "assigned");
+  useEffect(() => {
+    if (bookings.isLoading || activeBooking || devicePickupAttempted.current) return;
+    devicePickupAttempted.current = true;
+    let active = true;
+    let finished = false;
+    setLocatingPickup(true);
+    void (async () => {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) throw new Error("Allow location access or choose your pickup location on the map.");
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const [address] = await Location.reverseGeocodeAsync(position.coords).catch(() => []);
+      if (!active || manualPickupChosen.current) return;
+      setPickup({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+      setPickupAddress(formatGeocodedAddress(address) || `Current location (${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)})`);
+      setIdempotencyKey(Crypto.randomUUID());
+    })().catch(cause => {
+      if (active && !manualPickupChosen.current) showToast({ title: "Choose pickup location", message: cause instanceof Error ? cause.message : "Could not get your current location. Choose pickup on the map.", type: "info" });
+    }).finally(() => { if (active) { finished = true; setLocatingPickup(false); } });
+    return () => { active = false; if (!finished) devicePickupAttempted.current = false; };
+  }, [bookings.isLoading, Boolean(activeBooking)]);
   const completedBooking = currentBookingId ? bookings.data?.find(item => item.id === currentBookingId && item.status === "fulfilled") : undefined;
   const tracking = useQuery({ queryKey: ["active-ambulance-tracking", activeBooking?.id], queryFn: () => getMyActiveAmbulanceTracking(supabase!, activeBooking!.id), enabled: Boolean(supabase && activeBooking?.status === "assigned"), refetchInterval: 15000 });
   const pinVisible = activeBooking?.trip_status === "in_progress" || activeBooking?.trip_status === "arrived_at_destination";
@@ -118,27 +161,37 @@ export function AmbulanceBookingScreen({
   }, [bookingStorageKey, onComplete]);
 
   const request = useMutation({ mutationFn: async () => {
-    if (activeBooking || !supabase || !profile?.patient_id || !pickup || !hospitalId || pickupAddress.trim().length < 5) throw new Error("Confirm pickup and destination, and wait for any active request to finish.");
-    return requestAmbulanceBooking(supabase, { patientId: profile.patient_id, pickupLatitude: pickup.latitude, pickupLongitude: pickup.longitude, pickupAddress, destinationFacilityId: hospitalId, capabilityCode: type === "basic" ? "BLS" : type === "advanced" ? "ALS" : "NICU", idempotencyKey });
+    if (activeBooking || !supabase || !profile?.patient_id || !pickup || (!hospitalId && !externalHospital) || pickupAddress.trim().length < 5) throw new Error("Confirm pickup and destination, and wait for any active request to finish.");
+    if (externalHospital) return requestGoogleAmbulanceBooking(supabase, {
+      patientId: profile.patient_id, pickupLatitude: pickup.latitude, pickupLongitude: pickup.longitude,
+      pickupAddress, destinationPlaceId: externalHospital.place_id,
+      capabilityCode: type === "basic" ? "BLS" : type === "advanced" ? "ALS" : "NICU", idempotencyKey,
+    });
+    return requestAmbulanceBooking(supabase, { patientId: profile.patient_id, pickupLatitude: pickup.latitude, pickupLongitude: pickup.longitude, pickupAddress, destinationFacilityId: hospitalId!, capabilityCode: type === "basic" ? "BLS" : type === "advanced" ? "ALS" : "NICU", idempotencyKey });
   }, onSuccess: (bookingId) => { setCurrentBookingId(bookingId); if (bookingStorageKey) void SecureStore.setItemAsync(bookingStorageKey, bookingId).catch(() => undefined); setError(""); setIdempotencyKey(Crypto.randomUUID()); void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] }); }, onError: cause => setError(cause instanceof Error ? cause.message : "Could not request an ambulance.") });
   const cancel = useMutation({ mutationFn: () => {
     if (!supabase || !activeBooking || activeBooking.status !== "searching") throw new Error("This trip can no longer be cancelled here.");
     return cancelMyAmbulanceBooking(supabase, { bookingId: activeBooking.id, expectedVersion: Number(activeBooking.row_version) });
-  }, onSuccess: () => { if (bookingStorageKey) void SecureStore.deleteItemAsync(bookingStorageKey).catch(() => undefined); setCurrentBookingId(null); void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] }); setStep("booking"); }, onError: cause => Alert.alert("Could not cancel booking", cause instanceof Error ? cause.message : "Please try again.") });
+  }, onSuccess: () => { if (bookingStorageKey) void SecureStore.deleteItemAsync(bookingStorageKey).catch(() => undefined); setCurrentBookingId(null); void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] }); setStep("booking"); }, onError: cause => showToast({ title: "Could not cancel booking", message: cause instanceof Error ? cause.message : "Please try again.", type: "error" }) });
 
-  async function confirmPickup() {
-    setError("");
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) throw new Error("Allow device location to confirm pickup.");
-      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-      setPickup({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-      const places = await Location.reverseGeocodeAsync(position.coords).catch(() => []);
-      const place = places[0];
-      const resolvedAddress = [place?.name, place?.street, place?.district, place?.city, place?.region].filter(Boolean).join(", ");
-      if (!pickupAddress.trim() && resolvedAddress.length >= 5) setPickupAddress(resolvedAddress);
-      setStep("booking");
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not confirm pickup."); }
+  useFocusEffect(useCallback(() => {
+    if (!chosenPickup || chosenPickup.addressId !== pickupDraftId) return;
+    manualPickupChosen.current = true;
+    setLocatingPickup(false);
+    setPickup({ latitude: chosenPickup.latitude, longitude: chosenPickup.longitude });
+    setPickupAddress([chosenPickup.street, chosenPickup.locality, chosenPickup.city, chosenPickup.state, chosenPickup.pincode].filter(Boolean).join(", ") || `Selected pickup (${chosenPickup.latitude.toFixed(5)}, ${chosenPickup.longitude.toFixed(5)})`);
+    setIdempotencyKey(Crypto.randomUUID());
+    clearPickup();
+  }, [chosenPickup, clearPickup]));
+
+  function choosePickup() {
+    Keyboard.dismiss();
+    setSearching(false);
+    clearPickup();
+    router.push({ pathname: "/pick-location", params: {
+      id: pickupDraftId, from: "ambulance",
+      ...(pickup ? { latitude: String(pickup.latitude), longitude: String(pickup.longitude) } : {}),
+    } });
   }
 
   const handleBack = useCallback(() => {
@@ -176,6 +229,7 @@ export function AmbulanceBookingScreen({
   return (
     <View style={s.screen}>
       <Header
+        app="patient"
         title={getHeaderTitle(step)}
         onBackPress={onHeaderBack}
         centered={
@@ -187,7 +241,7 @@ export function AmbulanceBookingScreen({
           destination={destination}
           address={pickupAddress}
           onAddressChange={setPickupAddress}
-          onConfirm={() => void confirmPickup()}
+          onConfirm={choosePickup}
         />
       ) : step === "assigning" ? (
         <Assigning />
@@ -198,9 +252,9 @@ export function AmbulanceBookingScreen({
           location={tracking.data ?? null}
           completionPin={pinVisible ? pin.data ?? null : null}
           emergency={emergency}
-          onEmergencyChange={(value) => { if (value) Alert.alert("Emergency Mode unavailable", "This booking cannot promise priority dispatch yet. For urgent help, call 112 or use the separate SOS flow."); else setEmergency(false); }}
-          onCancel={() => { if (activeBooking?.status === "searching") cancel.mutate(); else Alert.alert("Cancellation unavailable", "This assigned trip cannot be cancelled from this screen."); }}
-          onProceedToPayment={() => { if (activeBooking?.trip_status === "completed") void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] }); else Alert.alert("Trip still active", "The driver must verify the completion PIN at your destination."); }}
+          onEmergencyChange={(value) => { if (value) showToast({ title: "Emergency Mode unavailable", message: "This booking cannot promise priority dispatch yet. Use the separate SOS flow for emergency dispatch.", type: "info" }); else setEmergency(false); }}
+          onCancel={() => { if (activeBooking?.status === "searching") cancel.mutate(); else showToast({ title: "Cancellation unavailable", message: "This assigned trip cannot be cancelled from this screen.", type: "info" }); }}
+          onProceedToPayment={() => { if (activeBooking?.trip_status === "completed") void queryClient.invalidateQueries({ queryKey: ["my-ambulance-bookings"] }); else showToast({ title: "Trip still active", message: "The driver must verify the completion PIN at your destination.", type: "info" }); }}
         />
       ) : step === "complete" ? (
         completedBooking ? <AmbulanceCompletion
@@ -218,18 +272,28 @@ export function AmbulanceBookingScreen({
           onDestinationChange={(dest) => {
             setDestination(dest);
             setHospitalId(null);
+            setExternalHospital(null);
+            setIdempotencyKey(Crypto.randomUUID());
           }}
-          hospitalId={hospitalId}
+          hospitalId={externalHospital?.id ?? hospitalId}
           onSelectHospital={(h) => {
             setDestination(h.name);
-            setHospitalId(h.id);
+            if ("source" in h && h.source === "google") { setExternalHospital(h); setHospitalId(null); }
+            else { setHospitalId(h.id); setExternalHospital(null); }
+            setSearching(false);
+            Keyboard.dismiss();
+            setIdempotencyKey(Crypto.randomUUID());
           }}
+          locatingPickup={locatingPickup}
           pickup={pickup}
           pickupAddress={pickupAddress}
           searching={searching}
           onSearchingChange={setSearching}
-          onCurrentLocationPress={() => setStep("pickup")}
+          onCurrentLocationPress={choosePickup}
+          onPickupAddressChange={(value) => { setPickupAddress(value); setIdempotencyKey(Crypto.randomUUID()); }}
           hospitalsData={hospitals.data ?? []}
+          googleHospitals={googleHospitals.data?.places ?? []}
+          isGoogleLoading={googleHospitals.isFetching}
           isHospitalsLoading={hospitals.isLoading}
           isHospitalsError={hospitals.isError}
           emergency={emergency}

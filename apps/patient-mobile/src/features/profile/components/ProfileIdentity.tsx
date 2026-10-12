@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { ReactNode } from "react";
+import { Mars, Venus } from "lucide-react-native";
 
 export function ProfileIdentity({ initials, name, gender, photoUrl, children, inverse = false }: {
   initials: string;
@@ -18,7 +19,8 @@ export function ProfileIdentity({ initials, name, gender, photoUrl, children, in
       <View style={styles.copy}>
         <View style={styles.nameRow}>
           <Text style={[styles.name, inverse && { color: colors.white }]}>{name}</Text>
-          {gender ? <View style={styles.genderBadge}><Text style={styles.gender}>{gender}</Text></View> : null}
+          {gender?.toLowerCase() === "male" ? <View accessibilityLabel="Male"><Mars size={18} color={inverse ? colors.white : colors.patient.primaryDark} /></View> :
+            gender?.toLowerCase() === "female" ? <View accessibilityLabel="Female"><Venus size={18} color={inverse ? colors.white : colors.patient.primaryDark} /></View> : null}
         </View>
         {children}
       </View>

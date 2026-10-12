@@ -8,7 +8,10 @@ import {
   recordConsultationDiagnosis,
   recordConsultationVital,
 } from "@startup/data-access";
-import { parseDisplayDate, prescriptionMedicineSchema } from "@startup/contracts";
+import {
+  parseDisplayDate,
+  prescriptionMedicineSchema,
+} from "@startup/contracts";
 import type {
   IssuePrescriptionInput,
   RecordVitalInput,
@@ -45,7 +48,9 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   useToastFeedback({ error, success: message });
-  const [vitalValues, setVitalValues] = useState<Partial<Record<RecordVitalInput["code"], string>>>({});
+  const [vitalValues, setVitalValues] = useState<
+    Partial<Record<RecordVitalInput["code"], string>>
+  >({});
   const [diagnosis, setDiagnosis] = useState("");
   const [medicineName, setMedicineName] = useState("");
   const [strength, setStrength] = useState("");
@@ -77,11 +82,14 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       setVitalValues((current) => ({ ...current, [code]: "" }));
       setError("");
       setMessage(`${vitalLabels[code]} saved.`);
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
     },
     onError: () =>
       setError("Could not save this vital. Check the value and try again."),
   });
+
   const diagnosisMutation = useMutation({
     mutationFn: () =>
       recordConsultationDiagnosis(supabase!, {
@@ -93,13 +101,16 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       setDiagnosis("");
       setError("");
       setMessage("Primary diagnosis saved.");
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
     },
     onError: () =>
       setError(
         "Could not save the diagnosis. A primary diagnosis may already exist."
       ),
   });
+
   const prescription = useMutation({
     mutationFn: () =>
       issueConsultationPrescription(supabase!, {
@@ -111,13 +122,16 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       setItems([]);
       setError("");
       setMessage("Prescription signed and saved.");
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
     },
     onError: () =>
       setError(
         "Could not issue the prescription. Check its dates and whether one already exists."
       ),
   });
+  
   const followup = useMutation({
     mutationFn: () =>
       recommendConsultationFollowup(supabase!, {
@@ -131,7 +145,9 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       setFollowupReason("");
       setError("");
       setMessage("Follow-up recommendation saved. It is not a booking.");
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
     },
     onError: () =>
       setError(
@@ -185,14 +201,21 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
             <Input
               label={`${vitalLabels[code]} (${vitalUnits[code]})`}
               value={vitalValues[code] ?? ""}
-              onChangeText={(value) => setVitalValues((current) => ({ ...current, [code]: value }))}
+              onChangeText={(value) =>
+                setVitalValues((current) => ({ ...current, [code]: value }))
+              }
               keyboardType="decimal-pad"
             />
           </View>
-          <Button loading={vital.isPending && vital.variables === code}
+          <Button
+            loading={vital.isPending && vital.variables === code}
             label="Save"
             variant="outline"
-            disabled={vital.isPending || !Number.isFinite(Number(vitalValues[code])) || Number(vitalValues[code]) <= 0}
+            disabled={
+              vital.isPending ||
+              !Number.isFinite(Number(vitalValues[code])) ||
+              Number(vitalValues[code]) <= 0
+            }
             onPress={() => vital.mutate(code)}
           />
         </View>
@@ -203,7 +226,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         onChangeText={setDiagnosis}
         multiline
       />
-      <Button loading={diagnosisMutation.isPending}
+      <Button
+        loading={diagnosisMutation.isPending}
         label="Save primary diagnosis"
         variant="outline"
         disabled={diagnosisMutation.isPending || diagnosis.trim().length < 2}
@@ -295,7 +319,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
           />
         </View>
       ))}
-      <Button loading={prescription.isPending}
+      <Button
+        loading={prescription.isPending}
         label={`Sign prescription (${items.length} ${items.length === 1 ? "medicine" : "medicines"})`}
         disabled={prescription.isPending || items.length === 0}
         onPress={() => prescription.mutate()}
@@ -313,7 +338,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         onChangeText={setFollowupReason}
         multiline
       />
-      <Button loading={followup.isPending}
+      <Button
+        loading={followup.isPending}
         label="Recommend follow-up"
         variant="outline"
         disabled={
@@ -329,7 +355,6 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
           followup.mutate();
         }}
       />
-
     </View>
   );
 }

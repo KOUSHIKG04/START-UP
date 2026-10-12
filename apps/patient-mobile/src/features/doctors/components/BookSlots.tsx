@@ -174,7 +174,10 @@ export function BookSlots({
         style={styles.bookSlotsCard}
       >
         <View style={styles.bookingSection}>
-          <Text style={styles.sectionTitle}>Select date</Text>
+          <View style={styles.sectionHeadingRow}>
+            <Text style={styles.sectionTitle}>Select date</Text>
+            <Text style={styles.sectionTitle}>{new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1).getFullYear()}</Text>
+          </View>
           <FadedScrollView
             ref={monthsScrollRef}
             horizontal
@@ -295,7 +298,7 @@ export function BookSlots({
 
         <View style={styles.bookingSection}>
           <Text style={styles.sectionTitle}>For whom?</Text>
-          <View style={styles.patientRow}>
+          <FadedScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.patientRow}>
             {patientOptions.map((option) => (
               <Chip
                 key={option.id}
@@ -308,7 +311,7 @@ export function BookSlots({
                 }}
               />
             ))}
-          </View>
+          </FadedScrollView>
         </View>
 
         <View style={styles.bookingSection}>
@@ -501,6 +504,8 @@ const styles = StyleSheet.create({
   patientRow: {
     flexDirection: "row",
     gap: 8,
+    alignItems: "center",
+    paddingVertical: 4,
   },
   reasonInputContainer: {
     width: "100%",

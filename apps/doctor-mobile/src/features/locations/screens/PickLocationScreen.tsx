@@ -78,7 +78,12 @@ export default function PickLocationScreen() {
   const [lookupVersion, setLookupVersion] = useState(0);
   const mapTouched = useRef(false);
   const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const { showToast } = useToast();
   const choose = useLocationDraft((state) => state.choose);
   const googleMapRef = useRef<GoogleMapsType.MapView>(null);
@@ -99,24 +104,39 @@ export default function PickLocationScreen() {
 
   async function searchAddress() {
     if (searching || locating) return;
-    if (!search.trim()) { showToast({ title: "Enter an area or address", type: "info" }); return; }
+    if (!search.trim()) {
+      showToast({ title: "Enter an area or address", type: "info" });
+      return;
+    }
     Keyboard.dismiss();
     setSearching(true);
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) throw new Error("Allow location access to search, or select a point on the map.");
+      if (!permission.granted)
+        throw new Error(
+          "Allow location access to search, or select a point on the map."
+        );
       const [found] = await Location.geocodeAsync(search.trim());
       if (!mounted.current) return;
       const next = validPoint(found?.latitude, found?.longitude);
-      if (!next) throw new Error("No location found. Try a more complete address.");
+      if (!next)
+        throw new Error("No location found. Try a more complete address.");
       setPoint(next);
-      setLookupVersion(version => version + 1);
+      setLookupVersion((version) => version + 1);
       const camera = { coordinates: next, zoom: 16 };
-      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
+      if (Platform.OS === "android")
+        googleMapRef.current?.setCameraPosition(camera);
       if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
     } catch (cause) {
-      if (mounted.current) showToast({ title: "Could not find address", message: cause instanceof Error ? cause.message : "Try again.", type: "error" });
-    } finally { if (mounted.current) setSearching(false); }
+      if (mounted.current)
+        showToast({
+          title: "Could not find address",
+          message: cause instanceof Error ? cause.message : "Try again.",
+          type: "error",
+        });
+    } finally {
+      if (mounted.current) setSearching(false);
+    }
   }
 
   async function useDeviceLocation() {
@@ -143,17 +163,18 @@ export default function PickLocationScreen() {
       setDetails(emptyDetails);
       setAddressLabel("");
       setPoint(next);
-      setLookupVersion(version => version + 1);
+      setLookupVersion((version) => version + 1);
       const camera = { coordinates: next, zoom: 16 };
       if (Platform.OS === "android")
         googleMapRef.current?.setCameraPosition(camera);
       if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
     } catch {
-      if (mounted.current) showToast({
-        title: "Could not find your location",
-        message: "Check location services and try again.",
-        type: "error",
-      });
+      if (mounted.current)
+        showToast({
+          title: "Could not find your location",
+          message: "Check location services and try again.",
+          type: "error",
+        });
     } finally {
       if (mounted.current) setLocating(false);
     }
@@ -171,26 +192,34 @@ export default function PickLocationScreen() {
     setAddressLabel("");
     const timer = setTimeout(() => {
       void Location.reverseGeocodeAsync(point)
-      .then(([address]) => {
-        if (!active) return;
-        if (!address) throw new Error("Address lookup returned no result.");
-        setAddressLabel(formatGeocodedAddress(address));
-        setDetails({
-          street: address?.street ?? "",
-          locality:
-            address?.district || address?.subregion || address?.name || "",
-          city: address?.city ?? "",
-          state: address?.region ?? "",
-          pincode: address?.postalCode?.replace(/\D/g, "").slice(0, 6) ?? "",
+        .then(([address]) => {
+          if (!active) return;
+          if (!address) throw new Error("Address lookup returned no result.");
+          setAddressLabel(formatGeocodedAddress(address));
+          setDetails({
+            street: address?.street ?? "",
+            locality:
+              address?.district || address?.subregion || address?.name || "",
+            city: address?.city ?? "",
+            state: address?.region ?? "",
+            pincode: address?.postalCode?.replace(/\D/g, "").slice(0, 6) ?? "",
+          });
+        })
+        .catch(() => {
+          if (active) {
+            setDetails(emptyDetails);
+            setAddressLabel("");
+            showToast({
+              title: "Address lookup unavailable",
+              message:
+                "You can confirm the coordinates and enter missing address details in the drawer.",
+              type: "info",
+            });
+          }
+        })
+        .finally(() => {
+          if (active) setResolving(false);
         });
-      })
-      .catch(() => {
-        if (active) {
-          setDetails(emptyDetails);
-          setAddressLabel("");
-          showToast({ title: "Address lookup unavailable", message: "You can confirm the coordinates and enter missing address details in the drawer.", type: "info" });
-        }
-      }).finally(() => { if (active) setResolving(false); });
     }, 600);
     return () => {
       active = false;
@@ -198,17 +227,28 @@ export default function PickLocationScreen() {
     };
   }, [point?.latitude, point?.longitude, lookupVersion]);
 
-  function onMapPoint(coordinates: { latitude?: number; longitude?: number }, recenter = false) {
+  function onMapPoint(
+    coordinates: { latitude?: number; longitude?: number },
+    recenter = false
+  ) {
     const next = validPoint(coordinates.latitude, coordinates.longitude);
     if (next) {
-      if (!recenter && point && Math.abs(next.latitude - point.latitude) < 0.000001 && Math.abs(next.longitude - point.longitude) < 0.000001) return;
+      if (
+        !recenter &&
+        point &&
+        Math.abs(next.latitude - point.latitude) < 0.000001 &&
+        Math.abs(next.longitude - point.longitude) < 0.000001
+      )
+        return;
       setDetails(emptyDetails);
       setAddressLabel("");
       setPoint(next);
       if (recenter) {
         const camera = { coordinates: next, zoom: 16 };
-        if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
-        if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
+        if (Platform.OS === "android")
+          googleMapRef.current?.setCameraPosition(camera);
+        if (Platform.OS === "ios")
+          appleMapRef.current?.setCameraPosition(camera);
       }
     }
   }
@@ -231,7 +271,10 @@ export default function PickLocationScreen() {
     ]
       .filter(Boolean)
       .join(", ");
-  const cameraPosition = useMemo(() => initialPoint ? { coordinates: initialPoint, zoom: 16 } : undefined, [initialPoint]);
+  const cameraPosition = useMemo(
+    () => (initialPoint ? { coordinates: initialPoint, zoom: 16 } : undefined),
+    [initialPoint]
+  );
 
   return (
     <View style={styles.screen}>
@@ -243,22 +286,40 @@ export default function PickLocationScreen() {
       />
       <SafeAreaView edges={["bottom"]} style={styles.body}>
         <View style={styles.searchRow}>
-          <Input accessibilityLabel="Search area or address" placeholder="Search an area or address"
-            value={search} onChangeText={setSearch} returnKeyType="search" containerStyle={styles.searchInput}
-            onSubmitEditing={() => void searchAddress()} />
-          <Button theme="doctor" label="Search" loading={searching} disabled={searching || locating}
-            onPress={() => void searchAddress()} />
+          <Input
+            accessibilityLabel="Search area or address"
+            placeholder="Search an area or address"
+            value={search}
+            onChangeText={setSearch}
+            returnKeyType="search"
+            containerStyle={styles.searchInput}
+            onSubmitEditing={() => void searchAddress()}
+          />
+          <Button
+            theme="doctor"
+            label="Search"
+            loading={searching}
+            disabled={searching || locating}
+            onPress={() => void searchAddress()}
+          />
         </View>
         <Text style={styles.instruction}>
           Drag the map beneath the pin or tap to choose your address.
         </Text>
-        <View style={styles.mapFrame} onTouchStart={() => { mapTouched.current = true; }}>
+        <View
+          style={styles.mapFrame}
+          onTouchStart={() => {
+            mapTouched.current = true;
+          }}
+        >
           {nativeMaps && Platform.OS === "android" ? (
             <nativeMaps.GoogleMaps.View
               ref={googleMapRef}
               style={styles.map}
               cameraPosition={cameraPosition}
-              onCameraMove={event => { if (point || mapTouched.current) onMapPoint(event.coordinates); }}
+              onCameraMove={(event) => {
+                if (point || mapTouched.current) onMapPoint(event.coordinates);
+              }}
               onMapClick={(event) => onMapPoint(event.coordinates, true)}
             />
           ) : null}
@@ -267,11 +328,21 @@ export default function PickLocationScreen() {
               ref={appleMapRef}
               style={styles.map}
               cameraPosition={cameraPosition}
-              onCameraMove={event => { if (point || mapTouched.current) onMapPoint(event.coordinates); }}
+              onCameraMove={(event) => {
+                if (point || mapTouched.current) onMapPoint(event.coordinates);
+              }}
               onMapClick={(event) => onMapPoint(event.coordinates, true)}
             />
           ) : null}
-          {nativeMaps ? <View pointerEvents="none" style={styles.pin}><MapPin size={36} fill={colors.white} color={colors.doctor.primary} /></View> : null}
+          {nativeMaps ? (
+            <View pointerEvents="none" style={styles.pin}>
+              <MapPin
+                size={36}
+                fill={colors.white}
+                color={colors.doctor.primary}
+              />
+            </View>
+          ) : null}
           {!point && !nativeMaps ? (
             <View style={styles.mapState}>
               {locating ? (
@@ -323,7 +394,10 @@ export default function PickLocationScreen() {
             accessibilityLabel="Confirm map location"
             disabled={!point || locating || searching || resolving}
             onPress={confirm}
-            style={[styles.confirm, (!point || locating || searching || resolving) && styles.disabled]}
+            style={[
+              styles.confirm,
+              (!point || locating || searching || resolving) && styles.disabled,
+            ]}
           >
             <Text style={styles.confirmText}>Confirm Location</Text>
           </Pressable>
@@ -336,9 +410,20 @@ export default function PickLocationScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
   body: { flex: 1 },
-  searchRow: { flexDirection: "row", alignItems: "center", gap: 10, padding: 16 },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 16,
+  },
   searchInput: { flex: 1 },
-  pin: { position: "absolute", top: "50%", left: "50%", marginLeft: -18, marginTop: -36 },
+  pin: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: -18,
+    marginTop: -36,
+  },
   instruction: {
     paddingHorizontal: 20,
     paddingVertical: 12,

@@ -1,10 +1,6 @@
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
-import {
-  Choice,
-  Heading,
-  Panel,
-} from "../../../components/DoctorScreen";
+import { Choice, Heading, Panel } from "../../../components/DoctorScreen";
 import { ui } from "../../../components/theme";
 import type { Medicine } from "../../../types/doctor";
 
@@ -25,9 +21,7 @@ export function MedicineEditor({
 }: MedicineEditorProps) {
   return (
     <Panel>
-      <Heading>
-        {isEditingExisting ? "Edit medicine" : "Add medicine"}
-      </Heading>
+      <Heading>{isEditingExisting ? "Edit medicine" : "Add medicine"}</Heading>
       <Input
         label="Medicine name and strength"
         accessibilityLabel="Medicine name and strength"
@@ -65,10 +59,7 @@ export function MedicineEditor({
             containerStyle={ui.flex}
             onChangeText={(value) => {
               const meals = [...medicine.meals] as Medicine["meals"];
-              meals[index] = Math.min(
-                9,
-                Number(value.replace(/\D/g, "")) || 0
-              );
+              meals[index] = Math.min(9, Number(value.replace(/\D/g, "")) || 0);
               onChange({ ...medicine, meals });
             }}
           />

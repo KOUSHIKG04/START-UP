@@ -50,6 +50,7 @@ if ($UseCli) {
       @{ Name = "Clinic"; File = "clinic.cli-smoke.sql"; Result = "clinic_smoke_passed" },
       @{ Name = "Inventory"; File = "inventory.cli-smoke.sql"; Result = "inventory_smoke_passed" },
       @{ Name = "Ambulance"; File = "ambulance.cli-smoke.sql"; Result = "ambulance_smoke_passed" }
+      @{ Name = "External ambulance destinations"; File = "external-ambulance.cli-smoke.sql"; Result = "external_ambulance_smoke_passed" }
       @{ Name = "Patient email"; File = "patient-email.cli-smoke.sql"; Result = "patient_email_smoke_passed" }
       @{ Name = "Patient DOB"; File = "patient-birth-date.cli-smoke.sql"; Result = "patient_birth_date_smoke_passed" }
       @{ Name = "Doctor DOB"; File = "doctor-birth-date.cli-smoke.sql"; Result = "doctor_birth_date_smoke_passed" }

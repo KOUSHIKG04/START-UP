@@ -61,6 +61,8 @@ export const familyProfileListSchema = z.array(
     relation: z.string().nullable(),
     phone: z.string().nullable(),
     verified: z.boolean(),
+    notify: z.boolean().optional(),
+    can_edit: z.boolean().optional(),
     profile_photo_path: z.string().nullable().optional(),
   })
 );

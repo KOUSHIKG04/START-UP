@@ -16,7 +16,6 @@ import { supabase, useMobileSession } from "../../../services/supabase";
 export default function AddFamilyScreen() {
   useFocusEffect(useCallback(() => {
     setStatusBarStyle("dark");
-    return () => setStatusBarStyle("light");
   }, []));
   const { profile } = useMobileSession();
 
@@ -30,7 +29,7 @@ export default function AddFamilyScreen() {
 
   return (
     <OnboardingShell
-      onBack={() => router.replace("/(app)/(tabs)")}
+      onBack={() => router.canGoBack() ? router.back() : router.replace("/(app)/(tabs)/profile")}
       bottomArt={false}
       scroll
     >
@@ -66,6 +65,10 @@ export default function AddFamilyScreen() {
                       {member.blood_group ? ` · ${member.blood_group}` : ""}
                     </Text>
                   </View>
+                  {member.can_edit ? <Button theme="patient" variant="outline" label="Edit"
+                    style={{ backgroundColor: colors.white }}
+                    accessibilityLabel={`Edit ${member.full_name}`}
+                    onPress={() => router.push({ pathname: "/(app)/add-family-member", params: { memberId: member.id } })} /> : null}
                 </View>
               ))}
             </View>
@@ -148,9 +151,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: colors.white,
+    backgroundColor: colors.patient.surface,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.12)",
+    borderColor: "#00000030",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -182,7 +185,7 @@ const styles = StyleSheet.create({
     height: 54,
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.19)",
+    borderColor: "#00000030",
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",

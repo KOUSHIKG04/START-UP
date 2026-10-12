@@ -24,8 +24,8 @@ BEGIN
     'gender','Male','blood_group','A+','relation','Son','phone','+911234567890','notify',false));
   IF member IS NULL OR jsonb_array_length(public.list_my_family_profiles())<>1 THEN
     RAISE EXCEPTION 'Family profile not listed'; END IF;
-  IF (public.list_my_family_profiles()->0->>'verified')::boolean THEN
-    RAISE EXCEPTION 'Family access must await verification'; END IF;
+  IF NOT (public.list_my_family_profiles()->0->>'verified')::boolean THEN
+    RAISE EXCEPTION 'Managed family access must be available for booking'; END IF;
   EXECUTE 'RESET ROLE';
 
   EXECUTE 'SET LOCAL ROLE authenticated';

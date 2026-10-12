@@ -76,6 +76,7 @@ export const ambulanceBooking = clinzo
         (): AnyPgColumn => facility.id,
         { onDelete: "restrict" }
       ),
+      destination_google_place_id: text("destination_google_place_id"),
       destination_position: geographyPoint("destination_position"),
       destination_address: text("destination_address"),
       patient_name_snapshot: text("patient_name_snapshot"),
@@ -100,6 +101,7 @@ export const ambulanceBooking = clinzo
         "gist",
         table.destination_position
       ),
+      check("ambulance_external_destination_ck", sql.raw("destination_google_place_id IS NULL OR (destination_facility_id IS NULL AND destination_position IS NOT NULL AND length(destination_google_place_id) BETWEEN 1 AND 300)")),
       check(
         "ambulance_booking_ck_1",
         sql.raw("(requested_by IS NULL) <> (guest_session_id IS NULL)")

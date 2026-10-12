@@ -17,13 +17,12 @@ function ProfileStat({ label, value }: { label: string; value: string }) {
       theme="patient"
       variant="outlined"
       borderColor={colors.border}
-      borderRadius={12}
-      padding={12}
+      borderRadius={10}
+      padding={8}
       gap={4}
       style={styles.stat}
     >
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+      <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.9}>{label}: <Text style={styles.value}>{value}</Text></Text>
     </Card>
   );
 }
@@ -31,8 +30,9 @@ function ProfileStat({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   stats: { flexDirection: "row", gap: 8 },
   stat: {
-    flex: 1,
-    height: 65.5,
+    flexShrink: 1,
+    minWidth: 0,
+    height: 36,
     paddingVertical: 0,
     justifyContent: "center",
     elevation: 0,
@@ -41,14 +41,14 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.medium,
-    fontSize: 11,
-    lineHeight: 16,
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    lineHeight: 20,
   },
   value: {
     color: colors.patient.text,
     fontFamily: fontFamilies.semibold,
-    fontSize: 15,
+    fontSize: 13,
     lineHeight: 21,
   },
 });

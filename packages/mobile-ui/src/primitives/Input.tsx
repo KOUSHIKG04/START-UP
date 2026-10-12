@@ -17,6 +17,8 @@ export type InputProps = TextInputProps & {
   /** Preserve embedded/search/OTP styling without adding a form-field wrapper. */
   variant?: "outlined" | "unstyled";
   label?: string;
+  /** Non-editable leading text, such as a phone country code. */
+  prefix?: string;
   error?: string;
   /** Show an error outline while messages are handled by a toast. */
   invalid?: boolean;
@@ -30,6 +32,7 @@ export function Input({
   ref,
   variant = "outlined",
   label,
+  prefix,
   error,
   invalid = false,
   disabled = false,
@@ -61,13 +64,21 @@ export function Input({
         } : undefined,
         disabled ? styles.inputDisabled : undefined,
         style,
+        prefix ? styles.prefixedInput : undefined,
         error || invalid ? styles.inputError : undefined,
       ]}
     />
   );
   // A chat composer, search row or hidden OTP field must remain in its parent's
   // layout; labels and form containers are added only when actually requested.
-  if (variant === "unstyled" && !label && !error) return input;
+  const control = prefix ? <View style={styles.prefixContainer}>
+    {input}
+    <View pointerEvents="none" style={styles.prefixArea}>
+      <Text style={[styles.prefixText, { color: theme.text }]}>{prefix}</Text>
+      <View style={[styles.prefixDivider, { backgroundColor: theme.border }]} />
+    </View>
+  </View> : input;
+  if (variant === "unstyled" && !label && !error) return control;
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? (
@@ -76,7 +87,7 @@ export function Input({
         </Text>
       ) : null}
 
-      {input}
+      {control}
 
       {error ? <Text style={[styles.error, errorStyle]}>{error}</Text> : null}
     </View>
@@ -84,6 +95,11 @@ export function Input({
 }
 
 const styles = StyleSheet.create({
+  prefixContainer: { position: "relative" },
+  prefixedInput: { paddingLeft: 70 },
+  prefixArea: { position: "absolute", left: 16, top: 0, bottom: 0, flexDirection: "row", alignItems: "center", gap: 12 },
+  prefixText: { fontFamily: fontFamilies.medium, fontSize: 15 },
+  prefixDivider: { width: 1, height: 22 },
   label: {
     marginBottom: 4,
     color: colors.textPrimary,

@@ -21,8 +21,23 @@ BEGIN
   IF NOT denied THEN RAISE EXCEPTION 'Invalid phone accepted'; END IF;
   family_id := public.add_my_family_profile(jsonb_build_object('full_name','Photo Family','birth_date','2010-01-01','gender','Other','blood_group','O+','relation','Sibling','phone','+919000000012','notify',true,'profile_photo_path',photo));
   SELECT entry INTO detail FROM jsonb_array_elements(public.list_my_family_profiles()) entry WHERE entry->>'id'=family_id::text;
-  IF detail->>'profile_photo_path' IS DISTINCT FROM photo OR (detail->>'verified')::boolean THEN
-    RAISE EXCEPTION 'Family photo missing or access incorrectly verified'; END IF;
+  IF detail->>'profile_photo_path' IS DISTINCT FROM photo OR NOT (detail->>'verified')::boolean THEN
+    RAISE EXCEPTION 'Family photo missing or managed access unavailable'; END IF;
+  IF NOT (detail->>'can_edit')::boolean OR NOT (detail->>'notify')::boolean THEN
+    RAISE EXCEPTION 'Managed family edit or notification state missing'; END IF;
+  PERFORM public.update_my_family_profile(family_id,jsonb_build_object('full_name','Updated Family','birth_date','2009-02-03','gender','Female','blood_group','AB+','relation','Daughter','phone','+919000000014','notify',false));
+  SELECT entry INTO detail FROM jsonb_array_elements(public.list_my_family_profiles()) entry WHERE entry->>'id'=family_id::text;
+  IF detail->>'full_name' IS DISTINCT FROM 'Updated Family' OR detail->>'relation' IS DISTINCT FROM 'Daughter'
+    OR detail->>'phone' IS DISTINCT FROM '+919000000014' OR detail->>'birth_date' IS DISTINCT FROM '2009-02-03'
+    OR (detail->>'notify')::boolean OR detail->>'profile_photo_path' IS DISTINCT FROM photo THEN
+    RAISE EXCEPTION 'Family edit did not preserve/update correct fields'; END IF;
+  PERFORM set_config('request.jwt.claim.sub',other_id::text,true);
+  denied := false;
+  BEGIN
+    PERFORM public.update_my_family_profile(family_id,jsonb_build_object('full_name','Outsider'));
+  EXCEPTION WHEN SQLSTATE '42501' THEN denied := true; END;
+  IF NOT denied THEN RAISE EXCEPTION 'Outsider edited family profile'; END IF;
+  PERFORM set_config('request.jwt.claim.sub',user_id::text,true);
   denied := false;
   BEGIN
     PERFORM public.add_my_family_profile(jsonb_build_object('full_name','Wrong Photo','birth_date','2010-01-01','gender','Other','blood_group','O+','relation','Sibling','phone','+919000000013','notify',false,'profile_photo_path',other_photo));

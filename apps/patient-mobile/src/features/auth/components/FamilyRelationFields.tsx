@@ -10,6 +10,7 @@ import { SelectDropdown } from "./SelectDropdown";
 import type { ProfileFormValues } from "./ProfileForm";
 import { PROFILE_PLACEHOLDER_COLOR, profileFormStyles } from "./profileFormStyles";
 import { Checkbox, Input } from "@startup/mobile-ui";
+import { contactPhoneForInput, normalizeContactPhone } from "@startup/contracts";
 
 const relations = [
   "Son",
@@ -50,8 +51,8 @@ export function FamilyRelationFields({
         rules={{
           validate: (val) => {
             return (
-              val.replace(/\D/g, "").length === 10 ||
-              "Enter a 10-digit phone number for your family contact."
+              Boolean(normalizeContactPhone(val)) ||
+              "Enter a valid phone number for your family contact."
             );
           },
         }}
@@ -63,12 +64,13 @@ export function FamilyRelationFields({
             containerStyle={styles.sectionLabel}
             accessibilityLabel="Family member phone number"
             keyboardType="phone-pad"
-            placeholder="+91"
-            maxLength={10}
+            placeholder="Mobile number"
+            prefix={value.startsWith("+") && !value.startsWith("+91") ? undefined : "+91"}
+            maxLength={20}
             value={value}
             onChangeText={(text) => {
               onClearError();
-              onChange(text);
+              onChange(contactPhoneForInput(text));
             }}
             onBlur={onBlur}
             placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}

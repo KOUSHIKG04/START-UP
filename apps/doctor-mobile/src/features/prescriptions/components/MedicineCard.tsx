@@ -1,10 +1,6 @@
 import { View } from "react-native";
 import { Button } from "@startup/mobile-ui";
-import {
-  Heading,
-  Label,
-  Panel,
-} from "../../../components/DoctorScreen";
+import { Heading, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import type { Medicine } from "../../../types/doctor";
 
@@ -83,12 +79,10 @@ export function MedicineCard({
           </View>
         ))}
       </View>
-      <Label
-        style={{ color: palette.dark, fontSize: 12, textAlign: "center" }}
-      >
+      <Label style={{ color: palette.dark, fontSize: 12, textAlign: "center" }}>
         {medicine.meals.join(" – ")} tablets ·{" "}
-        {medicine.meals.filter(Boolean).length} times daily ·{" "}
-        {medicine.days} days
+        {medicine.meals.filter(Boolean).length} times daily · {medicine.days}{" "}
+        days
       </Label>
       {!readOnly && (
         <>

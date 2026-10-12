@@ -62,6 +62,7 @@ export default function PickLocationScreen() {
   const params = useLocalSearchParams();
   const addressId = first(params.id) ?? null;
   const fromAddress = first(params.from) === "address";
+  const fromAmbulance = first(params.from) === "ambulance";
   const fromProfile = first(params.from) === "profile";
   const initialPoint = useMemo(
     () => validPoint(first(params.latitude), first(params.longitude)),
@@ -215,7 +216,7 @@ export default function PickLocationScreen() {
   function confirm() {
     if (!point || resolving || locating || searching) return;
     choose({ ...point, ...details, addressId });
-    if (fromAddress || fromProfile) router.back();
+    if (fromAddress || fromProfile || fromAmbulance) router.back();
     else router.replace("/address-details");
   }
 

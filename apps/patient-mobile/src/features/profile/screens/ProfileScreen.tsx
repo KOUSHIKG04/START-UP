@@ -146,6 +146,7 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
                 .toUpperCase()}
               inverse
               name={name}
+              gender={detail.data?.gender}
               photoUrl={profilePhoto.data}
             >
               <ProfileStats
@@ -170,7 +171,7 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
       >
         <View style={styles.section}>
           <Card theme="patient" variant="outlined" borderWidth={1} borderRadius={16} padding={0} gap={0} style={styles.flatCard}>
-            <ProfileAction title="Add family members" icon={<Users size={21} color={colors.patient.primaryDark} />} trailingIcon={<View style={styles.familyPlus}><Plus size={21} color={colors.patient.primaryDark} /></View>} count={family.data?.length ? String(family.data.length) : undefined} onPress={() => router.push("/(app)/family-profile")} />
+            <ProfileAction title="Add family members" icon={<Users size={21} color={colors.patient.primaryDark} />} trailingIcon={<View style={styles.familyPlus}><Plus size={21} color={colors.patient.primaryDark} /></View>} neutralCount count={family.data?.length ? String(family.data.length) : undefined} onPress={() => router.push("/(app)/family-profile")} />
           </Card>
         </View>
 
@@ -325,12 +326,14 @@ function ProfileAction({
   icon,
   title,
   count,
+  neutralCount = false,
   trailingIcon,
   onPress,
 }: {
   icon: ReactNode;
   title: string;
   count?: string;
+  neutralCount?: boolean;
   trailingIcon?: ReactNode;
   onPress: () => void;
 }) {
@@ -346,8 +349,8 @@ function ProfileAction({
         <Text style={styles.actionTitle}>{title}</Text>
       </View>
       {count ? (
-        <View style={styles.countBadge}>
-          <Text style={styles.countLabel}>{count}</Text>
+        <View style={[styles.countBadge, neutralCount && styles.familyCountBadge]}>
+          <Text style={[styles.countLabel, neutralCount && styles.familyCountLabel]}>{count}</Text>
         </View>
       ) : null}
       <View style={styles.trailingIcon}>
@@ -507,6 +510,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginHorizontal: 16,
   },
+  familyCountBadge: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, minWidth: 28, alignItems: "center", justifyContent: "center" },
+  familyCountLabel: { color: colors.patient.text },
   countBadge: {
     backgroundColor: colors.patient.surface,
     borderRadius: 12,

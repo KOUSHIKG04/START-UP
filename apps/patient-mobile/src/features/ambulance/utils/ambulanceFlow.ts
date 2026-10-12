@@ -33,8 +33,8 @@ export const ambulanceTypes: AmbulanceType[] = [
   },
   {
     id: "icu",
-    title: "Mobile ICU",
-    description: "Full ICU setup and specialist",
+    title: "Neonatal ICU",
+    description: "Neonatal intensive care transport",
     fare: null,
     eta: null,
   },

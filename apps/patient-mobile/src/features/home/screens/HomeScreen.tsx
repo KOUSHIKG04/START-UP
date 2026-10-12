@@ -70,6 +70,9 @@ export function HomeScreen({
 }: {
   onNotificationPress?: () => void;
 } = {}) {
+  useEffect(() => {
+    router.prefetch("/select-location");
+  }, []);
   const greeting = useTimeGreeting();
   const { top: topInset } = useSafeAreaInsets();
   const { profile } = useMobileSession();

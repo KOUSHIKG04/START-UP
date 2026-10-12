@@ -53,6 +53,30 @@ export async function addMyFamilyProfile(
   return data;
 }
 
+export async function updateMyFamilyProfile(
+  client: AppSupabaseClient,
+  patientId: string,
+  details: FamilyProfileInput
+) {
+  const value = familyProfileInputSchema.parse(details);
+  const { data, error } = await client.rpc("update_my_family_profile", {
+    p_patient_id: patientId,
+    p_profile: {
+      full_name: value.fullName,
+      age_years: value.age,
+      ...(value.dateOfBirth ? { birth_date: value.dateOfBirth } : {}),
+      gender: value.gender,
+      blood_group: value.bloodGroup,
+      relation: value.relation,
+      phone: value.phone,
+      notify: value.notify,
+      ...(value.profilePhotoPath ? { profile_photo_path: value.profilePhotoPath } : {}),
+    },
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function listMyFamilyProfiles(client: AppSupabaseClient) {
   const { data, error } = await client.rpc("list_my_family_profiles");
   if (error) throw error;

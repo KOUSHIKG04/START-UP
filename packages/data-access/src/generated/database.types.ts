@@ -216,6 +216,10 @@ export type Database = {
         Args: { p_profile: Record<string, unknown> };
         Returns: string;
       };
+      update_my_family_profile: {
+        Args: { p_patient_id: string; p_profile: Record<string, unknown> };
+        Returns: string;
+      };
       list_my_family_profiles: {
         Args: Record<string, never>;
         Returns: unknown;
@@ -313,6 +317,8 @@ export type Database = {
         };
         Returns: unknown;
       };
+      authorize_ambulance_hospital_lookup: { Args: Record<string, never>; Returns: boolean };
+      request_google_ambulance_booking: { Args: { p_auth_user_id: string; p_patient_id: string; p_pickup_latitude: number; p_pickup_longitude: number; p_pickup_address: string; p_destination_place_id: string; p_destination_name: string; p_destination_address: string; p_destination_latitude: number; p_destination_longitude: number; p_capability_code: string; p_idempotency_key: string }; Returns: string };
       request_ambulance_booking: {
         Args: {
           p_patient_id: string;

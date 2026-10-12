@@ -1,4 +1,5 @@
 export type VisitMode = "clinic" | "online" | "home";
+
 export type Patient = {
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export type Patient = {
   address: string;
   pin: string;
 };
+
 export type Appointment = {
   id: string;
   patientId: string;
@@ -20,6 +22,7 @@ export type Appointment = {
   queue: string;
   status: "waiting" | "completed";
 };
+
 export type Medicine = {
   id: string;
   name: string;
@@ -27,6 +30,7 @@ export type Medicine = {
   meals: [number, number, number];
   days: string;
 };
+
 export type Consultation = {
   notes: string;
   medicines: Medicine[];
@@ -34,7 +38,9 @@ export type Consultation = {
   signed: boolean;
   completed: boolean;
 };
+
 export type Message = { id: string; text: string; sent: boolean; time: string };
+
 export type Schedule = {
   days: number[];
   start: string;

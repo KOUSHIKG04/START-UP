@@ -1,3 +1,4 @@
+import { googleHospitalSearchSchema, googleHospitalSearchResultSchema, requestGoogleAmbulanceBookingSchema, type RequestGoogleAmbulanceBookingInput } from "@startup/contracts";
 import {
   cancelAmbulanceBookingSchema,
   driverOfferSchema,
@@ -103,4 +104,24 @@ export async function respondMyDriverOffer(
   });
   if (error) throw error;
   return data === null ? null : uuidSchema.parse(data);
+}
+
+async function ambulancePlacesRequest(client: AppSupabaseClient, body: Record<string, unknown>) {
+  const { data, error } = await client.functions.invoke("ambulance-hospitals", { body });
+  if (error) {
+    const response = "context" in error ? error.context : undefined;
+    if (response instanceof Response) {
+      const details = await response.clone().json().catch(() => null) as { error?: string } | null;
+      if (details?.error) throw new Error(details.error);
+    }
+    throw new Error("Hospital search service is unavailable. Try a registered hospital.");
+  }
+  return data;
+}
+export async function searchGoogleAmbulanceHospitals(client: AppSupabaseClient, input: { latitude: number; longitude: number; query?: string }) {
+  return googleHospitalSearchResultSchema.parse(await ambulancePlacesRequest(client, { action: "search", ...googleHospitalSearchSchema.parse(input) }));
+}
+export async function requestGoogleAmbulanceBooking(client: AppSupabaseClient, input: RequestGoogleAmbulanceBookingInput) {
+  const result = await ambulancePlacesRequest(client, { action: "book", ...requestGoogleAmbulanceBookingSchema.parse(input) });
+  return uuidSchema.parse(result.bookingId);
 }

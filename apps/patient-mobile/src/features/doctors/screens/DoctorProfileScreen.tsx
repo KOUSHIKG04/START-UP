@@ -203,7 +203,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
                 slots={slots}
                 patientOptions={[
                   ...(profile?.patient_id ? [{ id: profile.patient_id, label: "Self", verified: true }] : []),
-                  ...(familyQuery.data ?? []).map((member) => ({ id: member.id, label: member.verified ? member.full_name : `${member.full_name} (pending verification)`, verified: member.verified })),
+                  ...(familyQuery.data ?? []).map((member) => ({ id: member.id, label: member.full_name, verified: member.verified })),
                 ]}
                 loading={slotsQuery.isLoading}
                 error={slotsQuery.isError ? "Could not load available slots." : null}

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     borderColor: colors.borderDefault,
   },
   ambulanceSelected: {
-    borderColor: "#E8F5F4",
+    borderColor: colors.borderDefault,
     backgroundColor: "#E8F5F4",
   },
   ambulanceIcon: {

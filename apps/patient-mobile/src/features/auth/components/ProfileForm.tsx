@@ -8,6 +8,8 @@ import {
   ageFromBirthDate,
   formatDisplayDate,
   parseDisplayDate,
+  contactPhoneForInput,
+  normalizeContactPhone,
 } from "@startup/contracts";
 import { Controller, useForm } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -76,6 +78,8 @@ function getInitialFormValues(
     blood_group: string | null;
     email: string | null;
     contact_phone?: string | null;
+    relation?: string | null;
+    notify?: boolean;
     address: PatientAddress | null;
   },
   family = false,
@@ -91,9 +95,9 @@ function getInitialFormValues(
     bloodGroup: (initialProfile?.blood_group ?? "").replace("-", "−"),
     email: initialProfile?.email ?? (!family ? initialEmail : ""),
     address: initialProfile?.address ?? undefined,
-    relation: "Son",
-    phone: initialProfile?.contact_phone || (!family ? initialPhone : ""),
-    notify: false,
+    relation: initialProfile?.relation ?? "Son",
+    phone: contactPhoneForInput(initialProfile?.contact_phone || (!family ? initialPhone : "")),
+    notify: initialProfile?.notify ?? false,
   };
 }
 
@@ -112,9 +116,7 @@ function formatProfilePayload(
     email: values.email?.trim() || undefined,
     address: values.address,
     relation: family ? values.relation : undefined,
-    phone: values.phone.trim().startsWith("+")
-      ? `+${values.phone.replace(/\D/g, "")}`
-      : `+91${values.phone.replace(/\D/g, "")}`,
+    phone: normalizeContactPhone(values.phone) ?? undefined,
     notify: family ? values.notify : undefined,
   };
 }
@@ -167,6 +169,8 @@ export function ProfileForm({
     blood_group: string | null;
     email: string | null;
     contact_phone?: string | null;
+    relation?: string | null;
+    notify?: boolean;
     address: PatientAddress | null;
     profile_photo_path?: string | null;
   };
@@ -246,7 +250,7 @@ export function ProfileForm({
       setValue("email", initialEmail);
     }
     if (!initialProfile && !family && initialPhone) {
-      setValue("phone", initialPhone);
+      setValue("phone", contactPhoneForInput(initialPhone));
     }
   }, [initialProfile, initialEmail, initialPhone, family, reset, setValue]);
 
@@ -337,9 +341,7 @@ export function ProfileForm({
             rules={{
               required: "Enter your phone number.",
               validate: (value) =>
-                (value.trim().startsWith("+")
-                  ? /^\+[1-9]\d{7,14}$/.test(value.trim())
-                  : /^\d{10}$/.test(value.replace(/\D/g, ""))) ||
+                Boolean(normalizeContactPhone(value)) ||
                 "Enter a valid mobile number, including the country code for international numbers.",
             }}
             render={({ field, fieldState }) => (
@@ -350,10 +352,11 @@ export function ProfileForm({
                 invalid={fieldState.invalid}
                 keyboardType="phone-pad"
                 autoComplete="tel"
-                placeholder="+91 mobile number"
+                placeholder="Mobile number"
+                prefix={field.value.startsWith("+") && !field.value.startsWith("+91") ? undefined : "+91"}
                 placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
                 value={field.value}
-                onChangeText={field.onChange}
+                onChangeText={(value) => field.onChange(contactPhoneForInput(value))}
                 onBlur={field.onBlur}
                 style={[profileFormStyles.control, profileFormStyles.text]}
               />

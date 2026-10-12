@@ -1,6 +1,11 @@
 /** Window coordinates must share the same origin; use the actual form viewport. */
 export function keyboardScrollAdjustment({
-  inputTop, inputHeight, viewportTop, viewportHeight, keyboardTop, gap = 24,
+  inputTop,
+  inputHeight,
+  viewportTop,
+  viewportHeight,
+  keyboardTop,
+  gap = 24,
 }: {
   inputTop: number;
   inputHeight: number;

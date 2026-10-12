@@ -1,3 +1,4 @@
+import type { AmbulanceHospital } from "@startup/contracts";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Clock3, Heart, MapPin } from "lucide-react-native";
@@ -10,19 +11,21 @@ export function Suggestions({
   hospitals,
 }: {
   query?: string;
-  onSelect: (name: string) => void;
+  onSelect: (hospital: AmbulanceHospital) => void;
   onClose?: () => void;
-  hospitals: { id: string; name: string; address: string; distance_meters: number | null }[];
+  hospitals: AmbulanceHospital[];
 }) {
   const [favorite, setFavorite] = useState<string>("");
 
-  const filtered = hospitals.filter(({ name, address }) => {
+  const filtered = hospitals.filter((hospital) => {
+    if ("source" in hospital) return true;
+    const { name, address } = hospital;
     if (!query || !query.trim()) return true;
     const q = query.toLowerCase();
     return name.toLowerCase().includes(q) || address.toLowerCase().includes(q);
   });
 
-  const list = filtered;
+  const list = filtered.slice(0, 10);
 
   return (
     <View style={styles.suggestionsContainer}>
@@ -40,12 +43,13 @@ export function Suggestions({
       </View>
 
       <View style={styles.suggestionsList}>
-        {list.map(({ id, name, address, distance_meters }) => {
+        {list.map((hospital) => {
+          const { id, name, address, distance_meters } = hospital;
           const isFav = favorite === name;
           return (
             <Pressable
               key={id}
-              onPress={() => onSelect(name)}
+              onPress={() => onSelect(hospital)}
               style={({ pressed }) => [
                 styles.suggestionCard,
                 pressed && styles.pressed,
@@ -61,6 +65,8 @@ export function Suggestions({
                 <Text numberOfLines={1} style={styles.suggestionAddress}>
                   {address}
                 </Text>
+                {"source" in hospital ? <Text style={{ color: "#5E5E5E", fontFamily: fontFamilies.regular, fontSize: 12 }}>Google Maps</Text> : null}
+                {"source" in hospital ? hospital.attributions.map(a => <Text key={a.provider} style={{ color: "#5E5E5E", fontSize: 12 }}>{a.provider}</Text>) : null}
                 <View style={styles.suggestionMetaRow}>
                   <Clock3 color="#087F78" size={12} />
                   <Text style={styles.suggestionMetaText}>

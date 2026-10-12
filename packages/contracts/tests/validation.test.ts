@@ -119,3 +119,27 @@ test("driver registration accepts UI evidence without caller-selected approval o
   expect(driverRegistrationSubmissionSchema.safeParse({ ...application, documents: {} }).success).toBe(false);
   expect(driverRegistrationSubmissionSchema.safeParse({ ...application, approved: true }).success).toBe(false);
 });
+import { contactPhoneForInput, normalizeContactPhone } from "../src/phone";
+
+test("contact phones round-trip through edit forms without duplicating the country code", () => {
+  for (const value of ["9876543210", "+919876543210", "919876543210", "+91 98765 43210"]) {
+    expect(normalizeContactPhone(value)).toBe("+919876543210");
+    expect(contactPhoneForInput(value)).toBe("9876543210");
+    expect(normalizeContactPhone(contactPhoneForInput(value))).toBe("+919876543210");
+  }
+  expect(contactPhoneForInput("+14155552671")).toBe("+14155552671");
+  expect(normalizeContactPhone("+14155552671")).toBe("+14155552671");
+  expect(normalizeContactPhone("=919876543210")).toBeNull();
+  expect(normalizeContactPhone("91")).toBeNull();
+  expect(normalizeContactPhone("")).toBeNull();
+});
+
+import { requestGoogleAmbulanceBookingSchema } from "../src/ambulance-booking";
+test("external ambulance booking accepts a place ID, not caller supplied hospital coordinates or verification", () => {
+  const input = { patientId: id, pickupLatitude: 12.9, pickupLongitude: 77.5,
+    pickupAddress: "Confirmed pickup gate", destinationPlaceId: "ChIJ_Test", capabilityCode: "BLS", idempotencyKey: id };
+  expect(requestGoogleAmbulanceBookingSchema.safeParse(input).success).toBe(true);
+  expect(requestGoogleAmbulanceBookingSchema.safeParse({ ...input, destinationLatitude: 12.9 }).success).toBe(false);
+  expect(requestGoogleAmbulanceBookingSchema.safeParse({ ...input, verified: true }).success).toBe(false);
+  expect(requestGoogleAmbulanceBookingSchema.safeParse({ ...input, destinationPlaceId: "../arbitrary" }).success).toBe(false);
+});

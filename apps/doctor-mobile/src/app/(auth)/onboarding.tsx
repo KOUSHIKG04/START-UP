@@ -36,6 +36,7 @@ import {
   doctorQualificationSchema,
   doctorSpecialtiesSchema,
   ageFromBirthDate,
+  contactPhoneForInput,
   parseDisplayDate,
 } from "@startup/contracts";
 import {
@@ -176,7 +177,7 @@ export default function DoctorOnboarding() {
   useEffect(() => {
     if (!session?.user) return;
     setEmail(current => current || session.user.email || "");
-    setPhone(current => current || session.user.phone || "");
+    setPhone(current => current || contactPhoneForInput(session.user.phone || ""));
   }, [session?.user.id, session?.user.email, session?.user.phone]);
 
   useEffect(() => {
