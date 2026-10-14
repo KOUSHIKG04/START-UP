@@ -1,8 +1,8 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { LiveUpdatesBridge } from "../services/LiveUpdatesBridge";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import { DefaultTheme, router, Stack, ThemeProvider } from "expo-router";
+import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@startup/design-tokens";
@@ -41,17 +41,6 @@ const navTheme = {
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(albertSansFonts);
   const auth = useMobileSession();
-  const routedAccount = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (auth.loading || (!fontsLoaded && !fontError)) return;
-    if (!auth.session) { routedAccount.current = null; return; }
-    if (auth.error || routedAccount.current === auth.session.user.id) return;
-    routedAccount.current = auth.session.user.id;
-    // Only a successfully resolved new/incomplete account needs onboarding.
-    // Existing patients are routed by the protected app group below.
-    if (!auth.profile?.patient_id || !auth.profile.patient_profile_complete) router.replace("/onboarding");
-  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile, fontsLoaded, fontError]);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

@@ -28,7 +28,7 @@ export function LiveFacilityUpdates({ facilityIds }: { facilityIds: string[] }) 
         const all = catchUp;
         const kinds = new Set([...changes.values()].map(change => change.kind));
         if (all || kinds.has("beds")) void queryClient.invalidateQueries({ queryKey: ["facility-live-beds"] }, { cancelRefetch: false });
-        if (all || kinds.has("schedule") || kinds.has("profile")) {
+        if (all || kinds.has("schedule") || kinds.has("profile") || kinds.has("appointments")) {
           void queryClient.invalidateQueries({ queryKey: ["facility-practice-schedule"] }, { cancelRefetch: false });
           void queryClient.invalidateQueries({ queryKey: ["doctors", "directory"] }, { cancelRefetch: false });
         }

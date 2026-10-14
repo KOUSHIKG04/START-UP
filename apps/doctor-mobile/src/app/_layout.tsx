@@ -108,6 +108,6 @@ export default function RootLayout() {
   );
 }
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#E6F5F4" },
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
   scene: { flex: 1, backgroundColor: "#FFFFFF" },
 });

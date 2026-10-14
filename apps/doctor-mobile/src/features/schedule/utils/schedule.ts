@@ -12,7 +12,7 @@ export function formatTime(value: number) {
   const hour = Math.floor(value / 60);
   return `${String(hour % 12 || 12).padStart(2, "0")}:${String(value % 60).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
 }
-export function scheduleError(schedule: Schedule): string | undefined {
+export function scheduleError(schedule: Schedule, mode: "clinic" | "online" | "home" = "clinic"): string | undefined {
   if (!Number.isInteger(schedule.duration) || schedule.duration < 5 || schedule.duration > 120) return "Enter a clinic slot duration from 5 to 120 minutes.";
   if (!Number.isInteger(schedule.onlineDuration) || schedule.onlineDuration < 5 || schedule.onlineDuration > 120) return "Enter an online slot duration from 5 to 120 minutes.";
   if (!Number.isInteger(schedule.homeDuration) || schedule.homeDuration < 30 || schedule.homeDuration > 120) return "Enter a home-visit slot duration from 30 to 120 minutes.";
@@ -25,8 +25,10 @@ export function scheduleError(schedule: Schedule): string | undefined {
     return "Enter clinic hours as HH:MM; the end may be 24:00.";
   if (endMinutes(schedule.end) <= minutes(schedule.start))
     return "End time must be after start time.";
-  if (endMinutes(schedule.end) - minutes(schedule.start) < schedule.duration)
-    return "Clinic hours must fit at least one appointment slot.";
+  const duration = mode === "online" ? schedule.onlineDuration : mode === "home" ? schedule.homeDuration : schedule.duration;
+  if (mode !== "home" && duration > 45) return "Choose a slot duration of up to 45 minutes.";
+  if (endMinutes(schedule.end) - minutes(schedule.start) < duration)
+    return "Working hours must fit at least one appointment slot.";
   if (
     [schedule.onlineFee, schedule.clinicFee, schedule.homeFee].some(
       (f) => !/^\d+(\.\d{1,2})?$/.test(f) || Number(f) > 100000

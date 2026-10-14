@@ -87,7 +87,7 @@ export function EditProfileScreen() {
   });
 
   return (
-    <DoctorScreen title="Edit profile" background="#F5F5F5" bottomNav={false}>
+    <DoctorScreen title="Edit profile" bottomNav={false}>
       <Panel>
         {profile.isLoading ? <Skeleton theme="doctor" height={120} radius={12} /> : null}
         {profile.error ? <Label style={ui.error}>{profile.error.message}</Label> : null}

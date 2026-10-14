@@ -63,6 +63,8 @@ export {
   type FadedScrollViewProps,
 } from "./primitives/FadedScrollView";
 export { TimeSlot, type TimeSlotProps } from "./primitives/TimeSlot";
+export { ClockTimePicker, type ClockTimePickerProps } from "./primitives/ClockTimePicker";
+export { ClockDurationPicker, type ClockDurationPickerProps } from "./primitives/ClockDurationPicker";
 export { UploadInput, type UploadInputProps } from "./primitives/UploadInput";
 export { StatusBadge, type StatusBadgeProps } from "./primitives/StatusBadge";
 export {

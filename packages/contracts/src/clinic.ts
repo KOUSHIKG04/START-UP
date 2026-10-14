@@ -66,6 +66,7 @@ export const clinicTransitionSchema = z
   .strict();
 
 export const clinicSlotSchema = z.object({
+  service_mode: z.enum(["clinic", "online", "home"]).optional(),
   window_id: uuidSchema,
   practice_service_id: uuidSchema,
   practice_id: uuidSchema,
@@ -97,6 +98,7 @@ export const clinicSessionSchema = z.object({
   auto_confirm_limit: z.number().int().nonnegative().nullable(),
   state: z.enum(["published", "open", "closed", "cancelled"]),
   row_version: z.string(),
+  available_slots: z.array(z.object({ starts_at: z.string(), ends_at: z.string() })).optional(),
 });
 
 export const setClinicAutoConfirmLimitSchema = z
@@ -112,6 +114,7 @@ export const clinicUnavailabilitySchema = z.object({
   starts_at: z.string(),
   ends_at: z.string(),
   reason: z.string(),
+  service_mode: z.enum(["all", "clinic", "online", "home"]).default("all"),
   state: z.enum(["active", "revoked"]),
   row_version: z.string(),
 });
@@ -122,6 +125,8 @@ export const addClinicUnavailabilitySchema = z
     startsAt: z.iso.datetime({ offset: true }),
     endsAt: z.iso.datetime({ offset: true }),
     reason: z.string().trim().min(2).max(500),
+    serviceMode: z.enum(["all", "clinic", "online", "home"]).optional(),
+    serviceModes: z.array(z.enum(["all", "clinic", "online", "home"])).min(1).max(3).optional(),
   })
   .strict();
 

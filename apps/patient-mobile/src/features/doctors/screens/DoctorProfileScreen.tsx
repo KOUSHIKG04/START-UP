@@ -27,6 +27,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
   const [overrideConsultationType, setOverrideConsultationType] = useState<ConsultationType | null>(null);
   const selectedConsultationType = overrideConsultationType ?? (consultationType as ConsultationType);
   const isOnline = selectedConsultationType === "Online";
+  const serviceMode = isOnline ? "online" : selectedConsultationType === "Home Visit" ? "home" : "clinic";
   const [addressDraft, setAddressDraft] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState(() => Crypto.randomUUID());
@@ -59,8 +60,8 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     return () => { active = false; };
   }, [coordinates, isOnline, savedLocations.isLoading, selectedLocation?.latitude, selectedLocation?.longitude]);
   const practiceQuery = useQuery({
-    queryKey: ["public-practice", practiceId, isOnline ? null : coordinates?.latitude, isOnline ? null : coordinates?.longitude],
-    queryFn: () => searchPublicPractices(supabase!, { practiceId, latitude: isOnline ? undefined : coordinates?.latitude, longitude: isOnline ? undefined : coordinates?.longitude, limit: 50 }),
+    queryKey: ["public-practice", practiceId, serviceMode, isOnline ? null : coordinates?.latitude, isOnline ? null : coordinates?.longitude],
+    queryFn: () => searchPublicPractices(supabase!, { practiceId, serviceMode, latitude: isOnline ? undefined : coordinates?.latitude, longitude: isOnline ? undefined : coordinates?.longitude, limit: 100 }),
     enabled: Boolean(supabase && practiceId),
   });
   useToastFeedback({ error: practiceQuery.isError ? "Could not load this doctor." : "" });
@@ -68,8 +69,9 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
   const matchingServices = practiceQuery.data?.filter(item => item.practice_id === practiceId && item.service_code.startsWith(servicePrefix)) ?? [];
   const matchingServiceIds = new Set(matchingServices.map(item => item.practice_service_id));
   const slotsQuery = useQuery({
-    queryKey: ["clinic-slots", practiceId],
-    queryFn: () => listPracticeClinicSlots(supabase!, practiceId),
+    queryKey: ["clinic-slots", practiceId, serviceMode],
+    // A rolling 30-day schedule contains at most 100 slots per service/day.
+    queryFn: () => listPracticeClinicSlots(supabase!, practiceId, undefined, 3000, serviceMode),
     enabled: Boolean(supabase && practiceId),
   });
   useFocusEffect(useCallback(() => {
@@ -100,7 +102,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     setAddressDraft(formatted);
     setHomeAddress(formatted);
   }, [patientDetail.data?.address, selectedLocation]);
-  const slots = slotsQuery.data?.filter(item => item.practice_id === practiceId && matchingServiceIds.has(item.practice_service_id)) ?? [];
+  const slots = slotsQuery.data?.filter(item => item.practice_id === practiceId && item.service_mode === serviceMode && matchingServiceIds.has(item.practice_service_id)) ?? [];
   const displayedServiceId = slots[0]?.practice_service_id ?? matchingServices.find(item => item.practice_service_id === serviceId)?.practice_service_id ?? matchingServices[0]?.practice_service_id;
   const practice = matchingServices.find(item => item.practice_service_id === displayedServiceId);
   const bioQuery = useQuery({

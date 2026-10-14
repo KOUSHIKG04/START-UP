@@ -65,3 +65,9 @@ export function formatDisplayDateTime(
   if (Number.isNaN(date.getTime())) return "—";
   return `${formatDisplayDate(date, timeZone)} ${new Intl.DateTimeFormat("en-IN", { hour: "2-digit", minute: "2-digit", timeZone }).format(date)}`;
 }
+
+/** Tomorrow's calendar date in the practice timezone, independent of device time. */
+export function nextLocalDate(timeZone?: string, now = new Date()): string {
+  const today = parseDisplayDate(formatDisplayDate(now, timeZone))!;
+  return new Date(Date.parse(`${today}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+}

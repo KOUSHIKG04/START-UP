@@ -317,6 +317,10 @@ export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferenc
   home_auto_accept_limit: smallint("home_auto_accept_limit").notNull().default(0),
   clinic_start: time("clinic_start").notNull(),
   clinic_end: time("clinic_end").notNull(),
+  online_start: time("online_start").notNull().default("13:00"),
+  online_end: time("online_end").notNull().default("15:00"),
+  home_start: time("home_start").notNull().default("16:00"),
+  home_end: time("home_end").notNull().default("17:00"),
   slot_minutes: smallint("slot_minutes").notNull(),
   online_slot_minutes: smallint("online_slot_minutes").notNull(),
   home_slot_minutes: smallint("home_slot_minutes").notNull(),
@@ -333,6 +337,7 @@ export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferenc
   updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
 }, (table) => [
   check("schedule_service_days_check", sql`cardinality(${table.online_working_days}) between 1 and 7 and cardinality(${table.home_working_days}) between 1 and 7 and ${table.online_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[] and ${table.home_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[]`),
+  check("schedule_service_hours_check", sql`${table.online_start} < ${table.online_end} and ${table.home_start} < ${table.home_end}`),
   check("schedule_service_approval_limits_check", sql`${table.online_auto_accept_limit} between 0 and 100 and ${table.home_auto_accept_limit} between 0 and 100`),
 ]).enableRLS();
 

@@ -114,7 +114,7 @@ export function BookSlots({
     noSlotsNotice.current = consultationType;
     showToast({
       title: "No slots available",
-      message: `This doctor has not published upcoming ${consultationType.toLowerCase()} times yet.`,
+      message: `No upcoming ${consultationType.toLowerCase()} times are available. Choose another service or check back later.`,
       type: "info",
     });
   }, [consultationType, error, loading, showToast, slots.length]);
@@ -268,6 +268,7 @@ export function BookSlots({
               </Text>
             ) : null}
           </View>
+          {selectedDate && !loading && !error && dateSlots.length === 0 ? <Text variant="body" style={styles.availability}>Not available on this date. Choose another date.</Text> : null}
           <View style={styles.slotGrid}>
             {dateSlots.map((slot) => {
               const time = new Date(slot.starts_at).toLocaleTimeString([], {

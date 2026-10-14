@@ -91,7 +91,6 @@ export function SelectPracticeScreen() {
     <DoctorScreen
       title="Select Your Location"
       bottomNav={false}
-      background={palette.subtle}
       contentStyle={styles.content}
     >
       <View style={styles.search}>

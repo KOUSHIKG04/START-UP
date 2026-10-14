@@ -11,6 +11,7 @@ import {
 import type {
   DoctorScheduleSettings,
   PublishSelectedDoctorSlotsInput,
+  AddClinicUnavailabilityInput,
 } from "@startup/contracts";
 import {
   getMySchedulePreferences,
@@ -19,6 +20,10 @@ import {
   listMyClinicSessions,
   saveMySchedulePreferences,
   publishSelectedDoctorSlots,
+  publishMyDoctorSchedule,
+  listClinicUnavailability,
+  addClinicUnavailability,
+  revokeClinicUnavailability,
 } from "@startup/data-access";
 import { requireApprovedFacility } from "@/server/auth/facilityAccess";
 import { createClient } from "@/lib/supabase/server";
@@ -48,19 +53,116 @@ export async function loadFacilityDoctorSchedule(
   try {
     const { client, doctor, settings } = await authorizedPractice(practiceId);
     if (localDay) z.iso.date().parse(localDay);
-    const [sessions, usage] = await Promise.all([
+    const [sessions, usage, unavailable] = await Promise.all([
       listMyClinicSessions(client, practiceId),
       localDay
         ? getMyDoctorDailySlotUsage(client, practiceId, localDay)
         : Promise.resolve(null),
+      listClinicUnavailability(client, practiceId),
     ]);
-    return { ok: true as const, doctor, settings, sessions, usage };
+    return {
+      ok: true as const,
+      doctor,
+      settings,
+      sessions,
+      usage,
+      unavailable,
+    };
   } catch (error) {
     unstable_rethrow(error);
     return {
       ok: false as const,
       error:
         error instanceof Error ? error.message : "Could not load schedule.",
+    };
+  }
+}
+
+export async function publishFacilityDoctorSchedule(
+  practiceId: string,
+  mode: "clinic" | "online" | "home",
+  settings: DoctorScheduleSettings,
+  expectedVersion: number,
+  effectiveFrom?: string
+) {
+  try {
+    const value = doctorScheduleSettingsSchema.parse(settings);
+    z.enum(["clinic", "online", "home"]).parse(mode);
+    z.number().int().safe().nonnegative().parse(expectedVersion);
+    if (effectiveFrom) z.iso.date().parse(effectiveFrom);
+    const { client } = await authorizedPractice(practiceId);
+    const publication = await publishMyDoctorSchedule(
+      client,
+      practiceId,
+      mode,
+      value,
+      expectedVersion,
+      effectiveFrom
+    );
+    revalidatePath("/doctor-schedules");
+    revalidatePath("/appointments");
+    return { ok: true as const, ...publication };
+  } catch (error) {
+    unstable_rethrow(error);
+    return {
+      ok: false as const,
+      error:
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "PT409"
+          ? "Schedule changed in another app. Refresh and review before publishing again."
+          : error instanceof Error
+            ? error.message
+            : "Could not publish schedule.",
+    };
+  }
+}
+
+export async function addFacilityDoctorUnavailability(
+  input: AddClinicUnavailabilityInput
+) {
+  try {
+    const { client } = await authorizedPractice(input.practiceId);
+    await addClinicUnavailability(client, input);
+    revalidatePath("/doctor-schedules");
+    revalidatePath("/appointments");
+    return { ok: true as const };
+  } catch (error) {
+    unstable_rethrow(error);
+    return {
+      ok: false as const,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Could not add unavailable time.",
+    };
+  }
+}
+
+export async function removeFacilityDoctorUnavailability(
+  practiceId: string,
+  exceptionId: string,
+  expectedVersion: number
+) {
+  try {
+    const { client } = await authorizedPractice(practiceId);
+    // Revocation also checks that the exception belongs to an authorized practice.
+    const items = await listClinicUnavailability(client, practiceId);
+    if (!items.some((item) => item.id === exceptionId))
+      throw new Error("Unavailable time does not belong to this practice.");
+    await revokeClinicUnavailability(client, { exceptionId, expectedVersion });
+    revalidatePath("/doctor-schedules");
+    revalidatePath("/appointments");
+    return { ok: true as const };
+  } catch (error) {
+    unstable_rethrow(error);
+    return {
+      ok: false as const,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Could not remove unavailable time.",
     };
   }
 }
@@ -86,7 +188,14 @@ export async function saveFacilityDoctorSchedule(
     return {
       ok: false as const,
       error:
-        typeof error === "object" && error !== null && "code" in error && error.code === "PT409" ? "Schedule changed in another app. Refresh before saving again." : error instanceof Error ? error.message : "Could not save schedule.",
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "PT409"
+          ? "Schedule changed in another app. Refresh before saving again."
+          : error instanceof Error
+            ? error.message
+            : "Could not save schedule.",
     };
   }
 }

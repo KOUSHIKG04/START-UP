@@ -90,14 +90,15 @@ export async function addClinicUnavailability(
   input: AddClinicUnavailabilityInput
 ) {
   const request = addClinicUnavailabilitySchema.parse(input);
-  const { data, error } = await client.rpc("add_clinic_unavailability", {
+  const { data, error } = await client.rpc("add_doctor_unavailability_for_services", {
     p_practice_id: request.practiceId,
     p_starts_at: request.startsAt,
     p_ends_at: request.endsAt,
     p_reason: request.reason,
+    p_service_modes: request.serviceModes ?? [request.serviceMode ?? "all"],
   });
-  if (error) throw error;
-  return uuidSchema.parse(data);
+  if (error) throw Object.assign(new Error(error.message), error);
+  return uuidSchema.array().parse(data)[0]!;
 }
 
 export async function revokeClinicUnavailability(
@@ -109,7 +110,7 @@ export async function revokeClinicUnavailability(
     p_exception_id: request.exceptionId,
     p_expected_version: request.expectedVersion,
   });
-  if (error) throw error;
+  if (error) throw Object.assign(new Error(error.message), error);
   return uuidSchema.parse(data);
 }
 
@@ -186,15 +187,19 @@ export async function listPracticeClinicSlots(
   client: AppSupabaseClient,
   practiceId: string,
   serviceId?: string,
-  limit = 100
+  limit = 100,
+  serviceMode?: "clinic" | "online" | "home"
 ) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100)
+  if (!Number.isInteger(limit) || limit < 1 || limit > (serviceMode ? 3000 : 100))
     throw new Error("Invalid slot limit");
-  const { data, error } = await client.rpc("list_practice_clinic_slots", {
+  const args = {
     p_practice_id: uuidSchema.parse(practiceId),
     p_service_id: serviceId ? uuidSchema.parse(serviceId) : null,
     p_limit: limit,
-  });
+  };
+  const { data, error } = serviceMode
+    ? await client.rpc("list_practice_service_slots", {...args, p_mode: serviceMode})
+    : await client.rpc("list_practice_clinic_slots", args);
   if (error) throw error;
   return clinicSlotSchema.array().parse(data);
 }

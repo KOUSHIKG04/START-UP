@@ -1,5 +1,6 @@
 -- Exact-target disposable validation only; all fixtures roll back.
 BEGIN;
+
 DO $$
 DECLARE da uuid:=gen_random_uuid(); pa uuid:=gen_random_uuid(); outsider uuid:=gen_random_uuid();
  di uuid; pi uuid; org uuid; fac uuid; doc uuid; patient uuid; practice uuid; service uuid; day uuid; sess uuid; win uuid; apt uuid; msg uuid; nonce uuid:=gen_random_uuid(); denied boolean;
@@ -58,5 +59,7 @@ BEGIN
  IF has_function_privilege('anon','public.send_online_message(uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'Anonymous chat send exposed'; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_publication_tables WHERE pubname='supabase_realtime' AND schemaname='public' AND tablename='online_message') THEN RAISE EXCEPTION 'Realtime chat publication missing'; END IF;
 END $$;
+
 ROLLBACK;
+
 SELECT true AS active_consultation_chat_smoke_passed;
