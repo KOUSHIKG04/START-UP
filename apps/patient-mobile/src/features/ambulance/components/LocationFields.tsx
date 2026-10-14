@@ -1,10 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Input, Loader } from "@startup/mobile-ui";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { MapPin, Search, X } from "lucide-react-native";
 import { fontFamilies, shadows } from "@startup/design-tokens";
 
@@ -32,7 +28,7 @@ export function LocationFields({
         accessibilityLabel="Current location, tap to set pickup on map"
       >
         <View style={styles.pickupDot} />
-        <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{pickupAddress || "Current Location"}</Text>
+        <Text variant="body" style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{pickupAddress || "Current Location"}</Text>
         {locating ? <Loader theme="patient" size="small" /> : <MapPin color="#008877" size={19} />}
       </Pressable>
 

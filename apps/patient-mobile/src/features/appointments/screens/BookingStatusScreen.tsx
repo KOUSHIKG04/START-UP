@@ -1,13 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native";
+import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import {
   CalendarDays,
   CheckCircle2,
@@ -149,13 +142,13 @@ function PendingStatus({
         </View>
         <View style={styles.statusCopy}>
           <View style={styles.pendingTitleRow}>
-            <Text style={styles.pendingTitle}>Waiting for doctor’s approval</Text>
+            <Text variant="cardHeading" style={styles.pendingTitle}>Waiting for doctor’s approval</Text>
             {/* <View style={styles.pendingTag}>
               <View style={styles.pendingDot} />
               <Text style={styles.pendingTagText}>In Review</Text>
             </View> */}
           </View>
-          <Text style={styles.pendingDescription}>
+          <Text variant="body" style={styles.pendingDescription}>
             We’ll notify you once your booking is confirmed by the doctor.
           </Text>
         </View>
@@ -213,16 +206,16 @@ function OnlineScheduleCard({ appointment }: { appointment: Appointment }) {
       padding={16}
       style={styles.flatCard}
     >
-      <Text style={styles.onlineDoctorName}>{appointment.doctorName}</Text>
+      <Text variant="cardHeading" style={styles.onlineDoctorName}>{appointment.doctorName}</Text>
       <View style={styles.scheduleRow}>
         <Clock3 color={colors.patient.primaryDark} size={18} />
-        <Text style={styles.scheduleLabel}>Time</Text>
-        <Text style={styles.scheduleValue}>{appointment.time}</Text>
+        <Text variant="label" style={styles.scheduleLabel}>Time</Text>
+        <Text variant="bodyEmphasis" style={styles.scheduleValue}>{appointment.time}</Text>
       </View>
       <View style={styles.scheduleRow}>
         <CalendarDays color={colors.patient.primaryDark} size={18} />
-        <Text style={styles.scheduleLabel}>Date</Text>
-        <Text style={styles.scheduleValue}>{appointment.date}</Text>
+        <Text variant="label" style={styles.scheduleLabel}>Date</Text>
+        <Text variant="bodyEmphasis" style={styles.scheduleValue}>{appointment.date}</Text>
       </View>
     </Card>
   );
@@ -240,7 +233,7 @@ function OnlineConsultationActions({
       <View style={styles.videoIcon}>
         <Video color={colors.patient.primaryDark} size={19} strokeWidth={2} />
       </View>
-      <Text style={styles.videoTitle}>Video consultation</Text>
+      <Text variant="cardHeading" style={styles.videoTitle}>Video consultation</Text>
       <Pressable
         accessibilityLabel="Open consultation chat"
         accessibilityRole="button"
@@ -279,7 +272,7 @@ function PaymentOptions() {
       padding={14}
       style={styles.flatCard}
     >
-      <Text style={styles.paymentTitle}>Payment</Text>
+      <Text variant="cardHeading" style={styles.paymentTitle}>Payment</Text>
       <View style={styles.paymentRow}>
         <Button
           label="Pay Now"

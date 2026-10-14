@@ -1,15 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -197,7 +190,7 @@ export default function AddressDetailsScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {!mapPoint ? (
-              <Text style={styles.muted}>
+              <Text variant="body" style={styles.muted}>
                 Choose and confirm a place on the map before saving this
                 address.
               </Text>
@@ -224,7 +217,7 @@ export default function AddressDetailsScreen() {
                         kind === value ? colors.white : colors.patient.text
                       }
                     />
-                    <Text
+                    <Text variant="bodyEmphasis"
                       style={[
                         styles.kindText,
                         kind === value && styles.kindTextSelected,
@@ -287,7 +280,7 @@ export default function AddressDetailsScreen() {
                   style={styles.change}
                 >
                   <MapPin size={18} color={colors.patient.primary} />
-                  <Text style={styles.changeText}>Change</Text>
+                  <Text variant="body" style={styles.changeText}>Change</Text>
                 </Pressable>
               </View>
               <View style={styles.split}>
@@ -355,7 +348,7 @@ export default function AddressDetailsScreen() {
               onPress={() => void save()}
               style={[styles.save, (busy || !mapPoint) && styles.saveDisabled]}
             >
-              <Text style={styles.saveText}>
+              <Text variant="button" style={styles.saveText}>
                 {busy ? "Saving address…" : "Save Address"}
               </Text>
             </Button>

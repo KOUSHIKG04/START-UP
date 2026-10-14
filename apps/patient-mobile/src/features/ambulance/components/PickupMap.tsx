@@ -1,10 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { Search } from "lucide-react-native";
 import { fontFamilies, shadows } from "@startup/design-tokens";
 import { pickupMapImage } from "../utils/ambulanceConstants";
@@ -31,9 +27,9 @@ export function PickupMap({
         />
       </View>
       <View style={styles.pickupPanel}>
-        <Text style={styles.pickupTitle}>Confirm your pickup</Text>
+        <Text variant="cardHeading" style={styles.pickupTitle}>Confirm your pickup</Text>
         <View style={styles.pickupSearch}>
-          <Text numberOfLines={1} style={styles.pickupPlaceholder}>
+          <Text variant="body" numberOfLines={1} style={styles.pickupPlaceholder}>
             {destination || "Search hospital or clinic"}
           </Text>
           <Search color="#71818F" size={18} />
@@ -50,7 +46,7 @@ export function PickupMap({
           onPress={onConfirm}
           style={styles.confirmButton}
         />
-        <Text style={styles.mapCaption}>
+        <Text variant="caption" style={styles.mapCaption}>
           Map shown for illustration; GPS permission required.
         </Text>
       </View>

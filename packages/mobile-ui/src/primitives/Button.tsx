@@ -1,15 +1,7 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useRef, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
@@ -103,7 +95,7 @@ export function Button({
         <>
           {leftIcon}
           {label ? (
-            <Text
+            <Text variant="button"
               numberOfLines={1}
               style={[
                 styles.label,

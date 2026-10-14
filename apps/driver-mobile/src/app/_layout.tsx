@@ -1,3 +1,4 @@
+import { LiveUpdatesBridge } from "../services/LiveUpdatesBridge";
 import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import { router, Stack } from "expo-router";
@@ -73,6 +74,7 @@ export default function RootLayout() {
         <ToastProvider>
         <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
         <QueryProvider>
+          <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
           {auth.profile?.driver?.id ? <DriverLocationReporter /> : null}
           <View style={{ flex: 1, backgroundColor: "#fff" }}>
             <Stack

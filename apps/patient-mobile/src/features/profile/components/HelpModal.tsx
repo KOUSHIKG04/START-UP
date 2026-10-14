@@ -1,4 +1,5 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight, HelpCircle, Mail, Phone, X } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, ModalSurface } from "@startup/mobile-ui";
@@ -16,7 +17,7 @@ export function HelpModal({
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleRow}>
               <HelpCircle color={colors.patient.primaryDark} size={20} />
-              <Text style={styles.modalTitle}>Help & Support</Text>
+              <Text variant="cardHeading" style={styles.modalTitle}>Help & Support</Text>
             </View>
             <Pressable
               onPress={onClose}
@@ -27,7 +28,7 @@ export function HelpModal({
           </View>
 
           <View style={styles.modalBody}>
-            <Text style={styles.modalDescription}>
+            <Text variant="body" style={styles.modalDescription}>
               We are here 24/7 to assist with your medical appointments, emergency
               dispatch, and account queries.
             </Text>
@@ -38,8 +39,8 @@ export function HelpModal({
             >
               <Phone color={colors.patient.primaryDark} size={18} />
               <View style={styles.contactTextCol}>
-                <Text style={styles.contactLabel}>{supportContacts.hours}</Text>
-                <Text style={styles.contactValue}>{supportContacts.phone}</Text>
+                <Text variant="label" style={styles.contactLabel}>{supportContacts.hours}</Text>
+                <Text variant="bodyEmphasis" style={styles.contactValue}>{supportContacts.phone}</Text>
               </View>
               <ChevronRight color="#8EA0B4" size={16} />
             </Pressable>
@@ -50,8 +51,8 @@ export function HelpModal({
             >
               <Mail color={colors.patient.primaryDark} size={18} />
               <View style={styles.contactTextCol}>
-                <Text style={styles.contactLabel}>Email Support</Text>
-                <Text style={styles.contactValue}>{supportContacts.email}</Text>
+                <Text variant="label" style={styles.contactLabel}>Email Support</Text>
+                <Text variant="bodyEmphasis" style={styles.contactValue}>{supportContacts.email}</Text>
               </View>
               <ChevronRight color="#8EA0B4" size={16} />
             </Pressable>

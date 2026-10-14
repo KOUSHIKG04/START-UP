@@ -5,6 +5,8 @@ export type Database = {
     Tables: Record<string, never>;
     Views: Record<string, never>;
     Functions: {
+      can_receive_app_live_events: { Args: { p_topic: string }; Returns: boolean; };
+      can_receive_facility_association_events: { Args: { p_topic: string }; Returns: boolean; };
       get_my_doctor_personal_address: { Args: Record<string, never>; Returns: unknown; };
       save_my_doctor_profile_with_address: {
         Args: { p_full_name: string; p_bio: string | null; p_languages: string[]; p_address: unknown };

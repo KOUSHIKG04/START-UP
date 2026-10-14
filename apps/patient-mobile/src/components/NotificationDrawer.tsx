@@ -1,16 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Loader, useToastFeedback, ModalSurface, Dropdown } from "@startup/mobile-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Animated,
-  BackHandler,
-  Dimensions,
-  PanResponder,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, BackHandler, Dimensions, PanResponder, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -165,7 +156,7 @@ function NotificationCard({
 
       <View style={styles.textContainer}>
         <View style={styles.cardHeaderRow}>
-          <Text
+          <Text variant="cardHeading"
             numberOfLines={1}
             style={[
               styles.itemTitle,
@@ -174,9 +165,9 @@ function NotificationCard({
           >
             {item.title}
           </Text>
-          <Text style={styles.itemTime}>{item.time}</Text>
+          <Text variant="caption" style={styles.itemTime}>{item.time}</Text>
         </View>
-        <Text style={styles.itemMessage}>{item.message}</Text>
+        <Text variant="body" style={styles.itemMessage}>{item.message}</Text>
       </View>
     </Pressable>
       </Animated.View>
@@ -196,7 +187,6 @@ export function NotificationDrawer({
     queryKey: ["my-notifications"],
     queryFn: () => listMyNotifications(supabase!),
     enabled: Boolean(supabase && showModal),
-    refetchInterval: showModal ? 15000 : false,
   });
   const markRead = useMutation({
     mutationFn: (ids?: string[]) => markMyNotificationsRead(supabase!, ids),
@@ -362,7 +352,7 @@ export function NotificationDrawer({
           <Header title="Notification" app="patient" onBackPress={onClose} />
 
           <View style={styles.drawerSubheader}>
-            <Text style={styles.unreadCountText} numberOfLines={1}>
+            <Text variant="label" style={styles.unreadCountText} numberOfLines={1}>
               {notifications.filter((n) => !n.read).length > 0
                 ? `${notifications.filter((n) => !n.read).length} new notification${
                     notifications.filter((n) => !n.read).length > 1 ? "s" : ""
@@ -376,10 +366,10 @@ export function NotificationDrawer({
           <View style={styles.hintRow}>
             {notifications.some((n) => !n.read) ? (
               <Pressable accessibilityLabel="Mark all as read" accessibilityRole="button" onPress={markAllAsRead} hitSlop={8}>
-                <Text style={styles.markReadText}>Mark all read</Text>
+                <Text variant="body" style={styles.markReadText}>Mark all read</Text>
               </Pressable>
             ) : null}
-            <Text style={styles.swipeHint}>Swipe left, then tap trash to delete.</Text>
+            <Text variant="caption" style={styles.swipeHint}>Swipe left, then tap trash to delete.</Text>
           </View>
 
           <ScrollView
@@ -393,7 +383,7 @@ export function NotificationDrawer({
           >
             {notificationsQuery.isLoading ? <Loader theme="patient" /> : null}
             {!notificationsQuery.isLoading && !notificationsQuery.isError && filteredNotifications.length === 0 ? (
-              <Text style={[styles.itemMessage, styles.emptyMessage]}>{filter === "all" ? "No notifications yet." : "No notifications match this filter."}</Text>
+              <Text variant="body" style={[styles.itemMessage, styles.emptyMessage]}>{filter === "all" ? "No notifications yet." : "No notifications match this filter."}</Text>
             ) : null}
             {filteredNotifications.map((item) => (
               <NotificationCard

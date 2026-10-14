@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import type { ReactNode } from "react";
-import { StyleSheet, Text, type StyleProp, type TextStyle } from "react-native";
+import { StyleSheet, type StyleProp, type TextStyle } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
 export function SectionTitle({
@@ -9,7 +10,7 @@ export function SectionTitle({
   children: ReactNode;
   style?: StyleProp<TextStyle>;
 }) {
-  return <Text style={[styles.sectionTitle, style]}>{children}</Text>;
+  return <Text variant="sectionHeading" style={[styles.sectionTitle, style]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({

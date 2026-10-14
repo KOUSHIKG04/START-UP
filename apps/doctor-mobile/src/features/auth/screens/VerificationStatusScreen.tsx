@@ -19,7 +19,7 @@ const documentControlHeight = 56;
 const labels: Record<string, string> = { pending: "Pending review", under_review: "Under review", needs_resubmission: "Update required", verified: "Verified", approved: "Approved", rejected: "Rejected", submitted: "Pending review" };
 
 export default function VerificationStatusScreen() {
-  const { submitted, profile, review, error, loading, refreshing, refresh } = useDoctorVerification({ refreshSession: false, pollIntervalMs: 3000 });
+  const { submitted, profile, review, error, loading, refreshing, refresh } = useDoctorVerification({ refreshSession: false });
   const { showToast } = useToast();
   useToastFeedback({ error });
   const [uploading, setUploading] = useState(false);

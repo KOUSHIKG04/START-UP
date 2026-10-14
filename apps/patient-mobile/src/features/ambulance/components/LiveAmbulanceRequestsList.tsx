@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { Button, Loader, useToastFeedback } from "@startup/mobile-ui";
 import type { MyAmbulanceBooking } from "@startup/contracts";
 
@@ -34,7 +35,7 @@ export function LiveAmbulanceRequestsList({
   useToastFeedback({ error: error ? "Could not load your ambulance requests." : "" });
   return (
     <>
-      <Text style={styles.title}>My requests</Text>
+      <Text variant="cardHeading" style={styles.title}>My requests</Text>
       <Button
         label="Refresh status"
         variant="outline"
@@ -43,48 +44,48 @@ export function LiveAmbulanceRequestsList({
       {isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
       {bookings?.map((booking) => (
         <View key={booking.id} style={styles.card}>
-          <Text style={styles.name}>
+          <Text variant="body" style={styles.name}>
             {booking.public_code} · {booking.status}
           </Text>
-          <Text>
+          <Text variant="body">
             {booking.capability_code} · {booking.pickup_address} →{" "}
             {booking.destination_address}
           </Text>
           {booking.driver_name ? (
-            <Text>
+            <Text variant="body">
               Driver: {booking.driver_name} · {booking.vehicle_registration}
             </Text>
           ) : null}
           {booking.trip_status ? (
-            <Text>Trip: {booking.trip_status}</Text>
+            <Text variant="body">Trip: {booking.trip_status}</Text>
           ) : null}
           {booking.id === activeBookingId &&
           booking.status === "assigned" ? (
             trackingData ? (
-              <Text>
+              <Text variant="body">
                 Driver location: {trackingData.latitude.toFixed(5)},{" "}
                 {trackingData.longitude.toFixed(5)} · updated{" "}
                 {new Date(trackingData.received_at).toLocaleTimeString()}
               </Text>
             ) : (
-              <Text>Waiting for a current driver location.</Text>
+              <Text variant="body">Waiting for a current driver location.</Text>
             )
           ) : null}
           {booking.id === activeBookingId && pinVisible ? (
             <View style={styles.card}>
-              <Text style={styles.subtitle}>Your completion PIN</Text>
+              <Text variant="body" style={styles.subtitle}>Your completion PIN</Text>
               {isPinLoading ? (
                 <Loader theme="patient" style={{ minHeight: 36 }} />
               ) : null}
               {pinData ? (
-                <Text
+                <Text variant="body"
                   accessibilityLabel="Four-digit completion PIN"
                   style={styles.pin}
                 >
                   {pinData}
                 </Text>
               ) : null}
-              <Text>
+              <Text variant="body">
                 Give this PIN to the driver only when you reach your
                 destination.
               </Text>

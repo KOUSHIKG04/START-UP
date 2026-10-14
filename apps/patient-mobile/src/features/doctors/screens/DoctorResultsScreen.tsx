@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router, useFocusEffect, type Href } from "expo-router";
 import * as Location from "expo-location";
 import { useQuery } from "@tanstack/react-query";
@@ -46,7 +47,6 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
       limit: 50,
     }),
     enabled: Boolean(supabase) && !isOnline,
-    refetchInterval: 30_000,
   });
   const onlineQuery = useQuery({
     queryKey: ["public-online-practices", symptom, onlineOffset],
@@ -57,7 +57,6 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
       limit: 50,
     }),
     enabled: Boolean(supabase) && isOnline,
-    refetchInterval: 30_000,
   });
   useEffect(() => { setOnlineOffset(0); setOnlineRows([]); }, [symptom, consultationType]);
   useEffect(() => {
@@ -124,7 +123,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     <Header title={symptom === "your symptoms" ? "All doctors" : `Specialists for ${symptom}`} app="patient" onBackPress={onBackPress} titleStyle={styles.headerTitle} />
     <View style={styles.topSection}>
       <View style={styles.headingRow}>
-        <View style={styles.headingCopy}><Text style={styles.title}>Doctors available for your care</Text></View>
+        <View style={styles.headingCopy}><Text variant="cardHeading" style={styles.title}>Doctors available for your care</Text></View>
         <View style={styles.filterActions}>
           <Dropdown accessibilityLabel="Sort doctors" options={isOnline ? filterOptions.filter(option => option.value !== "distance") : filterOptions} value={filter} onValueChange={(value) => { setFilter(value as SortBy); setSortOrder(value === "rating" || value === "experience" ? "desc" : "asc"); if (value === "distance" && !coordinates) void requestLocation(); }} triggerLabel="Filter" chevronSize={12} chevronColor={colors.patient.primaryDark} containerStyle={styles.filterContainer} triggerStyle={styles.filterTrigger} valueStyle={styles.filterValue} menuWidth={176} />
           <Pressable accessibilityLabel={sortOrder === "asc" ? "Sort ascending (tap for descending)" : "Sort descending (tap for ascending)"} accessibilityRole="button" onPress={toggleSortOrder} style={({ pressed }) => [styles.sortOrderButton, pressed && styles.sortOrderButtonPressed]}>
@@ -137,8 +136,8 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
       {locating && !isLoading ? <Loader theme="patient" style={styles.loading} /> : null}
       {isLoading ? <View accessibilityLabel="Loading doctors" style={styles.skeletonList}>{[0, 1, 2].map(index => <View key={index} style={styles.skeletonCard}><Skeleton theme="patient" width={54} height={54} radius={27} /><View style={styles.skeletonCopy}><Skeleton theme="patient" width="72%" height={18} /><Skeleton theme="patient" width="50%" height={14} /><Skeleton theme="patient" width="88%" height={14} /></View></View>)}</View> : null}
       {practices.length === 0 && !locating && !isLoading && !isError ? <View style={styles.empty}>
-        <Text style={styles.emptyTitle}>{symptom === "your symptoms" ? "No doctors available yet" : "No doctors match this search"}</Text>
-        <Text style={styles.message}>{symptom === "your symptoms" ? "Doctors appear here after their clinic is verified and they publish a service." : "Try another symptom, category, or browse all available doctors."}</Text>
+        <Text variant="cardHeading" style={styles.emptyTitle}>{symptom === "your symptoms" ? "No doctors available yet" : "No doctors match this search"}</Text>
+        <Text variant="body" style={styles.message}>{symptom === "your symptoms" ? "Doctors appear here after their clinic is verified and they publish a service." : "Try another symptom, category, or browse all available doctors."}</Text>
       </View> : null}
       <View style={styles.list}>{practices.map((practice) => <DoctorCard
         key={practice.practice_service_id}
@@ -153,7 +152,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
         contextLabel={consultationType === "Online" ? "Video consultation" : consultationType === "Home Visit" ? "Home Visit" : "Clinic Visit"}
         onPress={() => router.push({ pathname: "/doctor-profile", params: { practiceId: practice.practice_id, serviceId: practice.practice_service_id, consultationType } } as unknown as Href)}
       />)}</View>
-      {isOnline && onlineQuery.data?.length === 50 ? <Button loading={onlineQuery.isFetching} variant="ghost" label="Load more doctors" labelStyle={styles.moreLabel} accessibilityRole="button" accessibilityLabel="Load more online doctors" disabled={onlineQuery.isFetching} onPress={() => setOnlineOffset(value => value + 50)} style={styles.moreButton}><Text style={styles.moreLabel}>{onlineQuery.isFetching ? "Loading doctors…" : "Load more doctors"}</Text></Button> : null}
+      {isOnline && onlineQuery.data?.length === 50 ? <Button loading={onlineQuery.isFetching} variant="ghost" label="Load more doctors" labelStyle={styles.moreLabel} accessibilityRole="button" accessibilityLabel="Load more online doctors" disabled={onlineQuery.isFetching} onPress={() => setOnlineOffset(value => value + 50)} style={styles.moreButton}><Text variant="label" style={styles.moreLabel}>{onlineQuery.isFetching ? "Loading doctors…" : "Load more doctors"}</Text></Button> : null}
     </FadedScrollView>
   </View>;
 }

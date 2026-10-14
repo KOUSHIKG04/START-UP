@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import { useBedManagement } from "../hooks/useBedManagement";
 import type { BedInventoryProjection } from "@startup/contracts";
+import { BedCountStepper } from "../components/BedCountStepper";
 import { InitialBedCountsForm } from "../components/InitialBedCountsForm";
 import { bedManagementDateFormatter } from "../utils/bedManagementDate";
 import {
@@ -14,8 +15,6 @@ import {
   Check,
   User,
   Wrench,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 
 export default function BedManagementScreen({ inventory, loadError }: { inventory: BedInventoryProjection[]; loadError?: string }) {
@@ -23,14 +22,15 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
     viewMode,
     setViewMode,
     departments,
-    handleAdjustAvailable,
+    handleSetCount,
+    acceptSavedRow,
     totalBeds,
     totalAvailable,
     totalOccupied,
     availPercent,
     occPercent,
     totalMaintenance,
-    pendingId,
+    pendingIds,
   } = useBedManagement(inventory);
   useEffect(() => {
     if (loadError) toast.add({ title: "Could not load bed inventory", description: loadError, type: "error" });
@@ -225,7 +225,7 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
 
                 return (
                   <tr
-                    key={dept.id}
+                    key={`${dept.facilityId}:${dept.id}`}
                     className="hover:bg-slate-50/70 transition-colors"
                   >
                     {/* Department name with dot */}
@@ -238,7 +238,7 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
                       </div>
                     </td>
 
-                    {!dept.configured ? <td colSpan={4} className="py-3.5 px-3"><InitialBedCountsForm row={dept} /></td> : <>
+                    {!dept.configured ? <td colSpan={4} className="py-3.5 px-3"><InitialBedCountsForm row={dept} onSaved={acceptSavedRow} /></td> : <>
                     {/* Total Beds */}
                     <td className="py-3.5 px-3 text-center font-medium text-[#0f172a]">
                       {dept.total}
@@ -246,32 +246,12 @@ export default function BedManagementScreen({ inventory, loadError }: { inventor
 
                     {/* Available with Stepper (- / +) */}
                     <td className="py-3.5 px-3 text-center">
-                      <div className="inline-flex items-center border border-[#cbd5e1] rounded-md bg-white shadow-2xs overflow-hidden">
-                        <button
-                          aria-label="Decrease available beds"
-                          onClick={() => handleAdjustAvailable(dept.id, -1)}
-                          disabled={!dept.configured || dept.available <= 0 || pendingId === dept.id}
-                          className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-r border-[#cbd5e1] cursor-pointer"
-                        >
-                          <ChevronDown className="size-3.5" />
-                        </button>
-                        <span className="w-10 text-center font-semibold text-[#0f172a] text-[13px]">
-                          {dept.available}
-                        </span>
-                        <button
-                          aria-label="Increase available beds"
-                          onClick={() => handleAdjustAvailable(dept.id, 1)}
-                          disabled={!dept.configured || dept.available >= dept.total - dept.maintenance || pendingId === dept.id}
-                          className="px-2 py-1 text-[#64748b] hover:bg-slate-100 hover:text-[#0f172a] disabled:opacity-30 disabled:pointer-events-none transition-colors border-l border-[#cbd5e1] cursor-pointer"
-                        >
-                          <ChevronUp className="size-3.5" />
-                        </button>
-                      </div>
+                      <BedCountStepper label={`Available beds for ${dept.name}`} value={dept.available} max={dept.total - dept.maintenance}
+                        disabled={pendingIds.has(dept.id)} onCommit={value => { void handleSetCount(dept.id, "available", value); }} />
                     </td>
-
-                    {/* Occupied */}
-                    <td className="py-3.5 px-3 text-center font-semibold text-[#0f172a]">
-                      {dept.occupied}
+                    <td className="py-3.5 px-3 text-center">
+                      <BedCountStepper label={`Occupied beds for ${dept.name}`} value={dept.occupied} max={dept.total - dept.maintenance}
+                        disabled={pendingIds.has(dept.id)} onCommit={value => { void handleSetCount(dept.id, "occupied", value); }} />
                     </td>
 
                     {/* Occupancy Rate Bar & Label */}

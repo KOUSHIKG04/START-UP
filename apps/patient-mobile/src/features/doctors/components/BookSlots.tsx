@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
 import { formatDisplayDate } from "@startup/contracts";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
@@ -175,8 +176,8 @@ export function BookSlots({
       >
         <View style={styles.bookingSection}>
           <View style={styles.sectionHeadingRow}>
-            <Text style={styles.sectionTitle}>Select date</Text>
-            <Text style={styles.sectionTitle}>{new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1).getFullYear()}</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>Select date</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>{new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1).getFullYear()}</Text>
           </View>
           <FadedScrollView
             ref={monthsScrollRef}
@@ -233,7 +234,7 @@ export function BookSlots({
                     selected ? styles.selectedDateCard : undefined,
                   ]}
                 >
-                  <Text
+                  <Text variant="caption"
                     style={[
                       styles.dateNumber,
                       selected ? styles.selectedDateNumber : undefined,
@@ -242,7 +243,7 @@ export function BookSlots({
                   >
                     {date.dayNumber}
                   </Text>
-                  <Text
+                  <Text variant="caption"
                     style={[
                       styles.dateDay,
                       selected ? styles.selectedDateDay : undefined,
@@ -259,9 +260,9 @@ export function BookSlots({
 
         <View style={styles.bookingSection}>
           <View style={styles.sectionHeadingRow}>
-            <Text style={styles.sectionTitle}>Select time</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>Select time</Text>
             {dateSlots.length > 0 ? (
-              <Text style={styles.availability}>
+              <Text variant="body" style={styles.availability}>
                 {dateSlots.length} slots available
                 {selectedDate ? ` · ${formatDisplayDate(selectedDate)}` : ""}
               </Text>
@@ -297,7 +298,7 @@ export function BookSlots({
         </View>
 
         <View style={styles.bookingSection}>
-          <Text style={styles.sectionTitle}>For whom?</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>For whom?</Text>
           <FadedScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.patientRow}>
             {patientOptions.map((option) => (
               <Chip
@@ -315,7 +316,7 @@ export function BookSlots({
         </View>
 
         <View style={styles.bookingSection}>
-          <Text style={styles.sectionTitle}>Reason for visit (optional)</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>Reason for visit (optional)</Text>
           <Input
             accessibilityLabel="Reason for visit"
             placeholder="e.g. Fever, back pain, routine check-up..."

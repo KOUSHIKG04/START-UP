@@ -1,7 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { LockKeyhole } from "lucide-react-native";
 import {
@@ -138,11 +139,11 @@ function ProfileHeader({
         onPress={onPickPhoto}
       />
       <View style={styles.headText}>
-        <Text style={styles.title}>
+        <Text variant="cardHeading" style={styles.title}>
           {family ? "Family member Profile" : "Your Profile"}
         </Text>
         {
-          <Text style={styles.photoHint}>
+          <Text variant="label" style={styles.photoHint}>
             Tap the plus button on your profile icon to add a photo.
           </Text>
         }
@@ -402,7 +403,7 @@ export function ProfileForm({
           </View>
 
           <View style={styles.genderColumn}>
-            <Text style={styles.label}>Gender</Text>
+            <Text variant="label" style={styles.label}>Gender</Text>
             <Controller
               control={control}
               name="gender"
@@ -428,7 +429,7 @@ export function ProfileForm({
           </View>
         </View>
 
-        <Text style={[styles.label, styles.sectionLabel]}>Blood Group</Text>
+        <Text variant="label" style={[styles.label, styles.sectionLabel]}>Blood Group</Text>
         <Controller
           control={control}
           name="bloodGroup"
@@ -497,7 +498,7 @@ export function ProfileForm({
         </View>
         <View style={styles.privacyRow}>
           <LockKeyhole size={16} color={colors.textSecondary} />
-          <Text style={styles.privacy}>
+          <Text variant="body" style={styles.privacy}>
             Your Information is secure and private
           </Text>
         </View>

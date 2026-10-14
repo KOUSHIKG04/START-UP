@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { profileTabs } from "../utils/doctorProfileConstants";
 import type { ProfileTabsProps } from "../types/doctor-profile";
@@ -21,7 +22,7 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
               pressed ? styles.pressed : undefined,
             ]}
           >
-            <Text style={[styles.tabLabel, selected && styles.activeTabLabel]}>
+            <Text variant="label" style={[styles.tabLabel, selected && styles.activeTabLabel]}>
               {label}
             </Text>
           </Pressable>

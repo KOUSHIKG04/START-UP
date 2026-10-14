@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,7 +31,7 @@ export function LiveSosScreen({ onBackPress, onboarding = false }: { onBackPress
   const [locating, setLocating] = useState(false);
   const report = (text: string, type: ToastType) => showToast({ title: type === "error" ? "SOS action failed" : text, message: type === "error" ? text : undefined, type });
   const bookings = useQuery({ queryKey: ["my-ambulance-bookings"],
-    queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && sosDispatchEnabled && profile?.patient_id), refetchInterval: 15000 });
+    queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && sosDispatchEnabled && profile?.patient_id),});
   const active = bookings.data?.find((booking) => booking.booking_type === "sos" &&
     ["awaiting_location", "searching", "assigned"].includes(booking.status));
   const pinVisible = active?.trip_status === "in_progress" ||
@@ -44,7 +45,6 @@ export function LiveSosScreen({ onBackPress, onboarding = false }: { onBackPress
     queryKey: ["active-ambulance-tracking", active?.id],
     queryFn: () => getMyActiveAmbulanceTracking(supabase!, active!.id),
     enabled: Boolean(supabase && active?.status === "assigned"),
-    refetchInterval: 15000,
   });
 
   async function locate() {
@@ -98,24 +98,24 @@ export function LiveSosScreen({ onBackPress, onboarding = false }: { onBackPress
   return <SafeAreaView style={styles.screen}>
     <Header title="SOS Emergency" app="patient" onBackPress={onBackPress} />
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Emergency help</Text>
-      <Text>For immediate voice assistance, call your local emergency service. In India, dial 112.</Text>
+      <Text variant="cardHeading" style={styles.title}>Emergency help</Text>
+      <Text variant="body">For immediate voice assistance, call your local emergency service. In India, dial 112.</Text>
       <Button label="Call emergency 112" onPress={() => void Linking.openURL("tel:112")} />
-      {!sosDispatchEnabled ? <Text accessibilityRole="alert">In-app SOS dispatch is not active yet. Use the emergency call button above.</Text> : null}
+      {!sosDispatchEnabled ? <Text variant="body" accessibilityRole="alert">In-app SOS dispatch is not active yet. Use the emergency call button above.</Text> : null}
       {sosDispatchEnabled ? <>
       {active ? <View style={styles.card}>
-        <Text style={styles.subtitle}>Active SOS · {active.status}</Text>
-        <Text>{active.public_code}</Text>
-        <Text>{active.driver_name ? `Driver: ${active.driver_name} · ${active.vehicle_registration}` : "No driver assigned yet."}</Text>
-        {active.trip_status ? <Text>Trip: {active.trip_status}</Text> : null}
+        <Text variant="body" style={styles.subtitle}>Active SOS · {active.status}</Text>
+        <Text variant="body">{active.public_code}</Text>
+        <Text variant="body">{active.driver_name ? `Driver: ${active.driver_name} · ${active.vehicle_registration}` : "No driver assigned yet."}</Text>
+        {active.trip_status ? <Text variant="body">Trip: {active.trip_status}</Text> : null}
         {active.status === "assigned" ? tracking.data ? (
-          <Text>Driver location: {tracking.data.latitude.toFixed(5)}, {tracking.data.longitude.toFixed(5)} · updated {new Date(tracking.data.received_at).toLocaleTimeString()}</Text>
-        ) : <Text>Waiting for a current driver location.</Text> : null}
+          <Text variant="body">Driver location: {tracking.data.latitude.toFixed(5)}, {tracking.data.longitude.toFixed(5)} · updated {new Date(tracking.data.received_at).toLocaleTimeString()}</Text>
+        ) : <Text variant="body">Waiting for a current driver location.</Text> : null}
         {pinVisible ? <View style={styles.card}>
-          <Text style={styles.subtitle}>Your completion PIN</Text>
+          <Text variant="body" style={styles.subtitle}>Your completion PIN</Text>
           {verificationPin.isLoading ? <Loader theme="patient" style={{ minHeight: 36 }} /> : null}
-          {verificationPin.data ? <Text accessibilityLabel="Four-digit completion PIN" style={styles.pin}>{verificationPin.data}</Text> : null}
-          <Text>Give this PIN to the driver only when you reach your destination.</Text>
+          {verificationPin.data ? <Text variant="body" accessibilityLabel="Four-digit completion PIN" style={styles.pin}>{verificationPin.data}</Text> : null}
+          <Text variant="body">Give this PIN to the driver only when you reach your destination.</Text>
         </View> : null}
         {active.status === "searching" ? <>
           <Button loading={refreshDispatch.isPending} label="Search again" variant="outline" disabled={refreshDispatch.isPending}
@@ -124,7 +124,7 @@ export function LiveSosScreen({ onBackPress, onboarding = false }: { onBackPress
             disabled={cancel.isPending} onPress={() => cancel.mutate()} />
         </> : null}
       </View> : <>
-        <Text style={styles.subtitle}>Request an ALS ambulance</Text>
+        <Text variant="body" style={styles.subtitle}>Request an ALS ambulance</Text>
         {onboarding ? <>
           <Input label="Patient name" value={fullName} autoComplete="name"
             onChangeText={value => { setFullName(value); setRequestKey(Crypto.randomUUID()); }} />
@@ -142,9 +142,9 @@ export function LiveSosScreen({ onBackPress, onboarding = false }: { onBackPress
           disabled={request.isPending || !pickup || address.trim().length < 5 || summary.trim().length < 5 || (onboarding && (fullName.trim().length < 2 || !/^\+[1-9][0-9]{7,14}$/.test(contactPhone)))}
           delayLongPress={2300} accessibilityHint="Hold for 2.3 seconds to send the SOS request."
           onLongPress={() => request.mutate()} style={styles.sosButton}>
-          <Text style={styles.sosText}>{request.isPending ? "Sending…" : "Hold to send SOS"}</Text>
+          <Text variant="body" style={styles.sosText}>{request.isPending ? "Sending…" : "Hold to send SOS"}</Text>
         </Button>
-        <Text>The destination hospital can be chosen after emergency assessment.</Text>
+        <Text variant="body">The destination hospital can be chosen after emergency assessment.</Text>
       </>}
       <Button loading={bookings.isFetching} label="Refresh status" variant="outline" disabled={!profile?.patient_id || bookings.isFetching} onPress={() => void bookings.refetch()} />
       </> : null}

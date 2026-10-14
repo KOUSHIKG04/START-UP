@@ -1,15 +1,7 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
 
@@ -103,7 +95,7 @@ export function IconLabel({
             </View>
           </View>
 
-          <Text
+          <Text variant="label"
             numberOfLines={labelNumberOfLines}
             style={[
               styles.label,

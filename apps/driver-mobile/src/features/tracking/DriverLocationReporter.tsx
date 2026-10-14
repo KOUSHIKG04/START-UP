@@ -10,8 +10,7 @@ import { startDriverBackgroundLocation, stopDriverBackgroundLocation } from "./b
 export function DriverLocationReporter() {
   const { profile } = useMobileSession();
   const fleet = useQuery({ queryKey: ["driver-fleet", profile?.driver?.id],
-    queryFn: () => listMyAmbulanceFleet(supabase!), enabled: Boolean(supabase && profile?.driver?.id),
-    refetchInterval: 30000 });
+    queryFn: () => listMyAmbulanceFleet(supabase!), enabled: Boolean(supabase && profile?.driver?.id),});
   const shiftId = fleet.data?.find((vehicle) => vehicle.desired_availability === "online")?.active_shift_id;
 
   useEffect(() => {

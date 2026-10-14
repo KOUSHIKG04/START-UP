@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { Video } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
@@ -25,10 +26,10 @@ export function OnlineConsultation({
       </View>
 
       <View style={styles.consultationCopy}>
-        <Text style={styles.consultationTitle}>
+        <Text variant="cardHeading" style={styles.consultationTitle}>
           Online Consultation Available
         </Text>
-        <Text style={styles.consultationSubtitle}>
+        <Text variant="cardHeading" style={styles.consultationSubtitle}>
           {`Video call from home · ${fee}`}
         </Text>
       </View>

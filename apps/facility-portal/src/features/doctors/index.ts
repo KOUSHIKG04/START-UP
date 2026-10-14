@@ -14,3 +14,5 @@ export {
 } from "./utils/facilitySchedule";
 
 export { FacilityDoctorScheduleScreen } from "./screens/FacilityDoctorScheduleScreen";
+
+export { DashboardDoctorRequests } from "./components/DashboardDoctorRequests";

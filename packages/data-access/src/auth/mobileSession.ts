@@ -44,7 +44,7 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     // first sign-in, account switches and retries; preserve settled same-user
     // navigation during ordinary background refreshes.
     emit({
-      loading: state.loading || !sameAccount || Boolean(state.error),
+      loading: state.loading || !sameAccount || (Boolean(state.error) && !state.profile),
       session,
       profile: sameAccount ? state.profile : null,
       error: null,

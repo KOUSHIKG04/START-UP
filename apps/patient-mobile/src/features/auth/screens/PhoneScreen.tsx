@@ -1,8 +1,9 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { sendPhoneOtp } from "@startup/data-access";
@@ -20,11 +21,11 @@ export default function PhoneScreen() {
     finally { setBusy(false); }
   }
   return <OnboardingShell onBack={() => router.back()}><View style={styles.body}>
-    <Text style={styles.title}>Enter your mobile number</Text><Text style={styles.caption}>we’ll send you 6-digit OTP</Text>
-    <View style={styles.number}><Text style={styles.country}>+91</Text><View style={styles.divider} /><Input variant="unstyled" accessibilityLabel="Mobile number" keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" maxLength={10} placeholder="9483XXXXXX" value={phone} onChangeText={setPhone} style={styles.input} /></View>
+    <Text variant="screenTitle" style={styles.title}>Enter your mobile number</Text><Text variant="body" style={styles.caption}>we’ll send you 6-digit OTP</Text>
+    <View style={styles.number}><Text variant="label" style={styles.country}>+91</Text><View style={styles.divider} /><Input variant="unstyled" accessibilityLabel="Mobile number" keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" maxLength={10} placeholder="9483XXXXXX" value={phone} onChangeText={setPhone} style={styles.input} /></View>
 
-    <View style={styles.action}><Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>} label={busy ? "Sending…" : "Send OTP"} disabled={busy || phone.replace(/\D/g, "").length !== 10} onPress={() => void submit()} /></View>
-    <Text style={styles.safe}>♢  Your number is safe with us.</Text>
+    <View style={styles.action}><Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>} label={busy ? "Sending…" : "Send OTP"} disabled={busy || phone.replace(/\D/g, "").length !== 10} onPress={() => void submit()} /></View>
+    <Text variant="body" style={styles.safe}>♢  Your number is safe with us.</Text>
   </View></OnboardingShell>;
 }
 const styles = StyleSheet.create({

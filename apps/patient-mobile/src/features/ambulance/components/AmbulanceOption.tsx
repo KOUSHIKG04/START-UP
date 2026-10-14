@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Activity, HeartPulse, Siren } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { AmbulanceType } from "../utils/ambulanceConstants";
@@ -43,16 +44,16 @@ export function AmbulanceOption({
         {getAmbulanceIcon(item.id)}
       </View>
       <View style={styles.ambulanceCopy}>
-        <Text style={styles.ambulanceName}>{item.title}</Text>
-        <Text numberOfLines={1} style={styles.ambulanceDescription}>
+        <Text variant="body" style={styles.ambulanceName}>{item.title}</Text>
+        <Text variant="body" numberOfLines={1} style={styles.ambulanceDescription}>
           {item.description.replace("and", "&")}
         </Text>
       </View>
       <View style={styles.priceBlock}>
-        <Text style={[styles.price, selected && styles.selectedPrice]}>
+        <Text variant="bodyEmphasis" style={[styles.price, selected && styles.selectedPrice]}>
           {item.fare === null ? "Fare pending" : `₹${item.fare}`}
         </Text>
-        <Text style={styles.eta}>ETA {item.eta ?? "pending"}</Text>
+        <Text variant="body" style={styles.eta}>ETA {item.eta ?? "pending"}</Text>
       </View>
     </Pressable>
   );

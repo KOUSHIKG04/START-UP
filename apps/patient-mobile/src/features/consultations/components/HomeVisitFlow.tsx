@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { CarFront, Info } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
@@ -50,7 +51,7 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
         {/* <Text style={styles.cardTitle}>OTP verification</Text> */}
         <View style={styles.otpNotice}>
           <Info color={colors.patient.primaryDark} size={20} />
-          <Text style={styles.infoText}>Share this OTP when the doctor arrives.</Text>
+          <Text variant="body" style={styles.infoText}>Share this OTP when the doctor arrives.</Text>
         </View>
         <View style={styles.otpRow}>
           {[
@@ -60,7 +61,7 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
             { id: "otp-slot-4", digit: "6" },
           ].map((slot) => (
             <View key={slot.id} style={styles.otpCell}>
-              <Text style={styles.otpText}>{slot.digit}</Text>
+              <Text variant="body" style={styles.otpText}>{slot.digit}</Text>
             </View>
           ))}
         </View>

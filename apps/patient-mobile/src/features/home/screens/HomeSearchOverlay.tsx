@@ -1,16 +1,10 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
 import { supabase } from "../../../services/supabase";
-import {
-  Keyboard,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Keyboard, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { ChevronDown, Clock, MapPin, Search, Sparkles, X } from "lucide-react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -112,7 +106,7 @@ export function HomeSearchOverlay({
               style={styles.locationSelector}
             >
               <MapPin color={colors.white} size={18} strokeWidth={2} />
-              <Text style={styles.locationText}>{selectedCity}</Text>
+              <Text variant="body" style={styles.locationText}>{selectedCity}</Text>
               <ChevronDown color={colors.white} size={16} strokeWidth={2.2} />
             </Pressable>
           }
@@ -175,21 +169,21 @@ export function HomeSearchOverlay({
                       style={styles.rowIcon}
                     />
                     <View style={styles.rowContent}>
-                      <Text style={styles.itemTitle}>{item.title}</Text>
-                      <Text style={styles.itemSubtitle}>{item.type}</Text>
+                      <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
+                      <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
                     </View>
                   </Pressable>
                 ))
               ) : (
                 <View style={styles.emptyResults}>
-                  <Text style={styles.emptyText}>
+                  <Text variant="body" style={styles.emptyText}>
                     No results found for "{query}".
                   </Text>
                   <Pressable
                     onPress={handleSubmitEditing}
                     style={styles.searchAnywayButton}
                   >
-                    <Text style={styles.searchAnywayText}>
+                    <Text variant="body" style={styles.searchAnywayText}>
                       Search for "{query}"
                     </Text>
                   </Pressable>
@@ -202,7 +196,7 @@ export function HomeSearchOverlay({
               {recents.length > 0 && (
                 <View style={styles.recentsSection}>
                   <View style={styles.recentsHeader}>
-                    <Text style={styles.recentsHeaderText}>
+                    <Text variant="body" style={styles.recentsHeaderText}>
                       Continue searching for...
                     </Text>
                     <Pressable
@@ -211,7 +205,7 @@ export function HomeSearchOverlay({
                       hitSlop={8}
                       onPress={handleClearAll}
                     >
-                      <Text style={styles.clearAllText}>CLEAR</Text>
+                      <Text variant="body" style={styles.clearAllText}>CLEAR</Text>
                     </Pressable>
                   </View>
 
@@ -233,8 +227,8 @@ export function HomeSearchOverlay({
                           style={styles.rowIcon}
                         />
                         <View style={styles.rowContent}>
-                          <Text style={styles.itemTitle}>{item.title}</Text>
-                          <Text style={styles.itemSubtitle}>{item.type}</Text>
+                          <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
+                          <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
                         </View>
                         <Pressable
                           accessibilityLabel={`Remove ${item.title} from recents`}
@@ -262,7 +256,7 @@ export function HomeSearchOverlay({
                     size={16}
                     strokeWidth={2}
                   />
-                  <Text style={styles.suggestionsHeaderText}>
+                  <Text variant="body" style={styles.suggestionsHeaderText}>
                     Popular Searches
                   </Text>
                 </View>
@@ -279,7 +273,7 @@ export function HomeSearchOverlay({
                         pressed && styles.chipPressed,
                       ]}
                     >
-                      <Text style={styles.chipText}>{item.title}</Text>
+                      <Text variant="label" style={styles.chipText}>{item.title}</Text>
                     </Pressable>
                   ))}
                 </View>

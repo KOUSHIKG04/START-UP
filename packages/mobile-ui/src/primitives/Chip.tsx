@@ -1,13 +1,6 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type TextStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
 
@@ -101,7 +94,7 @@ export function Chip({
       ]}
     >
       {isRadio && radioPosition === "left" && renderRadioIndicator()}
-      <Text
+      <Text variant="label"
         numberOfLines={1}
         style={[
           styles.label,

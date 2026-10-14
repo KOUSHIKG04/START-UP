@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Chip } from "@startup/mobile-ui";
 import { categories, symptoms } from "../utils/findDoctorConstants";
@@ -21,7 +22,7 @@ export function FindDoctorCategories({
   return (
     <>
       <View>
-        <Text style={styles.symptomsTitle}>Most searched symptoms</Text>
+        <Text variant="cardHeading" style={styles.symptomsTitle}>Most searched symptoms</Text>
         <View style={styles.chipList}>
           {symptoms.map((symptom) => {
             const selected = selectedSymptom === symptom;
@@ -45,7 +46,7 @@ export function FindDoctorCategories({
       </View>
 
       <View>
-        <Text style={styles.sectionTitle}>Browse by categories</Text>
+        <Text variant="sectionHeading" style={styles.sectionTitle}>Browse by categories</Text>
         <View style={styles.categoryGrid}>
           {visibleCategories.map((category) => (
             <Pressable
@@ -73,7 +74,7 @@ export function FindDoctorCategories({
                 ]}
                 resizeMode="contain"
               />
-              <Text numberOfLines={2} style={styles.categoryLabel}>
+              <Text variant="label" numberOfLines={2} style={styles.categoryLabel}>
                 {category.label}
               </Text>
             </Pressable>

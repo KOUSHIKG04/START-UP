@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { Siren } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
@@ -12,8 +13,8 @@ export function Assigning() {
           </View>
         </View>
       </View>
-      <Text style={styles.assigningTitle}>Assigning the ambulance driver</Text>
-      <Text style={styles.assigningSubtitle}>We'll reach you soon</Text>
+      <Text variant="cardHeading" style={styles.assigningTitle}>Assigning the ambulance driver</Text>
+      <Text variant="cardHeading" style={styles.assigningSubtitle}>We'll reach you soon</Text>
     </View>
   );
 }

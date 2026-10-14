@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import { getMyPatientVerificationPin } from "@startup/data-access";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getMyPatientVerificationPin, subscribeAppChanges } from "@startup/data-access";
+import { AppState, Pressable, StyleSheet, View } from "react-native";
 import { ChevronDown, Lock } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, Input, Loader } from "@startup/mobile-ui";
@@ -23,7 +24,13 @@ export function ProfilePinCard() {
       return;
     }
     let current = true;
+    let inFlight = false;
+    let again = false;
     const load = async () => {
+      if (!current) return;
+      if (AppState.currentState !== "active") { again = true; return; }
+      if (inFlight) { again = true; return; }
+      inFlight = true; again = false;
       if (current) setLoading(true);
       try {
         const value = await getMyPatientVerificationPin(client, patientId);
@@ -37,16 +44,22 @@ export function ProfilePinCard() {
           setUnavailable(true);
         }
       } finally {
+        inFlight = false;
         if (current) setLoading(false);
+        if (current && again) { again = false; void load(); }
       }
     };
     void load();
-    const interval = setInterval(() => void load(), 15_000);
+    const cleanup = profile?.identity_id ? subscribeAppChanges(client, { identityId: profile.identity_id }, {
+      onChange: change => { if (change.kind === "profile") void load(); }, onConnected: () => { void load(); },
+    }) : () => {};
+    const appState = AppState.addEventListener("change", state => { if (state === "active") void load(); });
     return () => {
       current = false;
-      clearInterval(interval);
+      appState.remove();
+      cleanup();
     };
-  }, [patientId, showPin]);
+  }, [patientId, showPin, profile?.identity_id]);
 
   const digits = Array.from({ length: 4 }, (_, index) => pin?.[index] ?? "");
 
@@ -74,8 +87,8 @@ export function ProfilePinCard() {
           <Lock color={colors.patient.primaryDark} size={18} />
         </View>
         <View style={styles.copyCol}>
-          <Text style={styles.rowTitle}>Verification PIN</Text>
-          <Text style={styles.rowSubtitle}>
+          <Text variant="cardHeading" style={styles.rowTitle}>Verification PIN</Text>
+          <Text variant="cardHeading" style={styles.rowSubtitle}>
             Your 4-digit service completion passcode
           </Text>
         </View>
@@ -89,7 +102,7 @@ export function ProfilePinCard() {
       {showPin ? (
         <View style={styles.expandedSection}>
           <View style={styles.divider} />
-          <Text style={styles.pinInstructions}>
+          <Text variant="body" style={styles.pinInstructions}>
             Share this PIN only when an active service is ready to be completed.
           </Text>
           <View style={styles.pinRow}>
@@ -108,7 +121,7 @@ export function ProfilePinCard() {
             <Loader theme="patient" style={{ minHeight: 32 }} />
           ) : null}
           {unavailable ? (
-            <Text style={styles.pinInstructions}>
+            <Text variant="body" style={styles.pinInstructions}>
               Your PIN is available during an active trip. Home-visit PIN
               display will be enabled when that workflow is connected.
             </Text>

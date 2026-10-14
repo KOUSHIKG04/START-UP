@@ -1,15 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useTimeGreeting } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  BackHandler,
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Animated, BackHandler, Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router, type Href } from "expo-router";
@@ -122,7 +114,6 @@ export function HomeScreen({
     queryKey: ["patient-clinic-appointments"],
     queryFn: () => listClinicAppointments(supabase!),
     enabled: Boolean(supabase),
-    refetchInterval: 15000,
   });
 
   const upcoming = appointments.data
@@ -225,10 +216,10 @@ export function HomeScreen({
         />
         <SafeAreaView edges={["top"]} style={styles.safeArea}>
           <View style={styles.headerRow}>
-            <Text style={styles.greeting}>{greeting} 👋</Text>
+            <Text variant="sectionHeading" style={styles.greeting}>{greeting} 👋</Text>
             <Pressable accessibilityRole="button" accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`} onPress={() => router.push("/select-location")} style={styles.locationButton}>
               <MapPin color={colors.white} size={15} strokeWidth={2} />
-              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>{locationHeadline(selectedLocation)}</Text>
+              <Text variant="body" numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>{locationHeadline(selectedLocation)}</Text>
               <ChevronDown color={colors.white} size={15} />
             </Pressable>
           </View>

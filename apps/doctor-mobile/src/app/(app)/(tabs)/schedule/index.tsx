@@ -1,1 +1,1 @@
-export { ScheduleScreen as default } from "../../../../features/schedule/screens/ScheduleScreen";
+export { ScheduleOptionsScreen as default } from "../../../../features/schedule/screens/ScheduleOptionsScreen";

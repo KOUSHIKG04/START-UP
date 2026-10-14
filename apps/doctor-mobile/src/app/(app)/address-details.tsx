@@ -4,6 +4,7 @@ import { Input } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
+  ImageBackground,
   Platform,
   Pressable,
   ScrollView,
@@ -25,11 +26,10 @@ import type {
 } from "@startup/contracts";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, useToast, useToastFeedback } from "@startup/mobile-ui";
-import { BriefcaseBusiness, House, MapPin } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { supabase, useMobileSession } from "../../services/supabase";
 import { useLocationDraft } from "../../features/locations/locationDraft";
 
-type Kind = "house" | "office" | "other";
 const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
@@ -56,7 +56,6 @@ export default function AddressDetailsScreen() {
   const clearChosen = useLocationDraft((state) => state.clear);
   const chosenForForm = chosen?.addressId === (id ?? null) ? chosen : null;
   const [initializedId, setInitializedId] = useState<string | null>(null);
-  const [kind, setKind] = useState<Kind>("house");
   const [label, setLabel] = useState("");
   const [building, setBuilding] = useState("");
   const [street, setStreet] = useState(first(params.street) || "");
@@ -73,7 +72,6 @@ export default function AddressDetailsScreen() {
   useEffect(() => {
     if (!existing || initializedId === existing.id) return;
     setInitializedId(existing.id);
-    setKind(existing.kind === "current" ? "other" : existing.kind);
     setLabel(existing.label);
     setBuilding(existing.building || "");
     setStreet(chosenForForm?.street || existing.street || "");
@@ -104,8 +102,7 @@ export default function AddressDetailsScreen() {
     existing?.longitude !== undefined
       ? { latitude: existing.latitude, longitude: existing.longitude }
       : null);
-  const addressLabel =
-    kind === "house" ? "Home" : kind === "office" ? "Office" : label.trim();
+  const addressLabel = label.trim();
 
   async function save() {
     if (!supabase) return;
@@ -144,7 +141,7 @@ export default function AddressDetailsScreen() {
     try {
       const value: SavedDoctorLocationInput = {
         label: addressLabel,
-        kind,
+        kind: "other",
         building: building.trim(),
         street: street.trim(),
         locality: locality.trim(),
@@ -205,38 +202,6 @@ export default function AddressDetailsScreen() {
               </Text>
             ) : null}
             <View style={styles.card}>
-              <View style={styles.kindRow}>
-                {(
-                  [
-                    ["house", "Home", House],
-                    ["office", "Office", BriefcaseBusiness],
-                    ["other", "Other", MapPin],
-                  ] as const
-                ).map(([value, title, Icon]) => (
-                  <Pressable
-                    key={value}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: kind === value }}
-                    onPress={() => setKind(value)}
-                    style={[styles.kind, kind === value && styles.kindSelected]}
-                  >
-                    <Icon
-                      size={16}
-                      color={
-                        kind === value ? colors.white : colors.doctor.text
-                      }
-                    />
-                    <Text
-                      style={[
-                        styles.kindText,
-                        kind === value && styles.kindTextSelected,
-                      ]}
-                    >
-                      {title}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
               <Input
                 variant="unstyled"
                 accessibilityLabel="Building or floor"
@@ -288,8 +253,17 @@ export default function AddressDetailsScreen() {
                   }
                   style={styles.change}
                 >
-                  <MapPin size={18} color={colors.doctor.primary} />
-                  <Text style={styles.changeText}>Change</Text>
+                  <ImageBackground
+                    source={require("../../../assets/figma/address-map.png")}
+                    style={styles.changeMap}
+                    imageStyle={styles.changeMapImage}
+                    resizeMode="cover"
+                  >
+                    <View style={styles.changeContent}>
+                      <MapPin size={18} color={colors.doctor.primary} />
+                      <Text style={styles.changeText}>Change</Text>
+                    </View>
+                  </ImageBackground>
                 </Pressable>
               </View>
               <View style={styles.split}>
@@ -318,32 +292,34 @@ export default function AddressDetailsScreen() {
                   style={styles.input}
                 />
               </View>
-              <Input
-                variant="unstyled"
-                accessibilityLabel="Pincode"
-                label="Pincode"
-                labelStyle={styles.fieldLabel}
-                placeholderTextColor="#9CA3AF"
-                placeholder="Enter six-digit pincode"
-                keyboardType="number-pad"
-                maxLength={6}
-                value={pincode}
-                onChangeText={setPincode}
-                style={styles.input}
-              />
-              {kind === "other" ? (
+              <View style={styles.split}>
+                <Input
+                  variant="unstyled"
+                  accessibilityLabel="Pincode"
+                  label="Pincode"
+                  labelStyle={styles.fieldLabel}
+                  placeholderTextColor="#9CA3AF"
+                  placeholder="Six-digit pincode"
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  value={pincode}
+                  onChangeText={setPincode}
+                  containerStyle={styles.half}
+                  style={styles.input}
+                />
                 <Input
                   variant="unstyled"
                   accessibilityLabel="Save address as"
-                  label=" as *"
+                  label="Save address as *"
                   labelStyle={styles.fieldLabel}
                   placeholderTextColor="#9CA3AF"
-                  placeholder="e.g. Parents’ home"
+                  placeholder="e.g. Home"
                   value={label}
                   onChangeText={setLabel}
+                  containerStyle={styles.half}
                   style={styles.input}
                 />
-              ) : null}
+              </View>
             </View>
             <Button
               loading={busy}
@@ -411,35 +387,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 3,
   },
-  card: { backgroundColor: colors.white, borderRadius: 17, gap: 13 },
-  kindRow: {
-    flexDirection: "row",
-    backgroundColor: colors.white,
-    padding: 4,
-    borderRadius: 24,
-    marginBottom: 3,
-    elevation: 3,
-    shadowColor: colors.doctor.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-  },
-  kind: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-    minHeight: 38,
-    borderRadius: 20,
-  },
-  kindSelected: { backgroundColor: colors.doctor.primary },
-  kindText: {
-    color: colors.doctor.text,
-    fontFamily: fontFamilies.medium,
-    fontSize: 13,
-  },
-  kindTextSelected: { color: colors.white },
+  card: { backgroundColor: colors.white, borderRadius: 17, gap: 13, padding: 1, marginTop: 8 },
   fieldLabel: {
     color: colors.doctor.text,
     fontFamily: fontFamilies.medium,
@@ -472,7 +420,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#D9DDE0",
+    overflow: "hidden",
   },
+  changeMap: { flex: 1, width: "100%", justifyContent: "center", alignItems: "center" },
+  changeMapImage: { opacity: 0.5 },
+  changeContent: { alignItems: "center", gap: 2, backgroundColor: "#FFFFFFD9", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3 },
   changeText: {
     color: colors.doctor.primary,
     fontFamily: fontFamilies.semibold,

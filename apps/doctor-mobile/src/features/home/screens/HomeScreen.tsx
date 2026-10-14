@@ -1,5 +1,5 @@
 import { useTimeGreeting } from "@startup/mobile-ui";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell, MapPin, ArrowRight, ChevronDown } from "lucide-react-native";
@@ -35,9 +35,6 @@ import { locationHeadline } from "../../locations/locationDisplay";
 export function HomeScreen() {
   const greeting = useTimeGreeting();
   const insets = useSafeAreaInsets();
-  useEffect(() => {
-    router.prefetch("/select-location");
-  }, []);
   const { profile } = useMobileSession();
   const [showNotifications, setShowNotifications] = useState(false);
   const [presenceError, setPresenceError] = useState("");
@@ -63,7 +60,6 @@ export function HomeScreen() {
     queryKey: ["doctor-clinic-appointments", "all"],
     queryFn: () => listMyPracticeAppointments(supabase!),
     enabled: Boolean(supabase),
-    refetchInterval: 15000,
   });
   const presence = useQuery({
     queryKey: ["my-doctor-presence"],

@@ -1,8 +1,9 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { sendPhoneOtp, verifyPhoneOtp } from "@startup/data-access";
@@ -31,13 +32,13 @@ export default function VerifyOtpScreen() {
     finally { setResending(false); }
   }
   return <OnboardingShell onBack={() => router.back()}><View style={styles.body}>
-    <Text style={styles.title}>Verify OTP</Text><Text style={styles.caption}>Enter the 6-digit OTP sent to</Text><Text style={styles.phone}>{phone}</Text>
+    <Text variant="screenTitle" style={styles.title}>Verify OTP</Text><Text variant="body" style={styles.caption}>Enter the 6-digit OTP sent to</Text><Text variant="body" style={styles.phone}>{phone}</Text>
     <Pressable accessibilityRole="button" accessibilityLabel="Enter six-digit code" onPress={() => input.current?.focus()} style={styles.digits}>
-      {Array.from({ length: 6 }, (_, index) => <View key={index} style={styles.digit}><Text style={styles.digitText}>{code[index] ?? ""}</Text></View>)}
+      {Array.from({ length: 6 }, (_, index) => <View key={index} style={styles.digit}><Text variant="body" style={styles.digitText}>{code[index] ?? ""}</Text></View>)}
       <Input variant="unstyled" ref={input} accessibilityLabel="Six-digit verification code" keyboardType="number-pad" textContentType="oneTimeCode" autoComplete="sms-otp" maxLength={6} value={code} onChangeText={value => { const digits = value.replace(/\D/g, "").slice(0, 6); setCode(digits); if (digits.length === 6) void verify(digits); }} style={styles.hiddenInput} />
     </Pressable>
 
-    <Button loading={resending} label="Resend OTP" variant="ghost" labelStyle={styles.resendText} accessibilityRole="button" accessibilityState={{ disabled: seconds > 0 || busy || resending }} disabled={seconds > 0 || busy || resending} onPress={() => void resend()} style={styles.resend}><Text style={styles.resendText}>Resend OTP {seconds > 0 ? `in 00:${String(seconds).padStart(2, "0")}` : "now"}</Text></Button>
+    <Button loading={resending} label="Resend OTP" variant="ghost" labelStyle={styles.resendText} accessibilityRole="button" accessibilityState={{ disabled: seconds > 0 || busy || resending }} disabled={seconds > 0 || busy || resending} onPress={() => void resend()} style={styles.resend}><Text variant="body" style={styles.resendText}>Resend OTP {seconds > 0 ? `in 00:${String(seconds).padStart(2, "0")}` : "now"}</Text></Button>
   </View></OnboardingShell>;
 }
 const styles = StyleSheet.create({

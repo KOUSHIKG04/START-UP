@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { PROFILE_FIELD_HEIGHT } from "./profileFormStyles";
 
@@ -25,7 +26,7 @@ export function BloodGroupSelector({
           onPress={() => onChange(item)}
           style={[styles.blood, value === item && styles.selectedBlood, invalid && styles.invalid]}
         >
-          <Text
+          <Text variant="bodyEmphasis"
             style={[
               styles.bloodText,
               value === item && styles.selectedBloodText,

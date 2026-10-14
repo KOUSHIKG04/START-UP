@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FadedScrollView, Button, Header } from "@startup/mobile-ui";
+import { FadedScrollView, Button, Header, useKeyboardAwareScroll } from "@startup/mobile-ui";
 import { palette, ui } from "./theme";
 
 export function Label({
@@ -90,6 +90,7 @@ export function DoctorScreen({
   contentStyle?: StyleProp<ViewStyle>;
 }>) {
   const insets = useSafeAreaInsets();
+  const { scrollRef, keyboardInset, revealFocusedInput, onScroll } = useKeyboardAwareScroll();
   return (
     <KeyboardAvoidingView
       style={[ui.screen, { backgroundColor: background }]}
@@ -97,12 +98,18 @@ export function DoctorScreen({
     >
       <DoctorHeader title={title} />
       <FadedScrollView
+        ref={scrollRef}
         edgeColor={background}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        onFocus={revealFocusedInput}
+        onLayout={revealFocusedInput}
+        onContentSizeChange={revealFocusedInput}
+        onScroll={onScroll}
         contentContainerStyle={[
           ui.content,
-          { paddingBottom: (bottomNav ? 125 : 24) + insets.bottom },
           contentStyle,
+          { paddingBottom: (bottomNav ? 125 : 24) + insets.bottom + keyboardInset },
         ]}
       >
         {children}

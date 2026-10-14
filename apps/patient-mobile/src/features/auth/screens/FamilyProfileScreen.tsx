@@ -1,3 +1,4 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback, useMemo, useRef } from "react";
 import { setStatusBarStyle } from "expo-status-bar";
 import { uploadPatientProfilePhoto } from "../../../services/profile-photo";
@@ -5,7 +6,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMyFamilyProfile, listMyFamilyProfiles, updateMyFamilyProfile } from "@startup/data-access";
 import { Loader } from "@startup/mobile-ui";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { ProfileForm } from "../components/ProfileForm";
 import { supabase } from "../../../services/supabase";
 
@@ -26,7 +27,7 @@ export default function FamilyProfileScreen() {
   const queryClient = useQueryClient();
 
   if (memberId && family.isLoading) return <View style={{ flex: 1, justifyContent: "center" }}><Loader theme="patient" /></View>;
-  if (memberId && !member) return <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>{family.isError ? "Could not load family profile. Go back and retry." : "This family profile cannot be edited."}</Text></View>;
+  if (memberId && !member) return <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text variant="body">{family.isError ? "Could not load family profile. Go back and retry." : "This family profile cannot be edited."}</Text></View>;
   return (
     <ProfileForm
       family

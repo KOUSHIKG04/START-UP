@@ -51,7 +51,7 @@ export async function changePortalAppointment(
       typeof error === "object" && error !== null && "code" in error
         ? String(error.code)
         : null;
-    if (code === "40001")
+    if ((code === "PT409" || code === "40001"))
       return { error: "This appointment changed. Refresh and try again." };
     if (code === "42501")
       return { error: "You do not have access to this appointment or action." };

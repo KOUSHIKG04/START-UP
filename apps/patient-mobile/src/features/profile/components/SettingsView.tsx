@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Pressable, StyleSheet, Switch, View } from "react-native";
 import {
   ChevronRight,
   LogOut,
@@ -45,8 +46,8 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
               <Moon color="#64748B" size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text style={[styles.rowTitle, styles.disabledTitle]}>Dark Mode</Text>
-              <Text style={styles.rowSubtitle}>
+              <Text variant="cardHeading" style={[styles.rowTitle, styles.disabledTitle]}>Dark Mode</Text>
+              <Text variant="cardHeading" style={styles.rowSubtitle}>
                 System default • Dark mode coming soon
               </Text>
             </View>
@@ -83,8 +84,8 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
               <MessageCircle color={colors.patient.primaryDark} size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text style={styles.rowTitle}>Help and Support</Text>
-              <Text style={styles.rowSubtitle}>
+              <Text variant="cardHeading" style={styles.rowTitle}>Help and Support</Text>
+              <Text variant="cardHeading" style={styles.rowSubtitle}>
                 FAQs, 24/7 helpline & contact care
               </Text>
             </View>
@@ -112,8 +113,8 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
               <ShieldCheck color={colors.patient.primaryDark} size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text style={styles.rowTitle}>Privacy Policy</Text>
-              <Text style={styles.rowSubtitle}>
+              <Text variant="cardHeading" style={styles.rowTitle}>Privacy Policy</Text>
+              <Text variant="cardHeading" style={styles.rowSubtitle}>
                 Data protection, HIPAA & security terms
               </Text>
             </View>
@@ -141,8 +142,8 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
               <LogOut color="#DC2626" size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text style={styles.logoutItemTitle}>Log Out</Text>
-              <Text style={styles.rowSubtitle}>
+              <Text variant="cardHeading" style={styles.logoutItemTitle}>Log Out</Text>
+              <Text variant="cardHeading" style={styles.rowSubtitle}>
                 Sign out of your Clinzo patient account
               </Text>
             </View>

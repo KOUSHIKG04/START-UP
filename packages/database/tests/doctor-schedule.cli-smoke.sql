@@ -36,7 +36,7 @@ BEGIN
   IF (settings->>'home_radius_km')::numeric <> 5.5 OR settings->>'home_visits' <> 'true' THEN
     RAISE EXCEPTION 'Home visit radius did not persist'; END IF;
   denied:=false;
-  BEGIN PERFORM public.save_my_schedule_preferences(practice_id,settings,0); EXCEPTION WHEN SQLSTATE '40001' THEN denied:=true; END;
+  BEGIN PERFORM public.save_my_schedule_preferences(practice_id,settings,0); EXCEPTION WHEN SQLSTATE 'PT409' THEN denied:=true; END;
   IF NOT denied THEN RAISE EXCEPTION 'Stale schedule overwrite succeeded'; END IF;
   EXECUTE 'RESET ROLE';
   PERFORM clinzo.record_manual_credential_review('doctor',(profile->'doctor'->>'id')::uuid,'verified','fixture-company','fixture-evidence');

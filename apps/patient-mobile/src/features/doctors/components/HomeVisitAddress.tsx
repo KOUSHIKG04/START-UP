@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { Navigation } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, Input } from "@startup/mobile-ui";
@@ -41,10 +42,10 @@ export function HomeVisitAddress({
           strokeWidth={1.9}
         />
         <View style={styles.pinnedLocationCopy}>
-          <Text style={styles.pinnedLocationTitle}>
+          <Text variant="cardHeading" style={styles.pinnedLocationTitle}>
             Verified visit location
           </Text>
-          <Text numberOfLines={2} style={styles.pinnedLocationAddress}>
+          <Text variant="body" numberOfLines={2} style={styles.pinnedLocationAddress}>
             {verifiedAddress || "Add an address for the doctor’s visit"}
           </Text>
         </View>

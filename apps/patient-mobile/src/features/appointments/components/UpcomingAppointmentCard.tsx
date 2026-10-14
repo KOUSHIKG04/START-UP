@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   CalendarDays,
@@ -145,7 +146,7 @@ function AppointmentDetail({ icon, label, value }: AppointmentDetailProps) {
       <View style={styles.detailIcon}>{icon}</View>
       <View style={styles.detailText}>
         {/* <Text style={styles.detailLabel}>{label}</Text> */}
-        <Text
+        <Text variant="bodyEmphasis"
           adjustsFontSizeToFit
           minimumFontScale={0.86}
           numberOfLines={1}

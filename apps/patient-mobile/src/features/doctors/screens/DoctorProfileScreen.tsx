@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { router, useFocusEffect, type Href } from "expo-router";
 import * as Crypto from "expo-crypto";
 import * as Haptics from "expo-haptics";
@@ -61,7 +62,6 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     queryKey: ["public-practice", practiceId, isOnline ? null : coordinates?.latitude, isOnline ? null : coordinates?.longitude],
     queryFn: () => searchPublicPractices(supabase!, { practiceId, latitude: isOnline ? undefined : coordinates?.latitude, longitude: isOnline ? undefined : coordinates?.longitude, limit: 50 }),
     enabled: Boolean(supabase && practiceId),
-    refetchInterval: 30_000,
   });
   useToastFeedback({ error: practiceQuery.isError ? "Could not load this doctor." : "" });
   const servicePrefix = selectedConsultationType === "Online" ? "online-" : selectedConsultationType === "Home Visit" ? "home-" : "clinic-";
@@ -71,7 +71,6 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     queryKey: ["clinic-slots", practiceId],
     queryFn: () => listPracticeClinicSlots(supabase!, practiceId),
     enabled: Boolean(supabase && practiceId),
-    refetchInterval: 30_000,
   });
   useFocusEffect(useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ["public-practice", practiceId] });
@@ -108,7 +107,6 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     queryKey: ["practice-bio", practiceId, displayedServiceId],
     queryFn: () => getPublicPracticeBio(supabase!, practiceId, displayedServiceId!),
     enabled: Boolean(supabase && practiceId && displayedServiceId),
-    refetchInterval: 30_000,
   });
   const book = useMutation({
     mutationFn: ({ patientId, windowId, reason }: { patientId: string; windowId: string; reason: string }) => {
@@ -158,7 +156,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
     />
     <FadedScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       {practiceQuery.isLoading ? <View style={styles.profileSkeleton}><Skeleton theme="patient" width={56} height={56} radius={28} /><View style={{ flex: 1, gap: 10 }}><Skeleton theme="patient" width="70%" height={18} /><Skeleton theme="patient" width="48%" height={14} /></View></View> : null}
-      {!practice && !practiceQuery.isLoading && !practiceQuery.isError ? <Text style={styles.message}>This practice is not available.</Text> : null}
+      {!practice && !practiceQuery.isLoading && !practiceQuery.isError ? <Text variant="body" style={styles.message}>This practice is not available.</Text> : null}
       {practice ? <>
         <DoctorCard
           variant="detail"
@@ -196,7 +194,7 @@ export function DoctorProfileScreen({ practiceId, serviceId, consultationType }:
               onBack={() => router.back()}
               onGoToSlots={() => setActiveTab("slots")}
             /> : <>
-              {selectedConsultationType === "Home Visit" ? <Text style={styles.message}>Home-visit slots are shown below when published. Booking requires verified address coverage and is not enabled yet.</Text> : null}
+              {selectedConsultationType === "Home Visit" ? <Text variant="body" style={styles.message}>Home-visit slots are shown below when published. Booking requires verified address coverage and is not enabled yet.</Text> : null}
               <BookSlots
                 address={consultationFlows[selectedConsultationType].requiresAddress ? homeAddress : undefined}
                 consultationType={selectedConsultationType}

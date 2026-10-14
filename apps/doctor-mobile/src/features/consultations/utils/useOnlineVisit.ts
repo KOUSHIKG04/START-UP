@@ -9,7 +9,6 @@ export function useOnlineVisit(appointmentId?: string) {
     queryKey: ["doctor-clinic-appointments", "all"],
     queryFn: () => listMyPracticeAppointments(supabase!),
     enabled: Boolean(isLive && supabase),
-    refetchInterval: 15000,
   });
   return {
     isLive,

@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Image, StyleSheet, View } from "react-native";
 import { Info, UserRound } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
@@ -20,10 +21,10 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
         style={[styles.centeredCard, styles.flatCard]}
       >
         <View style={styles.queueHeading}>
-          <Text style={styles.queueTitle}>You are in queue</Text>
+          <Text variant="cardHeading" style={styles.queueTitle}>You are in queue</Text>
           <View style={styles.liveBadge}>
             <View style={styles.liveDot} />
-            <Text style={styles.liveText}>LIVE</Text>
+            <Text variant="body" style={styles.liveText}>LIVE</Text>
           </View>
         </View>
 
@@ -31,15 +32,15 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
 
         <View style={styles.queueStatsRow}>
           <View style={styles.queueStatBox}>
-            <Text style={styles.statPanelLabel}>TOKEN NUMBER</Text>
+            <Text variant="label" style={styles.statPanelLabel}>TOKEN NUMBER</Text>
 
-            <Text style={styles.statBigNumber}>7</Text>
+            <Text variant="bodyEmphasis" style={styles.statBigNumber}>7</Text>
           </View>
 
           <View style={styles.queueStatBox}>
-            <Text style={styles.statPanelLabel}>ESTIMATED TIME</Text>
-            <Text style={styles.statBigNumber}>
-              37<Text style={styles.waitTimeUnit}>MIN.</Text>
+            <Text variant="label" style={styles.statPanelLabel}>ESTIMATED TIME</Text>
+            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
+              37<Text variant="caption" style={styles.waitTimeUnit}>MIN.</Text>
             </Text>
           </View>
         </View>
@@ -57,14 +58,14 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
               </View>
             ))}
             <View style={styles.plusCircle}>
-              <Text style={styles.plusCircleText}>+2</Text>
+              <Text variant="body" style={styles.plusCircleText}>+2</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.notifyBanner}>
           <Info color={colors.patient.accent} size={22} strokeWidth={2} />
-          <Text style={styles.notifyBannerText}>
+          <Text variant="body" style={styles.notifyBannerText}>
             We’ll notify you when it’s almost your turn.
           </Text>
         </View>

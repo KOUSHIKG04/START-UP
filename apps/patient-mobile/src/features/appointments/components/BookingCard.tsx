@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { CalendarDays, ChevronRight, Clock3, UserRound } from "lucide-react-native";
 import { colors, fontFamilies, gradients, radius } from "@startup/design-tokens";
@@ -21,26 +22,26 @@ export default function BookingCard({ appointment, onPress, statusLabel }: {
   >
     <LinearGradient pointerEvents="none" colors={gradients.patientBanner.colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradient} />
     <View style={styles.topRow}>
-      <Text style={styles.type}>{appointment.consultationType}</Text>
+      <Text variant="body" style={styles.type}>{appointment.consultationType}</Text>
       <View style={styles.statusBadge}>
         <View style={[styles.statusDot, appointment.status === "approved" ? styles.statusDotApproved : styles.statusDotPending]} />
-        <Text style={styles.statusText}>{statusLabel ?? (appointment.status === "approved" ? "Confirmed" : "Pending")}</Text>
+        <Text variant="body" style={styles.statusText}>{statusLabel ?? (appointment.status === "approved" ? "Confirmed" : "Pending")}</Text>
       </View>
     </View>
     <CardHeader gap={11}>
       <View style={styles.avatar}><UserRound color={colors.white} size={22} strokeWidth={1.8} /></View>
       <CardContent gap={1} style={styles.identity}>
-        <Text numberOfLines={1} style={styles.name}>{appointment.doctorName}</Text>
-        <Text style={styles.specialty}>{appointment.specialty}</Text>
+        <Text variant="body" numberOfLines={1} style={styles.name}>{appointment.doctorName}</Text>
+        <Text variant="body" style={styles.specialty}>{appointment.specialty}</Text>
       </CardContent>
       {onPress ? <View style={styles.chevron}><ChevronRight color={colors.patient.primaryDark} size={19} strokeWidth={2.3} /></View> : null}
     </CardHeader>
     <CardSeparator color="#FFFFFF44" />
     <View style={styles.details}>
-      <View style={styles.detail}><CalendarDays color={colors.white} size={18} strokeWidth={1.8} /><View style={styles.detailCopy}><Text style={styles.detailLabel}>Date</Text><Text numberOfLines={1} style={styles.detailValue}>{appointment.date}</Text></View></View>
-      <View style={styles.detail}><Clock3 color={colors.white} size={18} strokeWidth={1.8} /><View style={styles.detailCopy}><Text style={styles.detailLabel}>Time</Text><Text numberOfLines={1} style={styles.detailValue}>{appointment.time}</Text></View></View>
+      <View style={styles.detail}><CalendarDays color={colors.white} size={18} strokeWidth={1.8} /><View style={styles.detailCopy}><Text variant="label" style={styles.detailLabel}>Date</Text><Text variant="bodyEmphasis" numberOfLines={1} style={styles.detailValue}>{appointment.date}</Text></View></View>
+      <View style={styles.detail}><Clock3 color={colors.white} size={18} strokeWidth={1.8} /><View style={styles.detailCopy}><Text variant="label" style={styles.detailLabel}>Time</Text><Text variant="bodyEmphasis" numberOfLines={1} style={styles.detailValue}>{appointment.time}</Text></View></View>
     </View>
-    {onPress ? <Text style={styles.viewDetails}>View appointment details</Text> : null}
+    {onPress ? <Text variant="body" style={styles.viewDetails}>View appointment details</Text> : null}
   </Card>;
 }
 

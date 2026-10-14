@@ -123,9 +123,14 @@ BEGIN
   denied := false;
   BEGIN
     PERFORM public.update_facility_bed_inventory(facility_id,bed_type_id,10,6,2,1);
-  EXCEPTION WHEN serialization_failure THEN denied := true;
+  EXCEPTION WHEN SQLSTATE 'PT409' THEN denied := true;
   END;
   IF NOT denied THEN RAISE EXCEPTION 'Stale inventory edit was accepted'; END IF;
+  SELECT x INTO row_data FROM jsonb_array_elements(public.list_facility_bed_inventory(facility_id)) x
+    WHERE x->>'bed_type_code'='general_ward';
+  IF row_data->>'occupied' IS DISTINCT FROM '6' OR row_data->>'row_version' IS DISTINCT FROM '2' THEN
+    RAISE EXCEPTION 'Rejected stale edit changed inventory';
+  END IF;
   denied := false;
   BEGIN
     PERFORM public.update_facility_bed_inventory(facility_id,bed_type_id,10,9,2,2);

@@ -1,4 +1,5 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { Phone } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { emergencyNumbers } from "../utils/ambulanceConstants";
@@ -14,9 +15,9 @@ export function EmergencyNumbers() {
         >
           <View style={styles.numberHeader}>
             <Phone color="#087F78" size={13} />
-            <Text style={styles.numberText}>{item.number}</Text>
+            <Text variant="bodyEmphasis" style={styles.numberText}>{item.number}</Text>
           </View>
-          <Text numberOfLines={1} style={styles.numberLabel}>
+          <Text variant="label" numberOfLines={1} style={styles.numberLabel}>
             {item.label}
           </Text>
         </Pressable>

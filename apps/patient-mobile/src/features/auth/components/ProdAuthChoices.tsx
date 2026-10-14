@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Phone } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import Svg, { Path } from "react-native-svg";
@@ -46,7 +47,7 @@ export function ProdAuthChoices({
         ]}
       >
         <GoogleIcon size={20} />
-        <Text style={styles.socialButtonText}>Continue with google</Text>
+        <Text variant="button" style={styles.socialButtonText}>Continue with google</Text>
       </Pressable>
 
       {/* Continue with Phone */}
@@ -64,7 +65,7 @@ export function ProdAuthChoices({
           color={colors.patient.primaryDark}
           strokeWidth={2.2}
         />
-        <Text style={styles.socialButtonText}>Continue with Phone</Text>
+        <Text variant="button" style={styles.socialButtonText}>Continue with Phone</Text>
       </Pressable>
 
     </View>

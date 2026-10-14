@@ -1,3 +1,4 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
@@ -9,12 +10,11 @@ import {
   Keyboard,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, Mic, X } from "lucide-react-native";
 import {
@@ -133,12 +133,20 @@ export function FindDoctorScreen({
   }, [searchQuery]);
   const doctorQuery = useQuery({
     queryKey: ["find-doctor-suggestions", debouncedQuery],
-    queryFn: () => searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
+    queryFn: () =>
+      searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
     enabled: isSearchActive && Boolean(supabase) && debouncedQuery.length >= 2,
   });
-  const doctorMatches = [...new Map((doctorQuery.data ?? [])
-    .filter(item => item.doctor_name.toLowerCase().includes(trimmedQuery))
-    .map(item => [item.doctor_id, { id: item.doctor_id, name: item.doctor_name }])).values()];
+  const doctorMatches = [
+    ...new Map(
+      (doctorQuery.data ?? [])
+        .filter((item) => item.doctor_name.toLowerCase().includes(trimmedQuery))
+        .map((item) => [
+          item.doctor_id,
+          { id: item.doctor_id, name: item.doctor_name },
+        ])
+    ).values(),
+  ];
   const filteredCategories = trimmedQuery
     ? categories.filter(
         (c) =>
@@ -172,7 +180,9 @@ export function FindDoctorScreen({
         />
         <SafeAreaView edges={["top"]} style={styles.safeArea}>
           <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>What are you feeling?</Text>
+            <Text variant="screenTitle" style={styles.headerTitle}>
+              What are you feeling?
+            </Text>
           </View>
         </SafeAreaView>
       </Animated.View>
@@ -292,16 +302,20 @@ export function FindDoctorScreen({
         showsVerticalScrollIndicator={false}
       >
         {!isSearchActive ? (
-          <FindDoctorCategories
-            selectedSymptom={selectedSymptom}
-            onSelectSymptom={(symptom) => {
-              setSelectedSymptom(selectedSymptom === symptom ? undefined : symptom);
-              router.push(getDoctorResultsRoute(symptom, consultationType));
-            }}
-            onSelectCategory={(_key, label) => {
-              router.push(getDoctorResultsRoute(label, consultationType));
-            }}
-          />
+          <>
+            <FindDoctorCategories
+              selectedSymptom={selectedSymptom}
+              onSelectSymptom={(symptom) => {
+                setSelectedSymptom(
+                  selectedSymptom === symptom ? undefined : symptom
+                );
+                router.push(getDoctorResultsRoute(symptom, consultationType));
+              }}
+              onSelectCategory={(_key, label) => {
+                router.push(getDoctorResultsRoute(label, consultationType));
+              }}
+            />
+          </>
         ) : (
           <FindDoctorSearchList
             filteredCategories={filteredCategories}

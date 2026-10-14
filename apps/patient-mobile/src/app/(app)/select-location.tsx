@@ -1,25 +1,20 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  searchMapPlaces,
   deleteMyPatientLocation,
   listMyPatientLocations,
   saveMyPatientLocation,
   selectMyPatientLocation,
 } from "@startup/data-access";
-import type { SavedPatientLocation } from "@startup/contracts";
+import type { MapPlace, SavedPatientLocation } from "@startup/contracts";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, useToast, useToastFeedback } from "@startup/mobile-ui";
 import {
@@ -38,7 +33,7 @@ import {
 } from "../../features/locations/locationDisplay";
 import { canGeocodeAddress } from "../../features/locations/geocoding";
 
-type Place = { latitude: number; longitude: number; addressLabel: string };
+type Place = { latitude: number; longitude: number; addressLabel: string; mapPlace?: MapPlace };
 
 export default function SelectLocationScreen() {
   const { profile } = useMobileSession();
@@ -46,6 +41,8 @@ export default function SelectLocationScreen() {
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<Place[]>([]);
+  const searchVersion = useRef(0);
+  useEffect(() => () => { searchVersion.current += 1; }, []);
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
@@ -94,7 +91,18 @@ export default function SelectLocationScreen() {
     if (busy) return;
     setBusy(true);
     setPendingAction("search");
+    const request = ++searchVersion.current;
+    const query = search.trim();
     try {
+      if (supabase) {
+        const result = await searchMapPlaces(supabase, { query, ...(devicePosition ?? {}) });
+        if (request !== searchVersion.current) return;
+        if (result.configured) {
+          setMatches(result.places.map(place => ({ latitude: place.latitude, longitude: place.longitude, addressLabel: place.address, mapPlace: place })));
+          if (!result.places.length) showToast({ title: "No locations found", message: "Try the area and city or a more specific address.", type: "info" });
+          return;
+        }
+      }
       if (!(await canGeocodeAddress())) {
         showToast({
           title: "Location permission needed",
@@ -116,6 +124,7 @@ export default function SelectLocationScreen() {
           };
         })
       );
+      if (request !== searchVersion.current) return;
       setMatches(found);
       if (!found.length)
         showToast({
@@ -123,10 +132,10 @@ export default function SelectLocationScreen() {
           message: "Try a more specific address.",
           type: "info",
         });
-    } catch {
-      showToast({
+    } catch (cause) {
+      if (request === searchVersion.current) showToast({
         title: "Location search unavailable",
-        message: "Try again or use your current location.",
+        message: cause instanceof Error ? cause.message : "Try again or use your current location.",
         type: "error",
       });
     } finally {
@@ -255,7 +264,7 @@ export default function SelectLocationScreen() {
               variant="unstyled"
               accessibilityLabel="Search an area or address"
               value={search}
-              onChangeText={setSearch}
+              onChangeText={value => { searchVersion.current += 1; setSearch(value); setMatches([]); }}
               onSubmitEditing={() => void searchPlaces()}
               returnKeyType="search"
               placeholder="Search an area or address"
@@ -301,7 +310,7 @@ export default function SelectLocationScreen() {
 
           {matches.length ? (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>SEARCH RESULTS</Text>
+              <Text variant="sectionHeading" style={styles.sectionTitle}>SEARCH RESULTS</Text>
               <View style={styles.card}>
                 {matches.map((place, index) => (
                   <Pressable
@@ -313,13 +322,14 @@ export default function SelectLocationScreen() {
                         params: {
                           latitude: String(place.latitude),
                           longitude: String(place.longitude),
+                          ...(place.mapPlace ? { place: JSON.stringify(place.mapPlace) } : {}),
                         },
                       })
                     }
                     style={styles.placeRow}
                   >
                     <MapPin size={20} color={colors.patient.primary} />
-                    <Text
+                    <Text variant="body"
                       style={styles.placeText}
                       numberOfLines={2}
                       ellipsizeMode="tail"
@@ -329,15 +339,17 @@ export default function SelectLocationScreen() {
                   </Pressable>
                 ))}
               </View>
+              {matches.some(place => place.mapPlace) ? <Text variant="label" style={styles.helper}>Google Maps</Text> : null}
+              {matches.flatMap(place => place.mapPlace?.attributions ?? []).map((attribution, index) => <Text variant="label" key={`${attribution.provider}-${index}`} style={styles.helper}>{attribution.provider}</Text>)}
             </View>
           ) : null}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Saved Addresses</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>Saved Addresses</Text>
             {locations.isLoading ? (
               <ActivityIndicator color={colors.patient.primary} />
             ) : null}
             {locations.data?.length === 0 ? (
-              <Text style={styles.helper}>
+              <Text variant="label" style={styles.helper}>
                 No saved addresses yet. Add one or use your current location.
               </Text>
             ) : null}
@@ -370,14 +382,14 @@ export default function SelectLocationScreen() {
                           <MapPin size={24} color={colors.patient.text} />
                         )}
                         {distanceToSavedLocation(devicePosition, location) ? (
-                          <Text style={styles.distance}>
+                          <Text variant="body" style={styles.distance}>
                             {distanceToSavedLocation(devicePosition, location)}
                           </Text>
                         ) : null}
                       </View>
                       <View style={styles.savedText}>
                         <View style={styles.labelRow}>
-                          <Text
+                          <Text variant="body"
                             style={styles.name}
                             numberOfLines={1}
                             ellipsizeMode="tail"
@@ -385,10 +397,10 @@ export default function SelectLocationScreen() {
                             {location.label}
                           </Text>
                           {location.selected ? (
-                            <Text style={styles.selected}>Selected</Text>
+                            <Text variant="body" style={styles.selected}>Selected</Text>
                           ) : null}
                         </View>
-                        <Text
+                        <Text variant="body"
                           style={styles.address}
                           numberOfLines={1}
                           ellipsizeMode="tail"

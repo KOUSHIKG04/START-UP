@@ -65,7 +65,6 @@ export function AppointmentsScreen() {
     queryKey: ["doctor-clinic-appointments", "all"],
     queryFn: () => listMyPracticeAppointments(supabase!),
     enabled: Boolean(supabase),
-    refetchInterval: 15000,
   });
   useEffect(() => {
     if (!appointmentId || !appointments.data || openedFromHome.current === appointmentId) return;

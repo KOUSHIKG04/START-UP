@@ -68,10 +68,16 @@ export async function getOnlineVideoToken(client: AppSupabaseClient, appointment
   return onlineTokenSchema.parse(data);
 }
 
-export function subscribeOnlineMessages(client: AppSupabaseClient, appointmentId: string, onMessage: () => void) {
+export function subscribeOnlineMessages(client: AppSupabaseClient, appointmentId: string, onMessage: () => void, onError?: () => void) {
   const id = uuidSchema.parse(appointmentId);
+  let active = true;
+  let warned = false;
   const channel = client.channel(`online-message-${id}`)
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "online_message", filter: `appointment_id=eq.${id}` }, onMessage)
-    .subscribe();
-  return () => { void client.removeChannel(channel); };
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "online_message", filter: `appointment_id=eq.${id}` }, () => { if (active) onMessage(); })
+    .subscribe(status => {
+      if (!active) return;
+      if (status === "SUBSCRIBED") { warned = false; onMessage(); }
+      else if (!warned && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) { warned = true; onError?.(); }
+    });
+  return () => { active = false; void client.removeChannel(channel).catch(() => undefined); };
 }

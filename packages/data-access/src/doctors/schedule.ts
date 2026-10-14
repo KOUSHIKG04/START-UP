@@ -45,6 +45,9 @@ export async function saveMySchedulePreferences(
     p_practice_id: uuidSchema.parse(practiceId),
     p_settings: {
       working_days: value.workingDays,
+      online_working_days: value.onlineWorkingDays, home_working_days: value.homeWorkingDays,
+      online_auto_accept: value.onlineAutoAccept, home_auto_accept: value.homeAutoAccept,
+      online_auto_accept_limit: value.onlineAutoAcceptLimit, home_auto_accept_limit: value.homeAutoAcceptLimit,
       clinic_start: value.clinicStart,
       clinic_end: value.clinicEnd,
       slot_minutes: value.slotMinutes,

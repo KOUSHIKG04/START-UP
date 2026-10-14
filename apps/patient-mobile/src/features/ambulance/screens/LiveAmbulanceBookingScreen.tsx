@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -49,7 +50,6 @@ export function LiveAmbulanceBookingScreen({
     queryKey: ["my-ambulance-bookings"],
     queryFn: () => listMyAmbulanceBookings(supabase!),
     enabled: !!supabase,
-    refetchInterval: 15000,
   });
   const activeBooking = bookings.data?.find(
     (booking) => booking.status === "searching" || booking.status === "assigned"
@@ -71,7 +71,6 @@ export function LiveAmbulanceBookingScreen({
     queryKey: ["active-ambulance-tracking", activeBooking?.id],
     queryFn: () => getMyActiveAmbulanceTracking(supabase!, activeBooking!.id),
     enabled: Boolean(supabase && activeBooking?.status === "assigned"),
-    refetchInterval: 15000,
   });
 
   async function locatePickup() {
@@ -167,8 +166,8 @@ export function LiveAmbulanceBookingScreen({
     <SafeAreaView style={styles.screen}>
       <Header title="Ambulance" app="patient" onBackPress={onBackPress} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Request an ambulance</Text>
-        <Text>
+        <Text variant="cardHeading" style={styles.title}>Request an ambulance</Text>
+        <Text variant="body">
           Choose a hospital and required ambulance type. We will show assignment
           status here.
         </Text>
@@ -181,7 +180,7 @@ export function LiveAmbulanceBookingScreen({
           onPress={() => void locatePickup()}
         />
         {pickup ? (
-          <Text>
+          <Text variant="body">
             Pickup coordinates confirmed. Enter a landmark so the driver can
             find you.
           </Text>
@@ -194,7 +193,7 @@ export function LiveAmbulanceBookingScreen({
             setIdempotencyKey(Crypto.randomUUID());
           }}
         />
-        <Text style={styles.subtitle}>Ambulance type</Text>
+        <Text variant="body" style={styles.subtitle}>Ambulance type</Text>
         <View style={styles.options}>
           {(["BLS", "ALS", "NICU"] as const).map((code) => (
             <Button
@@ -208,17 +207,17 @@ export function LiveAmbulanceBookingScreen({
             />
           ))}
         </View>
-        <Text style={styles.subtitle}>Destination hospital</Text>
+        <Text variant="body" style={styles.subtitle}>Destination hospital</Text>
         {hospitals.isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
         {hospitals.data?.length === 0 ? (
-          <Text>No active hospitals are available in the directory yet.</Text>
+          <Text variant="body">No active hospitals are available in the directory yet.</Text>
         ) : null}
         {hospitals.data?.map((hospital) => (
           <View key={hospital.id} style={styles.card}>
-            <Text style={styles.name}>{hospital.name}</Text>
-            <Text>{hospital.address}</Text>
+            <Text variant="body" style={styles.name}>{hospital.name}</Text>
+            <Text variant="body">{hospital.address}</Text>
             {hospital.distance_meters !== null ? (
-              <Text>
+              <Text variant="body">
                 {(hospital.distance_meters / 1000).toFixed(1)} km from pickup
               </Text>
             ) : null}
@@ -246,7 +245,7 @@ export function LiveAmbulanceBookingScreen({
           onPress={() => request.mutate()}
         />
         {activeBooking ? (
-          <Text>You already have an active ambulance request.</Text>
+          <Text variant="body">You already have an active ambulance request.</Text>
         ) : null}
         <LiveAmbulanceRequestsList
           bookings={bookings.data}

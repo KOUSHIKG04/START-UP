@@ -1,13 +1,8 @@
+import { AppText as Text } from "../primitives/AppText";
+import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  type ViewStyle,
-  type LayoutChangeEvent,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, type ViewStyle, type LayoutChangeEvent } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -176,6 +171,7 @@ type TabButtonProps = {
 function TabButton({ item, isActive, onPress }: TabButtonProps) {
   const Icon = item.icon;
   const theme = useMobileTheme();
+  const readable = useReadableTypography();
 
   return (
     <TouchableOpacity
@@ -207,13 +203,13 @@ function TabButton({ item, isActive, onPress }: TabButtonProps) {
           />
         )}
         {item.badge !== undefined && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item.badge}</Text>
+          <View style={[styles.badge, readable && { minWidth: 20, minHeight: 20, height: undefined, paddingVertical: 2, borderRadius: 10 }]}>
+            <Text variant="caption" style={styles.badgeText}>{item.badge}</Text>
           </View>
         )}
       </View>
 
-      <Text
+      <Text variant="label"
         numberOfLines={1}
         ellipsizeMode="tail"
         style={[

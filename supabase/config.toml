@@ -63,3 +63,7 @@ verify_jwt = true
 [functions.search-map-places]
 enabled = true
 verify_jwt = true
+
+[functions.resolve-map-address]
+  enabled = true
+  verify_jwt = true

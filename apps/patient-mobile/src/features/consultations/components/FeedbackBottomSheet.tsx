@@ -1,13 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import { CheckCircle2 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, TextArea } from "@startup/mobile-ui";
@@ -74,13 +68,13 @@ export default function FeedbackBottomSheet({
                   <CheckCircle2 color={colors.white} size={44} strokeWidth={2.5} />
                 </View>
               </View>
-              <Text style={styles.thankYouTitle}>Thank you!</Text>
+              <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
               <Button label="Done" onPress={handleClose} style={styles.submitButton} />
             </View>
           ) : (
             <>
               <View style={styles.handle} />
-              <Text style={styles.title}>
+              <Text variant="cardHeading" style={styles.title}>
                 Tell us what went well and what we can improve.
               </Text>
               <TextArea

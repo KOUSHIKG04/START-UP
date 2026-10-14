@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, ChevronRight, FileText, Stethoscope } from "lucide-react-native";
@@ -39,13 +40,13 @@ export function RecordsScreen({
               accessibilityRole="button"
               onPress={() => records.refetch()}
             >
-              <Text style={styles.retry}>Retry</Text>
+              <Text variant="body" style={styles.retry}>Retry</Text>
             </Pressable>
           </View>
         ) : records.data.length === 0 ? (
           <View style={styles.state}>
             <FileText color={colors.patient.primary} size={38} />
-            <Text style={styles.stateText}>
+            <Text variant="body" style={styles.stateText}>
               Signed prescriptions and completed consultation records will appear here.
             </Text>
           </View>
@@ -66,19 +67,19 @@ export function RecordsScreen({
               <View style={styles.cardHeading}>
                 <View style={styles.iconSurface}>{hasPrescription ? <FileText color={colors.patient.primary} size={20} /> : <Stethoscope color={colors.patient.primary} size={20} />}</View>
                 <View style={styles.headingText}>
-                  <Text style={styles.cardTitle}>{hasPrescription ? "Prescription" : "Consultation record"}</Text>
-                  <Text numberOfLines={1} style={styles.doctor}>{record.doctor_name}</Text>
+                  <Text variant="cardHeading" style={styles.cardTitle}>{hasPrescription ? "Prescription" : "Consultation record"}</Text>
+                  <Text variant="body" numberOfLines={1} style={styles.doctor}>{record.doctor_name}</Text>
                 </View>
                 {hasPrescription ? <ChevronRight color={colors.patient.primary} size={20} /> : null}
               </View>
               <View style={styles.cardBody}>
-                <Text numberOfLines={1} style={styles.facility}>{record.facility_name}</Text>
-                {diagnosis ? <Text numberOfLines={2} style={styles.summary}>{diagnosis}</Text> : null}
-                {hasPrescription ? <Text style={styles.summary}>{record.medicines.length} {record.medicines.length === 1 ? "medicine" : "medicines"} prescribed</Text> : null}
+                <Text variant="body" numberOfLines={1} style={styles.facility}>{record.facility_name}</Text>
+                {diagnosis ? <Text variant="body" numberOfLines={2} style={styles.summary}>{diagnosis}</Text> : null}
+                {hasPrescription ? <Text variant="body" style={styles.summary}>{record.medicines.length} {record.medicines.length === 1 ? "medicine" : "medicines"} prescribed</Text> : null}
               </View>
               <View style={styles.cardFooter}>
-                <View style={styles.dateRow}><CalendarDays color={colors.patient.textSecondary} size={14} /><Text style={styles.dateText}>{formatDisplayDate(record.signed_at ?? record.started_at)}</Text></View>
-                {hasPrescription ? <Text style={styles.link}>View prescription</Text> : null}
+                <View style={styles.dateRow}><CalendarDays color={colors.patient.textSecondary} size={14} /><Text variant="caption" style={styles.dateText}>{formatDisplayDate(record.signed_at ?? record.started_at)}</Text></View>
+                {hasPrescription ? <Text variant="label" style={styles.link}>View prescription</Text> : null}
               </View>
             </Card>;
           })

@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -15,12 +15,13 @@ import * as Location from "expo-location";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  searchMapPlaces,
   deleteMyDriverLocation,
   listMyDriverLocations,
   saveMyDriverLocation,
   selectMyDriverLocation,
 } from "@startup/data-access";
-import type { SavedDriverLocation } from "@startup/contracts";
+import type { MapPlace, SavedDriverLocation } from "@startup/contracts";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, useToast, useToastFeedback } from "@startup/mobile-ui";
 import {
@@ -39,7 +40,7 @@ import {
 } from "../../features/locations/savedLocationDisplay";
 import { canGeocodeAddress } from "../../features/locations/geocoding";
 
-type Place = { latitude: number; longitude: number; addressLabel: string };
+type Place = { latitude: number; longitude: number; addressLabel: string; mapPlace?: MapPlace };
 
 export default function SelectLocationScreen() {
   const { profile } = useMobileSession();
@@ -47,6 +48,8 @@ export default function SelectLocationScreen() {
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<Place[]>([]);
+  const searchVersion = useRef(0);
+  useEffect(() => () => { searchVersion.current += 1; }, []);
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
@@ -95,7 +98,18 @@ export default function SelectLocationScreen() {
     if (busy) return;
     setBusy(true);
     setPendingAction("search");
+    const request = ++searchVersion.current;
+    const query = search.trim();
     try {
+      if (supabase) {
+        const result = await searchMapPlaces(supabase, { query, ...(devicePosition ?? {}) });
+        if (request !== searchVersion.current) return;
+        if (result.configured) {
+          setMatches(result.places.map(place => ({ latitude: place.latitude, longitude: place.longitude, addressLabel: place.address, mapPlace: place })));
+          if (!result.places.length) showToast({ title: "No locations found", message: "Try the area and city or a more specific address.", type: "info" });
+          return;
+        }
+      }
       if (!(await canGeocodeAddress())) {
         showToast({
           title: "Location permission needed",
@@ -117,6 +131,7 @@ export default function SelectLocationScreen() {
           };
         })
       );
+      if (request !== searchVersion.current) return;
       setMatches(found);
       if (!found.length)
         showToast({
@@ -124,10 +139,10 @@ export default function SelectLocationScreen() {
           message: "Try a more specific address.",
           type: "info",
         });
-    } catch {
-      showToast({
+    } catch (cause) {
+      if (request === searchVersion.current) showToast({
         title: "Location search unavailable",
-        message: "Try again or use your current location.",
+        message: cause instanceof Error ? cause.message : "Try again or use your current location.",
         type: "error",
       });
     } finally {
@@ -257,7 +272,7 @@ export default function SelectLocationScreen() {
               variant="unstyled"
               accessibilityLabel="Search an area or address"
               value={search}
-              onChangeText={setSearch}
+              onChangeText={value => { searchVersion.current += 1; setSearch(value); setMatches([]); }}
               onSubmitEditing={() => void searchPlaces()}
               returnKeyType="search"
               placeholder="Search an area or address"
@@ -315,6 +330,7 @@ export default function SelectLocationScreen() {
                         params: {
                           latitude: String(place.latitude),
                           longitude: String(place.longitude),
+                          ...(place.mapPlace ? { place: JSON.stringify(place.mapPlace) } : {}),
                         },
                       })
                     }
@@ -331,6 +347,8 @@ export default function SelectLocationScreen() {
                   </Pressable>
                 ))}
               </View>
+              {matches.some(place => place.mapPlace) ? <Text style={styles.helper}>Google Maps</Text> : null}
+              {matches.flatMap(place => place.mapPlace?.attributions ?? []).map((attribution, index) => <Text key={`${attribution.provider}-${index}`} style={styles.helper}>{attribution.provider}</Text>)}
             </View>
           ) : null}
           <View style={styles.section}>

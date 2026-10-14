@@ -25,15 +25,19 @@ incorrect imports, and `pnpm --filter facility-portal test:architecture` to test
    key from Supabase Connect. Never put a database password or service-role key in
    `NEXT_PUBLIC_*` variables. To fill the facility address from browser location,
    enable Google Geocoding API and set `GOOGLE_GEOCODING_API_KEY` in this app's
-   `.env.local` (server-side only). Restart the dev server after changing it.
-   Without that key, location coordinates can still be captured and the address
+   `.env.local` (server-side only). For the registration map, enable Maps JavaScript
+   API and set a separate website-restricted `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+   Add the local and deployed portal origins to that browser key's website
+   restrictions. Restart the dev server after changing environment variables.
+   Without these keys, location coordinates can still be captured and the address
    entered manually.
 3. Enable Supabase email/password Auth with email confirmation. A new hospital or
    clinic owner can use `/register`, confirm the email, sign in, and register one
    facility at `/facility-verification` while physically at its location. Enter
    street address, locality, city, state and pincode separately; "Use current
-   location" captures coordinates and fills available address parts when
-   Geocoding is configured. The registration starts pending. Upload its
+   location" captures coordinates when the map is unavailable. With Maps JavaScript
+   API configured, the owner can search an address, move the map, or tap a point, then confirm the pin;
+   Geocoding then fills available address parts. The registration starts pending. Upload its
    registration certificate and operating
    licence on that page; a Clinzo company reviewer approves the facility case.
    Existing staff memberships remain provisioned by an authorized administrator;

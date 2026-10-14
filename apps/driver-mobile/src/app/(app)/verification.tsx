@@ -17,13 +17,8 @@ export default function DriverVerification() {
     queryKey: ["driver-fleet", profile?.driver?.id],
     queryFn: () => listMyAmbulanceFleet(supabase!),
     enabled: Boolean(supabase && profile?.driver?.id),
-    refetchInterval: 15000,
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => void mobileSession.refresh(), 15000);
-    return () => clearInterval(timer);
-  }, []);
 
   if (fleet.isLoading)
     return (

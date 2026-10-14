@@ -221,9 +221,10 @@ test("Input preserves embedded layout, native focus refs and OTP behavior", () =
   const ref = { current: null };
   const onChangeText = () => {};
   const style = { flex: 1, height: 1, opacity: 0 };
-  const element = Input({ variant: "unstyled", ref, style, onChangeText,
+  const tree = Input({ variant: "unstyled", ref, style, onChangeText,
     keyboardType: "number-pad", textContentType: "oneTimeCode", maxLength: 6,
     accessibilityLabel: "Verification code" });
+  const element = render(tree).find(node => node.type === "TextInput");
   assert.equal(element.type, "TextInput");
   assert.equal(element.props.ref, ref);
   assert.equal(element.props.onChangeText, onChangeText);

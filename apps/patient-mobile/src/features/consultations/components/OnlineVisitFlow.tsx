@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useRef } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { AudioSession, LiveKitRoom, registerGlobals } from "@livekit/react-native";
 import { uuidSchema, type ClinicAppointment } from "@startup/contracts";
@@ -18,7 +19,7 @@ export function OnlineVisitFlow({ appointment, initialChat, onBackPress, onCompl
   const completionShown = useRef(false);
   const leaving = useRef(false);
   const { showToast } = useToast();
-  const appointmentStatus = useQuery({ queryKey: ["patient-clinic-appointments"], queryFn: () => listClinicAppointments(supabase!), enabled: Boolean(live && supabase), refetchInterval: 5000 });
+  const appointmentStatus = useQuery({ queryKey: ["patient-clinic-appointments"], queryFn: () => listClinicAppointments(supabase!), enabled: Boolean(live && supabase),});
   const activeAppointment = appointmentStatus.data?.find((item: ClinicAppointment) => item.id === appointmentId);
   useEffect(() => {
     if (activeAppointment?.status !== "completed" || completionShown.current) return;
@@ -41,7 +42,7 @@ export function OnlineVisitFlow({ appointment, initialChat, onBackPress, onCompl
     } catch { onBackPress(); } finally { leaving.current = false; }
   }
   if (context.isLoading || token.isLoading) return <View style={styles.wait}><Loader theme="patient" size="large" /></View>;
-  if (!live || !context.data || !token.data) return <View style={styles.wait}><Text style={{ color: colors.patient.text, textAlign: "center", padding: 24 }}>This consultation is not ready to join. Check its scheduled time and confirmation.</Text><Button theme="patient" label="Go back" onPress={onBackPress} /><Button theme="patient" variant="outline" label="Retry" onPress={() => { void context.refetch(); void token.refetch(); }} /></View>;
+  if (!live || !context.data || !token.data) return <View style={styles.wait}><Text variant="body" style={{ color: colors.patient.text, textAlign: "center", padding: 24 }}>This consultation is not ready to join. Check its scheduled time and confirmation.</Text><Button theme="patient" label="Go back" onPress={onBackPress} /><Button theme="patient" variant="outline" label="Retry" onPress={() => { void context.refetch(); void token.refetch(); }} /></View>;
   return <LiveKitRoom serverUrl={token.data.serverUrl} token={token.data.participantToken} connect audio video onError={error => showToast({ title: "Call connection failed", message: error.message, type: "error" })} onMediaDeviceFailure={() => showToast({ title: "Camera or microphone unavailable", message: "Check permissions. You can still use consultation chat.", type: "error" })}>
     <LiveConsultationCall appointmentId={appointmentId!} name={appointment.doctorName} active={activeAppointment?.status === "in_consultation"} initialChat={initialChat} onBack={onBackPress} onEnd={() => void leave()} />
   </LiveKitRoom>;

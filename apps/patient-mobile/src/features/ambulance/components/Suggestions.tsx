@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import type { AmbulanceHospital } from "@startup/contracts";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Clock3, Heart, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
@@ -30,14 +31,14 @@ export function Suggestions({
   return (
     <View style={styles.suggestionsContainer}>
       <View style={styles.suggestionsHeader}>
-        <Text style={styles.suggestionsHeaderTitle}>
+        <Text variant="screenTitle" style={styles.suggestionsHeaderTitle}>
           {query && query.trim()
             ? `Results for "${query}"`
             : "Nearby Hospitals & Clinics"}
         </Text>
         {onClose ? (
           <Pressable onPress={onClose} hitSlop={10}>
-            <Text style={styles.suggestionsCloseBtn}>Done</Text>
+            <Text variant="body" style={styles.suggestionsCloseBtn}>Done</Text>
           </Pressable>
         ) : null}
       </View>
@@ -59,17 +60,17 @@ export function Suggestions({
                 <MapPin color="#087F78" size={20} />
               </View>
               <View style={styles.suggestionCopy}>
-                <Text numberOfLines={1} style={styles.suggestionName}>
+                <Text variant="body" numberOfLines={1} style={styles.suggestionName}>
                   {name}
                 </Text>
-                <Text numberOfLines={1} style={styles.suggestionAddress}>
+                <Text variant="body" numberOfLines={1} style={styles.suggestionAddress}>
                   {address}
                 </Text>
-                {"source" in hospital ? <Text style={{ color: "#5E5E5E", fontFamily: fontFamilies.regular, fontSize: 12 }}>Google Maps</Text> : null}
-                {"source" in hospital ? hospital.attributions.map(a => <Text key={a.provider} style={{ color: "#5E5E5E", fontSize: 12 }}>{a.provider}</Text>) : null}
+                {"source" in hospital ? <Text variant="caption" style={{ color: "#5E5E5E", fontFamily: fontFamilies.regular, fontSize: 12 }}>Google Maps</Text> : null}
+                {"source" in hospital ? hospital.attributions.map(a => <Text variant="caption" key={a.provider} style={{ color: "#5E5E5E", fontSize: 12 }}>{a.provider}</Text>) : null}
                 <View style={styles.suggestionMetaRow}>
                   <Clock3 color="#087F78" size={12} />
-                  <Text style={styles.suggestionMetaText}>
+                  <Text variant="body" style={styles.suggestionMetaText}>
                     {distance_meters === null ? "Distance unavailable" : `${(distance_meters / 1000).toFixed(1)} km away`}
                   </Text>
                 </View>

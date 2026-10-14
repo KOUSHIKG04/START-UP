@@ -1,5 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
+import { LiveUpdatesBridge } from "../services/LiveUpdatesBridge";
 import { useEffect, useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { DefaultTheme, router, Stack, ThemeProvider } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -9,6 +11,7 @@ import {
   Loader,
   SafeAreaProvider,
   MobileThemeProvider,
+  MobileTypographyProvider,
   ToastProvider,
   useToast,
 } from "@startup/mobile-ui";
@@ -64,14 +67,16 @@ export default function RootLayout() {
   }
 
   if (auth.loading) return <View style={styles.root}><Loader theme="patient" size="large" style={{ flex: 1 }} /></View>;
-  if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void signOutWithPushCleanup()} /></View>;
+  if (auth.session && auth.error) return <View style={[styles.root, { justifyContent: "center", padding: 24, gap: 16 }]}><Text variant="body" accessibilityRole="alert">{auth.error}</Text><Button label="Retry" onPress={() => void mobileSession.refresh()} /><Button label="Sign out" variant="outline" onPress={() => void signOutWithPushCleanup()} /></View>;
 
   return (
     <MobileThemeProvider theme="patient">
+      <MobileTypographyProvider enabled>
       <SafeAreaProvider>
         <ToastProvider>
         <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
         <QueryProvider>
+          <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
           <ThemeProvider value={navTheme}>
             <View style={styles.root}>
               <Stack
@@ -91,6 +96,7 @@ export default function RootLayout() {
         </QueryProvider>
         </ToastProvider>
       </SafeAreaProvider>
+      </MobileTypographyProvider>
     </MobileThemeProvider>
   );
 }

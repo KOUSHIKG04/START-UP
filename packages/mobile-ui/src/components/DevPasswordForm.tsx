@@ -1,5 +1,6 @@
+import { AppText as Text } from "../primitives/AppText";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Button } from "../primitives/Button";
@@ -49,13 +50,13 @@ export function DevPasswordForm({
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
-      <Text
+      <Text variant="cardHeading"
         accessibilityRole="header"
         style={[styles.title, { color: theme.text }]}
       >
         {title}
       </Text>
-      <Text style={[styles.description, { color: theme.text }]}>
+      <Text variant="body" style={[styles.description, { color: theme.text }]}>
         {confirmationNeeded
           ? "Check your email for a confirmation link, then sign in."
           : mode === "signup"
@@ -102,7 +103,7 @@ export function DevPasswordForm({
             />
           ) : null}
           {configurationError || error ? (
-            <Text accessibilityRole="alert" style={styles.error}>
+            <Text variant="body" accessibilityRole="alert" style={styles.error}>
               {configurationError ?? error}
             </Text>
           ) : null}

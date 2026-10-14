@@ -1,3 +1,4 @@
+import { LiveFacilityUpdates } from "@/features/dashboard";
 import type { ReactNode } from "react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { requireApprovedFacility } from "@/server/auth/facilityAccess";
@@ -13,5 +14,5 @@ export default async function AdminRouteLayout({
   const access = await requireApprovedFacility();
   const client = await createClient();
   const { data: { user } } = await client.auth.getUser();
-  return <AdminLayout facilityName={access.facilities[0]?.facilityName ?? "Facility"} userName={user?.email ?? "Facility account"}>{children}</AdminLayout>;
+  return <AdminLayout facilityName={access.facilities[0]?.facilityName ?? "Facility"} userName={user?.email ?? "Facility account"}><LiveFacilityUpdates facilityIds={access.facilities.map(facility => facility.facilityId)} />{children}</AdminLayout>;
 }

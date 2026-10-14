@@ -1,11 +1,5 @@
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type ImageSourcePropType,
-} from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Search } from "lucide-react-native";
 
@@ -47,8 +41,8 @@ export function FindDoctorSearchList({
                 <Search color={colors.patient.primaryDark} size={22} />
               </View>
               <View style={styles.categoryRowContent}>
-                <Text style={styles.categoryRowTitle}>{doctor.name}</Text>
-                <Text style={styles.categoryRowSubtitle}>Doctor</Text>
+                <Text variant="cardHeading" style={styles.categoryRowTitle}>{doctor.name}</Text>
+                <Text variant="cardHeading" style={styles.categoryRowSubtitle}>Doctor</Text>
               </View>
             </Pressable>
           ))}
@@ -76,24 +70,24 @@ export function FindDoctorSearchList({
               resizeMode="contain"
             />
             <View style={styles.categoryRowContent}>
-              <Text style={styles.categoryRowTitle}>
+              <Text variant="cardHeading" style={styles.categoryRowTitle}>
                 {category.label.replace("\n", " ")}
               </Text>
-              <Text style={styles.categoryRowSubtitle}>Speciality</Text>
+              <Text variant="cardHeading" style={styles.categoryRowSubtitle}>Speciality</Text>
             </View>
           </Pressable>
           ))}
         </>
       ) : (
         <View style={styles.emptyResults}>
-          <Text style={styles.emptyText}>
+          <Text variant="body" style={styles.emptyText}>
             No categories found for &quot;{searchQuery}&quot;.
           </Text>
           <Pressable
             onPress={() => onSearchAnyway(searchQuery.trim())}
             style={styles.searchAnywayButton}
           >
-            <Text style={styles.searchAnywayText}>
+            <Text variant="body" style={styles.searchAnywayText}>
               Search for &quot;{searchQuery}&quot;
             </Text>
           </Pressable>

@@ -1,15 +1,8 @@
+import { AppText as Text, AppTextInput } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
+import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import type { Ref } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type StyleProp,
-  type TextInputProps,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type InputProps = TextInputProps & {
@@ -47,8 +40,9 @@ export function Input({
   ...props
 }: InputProps) {
   const theme = useMobileTheme();
+  const readable = useReadableTypography();
   const input = (
-    <TextInput
+    <AppTextInput
       {...props}
       ref={ref}
       accessibilityLabel={accessibilityLabel}
@@ -64,6 +58,7 @@ export function Input({
         } : undefined,
         disabled ? styles.inputDisabled : undefined,
         style,
+        readable && variant === "outlined" && { minHeight: 52 },
         prefix ? styles.prefixedInput : undefined,
         error || invalid ? styles.inputError : undefined,
       ]}
@@ -74,7 +69,7 @@ export function Input({
   const control = prefix ? <View style={styles.prefixContainer}>
     {input}
     <View pointerEvents="none" style={styles.prefixArea}>
-      <Text style={[styles.prefixText, { color: theme.text }]}>{prefix}</Text>
+      <Text variant="body" style={[styles.prefixText, { color: theme.text }]}>{prefix}</Text>
       <View style={[styles.prefixDivider, { backgroundColor: theme.border }]} />
     </View>
   </View> : input;
@@ -82,14 +77,14 @@ export function Input({
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? (
-        <Text style={[styles.label, { color: theme.text }, labelStyle]}>
+        <Text variant="label" style={[styles.label, { color: theme.text }, labelStyle]}>
           {label}
         </Text>
       ) : null}
 
       {control}
 
-      {error ? <Text style={[styles.error, errorStyle]}>{error}</Text> : null}
+      {error ? <Text variant="label" style={[styles.error, errorStyle]}>{error}</Text> : null}
     </View>
   );
 }

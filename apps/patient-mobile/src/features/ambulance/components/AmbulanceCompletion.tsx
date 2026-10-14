@@ -1,11 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Ambulance,
   Building2,
@@ -75,11 +70,11 @@ export function AmbulanceCompletion({
               </View>
             </View>
           </View>
-          <Text style={styles.thankYouTitle}>Thank you!</Text>
-          <Text style={styles.completedTitle}>
+          <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
+          <Text variant="cardHeading" style={styles.completedTitle}>
             Your Ambulance Journey is Completed
           </Text>
-          <Text style={styles.centeredDescription}>
+          <Text variant="body" style={styles.centeredDescription}>
             Your trip to {booking.destination_address ?? "the destination"} is complete.
           </Text>
         </View>
@@ -97,23 +92,23 @@ export function AmbulanceCompletion({
         >
           <View style={styles.summaryHeading}>
             <ClipboardList color={colors.patient.primaryDark} size={20} />
-            <Text style={styles.cardTitle}>Emergency Handover Summary</Text>
+            <Text variant="cardHeading" style={styles.cardTitle}>Emergency Handover Summary</Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <Building2 color={colors.patient.primaryDark} size={18} />
-              <Text style={styles.secondaryText}>Hospital</Text>
+              <Text variant="body" style={styles.secondaryText}>Hospital</Text>
             </View>
-            <Text style={styles.summaryValue}>{booking.destination_address ?? "Destination unavailable"}</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValue}>{booking.destination_address ?? "Destination unavailable"}</Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <UserRound color={colors.patient.primaryDark} size={18} />
-              <Text style={styles.secondaryText}>Driver</Text>
+              <Text variant="body" style={styles.secondaryText}>Driver</Text>
             </View>
-            <Text style={styles.summaryValue}>
+            <Text variant="bodyEmphasis" style={styles.summaryValue}>
               {booking.driver_name ?? "Driver details unavailable"} ({booking.vehicle_registration ?? "Vehicle unavailable"})
             </Text>
           </View>
@@ -121,17 +116,17 @@ export function AmbulanceCompletion({
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <ShieldCheck color={colors.patient.primaryDark} size={18} />
-              <Text style={styles.secondaryText}>Service</Text>
+              <Text variant="body" style={styles.secondaryText}>Service</Text>
             </View>
-            <Text style={styles.summaryValue}>{booking.capability_code}</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValue}>{booking.capability_code}</Text>
           </View>
 
           <View style={styles.summaryRowLast}>
             <View style={styles.summaryLabel}>
               <ReceiptText color={colors.patient.primaryDark} size={18} />
-              <Text style={styles.secondaryText}>Total Fare</Text>
+              <Text variant="body" style={styles.secondaryText}>Total Fare</Text>
             </View>
-            <Text style={styles.summaryValueTotal}>Fare pending</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValueTotal}>Fare pending</Text>
           </View>
         </Card>
       </View>
@@ -148,7 +143,7 @@ export function AmbulanceCompletion({
           padding={16}
           style={styles.experienceCard}
         >
-          <Text style={styles.feedbackTitle}>How was your experience?</Text>
+          <Text variant="cardHeading" style={styles.feedbackTitle}>How was your experience?</Text>
           <View style={styles.ratingRow}>
             {experienceRatings.map((item, index) => (
               <Pressable
@@ -164,7 +159,7 @@ export function AmbulanceCompletion({
                   pressed ? styles.pressed : undefined,
                 ]}
               >
-                <Text style={styles.ratingEmoji}>{item.emoji}</Text>
+                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>{item.emoji}</Text>
               </Pressable>
             ))}
           </View>
@@ -188,7 +183,7 @@ export function AmbulanceCompletion({
                 size={16}
                 strokeWidth={2.4}
               />
-              <Text style={styles.ratingSubmittedText}>
+              <Text variant="bodyEmphasis" style={styles.ratingSubmittedText}>
                 Submitted
               </Text>
             </View>

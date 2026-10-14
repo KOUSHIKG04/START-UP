@@ -69,7 +69,6 @@ export function LiveConsultationCall({
     queryKey: ["online-messages", appointmentId],
     queryFn: () => listOnlineMessages(supabase!, appointmentId),
     enabled: Boolean(active && supabase),
-    refetchInterval: active ? 4000 : false,
   });
   useToastFeedback({
     error: messages.isError
@@ -82,8 +81,8 @@ export function LiveConsultationCall({
       void client.invalidateQueries({
         queryKey: ["online-messages", appointmentId],
       });
-    });
-  }, [active, appointmentId, client]);
+    }, () => showToast({ title: "Chat connection interrupted", message: "Messages will catch up when the connection returns.", type: "info" }));
+  }, [active, appointmentId, client, showToast]);
 
   async function device(action: () => Promise<unknown>, message: string) {
     if (lock.current) return;

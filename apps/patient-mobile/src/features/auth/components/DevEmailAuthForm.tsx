@@ -1,11 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { onboardingButtonStyles } from "./OnboardingShell";
 
@@ -33,12 +29,12 @@ function EmailConfirmationNotice({
 }) {
   return (
     <>
-      <Text style={styles.info}>
+      <Text variant="body" style={styles.info}>
         If an account can be created for {email.trim()}, Supabase will send a
         confirmation link. Open it, then return here and sign in to create your
         patient profile.
       </Text>
-      <Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>} label="Back to sign in" onPress={onBackToSignIn} />
+      <Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>} label="Back to sign in" onPress={onBackToSignIn} />
     </>
   );
 }
@@ -102,7 +98,7 @@ function EmailCredentialsForm({
           editable={!busy}
         />
       ) : null}
-      <Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>}
+      <Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>}
         label={submitLabel}
         disabled={isSubmitDisabled}
         onPress={onSubmit}
@@ -112,7 +108,7 @@ function EmailCredentialsForm({
         onPress={onSwitchEmailMode}
         disabled={busy}
       >
-        <Text style={styles.switchText}>
+        <Text variant="body" style={styles.switchText}>
           {isSignUp
             ? "Already have an account? Sign in"
             : "New here? Create an account"}
@@ -126,7 +122,7 @@ export function DevEmailAuthForm(props: DevEmailAuthFormProps) {
   if (props.confirmationPending) {
     return (
       <View style={styles.form}>
-        <Text style={styles.formHeading}>Check your email</Text>
+        <Text variant="cardHeading" style={styles.formHeading}>Check your email</Text>
         <EmailConfirmationNotice
           email={props.email}
           onBackToSignIn={props.onBackToSignIn}
@@ -137,7 +133,7 @@ export function DevEmailAuthForm(props: DevEmailAuthFormProps) {
 
   return (
     <View style={styles.form}>
-      <Text style={styles.formHeading}>
+      <Text variant="cardHeading" style={styles.formHeading}>
         {props.emailMode === "signup"
           ? "Create your account"
           : "Sign in with email"}

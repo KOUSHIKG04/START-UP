@@ -1,7 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState, type ReactNode } from "react";
-import { BackHandler, Pressable, StyleSheet, Text, View } from "react-native";
+import { BackHandler, Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -313,8 +314,8 @@ function ContactDetail({
     <View style={styles.contactRow}>
       <View style={styles.contactIcon}>{icon}</View>
       <View style={styles.copyCol}>
-        <Text style={styles.contactLabel}>{label}</Text>
-        <Text style={styles.contactValue} selectable>
+        <Text variant="label" style={styles.contactLabel}>{label}</Text>
+        <Text variant="body" style={styles.contactValue} selectable>
           {value}
         </Text>
       </View>
@@ -346,11 +347,11 @@ function ProfileAction({
     >
       <View style={styles.actionIcon}>{icon}</View>
       <View style={styles.copyCol}>
-        <Text style={styles.actionTitle}>{title}</Text>
+        <Text variant="body" style={styles.actionTitle}>{title}</Text>
       </View>
       {count ? (
         <View style={[styles.countBadge, neutralCount && styles.familyCountBadge]}>
-          <Text style={[styles.countLabel, neutralCount && styles.familyCountLabel]}>{count}</Text>
+          <Text variant="label" style={[styles.countLabel, neutralCount && styles.familyCountLabel]}>{count}</Text>
         </View>
       ) : null}
       <View style={styles.trailingIcon}>

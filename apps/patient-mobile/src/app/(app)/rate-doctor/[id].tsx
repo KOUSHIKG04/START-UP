@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useLocalSearchParams, router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   getMyDoctorReview,
   listClinicAppointments,
@@ -97,7 +98,7 @@ export default function RateDoctorRoute() {
       {!appointments.isPending &&
       !review.isPending &&
       appointment?.status !== "completed" ? (
-        <Text style={styles.message}>
+        <Text variant="body" style={styles.message}>
           You can rate this doctor after the consultation is completed.
         </Text>
       ) : null}

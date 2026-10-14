@@ -1,16 +1,6 @@
+import { AppText as Text } from "../primitives/AppText";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  FlatList,
-  KeyboardAvoidingView,
-  PanResponder,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Animated, FlatList, KeyboardAvoidingView, PanResponder, Platform, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Camera,
@@ -243,10 +233,10 @@ export function ConsultationCall(props: ConsultationCallProps) {
           <ChevronLeft size={24} color={colors.white} />
         </Pressable>
         <View style={styles.heading}>
-          <Text numberOfLines={1} style={styles.name}>
+          <Text variant="body" numberOfLines={1} style={styles.name}>
             {name}
           </Text>
-          <Text style={styles.status}>
+          <Text variant="body" style={styles.status}>
             {props.connected
               ? chat
                 ? "In-call chat"
@@ -292,10 +282,10 @@ export function ConsultationCall(props: ConsultationCallProps) {
                       : styles.received,
                   ]}
                 >
-                  <Text style={[styles.message, { color: palette.text }]}>
+                  <Text variant="body" style={[styles.message, { color: palette.text }]}>
                     {item.body}
                   </Text>
-                  <Text style={styles.time}>
+                  <Text variant="caption" style={styles.time}>
                     {new Date(item.created_at).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -304,7 +294,7 @@ export function ConsultationCall(props: ConsultationCallProps) {
                 </View>
               )}
               ListEmptyComponent={
-                <Text style={styles.empty}>
+                <Text variant="body" style={styles.empty}>
                   Messages shared during this consultation appear here.
                 </Text>
               }
@@ -422,7 +412,7 @@ export function ConsultationCall(props: ConsultationCallProps) {
                 <View
                   style={[styles.badge, { backgroundColor: palette.primary }]}
                 >
-                  <Text style={styles.badgeText}>
+                  <Text variant="caption" style={styles.badgeText}>
                     {unread > 9 ? "9+" : unread}
                   </Text>
                 </View>

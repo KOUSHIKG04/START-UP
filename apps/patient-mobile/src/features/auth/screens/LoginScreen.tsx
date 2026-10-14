@@ -1,13 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Image, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import Svg, { Path } from "react-native-svg";
 import { Phone } from "lucide-react-native";
@@ -138,7 +132,7 @@ export default function LoginScreen() {
                 mode === "dev" && styles.switchBtnActive,
               ]}
             >
-              <Text
+              <Text variant="body"
                 style={[
                   styles.switchBtnText,
                   mode === "dev" && styles.switchBtnTextActive,
@@ -161,7 +155,7 @@ export default function LoginScreen() {
                 mode === "prod" && styles.switchBtnActive,
               ]}
             >
-              <Text
+              <Text variant="body"
                 style={[
                   styles.switchBtnText,
                   mode === "prod" && styles.switchBtnTextActive,
@@ -173,13 +167,13 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text style={styles.heading}>
+        <Text variant="screenTitle" style={styles.heading}>
           Welcome to{" "}
-          <Text style={styles.brand}>
-            Clinzo<Text style={styles.plus}>⁺</Text>
+          <Text variant="inherit" style={styles.brand}>
+            Clinzo<Text variant="body" style={styles.plus}>⁺</Text>
           </Text>
         </Text>
-        <Text style={styles.tagline}>Right Care. Right Time.</Text>
+        <Text variant="label" style={styles.tagline}>Right Care. Right Time.</Text>
 
         {mode === "dev" ? (
           <DevEmailAuthForm
@@ -211,10 +205,10 @@ export default function LoginScreen() {
           </>
         )}
 
-            <Text style={styles.terms}>
+            <Text variant="body" style={styles.terms}>
               By continuing, you agree to our{"\n"}
-              <Text style={styles.link}>Terms of Services</Text> and{" "}
-              <Text style={styles.link}>Privacy Policy</Text>
+              <Text variant="inherit" style={styles.link}>Terms of Services</Text> and{" "}
+              <Text variant="inherit" style={styles.link}>Privacy Policy</Text>
             </Text>
       </View>
     </OnboardingShell>

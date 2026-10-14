@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   AlertCircle,
@@ -87,9 +88,9 @@ export function CompletionView({
               </View>
             </View>
           </View>
-          <Text style={styles.thankYouTitle}>Thank you!</Text>
-          <Text style={styles.completedTitle}>{completionCopy}</Text>
-          <Text style={styles.centeredDescription}>
+          <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
+          <Text variant="cardHeading" style={styles.completedTitle}>{completionCopy}</Text>
+          <Text variant="body" style={styles.centeredDescription}>
             {appointment.doctorName} has completed your consultation.
           </Text>
         </View>
@@ -124,7 +125,7 @@ export function CompletionView({
             </View>
             <View style={styles.orderMedicineNotice}>
               <AlertCircle color={colors.patient.primary} size={16} strokeWidth={2} />
-              <Text style={styles.orderMedicineNoticeText}>
+              <Text variant="body" style={styles.orderMedicineNoticeText}>
                 Order medicine will work once we start operations.
               </Text>
             </View>
@@ -132,7 +133,7 @@ export function CompletionView({
         ) : isHome ? null : (
           <View style={styles.recordsBanner}>
             <FileText color={colors.patient.primaryDark} size={23} />
-            <Text style={styles.infoText}>
+            <Text variant="body" style={styles.infoText}>
               Prescription and consultation notes have been sent to your email and are available in records.
             </Text>
           </View>
@@ -150,7 +151,7 @@ export function CompletionView({
           padding={16}
           style={styles.experienceCard}
         >
-          <Text style={styles.feedbackTitle}>Rate your doctor</Text>
+          <Text variant="cardHeading" style={styles.feedbackTitle}>Rate your doctor</Text>
           {/* <Text style={styles.feedbackDescription}>
             Your feedback helps us improve
           </Text> */}
@@ -169,7 +170,7 @@ export function CompletionView({
                   pressed ? styles.pressed : undefined,
                 ]}
               >
-                <Text style={styles.ratingEmoji}>{item.emoji}</Text>
+                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>{item.emoji}</Text>
               </Pressable>
             ))}
           </View>
@@ -189,7 +190,7 @@ export function CompletionView({
           ) : (
             <View style={styles.ratingSubmittedConfirmation}>
               <CheckCircle2 color={colors.patient.primaryDark} size={16} strokeWidth={2.4} />
-              <Text style={styles.ratingSubmittedText}>Rating saved. Thank you!</Text>
+              <Text variant="bodyEmphasis" style={styles.ratingSubmittedText}>Rating saved. Thank you!</Text>
             </View>
           )}
         </Card> : null}
@@ -235,21 +236,21 @@ function ConsultationSummary({ appointment }: { appointment: Appointment }) {
     >
       <View style={styles.summaryHeading}>
         <ClipboardList color={colors.patient.primaryDark} size={20} />
-        <Text style={styles.cardTitle}>Consultation Summary</Text>
+        <Text variant="cardHeading" style={styles.cardTitle}>Consultation Summary</Text>
       </View>
       <View style={styles.summaryRow}>
         <View style={styles.summaryLabel}>
           <UserRound color={colors.patient.primaryDark} size={18} />
-          <Text style={styles.secondaryText}>Doctor</Text>
+          <Text variant="body" style={styles.secondaryText}>Doctor</Text>
         </View>
-        <Text style={styles.summaryValue}>{appointment.doctorName}</Text>
+        <Text variant="bodyEmphasis" style={styles.summaryValue}>{appointment.doctorName}</Text>
       </View>
       <View style={styles.summaryRow}>
         <View style={styles.summaryLabel}>
           <CalendarDays color={colors.patient.primaryDark} size={18} />
-          <Text style={styles.secondaryText}>Date & Time</Text>
+          <Text variant="body" style={styles.secondaryText}>Date & Time</Text>
         </View>
-        <Text style={styles.summaryValue}>
+        <Text variant="bodyEmphasis" style={styles.summaryValue}>
           {appointment.date}, {appointment.time.split(" – ")[0]}
         </Text>
       </View>

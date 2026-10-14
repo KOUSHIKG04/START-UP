@@ -4,6 +4,7 @@ export function settingsDraft(
 ): DoctorScheduleSettings {
   return {
     workingDays: saved.working_days,
+    onlineWorkingDays: saved.online_working_days ?? saved.working_days, homeWorkingDays: saved.home_working_days ?? saved.working_days,
     clinicStart: saved.clinic_start.slice(0, 5),
     clinicEnd: saved.clinic_end.slice(0, 5),
     slotMinutes: saved.slot_minutes,
@@ -21,7 +22,7 @@ export function settingsDraft(
   };
 }
 export const initialSettings: DoctorScheduleSettings = {
-  workingDays: [1, 2, 3, 4, 5],
+  workingDays: [1, 2, 3, 4, 5], onlineWorkingDays: [1, 2, 3, 4, 5], homeWorkingDays: [1, 2, 3, 4, 5],
   clinicStart: "09:00",
   clinicEnd: "17:00",
   slotMinutes: 15,

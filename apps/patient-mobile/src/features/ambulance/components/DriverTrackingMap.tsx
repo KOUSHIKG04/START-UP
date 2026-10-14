@@ -27,7 +27,7 @@ export function DriverTrackingMap({ location, style }: Props) {
   useEffect(() => {
     if (!canShowNativeMap || latitude === undefined || longitude === undefined) return;
     const cameraPosition = { coordinates: { latitude, longitude }, zoom: 15 };
-    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(cameraPosition);
+    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...cameraPosition, duration: 0 });
     if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(cameraPosition);
   }, [canShowNativeMap, latitude, longitude]);
 

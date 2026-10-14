@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, CardSeparator, Chip } from "@startup/mobile-ui";
@@ -28,8 +29,8 @@ export function AboutDoctor({
         style={styles.aboutCard}
       >
         <View style={styles.aboutSection}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.bodyText}>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>About</Text>
+          <Text variant="body" style={styles.bodyText}>
             {bio || `${doctorName} has not added a biography yet.`}
           </Text>
         </View>
@@ -37,7 +38,7 @@ export function AboutDoctor({
         <CardSeparator color="#E8ECEF" />
 
         <View style={styles.aboutSection}>
-          <Text style={styles.sectionTitle}>Hospital</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>Hospital</Text>
           <View style={styles.hospitalRow}>
             <MapPin
               color={colors.patient.primaryDark}
@@ -45,12 +46,12 @@ export function AboutDoctor({
               strokeWidth={1.9}
             />
             <View style={styles.hospitalCopy}>
-              <Text style={styles.hospitalLine}>
-                <Text style={styles.hospitalName}>{facilityName}, </Text>
-                <Text style={styles.hospitalAddress}>{facilityAddress}</Text>
+              <Text variant="body" style={styles.hospitalLine}>
+                <Text variant="cardHeading" style={styles.hospitalName}>{facilityName}, </Text>
+                <Text variant="body" style={styles.hospitalAddress}>{facilityAddress}</Text>
               </Text>
               {distanceMeters !== null ? (
-                <Text style={styles.secondaryText}>
+                <Text variant="body" style={styles.secondaryText}>
                   {(distanceMeters / 1000).toFixed(1)} km from you
                 </Text>
               ) : null}
@@ -61,7 +62,7 @@ export function AboutDoctor({
         <CardSeparator color="#E8ECEF" />
 
         <View style={styles.aboutSection}>
-          <Text style={styles.sectionTitle}>Languages</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>Languages</Text>
           <View style={styles.languageRow}>
             {languages.map((language) => (
               <Chip

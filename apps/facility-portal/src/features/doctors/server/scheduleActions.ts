@@ -86,7 +86,7 @@ export async function saveFacilityDoctorSchedule(
     return {
       ok: false as const,
       error:
-        error instanceof Error ? error.message : "Could not save schedule.",
+        typeof error === "object" && error !== null && "code" in error && error.code === "PT409" ? "Schedule changed in another app. Refresh before saving again." : error instanceof Error ? error.message : "Could not save schedule.",
     };
   }
 }

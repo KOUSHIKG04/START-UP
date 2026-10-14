@@ -1,7 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { useCallback } from "react";
 import { setStatusBarStyle } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, UserRound, Users } from "lucide-react-native";
@@ -37,7 +38,7 @@ export default function AddFamilyScreen() {
         <View style={styles.topSection}>
           <View style={styles.header}>
             <View style={styles.titleRow}>
-              <Text style={styles.title}>Add Family Members</Text>
+              <Text variant="cardHeading" style={styles.title}>Add Family Members</Text>
               <View style={styles.iconWrap}>
                 <Users
                   size={24}
@@ -56,8 +57,8 @@ export default function AddFamilyScreen() {
                     <UserRound size={18} color={colors.white} strokeWidth={2} />
                   </View>
                   <View style={styles.memberInfo}>
-                    <Text style={styles.memberName}>{member.full_name}</Text>
-                    <Text style={styles.memberMeta}>
+                    <Text variant="body" style={styles.memberName}>{member.full_name}</Text>
+                    <Text variant="body" style={styles.memberMeta}>
                       {member.relation}
                       {member.age_years !== null
                         ? ` · ${member.age_years} yrs`
@@ -85,7 +86,7 @@ export default function AddFamilyScreen() {
               color={colors.patient.primaryDark}
               strokeWidth={1.8}
             />
-            <Text style={styles.addText}>Add Family Member</Text>
+            <Text variant="body" style={styles.addText}>Add Family Member</Text>
             <Plus
               size={22}
               color={colors.patient.primaryDark}
@@ -99,7 +100,7 @@ export default function AddFamilyScreen() {
             theme="patient"
             style={onboardingButtonStyles.button}
             labelStyle={onboardingButtonStyles.label}
-            rightIcon={<Text style={onboardingButtonStyles.label}>›</Text>}
+            rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>}
             label={familyMembers.length > 0 ? "Continue" : "Skip and Continue"}
             onPress={() => router.replace("/(app)/(tabs)")}
           />

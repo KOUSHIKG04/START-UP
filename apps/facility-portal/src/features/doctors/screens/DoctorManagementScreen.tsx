@@ -13,7 +13,7 @@ import { DoctorTable } from "../components/DoctorTable";
 import { AddDoctorCard } from "../components/AddDoctorCard";
 import { FacilityDoctorRequests } from "../components/FacilityDoctorRequests";
 
-export default function DoctorManagementScreen() {
+export default function DoctorManagementScreen({ facilityIds }: { facilityIds: string[] }) {
   const {
     searchTerm,
     setSearchTerm,
@@ -54,7 +54,7 @@ export default function DoctorManagementScreen() {
         </div>
       </div>
 
-      <FacilityDoctorRequests onChange={() => void refetch()} />
+      <FacilityDoctorRequests scope={[...facilityIds].sort().join(":")} onChange={() => void refetch()} />
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

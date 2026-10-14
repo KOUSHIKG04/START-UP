@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors } from "@startup/design-tokens";
 import { IconLabel, Skeleton, useToastFeedback } from "@startup/mobile-ui";
 import { homeActions } from "../utils/HomeActions";
 import AmbulanceBanner from "./AmbulanceBanner";
+import { BookingGuideLink } from "./BookingGuideLink";
 import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
 import PopularServices from "./PopularServices";
 import { formatDisplayDate, type ClinicAppointment } from "@startup/contracts";
@@ -60,6 +61,10 @@ export function HomeFeedContent({
         />
       </View>
 
+      <View style={styles.bookingGuideLink}>
+        <BookingGuideLink onPress={() => router.push({ pathname: "/learn-booking", params: { consultationType: "Clinic Visit" } } as Href)} />
+      </View>
+
       {upcoming?.length ? (
         upcoming.map((appointment, index) => (
           <UpcomingAppointmentCard
@@ -99,6 +104,10 @@ const styles = StyleSheet.create({
   },
   ambulanceBanner: {
     marginTop: 10,
+    alignItems: "center",
+  },
+  bookingGuideLink: {
+    marginTop: 12,
     alignItems: "center",
   },
 });

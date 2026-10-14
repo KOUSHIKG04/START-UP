@@ -1,10 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Controller, type Control } from "react-hook-form";
 import { Navigation } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -59,7 +55,7 @@ export function PersonalAddressFields({
         )}
       />
       </> : <>
-      <Text style={[styles.label, styles.sectionLabel]}>
+      <Text variant="label" style={[styles.label, styles.sectionLabel]}>
         Add Address
       </Text>
       <Controller
@@ -75,7 +71,7 @@ export function PersonalAddressFields({
               style={[profileFormStyles.control, profileFormStyles.iconControl, fieldState.invalid && { borderColor: colors.danger }]}
             >
               {/* <Navigation size={22} color={colors.patient.primaryDark} /> */}
-              <Text
+              <Text variant="bodyEmphasis"
                 style={[
                   profileFormStyles.text,
                   styles.placeholder,

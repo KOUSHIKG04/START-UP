@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { View } from "react-native";
 import { Loader } from "@startup/mobile-ui";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,7 +32,7 @@ export default function EditPatientProfile() {
   if (detail.error || !detail.data)
     return (
       <View style={{ padding: 24 }}>
-        <Text accessibilityRole="alert">Could not load your profile.</Text>
+        <Text variant="body" accessibilityRole="alert">Could not load your profile.</Text>
       </View>
     );
   return (

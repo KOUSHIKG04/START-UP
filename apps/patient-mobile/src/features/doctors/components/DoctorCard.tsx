@@ -1,12 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useRef, type ReactNode } from "react";
-import {
-  type GestureResponderEvent,
-  type StyleProp,
-  StyleSheet,
-  Text,
-  View,
-  type ViewStyle,
-} from "react-native";
+import { type GestureResponderEvent, type StyleProp, StyleSheet, View, type ViewStyle } from "react-native";
 import { Briefcase, UserRound } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
@@ -107,19 +101,19 @@ export default function DoctorCard({
 
           <View style={styles.doctorInfo}>
             <View style={styles.nameRow}>
-              <Text numberOfLines={1} style={styles.profileName}>
+              <Text variant="cardHeading" numberOfLines={1} style={styles.profileName}>
                 {name}
               </Text>
               {contextLabel ? (
                 <View style={styles.contextBadge}>
-                  <Text style={styles.contextBadgeText}>{contextLabel}</Text>
+                  <Text variant="caption" style={styles.contextBadgeText}>{contextLabel}</Text>
                 </View>
               ) : null}
             </View>
 
-            {degree ? <Text numberOfLines={1} style={styles.secondaryText}>{degree}</Text> : null}
+            {degree ? <Text variant="label" numberOfLines={1} style={styles.secondaryText}>{degree}</Text> : null}
 
-            <Text numberOfLines={1} style={styles.specialtyText}>
+            <Text variant="label" numberOfLines={1} style={styles.specialtyText}>
               {specialty}
             </Text>
           </View>
@@ -167,22 +161,22 @@ export default function DoctorCard({
         </View>
 
         <View style={[styles.doctorInfo, variant === "detail" && styles.detailDoctorInfo]}>
-          <Text numberOfLines={1} style={styles.nameLine}>
-            <Text style={styles.nameText}>{name}</Text>
+          <Text variant="cardHeading" numberOfLines={1} style={styles.nameLine}>
+            <Text variant="cardHeading" style={styles.nameText}>{name}</Text>
             {degree ? (
-              <Text style={styles.degreeText}>{`  ${degree}`}</Text>
+              <Text variant="label" style={styles.degreeText}>{`  ${degree}`}</Text>
             ) : null}
           </Text>
 
-          {department ? <Text numberOfLines={1} style={styles.departmentText}>{department}</Text> : null}
+          {department ? <Text variant="label" numberOfLines={1} style={styles.departmentText}>{department}</Text> : null}
 
           <View style={styles.specialtyRatingRow}>
-            <Text numberOfLines={1} style={[styles.specialtyText, styles.specialtyInRow]}>{specialty}</Text>
-            {showRating && rating ? <Text numberOfLines={1} style={styles.ratingText}>{rating}</Text> : null}
+            <Text variant="label" numberOfLines={1} style={[styles.specialtyText, styles.specialtyInRow]}>{specialty}</Text>
+            {showRating && rating ? <Text variant="label" numberOfLines={1} style={styles.ratingText}>{rating}</Text> : null}
           </View>
           {contextLabel || distanceMeters != null ? <View style={styles.contextDistanceRow}>
-            {contextLabel ? <Text style={styles.contextInline}>{contextLabel}</Text> : null}
-            {distanceMeters != null ? <Text style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
+            {contextLabel ? <Text variant="label" style={styles.contextInline}>{contextLabel}</Text> : null}
+            {distanceMeters != null ? <Text variant="label" style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
           </View> : null}
         </View>
       </View>
@@ -191,12 +185,12 @@ export default function DoctorCard({
         <View style={styles.pillRow}>
           {!hideExperience && experience ? (
             <Pill balanced={Boolean(fee && !hideFee)}>
-              <Text style={styles.pillText}>{experience}</Text>
+              <Text variant="label" style={styles.pillText}>{experience}</Text>
             </Pill>
           ) : null}
           {!hideFee && fee ? (
             <Pill balanced={Boolean(experience && !hideExperience)}>
-              <Text style={styles.pillText}>{`Consultation Fee ${fee}`}</Text>
+              <Text variant="label" style={styles.pillText}>{`Consultation Fee ${fee}`}</Text>
             </Pill>
           ) : null}
         </View>
@@ -212,7 +206,7 @@ function Pill({ children, balanced }: { children: ReactNode; balanced: boolean }
 function StarIcon() {
   return (
     <View style={styles.starWrap}>
-      <Text style={styles.starEmoji}>★</Text>
+      <Text variant="inherit" style={styles.starEmoji}>★</Text>
     </View>
   );
 }
@@ -230,8 +224,8 @@ function MetricCell({
     <View style={styles.profileCell}>
       <View style={styles.profileIconSurface}>{icon}</View>
       <View style={styles.profileCellText}>
-        <Text style={styles.profileCellLabel}>{label}</Text>
-        <Text numberOfLines={1} style={styles.profileCellValue}>
+        <Text variant="label" style={styles.profileCellLabel}>{label}</Text>
+        <Text variant="bodyEmphasis" numberOfLines={1} style={styles.profileCellValue}>
           {value}
         </Text>
       </View>

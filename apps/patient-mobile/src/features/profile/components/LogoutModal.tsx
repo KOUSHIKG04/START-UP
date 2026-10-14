@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
@@ -50,8 +51,8 @@ export function LogoutModal({
             <View style={styles.logoutModalIconWrap}>
               <LogOut color="#DC2626" size={26} />
             </View>
-            <Text style={styles.logoutModalTitle}>Log Out</Text>
-            <Text style={styles.logoutModalSub}>
+            <Text variant="cardHeading" style={styles.logoutModalTitle}>Log Out</Text>
+            <Text variant="body" style={styles.logoutModalSub}>
               Are you sure you want to log out of your Clinzo patient account?
             </Text>
 

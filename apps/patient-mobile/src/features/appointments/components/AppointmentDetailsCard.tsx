@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Building2,
   CalendarClock,
@@ -90,10 +91,10 @@ function DetailRow({
     <View style={[styles.row, last && styles.lastRow]}>
       <View style={styles.labelGroup}>
         {icon}
-        <Text style={styles.label}>{label}</Text>
+        <Text variant="label" style={styles.label}>{label}</Text>
       </View>
       {typeof value === "string" ? (
-        <Text numberOfLines={2} style={styles.value}>
+        <Text variant="bodyEmphasis" numberOfLines={2} style={styles.value}>
           {value}
         </Text>
       ) : (

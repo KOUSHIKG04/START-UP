@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { AppText as Text } from "./AppText";
+import { Pressable, StyleSheet, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { Check } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
@@ -23,7 +24,7 @@ export function Checkbox({ checked, onCheckedChange, label, disabled = false, st
       <View style={[styles.box, { borderColor: themeColors.primary }, checked && { backgroundColor: themeColors.primary }]}>
         {checked ? <Check size={16} strokeWidth={3} color={colors.white} /> : null}
       </View>
-      <Text style={[styles.label, labelStyle]}>{label}</Text>
+      <Text variant="body" style={[styles.label, labelStyle]}>{label}</Text>
     </Pressable>
   );
 }

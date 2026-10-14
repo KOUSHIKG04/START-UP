@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { Pill } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { listMyClinicalRecords } from "@startup/data-access";
@@ -49,8 +50,8 @@ export function MedicinesScreen({
         ) : !record || record.medicines.length === 0 ? (
           <View style={styles.emptyCard}>
             <Pill color={colors.patient.primary} size={42} />
-            <Text style={styles.emptyTitle}>No medications prescribed</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text variant="cardHeading" style={styles.emptyTitle}>No medications prescribed</Text>
+            <Text variant="cardHeading" style={styles.emptySubtitle}>
               Active medication schedules from your consultations will be listed
               here.
             </Text>
@@ -58,7 +59,7 @@ export function MedicinesScreen({
         ) : (
           <>
             <View style={styles.diagnosisRow}>
-              <Text style={styles.diagnosisLabel}>CURRENT DIAGNOSIS</Text>
+              <Text variant="label" style={styles.diagnosisLabel}>CURRENT DIAGNOSIS</Text>
               <Chip
                 label={primaryDiagnosis}
                 style={styles.diagnosisChip}
@@ -107,7 +108,7 @@ export function MedicinesScreen({
                     <View style={styles.pillIcon}>
                       <Pill color={colors.white} size={18} />
                     </View>
-                    <Text style={styles.medicineName}>
+                    <Text variant="body" style={styles.medicineName}>
                       {medicine.medicine_name} {medicine.strength}
                     </Text>
                   </View>
@@ -120,7 +121,7 @@ export function MedicinesScreen({
                     <Dose label="Dinner" value={dinner} />
                   </View>
 
-                  <Text style={styles.doseSummary}>
+                  <Text variant="body" style={styles.doseSummary}>
                     {doseSummary || "As directed by physician"}
                   </Text>
                 </Card>
@@ -137,9 +138,9 @@ function Dose({ label, value }: { label: string; value: number }) {
   const active = value > 0;
   return (
     <View style={styles.doseColumn}>
-      <Text style={styles.mealLabel}>{label}</Text>
+      <Text variant="label" style={styles.mealLabel}>{label}</Text>
       <View style={[styles.doseBox, active ? styles.activeDoseBox : undefined]}>
-        <Text
+        <Text variant="bodyEmphasis"
           style={[
             styles.doseValue,
             active ? styles.activeDoseValue : undefined,

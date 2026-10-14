@@ -1,13 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { formatDisplayDate } from "@startup/contracts";
-import {
-  Pressable,
-  Share,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, Share, StyleSheet, View } from "react-native";
 import {
   Download,
   FileText,
@@ -97,8 +92,8 @@ export function PrescriptionScreen({
         ) : !record?.prescription_code ? (
           <View style={styles.emptyCard}>
             <FileText color={colors.patient.primary} size={42} />
-            <Text style={styles.emptyTitle}>No signed prescription yet</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text variant="cardHeading" style={styles.emptyTitle}>No signed prescription yet</Text>
+            <Text variant="cardHeading" style={styles.emptySubtitle}>
               When your doctor completes your consultation and issues a
               prescription, it will appear here.
             </Text>
@@ -126,10 +121,10 @@ export function PrescriptionScreen({
             >
               <FileText color={colors.patient.primary} size={23} />
               <View style={styles.flexCopy}>
-                <Text style={styles.cardTitle}>
+                <Text variant="cardHeading" style={styles.cardTitle}>
                   Prescription #{record.prescription_code ?? "not issued"}
                 </Text>
-                <Text style={styles.secondaryText}>
+                <Text variant="body" style={styles.secondaryText}>
                   {record.signed_at ? `Consultation completed ${formatDate(record.signed_at)}` : "Consultation in progress"}
                 </Text>
               </View>
@@ -142,14 +137,14 @@ export function PrescriptionScreen({
 
             {record.vitals.length > 0 ? (
               <View style={styles.vitalsContainer}>
-                <Text style={styles.vitalsHeader}>Recorded Vitals</Text>
+                <Text variant="body" style={styles.vitalsHeader}>Recorded Vitals</Text>
                 <View style={styles.vitalsRow}>
                   {record.vitals.map((v) => (
                     <View key={v.code} style={styles.vitalCard}>
-                      <Text style={styles.vitalValue}>
+                      <Text variant="bodyEmphasis" style={styles.vitalValue}>
                         {v.value} {v.unit}
                       </Text>
-                      <Text style={styles.vitalLabel}>
+                      <Text variant="label" style={styles.vitalLabel}>
                         {v.code.replaceAll("_", " ")}
                       </Text>
                     </View>
@@ -160,11 +155,11 @@ export function PrescriptionScreen({
 
             <View style={styles.medicinesCard}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Medicines</Text>
+                <Text variant="sectionHeading" style={styles.sectionTitle}>Medicines</Text>
                 <Chip label={primaryDiagnosis} style={styles.diagnosisChip} />
               </View>
               {record.medicines.length === 0 ? (
-                <Text style={styles.secondaryText}>
+                <Text variant="body" style={styles.secondaryText}>
                   No medications prescribed.
                 </Text>
               ) : (
@@ -188,15 +183,15 @@ export function PrescriptionScreen({
                       style={styles.medicineRow}
                     >
                       <View style={styles.medicineNumber}>
-                        <Text style={styles.medicineNumberText}>
+                        <Text variant="bodyEmphasis" style={styles.medicineNumberText}>
                           {index + 1}
                         </Text>
                       </View>
                       <View style={styles.flexCopy}>
-                        <Text style={styles.medicineName}>
+                        <Text variant="body" style={styles.medicineName}>
                           {medicine.medicine_name} {medicine.strength}
                         </Text>
-                        <Text numberOfLines={2} style={styles.medicineDose}>
+                        <Text variant="body" numberOfLines={2} style={styles.medicineDose}>
                           {scheduleInfo || "As directed by physician"}
                         </Text>
                       </View>
@@ -215,7 +210,7 @@ export function PrescriptionScreen({
                   ]}
                 >
                   <Pill color={colors.patient.primaryDark} size={17} />
-                  <Text style={styles.viewDetailsText}>
+                  <Text variant="body" style={styles.viewDetailsText}>
                     View medicine schedule
                   </Text>
                 </Pressable>
@@ -227,10 +222,10 @@ export function PrescriptionScreen({
                 <Info color={colors.patient.primaryDark} size={18} />
               </View>
               <View style={styles.flexCopy}>
-                <Text style={styles.adviceTitle}>
+                <Text variant="cardHeading" style={styles.adviceTitle}>
                   {record.assessment ?? "Follow-up recommended"}
                 </Text>
-                {record.followup ? <Text style={styles.secondaryText}>
+                {record.followup ? <Text variant="body" style={styles.secondaryText}>
                   Follow-up: {formatDate(record.followup.recommended_date)} · {record.followup.reason}
                 </Text> : null}
               </View>

@@ -1,3 +1,4 @@
+import { LiveUpdatesBridge } from "../services/LiveUpdatesBridge";
 import { useEffect, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router, Stack } from "expo-router";
@@ -11,6 +12,7 @@ import {
   MobileThemeProvider,
   ToastProvider,
   useToast,
+  useToastFeedback,
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
@@ -25,6 +27,10 @@ export const unstable_settings = { initialRouteName: "(app)" };
 function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
   const { showToast } = useToast();
   useDeviceNotifications(identityId, showToast);
+  return null;
+}
+function SessionFeedback({ error }: { error: string | null }) {
+  useToastFeedback({ error: error ?? "" });
   return null;
 }
 export default function RootLayout() {
@@ -49,7 +55,7 @@ export default function RootLayout() {
         <Loader theme="doctor" size="large" style={{ flex: 1 }} />
       </View>
     );
-  if (auth.session && auth.error)
+  if (auth.session && auth.error && !auth.profile)
     return (
       <View
         style={[
@@ -70,8 +76,10 @@ export default function RootLayout() {
     <MobileThemeProvider theme="doctor">
       <SafeAreaProvider>
         <ToastProvider>
+        <SessionFeedback error={auth.error} />
         <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
         <QueryProvider>
+          <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
           <View style={styles.root}>
             <Stack
               screenOptions={{
@@ -91,7 +99,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" />
               </Stack.Protected>
             </Stack>
-            <StatusBar style="dark" />
+            <StatusBar style={auth.profile?.doctor?.status === "verified" ? "light" : "dark"} />
           </View>
         </QueryProvider>
         </ToastProvider>

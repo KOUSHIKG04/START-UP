@@ -196,7 +196,6 @@ export function NotificationDrawer({
     queryKey: ["my-notifications"],
     queryFn: () => listMyNotifications(supabase!),
     enabled: Boolean(supabase && showModal),
-    refetchInterval: showModal ? 15000 : false,
   });
   const markRead = useMutation({
     mutationFn: (ids?: string[]) => markMyNotificationsRead(supabase!, ids),

@@ -11,6 +11,7 @@ import { toast } from "@startup/web-ui/components/ui/toast";
 import { listBedTypeCatalog, registerMyCareFacility, setMyProfilePhoto } from "@startup/data-access";
 import type { BedTypeCatalogItem } from "@startup/contracts";
 import { useRouter } from "next/navigation";
+import { FacilityLocationMap } from "./FacilityLocationMap";
 
 type Facility = { facility_id: string; facility_name: string; facility_kind: string };
 type Status = { status: string; documents: Array<{ kind: string; status: string; rejection_reason: string | null }> };
@@ -19,7 +20,13 @@ type FacilityLocation = { latitude: number; longitude: number };
 function getFacilityLocation(): Promise<FacilityLocation> {
   if (!navigator.geolocation) return Promise.reject(new Error("Location is unavailable in this browser. Use a supported browser at the facility."));
   return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(
-    position => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+    position => {
+      if (position.coords.accuracy > 100) {
+        reject(new Error(`Browser location is only accurate to about ${Math.round(position.coords.accuracy)} m. Turn on precise location or use a device at the facility, then try again.`));
+        return;
+      }
+      resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+    },
     () => reject(new Error("Allow location access while at the facility, then try again.")),
     { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
   ));
@@ -27,6 +34,7 @@ function getFacilityLocation(): Promise<FacilityLocation> {
 
 export function FacilityVerificationForm({ facilities }: { facilities: Facility[] }) {
   const router = useRouter();
+  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [facilityName,setFacilityName] = useState("");
   const [facilityKind,setFacilityKind] = useState<"hospital" | "clinic">("hospital");
   const [facilityAddress,setFacilityAddress] = useState("");
@@ -35,7 +43,13 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
   const [facilityState,setFacilityState] = useState("");
   const [facilityPincode,setFacilityPincode] = useState("");
   const [facilityLocation,setFacilityLocation] = useState<FacilityLocation | null>(null);
+  const [mapUnavailable,setMapUnavailable] = useState(false);
   const [locating,setLocating] = useState(false);
+  const [locationMessage,setLocationMessage] = useState("");
+  const handleMapUnavailable = useCallback((unavailable: boolean) => {
+    setMapUnavailable(unavailable);
+    if (unavailable) setLocationMessage("The map could not load. Use current location and check the address fields manually.");
+  }, []);
   const [offersBeds,setOffersBeds] = useState<boolean | null>(null);
   const [bedTypeCodes,setBedTypeCodes] = useState<string[]>([]);
   const [bedTypes,setBedTypes] = useState<BedTypeCatalogItem[]>([]);
@@ -138,6 +152,10 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
 
   async function register(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (mapsApiKey && !mapUnavailable && !facilityLocation) {
+      setLocationMessage("Confirm the facility pin on the map before registering.");
+      return;
+    }
     if (offersBeds === null || (offersBeds && bedTypeCodes.length === 0)) {
       toast.add({ title: "Complete bed services", description: "Choose whether beds are offered, then select the offered categories.", type: "warning" });
       return;
@@ -180,11 +198,11 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
     } finally { setRegistering(false); }
   }
 
-  async function useCurrentLocation() {
+  async function applyLocation(location: FacilityLocation) {
     setLocating(true);
+    setLocationMessage("");
+    setFacilityLocation(location);
     try {
-      const location = await getFacilityLocation();
-      setFacilityLocation(location);
       const response = await fetch("/api/facility-address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,17 +212,34 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
         address?: string; locality?: string; city?: string; state?: string;
         pincode?: string; error?: string;
       };
-      if (response.ok && result.address) {
-        setFacilityAddress(current => current.trim() ? current : result.address ?? "");
-        setFacilityLocality(current => current.trim() ? current : result.locality ?? "");
-        setFacilityCity(current => current.trim() ? current : result.city ?? "");
-        setFacilityState(current => current.trim() ? current : result.state ?? "");
-        setFacilityPincode(current => current.trim() ? current : result.pincode ?? "");
-        toast.add({ title: "Location captured", description: "Check each address field and fill any missing details.", type: "success" });
+      if (response.ok) {
+        setFacilityAddress(result.address ?? "");
+        setFacilityLocality(result.locality ?? "");
+        setFacilityCity(result.city ?? "");
+        setFacilityState(result.state ?? "");
+        setFacilityPincode(result.pincode ?? "");
+        setLocationMessage("Address filled from your location. Check every field and add missing street details.");
+        toast.add({ title: "Address found", description: "Check the address fields against the facility before registering. Add any missing street details.", type: "success" });
       } else {
-        toast.add({ title: "Location captured", description: result.error ?? "Enter the facility address manually.", type: "info" });
+        setLocationMessage(result.error ?? "Address lookup failed. Enter the address manually; location coordinates were captured.");
+        toast.add({ title: "Address lookup unavailable", description: result.error ?? "Enter the facility address manually. Location coordinates were captured.", type: "warning" });
       }
     } catch (cause) {
+      setLocationMessage("Location confirmed, but address lookup failed. Check and enter the address fields manually.");
+      toast.add({ title: "Address lookup failed", description: cause instanceof Error ? cause.message : "Enter the address manually.", type: "warning" });
+    } finally {
+      setLocating(false);
+    }
+  }
+
+  async function useCurrentLocation() {
+    setLocating(true);
+    setLocationMessage("");
+    setFacilityLocation(null);
+    try {
+      await applyLocation(await getFacilityLocation());
+    } catch (cause) {
+      setLocationMessage(cause instanceof Error ? cause.message : "Could not capture location. Try again.");
       toast.add({ title: "Could not capture location", description: cause instanceof Error ? cause.message : "Try again.", type: "error" });
     } finally {
       setLocating(false);
@@ -213,6 +248,7 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
 
   const awaitingReview = status?.status === "pending" || status?.status === "under_review";
   const addressFields = <div className="space-y-3">
+    {mapsApiKey && !mapUnavailable && <FacilityLocationMap apiKey={mapsApiKey} selected={facilityLocation} getCurrentLocation={getFacilityLocation} onConfirm={applyLocation} onUnavailable={handleMapUnavailable} disabled={registering} />}
     <div className="space-y-2">
       <Label htmlFor="facility-address">Street address</Label>
       <Input id="facility-address" placeholder="Street address" value={facilityAddress} onChange={event => setFacilityAddress(event.target.value)} minLength={5} maxLength={500} required />
@@ -235,11 +271,12 @@ export function FacilityVerificationForm({ facilities }: { facilities: Facility[
       <Label htmlFor="facility-pincode">Pincode</Label>
       <Input id="facility-pincode" placeholder="6-digit pincode" value={facilityPincode} onChange={event => setFacilityPincode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required />
     </div>
-    <Button type="button" variant="outline" onClick={useCurrentLocation} disabled={locating || registering}>{locating ? <Spinner aria-label="Getting location" /> : "Use current location"}</Button>
+    {(!mapsApiKey || mapUnavailable) && <Button type="button" variant="outline" onClick={useCurrentLocation} disabled={locating || registering}>{locating ? <Spinner aria-label="Getting location" /> : "Use current location"}</Button>}
+    {locationMessage && <p role="status" className="text-sm text-muted-foreground">{locationMessage}</p>}
   </div>;
 
   return <div className="space-y-5">
-    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div><div className="space-y-2"><Label htmlFor="facility-logo">Facility logo or photo (optional)</Label><Input id="facility-logo" type="file" accept="image/jpeg,image/png" onChange={event => { logoRef.current = event.target.files?.[0] ?? null; }} /><p className="text-xs text-muted-foreground">JPG or PNG, up to 5 MB.</p></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}<Button disabled={registering || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button></form> : statusLoading ? <div role="status" aria-label="Loading verification status" className="space-y-3 rounded-xl border bg-card p-6"><Skeleton className="h-5 w-48" /><Skeleton className="h-4 w-full" /><Skeleton className="h-9 w-28" /></div> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button></section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
+    {!facilities.length ? <form onSubmit={register} className="space-y-5 rounded-xl border bg-card p-6"><h2 className="font-semibold">Register your hospital or clinic</h2><p className="text-sm text-muted-foreground">Be at the facility to capture its location. Registration remains pending until Clinzo approves its documents.</p><div className="space-y-2"><Label htmlFor="facility-name">Facility name</Label><Input id="facility-name" value={facilityName} onChange={event=>setFacilityName(event.target.value)} minLength={2} maxLength={160} required /></div><div className="space-y-2"><Label htmlFor="facility-kind">Type</Label><select id="facility-kind" value={facilityKind} onChange={event=>setFacilityKind(event.target.value as "hospital" | "clinic")} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="hospital">Hospital</option><option value="clinic">Clinic</option></select></div><div className="space-y-2"><Label htmlFor="facility-logo">Facility logo or photo (optional)</Label><Input id="facility-logo" type="file" accept="image/jpeg,image/png" onChange={event => { logoRef.current = event.target.files?.[0] ?? null; }} /><p className="text-xs text-muted-foreground">JPG or PNG, up to 5 MB.</p></div>{addressFields}<fieldset className="space-y-2"><legend className="text-sm font-medium">Does this facility offer patient beds?</legend><div className="flex gap-5 text-sm"><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === true} onChange={() => setOffersBeds(true)} required />Yes</label><label className="flex items-center gap-2"><input type="radio" name="offers-beds" checked={offersBeds === false} onChange={() => { setOffersBeds(false); setBedTypeCodes([]); }} required />No</label></div></fieldset>{offersBeds && <fieldset className="space-y-2"><legend className="text-sm font-medium">Bed categories offered</legend><p className="text-xs text-muted-foreground">Select only categories this facility provides. Enter live bed counts after registration.</p><div className="grid gap-2 sm:grid-cols-2">{bedTypes.map(type => <label key={type.code} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bedTypeCodes.includes(type.code)} onChange={event => setBedTypeCodes(current => event.target.checked ? [...current,type.code] : current.filter(code => code !== type.code))} />{type.name}</label>)}</div></fieldset>}<Button disabled={registering || locating || Boolean(bedTypesError)}>{registering ? "Registering…" : "Register facility"}</Button></form> : statusLoading ? <div role="status" aria-label="Loading verification status" className="space-y-3 rounded-xl border bg-card p-6"><Skeleton className="h-5 w-48" /><Skeleton className="h-4 w-full" /><Skeleton className="h-9 w-28" /></div> : awaitingReview ? <section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Awaiting company approval</h2><p className="text-muted-foreground mt-2 text-sm">Your registration certificate and operating licence have been submitted. The dashboard opens after Clinzo approves the facility.</p><Button className="mt-4" variant="outline" onClick={checkStatus}>Check status</Button></section> : <form onSubmit={submit} className="space-y-5 rounded-xl border bg-card p-6">
       <div className="space-y-2"><Label htmlFor="facility">Facility</Label><select id="facility" value={activeFacilityId} onChange={(event) => { setFacilityId(event.target.value); setStatus(null); setStatusLoading(true); }} className="h-10 w-full rounded-md border bg-background px-3 text-sm">{facilities.map((facility) => <option key={facility.facility_id} value={facility.facility_id}>{facility.facility_name}</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="registration">Registration number</Label><Input id="registration" value={registration} onChange={(event) => setRegistration(event.target.value)} minLength={4} maxLength={120} required /></div>
       <div className="space-y-2"><Label htmlFor="certificate">Registration certificate</Label><Input id="certificate" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => { certificateRef.current = event.target.files?.[0] ?? null; }} required /><p className="text-xs text-muted-foreground">PDF, JPG or PNG, up to 10 MB.</p></div>

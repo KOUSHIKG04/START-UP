@@ -1,14 +1,7 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useState, type ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
@@ -110,7 +103,7 @@ export function Accordion({
           {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
           <View style={styles.titleContainer}>
             {typeof title === "string" ? (
-              <Text
+              <Text variant="cardHeading"
                 style={[
                   styles.title,
                   variant === "surface"
@@ -126,7 +119,7 @@ export function Accordion({
             )}
             {subtitle ? (
               typeof subtitle === "string" ? (
-                <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
+                <Text variant="cardHeading" style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
               ) : (
                 subtitle
               )

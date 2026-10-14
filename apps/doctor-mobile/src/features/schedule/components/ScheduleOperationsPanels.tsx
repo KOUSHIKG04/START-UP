@@ -16,6 +16,7 @@ import {
 } from "@startup/contracts";
 
 export function PublishSessionPanel({
+  mode: serviceMode,
   publishDate,
   onPublishDateChange,
   busy,
@@ -39,6 +40,7 @@ export function PublishSessionPanel({
   windows,
   onWindowChange,
 }: {
+  mode: "clinic" | "online" | "home";
   publishDate: string;
   onPublishDateChange: (date: string) => void;
   busy: boolean;
@@ -71,7 +73,7 @@ export function PublishSessionPanel({
       <Heading style={{ fontSize: 13 }}>Publish appointment slots</Heading>
       <Label muted>
         Saving working hours does not publish bookings. Choose a future date,
-        tap the exact clinic, online or home-visit times, then publish that
+        tap the exact times for this service, then publish that
         service. Only future published times appear in the Patient App.
       </Label>
       <Input
@@ -81,7 +83,7 @@ export function PublishSessionPanel({
         placeholder="DD-MM-YYYY"
       />
       {disabledReason ? <Label muted>{disabledReason}</Label> : null}
-      {(["clinic", "online", "home"] as const).map((mode) => {
+      {[serviceMode].map((mode) => {
         const available = slotStartTimes(
           windows[mode].start,
           windows[mode].end,
@@ -220,7 +222,7 @@ export function PublishSessionPanel({
               theme="doctor"
               variant={mode === "clinic" ? undefined : "outline"}
               label={`Publish ${selectedSlots[mode].length} ${mode === "online" ? "online" : mode === "home" ? "home visit" : "clinic"} slots`}
-              disabled={busy}
+              disabled={busy || disabled || selectedSlots[mode].length === 0 || (mode === "online" && onlineDisabled) || (mode === "home" && homeDisabled)}
               onPress={
                 mode === "clinic"
                   ? onPublish
@@ -241,19 +243,9 @@ export function PublishSessionPanel({
 
 export function PublishedSessionsPanel({
   sessions,
-  sessionLimits,
-  onLimitChange,
-  busy,
-  pendingAction,
-  onSaveLimit,
   isError,
 }: {
   sessions?: ClinicSession[];
-  sessionLimits: Record<string, string>;
-  onLimitChange: (sessionId: string, value: string) => void;
-  busy: boolean;
-  pendingAction: string | null;
-  onSaveLimit: (session: ClinicSession) => Promise<void>;
   isError: boolean;
 }) {
   return (
@@ -279,23 +271,7 @@ export function PublishedSessionsPanel({
               · {session.hard_capacity} slots
             </Label>
           </View>
-          <Input
-            label="Auto-confirm limit"
-            value={
-              sessionLimits[session.id] ??
-              String(session.auto_confirm_limit ?? 0)
-            }
-            onChangeText={(value) => onLimitChange(session.id, value)}
-            keyboardType="number-pad"
-          />
-          <Button
-            loading={pendingAction === `limit:${session.id}`}
-            theme="doctor"
-            variant="outline"
-            label="Save approval limit"
-            disabled={busy}
-            onPress={() => void onSaveLimit(session)}
-          />
+
         </View>
       ))}
       {isError ? (
@@ -400,9 +376,11 @@ export function UnavailableTimePanel({
 }
 
 export function ConsultationChargesPanel({
+  mode,
   draft,
   onUpdate,
 }: {
+  mode: "clinic" | "online" | "home";
   draft: {
     onlineFee: string;
     clinicFee: string;
@@ -421,7 +399,7 @@ export function ConsultationChargesPanel({
           ["Clinic Visit", "clinicFee"],
           ["Home Visit", "homeFee"],
         ] as const
-      ).map(([title, key]) => (
+      ).filter(([, key]) => key === (mode === "clinic" ? "clinicFee" : mode === "online" ? "onlineFee" : "homeFee")).map(([title, key]) => (
         <View key={key} style={ui.between}>
           <Label style={{ fontSize: 13, flex: 1 }}>{title}</Label>
           <Label>₹</Label>

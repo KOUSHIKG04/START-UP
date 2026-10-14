@@ -2,12 +2,10 @@
 
 import { useTransition } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
-import { useRouter } from "next/navigation";
 import type { BedInventoryProjection } from "@startup/contracts";
-import { saveBedInventory } from "../server/actions";
+import { saveBedCounts, reloadBedCounts, BedSaveError } from "../client/bedInventory";
 
-export function InitialBedCountsForm({ row }: { row: BedInventoryProjection }) {
-  const router = useRouter();
+export function InitialBedCountsForm({ row, onSaved }: { row: BedInventoryProjection; onSaved: (row: BedInventoryProjection) => void }) {
   const [pending, startTransition] = useTransition();
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -18,11 +16,13 @@ export function InitialBedCountsForm({ row }: { row: BedInventoryProjection }) {
     form.set("expectedRowVersion", "0");
     startTransition(async () => {
       try {
-        const result = await saveBedInventory(form);
-        if (result.error) toast.add({ title: "Could not save bed counts", description: result.error, type: "error" });
-        else { toast.add({ title: "Bed counts saved", type: "success" }); router.refresh(); }
-      } catch {
-        toast.add({ title: "Could not save bed counts", description: "Check your connection and try again.", type: "error" });
+        onSaved(await saveBedCounts(form));
+        toast.add({ title: "Bed counts saved", type: "success" });
+      } catch (error) {
+        if (error instanceof BedSaveError && error.code === "PT409") {
+          try { (await reloadBedCounts(row.facilityId)).forEach(onSaved); } catch { /* Keep last confirmed counts. */ }
+        }
+        toast.add({ title: "Could not save bed counts", description: error instanceof Error ? error.message : "Check your connection and try again.", type: "error" });
       }
     });
   }

@@ -91,7 +91,7 @@ export function AmbulanceBookingScreen({
     enabled: Boolean(supabase && profile?.patient_id && pickup), retry: false, staleTime: 60000, gcTime: 0,
   });
   useToastFeedback({ error: googleHospitals.isError ? "Additional hospital search is unavailable. You can still choose a Clinzo hospital." : "" });
-  const bookings = useQuery({ queryKey: ["my-ambulance-bookings"], queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && profile?.patient_id), refetchInterval: 15000 });
+  const bookings = useQuery({ queryKey: ["my-ambulance-bookings"], queryFn: () => listMyAmbulanceBookings(supabase!), enabled: Boolean(supabase && profile?.patient_id),});
   const activeBooking = bookings.data?.find(item => item.status === "searching" || item.status === "assigned");
   useEffect(() => {
     if (bookings.isLoading || activeBooking || devicePickupAttempted.current) return;
@@ -114,9 +114,9 @@ export function AmbulanceBookingScreen({
     return () => { active = false; if (!finished) devicePickupAttempted.current = false; };
   }, [bookings.isLoading, Boolean(activeBooking)]);
   const completedBooking = currentBookingId ? bookings.data?.find(item => item.id === currentBookingId && item.status === "fulfilled") : undefined;
-  const tracking = useQuery({ queryKey: ["active-ambulance-tracking", activeBooking?.id], queryFn: () => getMyActiveAmbulanceTracking(supabase!, activeBooking!.id), enabled: Boolean(supabase && activeBooking?.status === "assigned"), refetchInterval: 15000 });
+  const tracking = useQuery({ queryKey: ["active-ambulance-tracking", activeBooking?.id], queryFn: () => getMyActiveAmbulanceTracking(supabase!, activeBooking!.id), enabled: Boolean(supabase && activeBooking?.status === "assigned"),});
   const pinVisible = activeBooking?.trip_status === "in_progress" || activeBooking?.trip_status === "arrived_at_destination";
-  const pin = useQuery({ queryKey: ["patient-completion-pin", activeBooking?.id], queryFn: () => getMyPatientVerificationPin(supabase!, profile!.patient_id!), enabled: Boolean(supabase && profile?.patient_id && pinVisible), refetchInterval: 15000, gcTime: 0 });
+  const pin = useQuery({ queryKey: ["patient-completion-pin", activeBooking?.id], queryFn: () => getMyPatientVerificationPin(supabase!, profile!.patient_id!), enabled: Boolean(supabase && profile?.patient_id && pinVisible), gcTime: 0 });
   const bookingStorageKey = profile?.patient_id ? `clinzo-ambulance-current-${profile.patient_id}` : null;
 
   const step: AmbulanceFlowStep = activeBooking

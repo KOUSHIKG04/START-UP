@@ -18,7 +18,8 @@ export default function TabsLayout() {
         backBehavior="history"
         screenOptions={{
           headerShown: false,
-          animation: "none",
+          animation: "fade",
+          freezeOnBlur: true,
           tabBarHideOnKeyboard: true,
           sceneStyle: { backgroundColor: palette.white },
         }}

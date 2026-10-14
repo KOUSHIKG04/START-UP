@@ -1,12 +1,6 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-} from "react-native";
+import { Pressable, StyleSheet, type PressableProps, type StyleProp, type TextStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type TimeSlotProps = Omit<
@@ -47,7 +41,7 @@ export function TimeSlot({
         typeof style === "function" ? style(state) : style,
       ]}
     >
-      <Text
+      <Text variant="label"
         numberOfLines={1}
         style={[
           styles.text,

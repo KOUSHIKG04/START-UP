@@ -1,7 +1,8 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { useToast, useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { TriangleAlert } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -42,8 +43,8 @@ export default function SetupScreen() {
   return (
     <OnboardingShell onBack={() => router.back()}>
       <View style={styles.body}>
-        <Text style={styles.title}>Welcome to <Text style={styles.brand}>Clinzo⁺</Text></Text>
-        <Text style={styles.caption}>Setting things up for you..</Text>
+        <Text variant="pageHeadline" style={styles.title}>Welcome to <Text variant="inherit" style={styles.brand}>Clinzo⁺</Text></Text>
+        <Text variant="body" style={styles.caption}>Setting things up for you..</Text>
         <View style={styles.track}><View style={styles.progress} /></View>
         {/* Temporarily hidden: onboarding SOS, instructions, and manual continuation.
         <Pressable

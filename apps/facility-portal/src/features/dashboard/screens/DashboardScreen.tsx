@@ -18,6 +18,7 @@ import { wards as wardStyles } from "../utils/dashboardConstants";
 
 export default function DashboardScreen({
   doctorAction,
+  doctorRequests,
   inventory,
   appointments,
   weeklyDoctors,
@@ -25,6 +26,7 @@ export default function DashboardScreen({
   acceptAppointment,
 }: {
   doctorAction: ReactNode;
+  doctorRequests?: ReactNode;
   inventory: BedInventoryProjection[];
   appointments: ClinicAppointment[];
   weeklyDoctors: { id: string; name: string; speciality: string; days: boolean[] }[];
@@ -261,6 +263,7 @@ export default function DashboardScreen({
             </div>
 
             <div className="flex flex-col gap-3.5">
+              {doctorRequests}
               {pendingRequests.map((request) => <div key={request.id} className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -282,7 +285,7 @@ export default function DashboardScreen({
                   <AcceptPendingAppointmentButton appointmentId={request.id} expectedVersion={Number(request.row_version)} action={acceptAppointment} />
                 </div>
               </div>)}
-              {pendingRequests.length === 0 && <p className="text-[13px] text-[#475569]">No pending requests.</p>}
+              {pendingRequests.length === 0 && <p className="text-[13px] text-[#475569]">No pending appointment requests.</p>}
             </div>
           </div>
         </div>

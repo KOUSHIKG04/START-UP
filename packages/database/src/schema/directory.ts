@@ -309,6 +309,12 @@ export const doctorPresence = clinzo.table("doctor_presence", {
 export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferences", {
   doctor_facility_id: uuid("doctor_facility_id").primaryKey().references((): AnyPgColumn => doctorFacility.id, { onDelete: "restrict" }),
   working_days: smallint("working_days").array().notNull(),
+  online_working_days: smallint("online_working_days").array().notNull().default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
+  home_working_days: smallint("home_working_days").array().notNull().default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
+  online_auto_accept: boolean("online_auto_accept").notNull().default(false),
+  home_auto_accept: boolean("home_auto_accept").notNull().default(false),
+  online_auto_accept_limit: smallint("online_auto_accept_limit").notNull().default(0),
+  home_auto_accept_limit: smallint("home_auto_accept_limit").notNull().default(0),
   clinic_start: time("clinic_start").notNull(),
   clinic_end: time("clinic_end").notNull(),
   slot_minutes: smallint("slot_minutes").notNull(),
@@ -325,7 +331,10 @@ export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferenc
   home_fee_minor: integer("home_fee_minor"),
   row_version: bigint("row_version", { mode: "bigint" }).notNull().default(sql`1`),
   updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-}).enableRLS();
+}, (table) => [
+  check("schedule_service_days_check", sql`cardinality(${table.online_working_days}) between 1 and 7 and cardinality(${table.home_working_days}) between 1 and 7 and ${table.online_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[] and ${table.home_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[]`),
+  check("schedule_service_approval_limits_check", sql`${table.online_auto_accept_limit} between 0 and 100 and ${table.home_auto_accept_limit} between 0 and 100`),
+]).enableRLS();
 
 export const practiceService = clinzo
   .table(

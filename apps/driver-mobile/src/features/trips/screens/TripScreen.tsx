@@ -23,7 +23,7 @@ export function TripScreen() {
   const { profile } = useMobileSession();
   const { showToast } = useToast();
   const [pin, setPin] = useState(""); const [busy, setBusy] = useState(false); const [completedId, setCompletedId] = useState<string | null>(null);
-  const trips = useQuery({ queryKey: ["my-driver-trips", profile?.driver?.id], queryFn: () => listMyDriverTrips(supabase!), enabled: Boolean(supabase && profile?.driver?.id), refetchInterval: 15000 });
+  const trips = useQuery({ queryKey: ["my-driver-trips", profile?.driver?.id], queryFn: () => listMyDriverTrips(supabase!), enabled: Boolean(supabase && profile?.driver?.id),});
   useToastFeedback({ error: trips.isError ? "Could not load trip." : "" });
   const trip = trips.data?.find(item => !["completed", "cancelled"].includes(item.status)) ?? trips.data?.find(item => item.id === completedId);
   async function transition(item: MyDriverTrip, action: TransitionDriverTripInput["action"]) {

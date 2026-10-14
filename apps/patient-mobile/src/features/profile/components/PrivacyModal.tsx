@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { CheckCircle2, ShieldCheck, X } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, ModalSurface } from "@startup/mobile-ui";
@@ -16,7 +17,7 @@ export function PrivacyModal({
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleRow}>
               <ShieldCheck color={colors.patient.primaryDark} size={20} />
-              <Text style={styles.modalTitle}>Privacy & Security</Text>
+              <Text variant="cardHeading" style={styles.modalTitle}>Privacy & Security</Text>
             </View>
             <Pressable
               onPress={onClose}
@@ -27,7 +28,7 @@ export function PrivacyModal({
           </View>
 
           <View style={styles.modalBody}>
-            <Text style={styles.modalDescription}>
+            <Text variant="body" style={styles.modalDescription}>
               Your medical history, prescriptions, and consult notes are
               end-to-end encrypted and HIPAA compliant.
             </Text>
@@ -35,7 +36,7 @@ export function PrivacyModal({
             {privacyHighlights.map((point) => (
               <View key={point} style={styles.privacyBullet}>
                 <CheckCircle2 color="#059669" size={16} />
-                <Text style={styles.privacyBulletText}>{point}</Text>
+                <Text variant="body" style={styles.privacyBulletText}>{point}</Text>
               </View>
             ))}
           </View>

@@ -1,17 +1,8 @@
+import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
+import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import { memo, useCallback, useRef, useState, type ReactNode } from "react";
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { FlatList, Pressable, ScrollView, StyleSheet, View, useWindowDimensions, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
@@ -125,7 +116,7 @@ const DropdownOptionRow = memo(function DropdownOptionRow({
         option.disabled && styles.optionDisabled,
       ]}
     >
-      <Text
+      <Text variant="body"
         numberOfLines={1}
         style={[
           styles.optionLabel,
@@ -180,6 +171,7 @@ export function Dropdown({
   const [triggerPosition, setTriggerPosition] = useState<TriggerPosition>();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const themeColors = useMobileTheme(theme);
+  const readable = useReadableTypography();
   const selectedOption = options.find((option) => option.value === value);
   const menuHeight =
     Math.min(options.length, maxVisibleOptions) * OPTION_HEIGHT + 12;
@@ -243,7 +235,7 @@ export function Dropdown({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? <Text variant="label" style={styles.label}>{label}</Text> : null}
 
       <Pressable
         ref={triggerRef}
@@ -263,10 +255,11 @@ export function Dropdown({
           disabled ? styles.triggerDisabled : undefined,
           pressed && !disabled ? styles.triggerPressed : undefined,
           triggerStyle,
+          readable && { minHeight: 52 },
         ]}
       >
         {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
-        <Text
+        <Text variant="body"
           numberOfLines={1}
           style={[
             styles.value,
@@ -295,7 +288,7 @@ export function Dropdown({
         )}
       </Pressable>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text variant="label" style={styles.error}>{error}</Text> : null}
 
       <ModalSurface layout="custom"
         animationType="fade"

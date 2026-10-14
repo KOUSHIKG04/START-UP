@@ -22,7 +22,6 @@ export default function DriverVerification() {
     queryFn: () => getMyDriverRegistrationApplication(supabase!),
     enabled: Boolean(session && supabase),
     refetchOnMount: "always",
-    refetchInterval: 15000,
   });
 
   const review = useQuery({
@@ -30,13 +29,8 @@ export default function DriverVerification() {
     queryFn: () =>
       getMyVerificationCase(supabase!, "driver", application.data!.id),
     enabled: Boolean(supabase && application.data?.id),
-    refetchInterval: 15000,
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => void mobileSession.refresh(), 15000);
-    return () => clearInterval(timer);
-  }, []);
   if (application.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>

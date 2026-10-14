@@ -1,13 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import React from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
@@ -32,7 +25,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.title, titleStyle]}>{title}</Text>
+      <Text variant="sectionHeading" style={[styles.title, titleStyle]}>{title}</Text>
 
       {showSeeAll && (
         <Pressable
@@ -45,7 +38,7 @@ export default function SectionHeader({
             pressed && styles.pressed,
           ]}
         >
-          <Text style={[styles.seeAllText, seeAllTextStyle]}>{seeAllText}</Text>
+          <Text variant="label" style={[styles.seeAllText, seeAllTextStyle]}>{seeAllText}</Text>
           <ChevronRight
             color={colors.patient.primaryDark}
             size={16}

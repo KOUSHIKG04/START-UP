@@ -1,17 +1,12 @@
+import { AppText as Text } from "../primitives/AppText";
 import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type TextStyle,
-  type ViewProps,
-} from "react-native";
+import { Pressable, StyleSheet, View, type TextStyle, type ViewProps } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { colors, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
+import { useReadableTypography } from "../theme/MobileTypographyProvider";
 
 export type { HeaderApp } from "../utils/headerBackground";
 
@@ -46,6 +41,7 @@ export function Header({
   safeAreaEdges = ["top"],
   ...props
 }: HeaderProps) {
+  const readable = useReadableTypography();
   const appBackground = appBackgrounds[app];
   const resolvedBackgroundColor =
     backgroundColor ??
@@ -71,7 +67,7 @@ export function Header({
       ) : null}
 
       <SafeAreaView edges={safeAreaEdges}>
-        <View style={styles.container}>
+        <View style={[styles.container, readable && { minHeight: 88 }]}>
           {handleBack ? (
             <Pressable
               accessibilityRole="button"
@@ -101,8 +97,8 @@ export function Header({
               ]}
             >
               {title ? (
-                <Text
-                  numberOfLines={1}
+                <Text variant="screenTitle"
+                  numberOfLines={readable ? 2 : 1}
                   style={[
                     styles.title,
                     centered && styles.centeredText,

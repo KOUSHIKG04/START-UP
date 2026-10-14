@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { Card } from "@startup/mobile-ui";
+import { Card, useReadableTypography } from "@startup/mobile-ui";
 
 export function ProfileStats({ age, blood }: { age: string; blood: string }) {
   return (
@@ -12,6 +13,7 @@ export function ProfileStats({ age, blood }: { age: string; blood: string }) {
 }
 
 function ProfileStat({ label, value }: { label: string; value: string }) {
+  const readable = useReadableTypography();
   return (
     <Card
       theme="patient"
@@ -20,9 +22,9 @@ function ProfileStat({ label, value }: { label: string; value: string }) {
       borderRadius={10}
       padding={8}
       gap={4}
-      style={styles.stat}
+      style={[styles.stat, readable && { height: undefined, minHeight: 44, paddingVertical: 6 }]}
     >
-      <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.9}>{label}: <Text style={styles.value}>{value}</Text></Text>
+      <Text variant="label" style={styles.label} numberOfLines={readable ? 2 : 1} adjustsFontSizeToFit={!readable} minimumFontScale={0.9}>{label}: <Text variant="body" style={styles.value}>{value}</Text></Text>
     </Card>
   );
 }

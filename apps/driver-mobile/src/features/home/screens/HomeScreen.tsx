@@ -65,14 +65,20 @@ export function HomeScreen() {
     queryKey: ["driver-offers", driverId],
     queryFn: () => listMyDriverOffers(supabase!),
     enabled: Boolean(supabase && driverId),
-    refetchInterval: 15000,
   });
+
+  useEffect(() => {
+    const now = Date.now();
+    const deadlines = (offers.data ?? []).map(offer => Date.parse(offer.expires_at)).filter(deadline => deadline > now);
+    if (!deadlines.length) return;
+    const timer = setTimeout(() => { void client.invalidateQueries({ queryKey: ["driver-offers", driverId] }); }, Math.min(...deadlines) - now + 50);
+    return () => clearTimeout(timer);
+  }, [offers.data, client, driverId]);
 
   const trips = useQuery({
     queryKey: ["my-driver-trips", driverId],
     queryFn: () => listMyDriverTrips(supabase!),
     enabled: Boolean(supabase && driverId),
-    refetchInterval: 15000,
   });
   useToastFeedback({ error: offers.isError || trips.isError || fleet.isError ? "Could not refresh requests or status." : "" });
 

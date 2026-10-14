@@ -21,7 +21,6 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
     queryKey: ["my-driver-trips", profile?.driver?.id],
     queryFn: () => listMyDriverTrips(supabase!),
     enabled: Boolean(supabase && profile?.driver?.id),
-    refetchInterval: 15000,
   });
   useToastFeedback({ error: trips.isError ? "Could not load trip history." : "" });
   

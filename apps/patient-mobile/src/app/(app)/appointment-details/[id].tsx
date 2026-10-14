@@ -1,6 +1,7 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useLocalSearchParams, router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { listClinicAppointments } from "@startup/data-access";
 import type { ClinicAppointment } from "@startup/contracts";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
@@ -16,7 +17,6 @@ export default function AppointmentDetailsRoute() {
     queryKey: ["patient-clinic-appointments"],
     queryFn: () => listClinicAppointments(supabase!),
     enabled: Boolean(supabase),
-    refetchInterval: 15000,
   });
   useToastFeedback({ error: appointments.isError ? "Could not load this appointment. Go back and try again." : "" });
   const item = appointments.data?.find((appointment: ClinicAppointment) => appointment.id === id) as ClinicAppointment | undefined;
@@ -26,11 +26,11 @@ export default function AppointmentDetailsRoute() {
     <Header title="Appointment Details" app="patient" onBackPress={() => router.back()} />
     <FadedScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {appointments.isLoading ? <Loader theme="patient" size="large" style={styles.loading} /> : null}
-      {!appointments.isLoading && !appointments.isError && !item ? <Text style={styles.message}>This appointment is not available.</Text> : null}
+      {!appointments.isLoading && !appointments.isError && !item ? <Text variant="body" style={styles.message}>This appointment is not available.</Text> : null}
       {item && card ? <>
         <BookingCard appointment={card} statusLabel={item.status.replaceAll("_", " ")} />
         <Card theme="patient" backgroundColor={colors.white} gap={12}>
-          <Text style={styles.sectionTitle}>Appointment details</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>Appointment details</Text>
           <Detail label="Appointment ID" value={card.id} />
           <Detail label="Visit type" value={card.consultationType} />
           <Detail label="Date and time" value={`${card.date}, ${card.time}`} />
@@ -42,14 +42,14 @@ export default function AppointmentDetailsRoute() {
           {item.reason ? <Detail label="Reason for visit" value={item.reason} /> : null}
         </Card>
         {item.status === "completed" ? <Button label="Thank you · Rate doctor" onPress={() => router.push({ pathname: "/rate-doctor/[id]", params: { id: item.id } })} /> : null}
-        {item.visit_mode === "clinic" && item.queue_state ? <Text style={styles.message}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
+        {item.visit_mode === "clinic" && item.queue_state ? <Text variant="body" style={styles.message}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
       </> : null}
     </FadedScrollView>
   </View>;
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
-  return <View style={styles.detailRow}><Text style={styles.detailLabel}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>;
+  return <View style={styles.detailRow}><Text variant="label" style={styles.detailLabel}>{label}</Text><Text variant="bodyEmphasis" style={styles.detailValue}>{value}</Text></View>;
 }
 
 const styles = StyleSheet.create({

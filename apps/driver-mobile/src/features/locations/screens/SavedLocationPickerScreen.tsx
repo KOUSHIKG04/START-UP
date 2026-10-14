@@ -18,13 +18,13 @@ import type {
 } from "expo-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { searchMapPlaces } from "@startup/data-access";
-import type { MapPlace } from "@startup/contracts";
+import { mapPlaceSchema, type MapPlace } from "@startup/contracts";
 import { supabase } from "../../../services/supabase";
 import { LocateFixed, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Header, Input, useToast } from "@startup/mobile-ui";
 import { useLocationDraft } from "../savedLocationDraft";
-import { formatGeocodedAddress } from "../savedLocationDisplay";
+import { resolveDriverAddress } from "../resolveAddress";
 
 type Point = { latitude: number; longitude: number };
 type PlaceDetails = {
@@ -74,7 +74,13 @@ export default function PickLocationScreen() {
   );
   const [point, setPoint] = useState<Point | null>(initialPoint);
   const pointRef = useRef<Point | null>(initialPoint);
-  const selectedPlace = useRef<MapPlace | null>(null);
+  const initialPlace = useMemo(() => {
+    try {
+      const result = mapPlaceSchema.safeParse(JSON.parse(first(params.place) ?? "null"));
+      return result.success && initialPoint && result.data.latitude === initialPoint.latitude && result.data.longitude === initialPoint.longitude ? result.data : null;
+    } catch { return null; }
+  }, [params.place, initialPoint]);
+  const selectedPlace = useRef<MapPlace | null>(initialPlace);
   const operation = useRef(0);
   const [searchResults, setSearchResults] = useState<MapPlace[]>([]);
   const [details, setDetails] = useState<PlaceDetails>(emptyDetails);
@@ -105,10 +111,14 @@ export default function PickLocationScreen() {
     }
   }, []);
 
+  const onMapLoaded = useCallback(() => {
+    if (pointRef.current) googleMapRef.current?.setCameraPosition({ coordinates: pointRef.current, zoom: 16, duration: 0 });
+  }, []);
+
   function moveCamera(next: Point) {
     mapTouched.current = false;
     const camera = { coordinates: next, zoom: 16 };
-    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
+    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
     if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
   }
   function chooseSearchResult(result: MapPlace) {
@@ -188,28 +198,26 @@ export default function PickLocationScreen() {
     setDetails(emptyDetails);
     setAddressLabel("");
     const timer = setTimeout(() => {
-      void Location.reverseGeocodeAsync(point)
-      .then(([address]) => {
-        if (!active) return;
-        if (!address) throw new Error("Address lookup returned no result.");
-        setAddressLabel(formatGeocodedAddress(address));
-        setDetails({
-          street: address?.street ?? "",
-          locality:
-            address?.district || address?.subregion || address?.name || "",
-          city: address?.city ?? "",
-          state: address?.region ?? "",
-          pincode: address?.postalCode?.replace(/\D/g, "").slice(0, 6) ?? "",
-        });
-      })
-      .catch(() => {
-        if (active) {
-          setDetails(emptyDetails);
-          setAddressLabel("");
-          showToast({ title: "Address lookup unavailable", message: "You can confirm the coordinates and enter missing address details in the drawer.", type: "info" });
-        }
-      }).finally(() => { if (active) setResolving(false); });
-    }, 600);
+      void resolveDriverAddress(point, () => active)
+        .then(address => {
+          if (!active) return;
+          setAddressLabel(address.address);
+          setDetails({ street: address.street, locality: address.locality,
+            city: address.city, state: address.state, pincode: address.pincode });
+        })
+        .catch((cause: unknown) => {
+          if (active) {
+            setDetails(emptyDetails);
+            setAddressLabel("");
+            showToast({
+              title: "Could not fill this address",
+              message: cause instanceof Error ? cause.message : "Retry the lookup or enter the address manually.",
+              type: "error",
+            });
+          }
+        })
+        .finally(() => { if (active) setResolving(false); });
+    }, 900);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -228,7 +236,7 @@ export default function PickLocationScreen() {
     if (recenter) {
       mapTouched.current = false;
       const camera = { coordinates: next, zoom: 16 };
-      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
+      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
       if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
     }
   }, []);
@@ -263,7 +271,7 @@ export default function PickLocationScreen() {
       <Header title="Choose Location" app="driver" onBackPress={() => router.back()} />
       <View style={styles.body}>
         <View style={styles.mapFrame} onTouchStart={() => { mapTouched.current = true; }}>
-          {nativeMaps && Platform.OS === "android" ? <nativeMaps.GoogleMaps.View ref={googleMapRef} style={styles.map} cameraPosition={cameraPosition} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
+          {nativeMaps && Platform.OS === "android" ? <nativeMaps.GoogleMaps.View ref={googleMapRef} style={styles.map} cameraPosition={cameraPosition} onMapLoaded={onMapLoaded} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
           {nativeMaps && Platform.OS === "ios" ? <nativeMaps.AppleMaps.View ref={appleMapRef} style={styles.map} cameraPosition={cameraPosition} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
           {nativeMaps ? <View pointerEvents="none" style={styles.pin}><MapPin size={36} fill={colors.white} color={colors.driver.primary} /></View> : <View style={styles.mapState}><Text style={styles.stateText}>Map selection is unavailable in this build. You can search for a place or use your current location.</Text></View>}
         </View>
@@ -314,7 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   mapFrame: { ...StyleSheet.absoluteFill, backgroundColor: colors.driver.surface },
-  map: { flex: 1 },
+  map: { ...StyleSheet.absoluteFill },
   mapState: {
     flex: 1,
     justifyContent: "center",

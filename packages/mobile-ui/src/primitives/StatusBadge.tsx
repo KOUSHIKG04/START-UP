@@ -1,12 +1,5 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type TextStyle,
-  type ViewProps,
-  type ViewStyle,
-} from "react-native";
+import { AppText as Text } from "./AppText";
+import { StyleSheet, View, type StyleProp, type TextStyle, type ViewProps, type ViewStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type StatusBadgeProps = ViewProps & {
@@ -34,7 +27,7 @@ export function StatusBadge({
       style={[styles.badge, { backgroundColor }, style]}
     >
       <View style={[styles.dot, { backgroundColor: dotColor }, dotStyle]} />
-      <Text numberOfLines={1} style={[styles.text, textStyle]}>
+      <Text variant="label" numberOfLines={1} style={[styles.text, textStyle]}>
         {status}
       </Text>
     </View>

@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Search } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
@@ -37,21 +38,21 @@ export function HomeSearchResults({
               style={styles.rowIcon}
             />
             <View style={styles.rowContent}>
-              <Text style={styles.itemTitle}>{item.title}</Text>
-              <Text style={styles.itemSubtitle}>{item.type}</Text>
+              <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
+              <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
             </View>
           </Pressable>
         ))
       ) : (
         <View style={styles.emptyResults}>
-          <Text style={styles.emptyText}>
+          <Text variant="body" style={styles.emptyText}>
             No results found for &quot;{searchQuery}&quot;.
           </Text>
           <Pressable
             onPress={() => onSelectItem(searchQuery.trim())}
             style={styles.searchAnywayButton}
           >
-            <Text style={styles.searchAnywayText}>
+            <Text variant="body" style={styles.searchAnywayText}>
               Search for &quot;{searchQuery}&quot;
             </Text>
           </Pressable>

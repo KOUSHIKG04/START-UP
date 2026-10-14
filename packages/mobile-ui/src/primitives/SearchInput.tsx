@@ -1,3 +1,4 @@
+import { AppTextInput } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { forwardRef, type ReactNode } from "react";
 import {
@@ -57,7 +58,7 @@ export const SearchInput = forwardRef<TextInput, SearchInputProps>(
             strokeWidth={2}
           />
         ) : null}
-        <TextInput
+        <AppTextInput
           ref={ref}
           {...props}
           accessibilityLabel={accessibilityLabel}

@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "react-qr-code";
@@ -24,7 +25,6 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
     queryKey: ["patient-clinic-appointments"],
     queryFn: () => listClinicAppointments(supabase!),
     enabled: Boolean(supabase),
-    refetchInterval: 15000,
   });
   useToastFeedback({ error: error || (appointments.isError ? "Could not load bookings. Reopen this page to retry." : "") });
   useEffect(() => {
@@ -61,20 +61,20 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
       </ScrollView>
       {appointments.isLoading ? <View style={styles.loadingList}><Skeleton theme="patient" height={148} radius={16} /><Skeleton theme="patient" height={148} radius={16} /></View> : null}
       {!appointments.isLoading && !appointments.isError && visible.length === 0 ? <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No {filter === "All" ? "" : `${filter.toLowerCase()} `}bookings yet</Text>
-          <Text style={styles.emptyDescription}>{filter === "Medicine and test" ? "This booking type is not connected yet." : "Find a verified doctor and choose an available slot."}</Text>
+          <Text variant="cardHeading" style={styles.emptyTitle}>No {filter === "All" ? "" : `${filter.toLowerCase()} `}bookings yet</Text>
+          <Text variant="body" style={styles.emptyDescription}>{filter === "Medicine and test" ? "This booking type is not connected yet." : "Find a verified doctor and choose an available slot."}</Text>
           {filter !== "Medicine and test" ? <Button label="Find a doctor" onPress={() => router.push("/find-doctor" as Href)} /> : null}
         </View> : null}
         {visible.map((item) => <View key={item.id} style={styles.listItem}>
           <BookingCard appointment={clinicAppointmentCard(item)} statusLabel={item.status.replaceAll("_", " ")} onPress={() => router.push({ pathname: "/appointment-details/[id]", params: { id: item.id } } as Href)} />
-          {item.visit_mode === "clinic" && item.queue_state ? <Text style={styles.description}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
+          {item.visit_mode === "clinic" && item.queue_state ? <Text variant="body" style={styles.description}>Queue: {item.queue_state.replaceAll("_", " ")}{item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}{item.queue_state === "waiting" ? ` · ${item.ahead_count} ahead` : ""}</Text> : null}
           {item.status === "pending" || item.status === "confirmed" || (item.visit_mode === "online" && item.status === "in_consultation") ? <View style={styles.actionRow}>
             {item.visit_mode === "clinic" && item.status === "confirmed" && item.queue_state === "awaiting_arrival" ? <Button loading={issueQr.isPending && issueQr.variables === item.id} label="Show check-in QR" variant="outline" disabled={issueQr.isPending} onPress={() => issueQr.mutate(item.id)} style={styles.actionButton} labelStyle={styles.actionLabel} /> : null}
             {item.visit_mode === "online" && ["confirmed", "in_consultation"].includes(item.status) ? <Button label="Join consultation" onPress={() => router.push({ pathname: "/visit-session", params: { ...clinicAppointmentCard(item), mode: "online-video" } } as unknown as Href)} style={styles.actionButton} labelStyle={styles.actionLabel} /> : null}
             {item.status === "pending" || item.status === "confirmed" ? <Button loading={cancel.isPending && cancel.variables?.id === item.id} label="Cancel booking" variant="outline" disabled={cancel.isPending} onPress={() => cancel.mutate(item)} style={styles.actionButton} labelStyle={styles.actionLabel} /> : null}
           </View> : null}
           {item.status === "completed" ? <Button label="Thank you · Rate doctor" variant="outline" onPress={() => router.push({ pathname: "/rate-doctor/[id]", params: { id: item.id } } as Href)} /> : null}
-          {qr && qr.appointmentId === item.id ? <View style={styles.qr}><QRCode value={qr.token} size={220} /><Text>Show this to the clinic. It expires in five minutes.</Text></View> : null}
+          {qr && qr.appointmentId === item.id ? <View style={styles.qr}><QRCode value={qr.token} size={220} /><Text variant="body">Show this to the clinic. It expires in five minutes.</Text></View> : null}
         </View>)}
     </FadedScrollView>
   </View>;

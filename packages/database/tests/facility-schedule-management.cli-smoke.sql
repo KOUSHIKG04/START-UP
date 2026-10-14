@@ -79,7 +79,7 @@ BEGIN
     RAISE EXCEPTION 'Hospital owner schedule not persisted'; END IF;
   denied:=false;
   BEGIN PERFORM public.save_my_schedule_preferences(practice,settings,0);
-  EXCEPTION WHEN serialization_failure THEN denied:=true; END;
+  EXCEPTION WHEN SQLSTATE 'PT409' THEN denied:=true; END;
   IF NOT denied THEN RAISE EXCEPTION 'Stale hospital schedule write succeeded'; END IF;
   future_day:=(now() AT TIME ZONE zone)::date+14;
   slot_ids:=public.publish_selected_doctor_slots(practice,'clinic',ARRAY[
@@ -99,6 +99,77 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub',owner_auth::text,true);
   IF public.get_my_schedule_preferences(practice)->>'clinic_fee_minor' IS DISTINCT FROM '55000' THEN
     RAISE EXCEPTION 'Doctor edit did not reach facility'; END IF;
+  settings:=public.save_my_schedule_preferences(practice,settings||jsonb_build_object('home_visits',true,'home_radius_km',5,'home_fee_minor',35000),2);
+  slot_ids:=public.publish_selected_doctor_slots(practice,'online',ARRAY[(future_day+time '11:00') AT TIME ZONE zone],30,30000,'INR');
+  PERFORM public.publish_selected_doctor_slots(practice,'home',ARRAY[(future_day+time '13:00') AT TIME ZONE zone],60,35000,'INR');
+  IF jsonb_array_length(public.list_practice_clinic_slots(practice,NULL,now(),100))<>4 THEN
+    RAISE EXCEPTION 'Facility service slots did not reach Patient App'; END IF;
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
+  IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_my_clinic_sessions(practice)) item WHERE item->>'service_mode'='online' )
+    OR NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_my_clinic_sessions(practice)) item WHERE item->>'service_mode'='home') THEN
+    RAISE EXCEPTION 'Facility service schedule did not reach Doctor App'; END IF;
+  settings:=public.get_my_schedule_preferences(practice);
+  settings:=public.save_my_schedule_preferences(practice,settings||jsonb_build_object('online_slot_minutes',45),3);
+  IF settings->>'slot_minutes'<>'15' OR settings->>'home_slot_minutes'<>'60' THEN
+    RAISE EXCEPTION 'Editing online duration changed other services'; END IF;
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',owner_auth::text,true);
+  IF public.get_my_schedule_preferences(practice)->>'online_slot_minutes'<>'45' THEN RAISE EXCEPTION 'Doctor online update not visible to facility'; END IF;
+  settings:=public.get_my_schedule_preferences(practice);
+  settings:=public.save_my_schedule_preferences(practice,settings||jsonb_build_object(
+    'online_working_days',jsonb_build_array(extract(isodow FROM future_day+1)::int),
+    'home_working_days',jsonb_build_array(extract(isodow FROM future_day)::int),
+    'online_auto_accept',true,'online_auto_accept_limit',2,'home_auto_accept',false,'home_auto_accept_limit',0),4);
+  IF settings->'working_days' <> '[1,2,3,4,5,6,7]'::jsonb OR settings->>'auto_accept_limit'<>'1'
+    OR settings->'online_working_days'=settings->'home_working_days' THEN RAISE EXCEPTION 'Service rules are not independent'; END IF;
+  denied:=false;
+  BEGIN PERFORM public.publish_selected_doctor_slots(practice,'online',ARRAY[(future_day+time '15:00') AT TIME ZONE zone],45,30000,'INR');
+  EXCEPTION WHEN invalid_parameter_value THEN denied:=true; END;
+  IF NOT denied THEN RAISE EXCEPTION 'Online publication ignored service working days'; END IF;
+  settings:=public.save_my_schedule_preferences(practice,settings||jsonb_build_object('auto_accept',true,'auto_accept_limit',2),5);
+  PERFORM public.publish_selected_doctor_slots(practice,'online',ARRAY[(future_day+1+time '09:00') AT TIME ZONE zone],45,30000,'INR');
+  PERFORM public.publish_selected_doctor_slots(practice,'online',ARRAY[(future_day+1+time '11:00') AT TIME ZONE zone],45,30000,'INR');
+  PERFORM public.publish_selected_doctor_slots(practice,'online',ARRAY[(future_day+1+time '13:00') AT TIME ZONE zone],45,30000,'INR');
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
+  IF public.get_my_schedule_preferences(practice)->'online_working_days' <> settings->'online_working_days'
+    OR public.get_my_schedule_preferences(practice)->>'auto_accept_limit'<>'2' THEN
+    RAISE EXCEPTION 'Facility mode rules did not reach doctor'; END IF;
+  IF jsonb_array_length(public.list_practice_clinic_slots(practice,NULL,now(),100))<>7 THEN RAISE EXCEPTION 'Service slots not visible to patient'; END IF;
+  EXECUTE 'RESET ROLE';
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  PERFORM set_config('request.jwt.claim.sub',owner_auth::text,true);
+  DECLARE patient uuid; online_slot jsonb; clinic_slot jsonb; home_slot jsonb; extra_slot jsonb; booking uuid;
+  BEGIN
+    patient:=(public.complete_onboarding('patient','{"full_name":"Shared Budget Patient"}'::jsonb)->>'patient_id')::uuid;
+    SELECT item INTO online_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice,NULL,now(),100)) item WHERE (item->>'starts_at')::timestamptz=(future_day+time '11:00') AT TIME ZONE zone;
+    SELECT item INTO clinic_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice,NULL,now(),100)) item WHERE (item->>'starts_at')::timestamptz=(future_day+time '10:00') AT TIME ZONE zone;
+    SELECT item INTO home_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice,NULL,now(),100)) item WHERE (item->>'starts_at')::timestamptz=(future_day+time '13:00') AT TIME ZONE zone;
+    booking:=public.book_clinic_appointment(patient,(online_slot->>'window_id')::uuid,(online_slot->>'practice_service_id')::uuid,'Shared online first',gen_random_uuid());
+    EXECUTE 'RESET ROLE';
+    IF (SELECT status FROM clinzo.appointment WHERE id=booking)<>'confirmed' THEN RAISE EXCEPTION 'First online booking was not auto-confirmed'; END IF;
+    EXECUTE 'SET LOCAL ROLE authenticated';
+    booking:=public.book_clinic_appointment(patient,(clinic_slot->>'window_id')::uuid,(clinic_slot->>'practice_service_id')::uuid,'Shared clinic second',gen_random_uuid());
+    EXECUTE 'RESET ROLE';
+    IF (SELECT status FROM clinzo.appointment WHERE id=booking)<>'confirmed' THEN RAISE EXCEPTION 'Second mixed-mode booking was not auto-confirmed'; END IF;
+    EXECUTE 'SET LOCAL ROLE authenticated';
+    denied:=false;
+    BEGIN PERFORM public.book_clinic_appointment(patient,(home_slot->>'window_id')::uuid,(home_slot->>'practice_service_id')::uuid,'Blocked home booking',gen_random_uuid());
+    EXCEPTION WHEN invalid_parameter_value THEN denied:=true; END;
+    IF NOT denied THEN RAISE EXCEPTION 'Shared limit bypassed home coverage validation'; END IF;
+    SELECT item INTO extra_slot FROM jsonb_array_elements(public.list_practice_clinic_slots(practice,NULL,now(),100)) item WHERE (item->>'starts_at')::timestamptz=(future_day+time '10:30') AT TIME ZONE zone;
+    booking:=public.book_clinic_appointment(patient,(extra_slot->>'window_id')::uuid,(extra_slot->>'practice_service_id')::uuid,'Shared third booking',gen_random_uuid());
+    EXECUTE 'RESET ROLE';
+    IF (SELECT status FROM clinzo.appointment WHERE id=booking)<>'pending' THEN RAISE EXCEPTION 'Combined daily auto-confirm limit exceeded'; END IF;
+    IF NOT EXISTS(SELECT 1 FROM clinzo.domain_event WHERE aggregate_id=booking AND event_type='appointment.requested') THEN RAISE EXCEPTION 'Over-limit request event missing'; END IF;
+    EXECUTE 'SET LOCAL ROLE authenticated';
+  END;
+
+
   EXECUTE 'RESET ROLE';
   -- Reception staff can check patients in, but cannot change doctor preferences.
   INSERT INTO clinzo.identity(issuer,subject,display_name)

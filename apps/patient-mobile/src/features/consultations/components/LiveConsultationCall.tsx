@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { VideoTrack, isTrackReference, useConnectionState, useLocalParticipant, useRoomContext, useTracks } from "@livekit/react-native";
@@ -29,12 +30,12 @@ export function LiveConsultationCall({ appointmentId, name, active, initialChat 
   const mounted = useRef(false);
   const front = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  const messages = useQuery({ queryKey: ["online-messages", appointmentId], queryFn: () => listOnlineMessages(supabase!, appointmentId), enabled: Boolean(active && supabase), refetchInterval: active ? 4000 : false });
+  const messages = useQuery({ queryKey: ["online-messages", appointmentId], queryFn: () => listOnlineMessages(supabase!, appointmentId), enabled: Boolean(active && supabase),});
   useToastFeedback({ error: messages.isError ? "Could not refresh consultation messages. Try again." : "" });
   useEffect(() => {
     if (!active || !supabase) return;
-    return subscribeOnlineMessages(supabase, appointmentId, () => { void client.invalidateQueries({ queryKey: ["online-messages", appointmentId] }); });
-  }, [active, appointmentId, client]);
+    return subscribeOnlineMessages(supabase, appointmentId, () => { void client.invalidateQueries({ queryKey: ["online-messages", appointmentId] }); }, () => showToast({ title: "Chat connection interrupted", message: "Messages will catch up when the connection returns.", type: "info" }));
+  }, [active, appointmentId, client, showToast]);
   async function device(action: () => Promise<unknown>, message: string) {
     if (lock.current) return;
     lock.current = true; setDeviceBusy(true);
@@ -58,7 +59,7 @@ export function LiveConsultationCall({ appointmentId, name, active, initialChat 
     catch (cause) { if (mounted.current) showToast({ title: "Could not send message", message: cause instanceof Error ? cause.message : "Try again.", type: "error" }); throw cause; }
     finally { sendLock.current = false; if (mounted.current) setSending(false); }
   }
-  const fallback = (label: string) => <View style={styles.placeholder}><UserRound size={32} color={colors.patient.primary} /><Text style={styles.name}>{label}</Text></View>;
+  const fallback = (label: string) => <View style={styles.placeholder}><UserRound size={32} color={colors.patient.primary} /><Text variant="body" style={styles.name}>{label}</Text></View>;
   return <ConsultationCall key={appointmentId} theme="patient" name={name} initialChat={initialChat}
     remoteVideo={remote && isTrackReference(remote) && !remote.publication.isMuted ? <VideoTrack trackRef={remote} style={StyleSheet.absoluteFill} /> : fallback(name)}
     localVideo={local && isTrackReference(local) && isCameraEnabled ? <VideoTrack trackRef={local} mirror={front.current} zOrder={1} style={StyleSheet.absoluteFill} /> : fallback("Camera off")}

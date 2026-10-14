@@ -1,19 +1,11 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { Input, useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useEffect, useId, useState } from "react";
 import { router, useFocusEffect, type Href } from "expo-router";
 import { useLocationDraft } from "../../locations/locationDraft";
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useMobileSession } from "../../../services/supabase";
 import { MapPin, X } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -163,7 +155,7 @@ export function AddressSheet({
 
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.title}>Add Address</Text>
+              <Text variant="cardHeading" style={styles.title}>Add Address</Text>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Close address sheet"
@@ -230,7 +222,7 @@ export function AddressSheet({
                 onPress={handleConfirm}
                 style={styles.confirmButton}
               >
-                <Text style={styles.confirmButtonText}>Confirm Address</Text>
+                <Text variant="button" style={styles.confirmButtonText}>Confirm Address</Text>
               </Pressable>
             </ScrollView>
           </View>

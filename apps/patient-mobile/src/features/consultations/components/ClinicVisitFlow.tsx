@@ -1,5 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { MapPin, QrCode } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
@@ -35,8 +36,8 @@ export function ClinicVisitFlow({ appointment, onComplete }: ClinicVisitFlowProp
             <View style={styles.qrSurface}>
               <QrCode color={colors.patient.text} size={112} strokeWidth={1.5} />
             </View>
-            <Text style={styles.checkInCode}>BK12454OPY</Text>
-            <Text style={styles.centeredDescription}>
+            <Text variant="body" style={styles.checkInCode}>BK12454OPY</Text>
+            <Text variant="body" style={styles.centeredDescription}>
               Show this check-in code at reception to mark your attendance.
             </Text>
           </Card>
@@ -52,8 +53,8 @@ export function ClinicVisitFlow({ appointment, onComplete }: ClinicVisitFlowProp
             <View style={styles.locationRow}>
               <MapPin color={colors.patient.primaryDark} size={21} />
               <View style={styles.flexCopy}>
-                <Text style={styles.cardTitle}>{appointment.hospital}</Text>
-                <Text style={styles.secondaryText}>{appointment.location}</Text>
+                <Text variant="cardHeading" style={styles.cardTitle}>{appointment.hospital}</Text>
+                <Text variant="body" style={styles.secondaryText}>{appointment.location}</Text>
               </View>
             </View>
             <Button label="I’ve checked in" onPress={() => setCheckedIn(true)} />

@@ -1,12 +1,6 @@
+import { AppText as Text } from "@startup/mobile-ui";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, MapPin, ShieldCheck } from "lucide-react-native";
 import { colors, fontFamilies, gradients } from "@startup/design-tokens";
@@ -49,13 +43,13 @@ const HospitalCard = memo(function HospitalCard({
     >
       <View style={s.hospitalPin}><MapPin color={colors.patient.primaryDark} size={20} /></View>
       <View style={s.hospitalCopy}>
-        <Text numberOfLines={1} style={s.hospitalName}>{hospital.name}</Text>
-        <Text numberOfLines={1} style={s.hospitalAddress}>{hospital.address}</Text>
+        <Text variant="cardHeading" numberOfLines={1} style={s.hospitalName}>{hospital.name}</Text>
+        <Text variant="body" numberOfLines={1} style={s.hospitalAddress}>{hospital.address}</Text>
         <View style={s.metaRow}>
           <MapPin color={colors.patient.primaryDark} size={12} />
-          <Text style={s.meta}>{hospital.distance_meters === null ? "Distance unavailable" : `${(hospital.distance_meters / 1000).toFixed(1)} km away`}</Text>
+          <Text variant="body" style={s.meta}>{hospital.distance_meters === null ? "Distance unavailable" : `${(hospital.distance_meters / 1000).toFixed(1)} km away`}</Text>
         </View>
-        {"source" in hospital ? <Text style={s.googleAttribution}>Google Maps</Text> : null}
+        {"source" in hospital ? <Text variant="body" style={s.googleAttribution}>Google Maps</Text> : null}
       </View>
       {selected ? <Check size={18} color={colors.patient.primaryDark} /> : null}
     </Pressable>
@@ -180,10 +174,10 @@ export function AmbulanceBookingForm({
             renderItem={renderHospital}
           />
 
-          {googleHospitals.length ? <Text style={s.bookingMessage}>Google-listed destinations are external; Clinzo verification and bed availability are not provided.</Text> : null}
+          {googleHospitals.length ? <Text variant="body" style={s.bookingMessage}>Google-listed destinations are external; Clinzo verification and bed availability are not provided.</Text> : null}
           {isGoogleLoading ? <Loader theme="patient" style={{ minHeight: 36 }} /> : null}
 
-          {googleHospitals.flatMap(h => h.attributions).filter((a, i, all) => all.findIndex(item => item.provider === a.provider) === i).map(a => <Text key={a.provider} style={s.googleAttribution}>{a.provider}</Text>)}
+          {googleHospitals.flatMap(h => h.attributions).filter((a, i, all) => all.findIndex(item => item.provider === a.provider) === i).map(a => <Text variant="body" key={a.provider} style={s.googleAttribution}>{a.provider}</Text>)}
           <SectionTitle>Select Ambulance Type</SectionTitle>
           <View style={s.ambulanceList}>
             {ambulanceTypes.map((item) => (
@@ -216,7 +210,7 @@ export function AmbulanceBookingForm({
             <Loader theme="patient" style={{ minHeight: 36 }} />
           ) : null}
           {hasActiveBooking ? (
-            <Text style={s.bookingMessage}>
+            <Text variant="body" style={s.bookingMessage}>
               You already have an active request.
             </Text>
           ) : null}
@@ -227,7 +221,7 @@ export function AmbulanceBookingForm({
 
           <View style={s.safetyNote}>
             <ShieldCheck color="#087F78" size={18} />
-            <Text style={s.safetyNoteText}>
+            <Text variant="label" style={s.safetyNoteText}>
               All ambulances are GPS-tracked & equipped with trained paramedics.
               Your safety is our priority.
             </Text>

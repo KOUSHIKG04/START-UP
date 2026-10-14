@@ -24,7 +24,7 @@ import { LocateFixed, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Header, Input, useToast } from "@startup/mobile-ui";
 import { useClinicLocationDraft } from "../../features/locations/clinicLocationDraft";
-import { formatGeocodedAddress } from "../../features/locations/locationDisplay";
+import { resolveDoctorAddress } from "../../features/locations/resolveAddress";
 
 type Point = { latitude: number; longitude: number };
 type PlaceDetails = {
@@ -110,10 +110,14 @@ export default function ClinicLocationScreen() {
     }
   }, []);
 
+  const onMapLoaded = useCallback(() => {
+    if (pointRef.current) googleMapRef.current?.setCameraPosition({ coordinates: pointRef.current, zoom: 16, duration: 0 });
+  }, []);
+
   function moveCamera(next: Point) {
     mapTouched.current = false;
     const camera = { coordinates: next, zoom: 16 };
-    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
+    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
     if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
   }
   function chooseSearchResult(result: MapPlace) {
@@ -193,36 +197,28 @@ export default function ClinicLocationScreen() {
     setDetails(emptyDetails);
     setAddressLabel("");
     const timer = setTimeout(() => {
-      void Location.reverseGeocodeAsync(point)
-        .then(([address]) => {
+      void resolveDoctorAddress(point, () => active)
+        .then(address => {
           if (!active) return;
-          if (!address) throw new Error("Address lookup returned no result.");
-          setAddressLabel(formatGeocodedAddress(address));
-          setDetails({
-            street: address?.street ?? "",
-            locality:
-              address?.district || address?.subregion || address?.name || "",
-            city: address?.city ?? "",
-            state: address?.region ?? "",
-            pincode: address?.postalCode?.replace(/\D/g, "").slice(0, 6) ?? "",
-          });
+          setAddressLabel(address.address);
+          setDetails({ street: address.street, locality: address.locality,
+            city: address.city, state: address.state, pincode: address.pincode });
         })
-        .catch(() => {
+        .catch((cause: unknown) => {
           if (active) {
             setDetails(emptyDetails);
             setAddressLabel("");
             showToast({
-              title: "Address lookup unavailable",
-              message:
-                "You can confirm the coordinates and enter missing address details in the drawer.",
-              type: "info",
+              title: "Could not fill this address",
+              message: cause instanceof Error ? cause.message : "Retry the lookup or enter the address manually.",
+              type: "error",
             });
           }
         })
         .finally(() => {
           if (active) setResolving(false);
         });
-    }, 600);
+    }, 900);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -241,7 +237,7 @@ export default function ClinicLocationScreen() {
     if (recenter) {
       mapTouched.current = false;
       const camera = { coordinates: next, zoom: 16 };
-      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition(camera);
+      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
       if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
     }
   }, []);
@@ -278,7 +274,7 @@ export default function ClinicLocationScreen() {
       <Header title="Choose Location" app="doctor" onBackPress={() => router.back()} />
       <View style={styles.body}>
         <View style={styles.mapFrame} onTouchStart={() => { mapTouched.current = true; }}>
-          {nativeMaps && Platform.OS === "android" ? <nativeMaps.GoogleMaps.View ref={googleMapRef} style={styles.map} cameraPosition={cameraPosition} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
+          {nativeMaps && Platform.OS === "android" ? <nativeMaps.GoogleMaps.View ref={googleMapRef} style={styles.map} cameraPosition={cameraPosition} onMapLoaded={onMapLoaded} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
           {nativeMaps && Platform.OS === "ios" ? <nativeMaps.AppleMaps.View ref={appleMapRef} style={styles.map} cameraPosition={cameraPosition} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
           {nativeMaps ? <View pointerEvents="none" style={styles.pin}><MapPin size={36} fill={colors.white} color={colors.doctor.primary} /></View> : <View style={styles.mapState}><Text style={styles.stateText}>Map selection is unavailable in this build. You can search for a place or use your current location.</Text></View>}
         </View>
@@ -329,7 +325,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   mapFrame: { ...StyleSheet.absoluteFill, backgroundColor: colors.doctor.surface },
-  map: { flex: 1 },
+  map: { ...StyleSheet.absoluteFill },
   mapState: {
     flex: 1,
     justifyContent: "center",

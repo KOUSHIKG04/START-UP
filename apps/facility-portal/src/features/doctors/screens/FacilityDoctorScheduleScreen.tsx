@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { Building2, House, Video, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@startup/web-ui/components/ui/button";
@@ -22,11 +23,24 @@ import {
 } from "../server/scheduleActions";
 import { practiceSlotIso, previewClocks } from "../utils/scheduleEditor";
 import { initialSettings, settingsDraft, card } from "../utils/facilityScheduleEditorConstants";
-export function FacilityDoctorScheduleScreen({
-  practiceId,
-}: {
-  practiceId: string;
-}) {
+export function FacilityDoctorScheduleScreen({ practiceId, mode }: { practiceId: string; mode?: "clinic" | "online" | "home" }) {
+  if (mode) return <FacilityDoctorScheduleEditor key={`${practiceId}:${mode}`} practiceId={practiceId} mode={mode} />;
+  return <div className="space-y-6">
+    <div className="flex items-center justify-between gap-4"><h1 className="text-2xl font-bold">Manage Schedule</h1><Button asChild variant="outline"><Link href="/doctor-schedules">Back to doctors</Link></Button></div>
+    <div className="grid max-w-3xl gap-4">
+      {([
+        ["clinic", "Clinic appointments", "Manage visits at this facility", Building2],
+        ["home", "Home visits", "Manage visit times and travel radius", House],
+        ["online", "Online consultations", "Manage video consultation times", Video],
+      ] as const).map(([service, title, description, Icon]) => <Link key={service}
+        href={`/doctor-schedules/${practiceId}/${service}`}
+        className="flex min-h-20 items-center gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 hover:bg-[#f8fafc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008577]">
+        <Icon className="size-6 shrink-0 text-[#008577]" /><div className="flex-1"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-sm text-[#475569]">{description}</p></div><ChevronRight className="size-5 text-[#64748b]" />
+      </Link>)}
+    </div>
+  </div>;
+}
+function FacilityDoctorScheduleEditor({ practiceId, mode }: { practiceId: string; mode: "clinic" | "online" | "home" }) {
   const client = useQueryClient();
   const router = useRouter();
   const [date, setDate] = useState("");
@@ -37,17 +51,14 @@ export function FacilityDoctorScheduleScreen({
   });
   const result = schedule.data;
   const saved = result?.ok ? result.settings : null;
-  const [draft, setDraft] = useState<DoctorScheduleSettings>(initialSettings);
-  const [version, setVersion] = useState(0);
-  const initialized = useRef(false);
-  useEffect(() => {
-    if (result?.ok && !initialized.current) {
-      initialized.current = true;
-      setDraft(result.settings ? settingsDraft(result.settings) : initialSettings);
-      setVersion(result.settings ? Number(result.settings.row_version) : 0);
-    }
-  }, [result]);
-  const [mode, setMode] = useState<"clinic" | "online" | "home">("clinic");
+  const [edits, setEdits] = useState<{ version: number; settings: DoctorScheduleSettings } | null>(null);
+  const version = edits?.version ?? Number(saved?.row_version ?? 0);
+  const draft = edits?.settings ?? (saved ? settingsDraft(saved) : initialSettings);
+  const setDraft = (settings: DoctorScheduleSettings) => setEdits({ version, settings });
+  const daysKey = mode === "online" ? "onlineWorkingDays" : mode === "home" ? "homeWorkingDays" : "workingDays";
+  const acceptKey = "autoAccept";
+  const limitKey = "autoAcceptLimit";
+  const serviceDays = draft[daysKey] ?? draft.workingDays;
   const [window, setWindow] = useState({ start: "09:00", end: "12:00" });
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
@@ -60,7 +71,7 @@ export function FacilityDoctorScheduleScreen({
       });
   }, [result]);
   const update = (changes: Partial<DoctorScheduleSettings>) =>
-    setDraft((previous) => ({ ...previous, ...changes }));
+    setEdits({ version, settings: { ...draft, ...changes } });
   const duration = saved
     ? mode === "clinic"
       ? saved.slot_minutes
@@ -90,7 +101,7 @@ export function FacilityDoctorScheduleScreen({
     day &&
     timezone &&
     saved &&
-    saved.working_days.includes(new Date(`${day}T12:00:00Z`).getUTCDay() || 7)
+    (mode === "online" ? saved.online_working_days ?? saved.working_days : mode === "home" ? saved.home_working_days ?? saved.working_days : saved.working_days).includes(new Date(`${day}T12:00:00Z`).getUTCDay() || 7)
       ? clocks.flatMap((clock) => {
           try {
             const iso = practiceSlotIso(day, clock, timezone);
@@ -134,7 +145,7 @@ export function FacilityDoctorScheduleScreen({
     if (refreshed.data?.ok) {
       const next = refreshed.data.settings;
       setDraft(next ? settingsDraft(next) : initialSettings);
-      setVersion(next ? Number(next.row_version) : 0);
+      setEdits(null);
       setSelected([]);
     }
   }
@@ -173,7 +184,7 @@ export function FacilityDoctorScheduleScreen({
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]">Manage Schedule</h1>
+          <h1 className="text-2xl font-bold text-[#0f172a]">{mode === "clinic" ? "Clinic Schedule" : mode === "online" ? "Online Schedule" : "Home Visit Schedule"}</h1>
           <p className="text-sm text-[#475569]">
             {result?.ok ? result.doctor.name : "Doctor schedule"}
             {timezone ? ` - ${timezone}` : ""}
@@ -191,8 +202,8 @@ export function FacilityDoctorScheduleScreen({
           >
             {schedule.isFetching ? <Spinner /> : "Refresh"}
           </Button>
-          <Link href="/doctor-schedules" className="text-sm underline">
-            Back to schedules
+          <Link href={`/doctor-schedules/${practiceId}`} className="text-sm underline">
+            Back to services
           </Link>
         </div>
       </div>
@@ -227,7 +238,7 @@ export function FacilityDoctorScheduleScreen({
                   return;
                 }
                 setDraft(settingsDraft(response.settings));
-                setVersion(Number(response.settings.row_version));
+                setEdits(null);
                 setSelected([]);
                 await client.invalidateQueries({
                   queryKey: ["facility-practice-schedule", practiceId],
@@ -238,8 +249,9 @@ export function FacilityDoctorScheduleScreen({
             }}
           >
             <h2 className="text-lg font-semibold">
-              Working hours and consultation settings
+              Working days and consultation settings
             </h2>
+            <p className="text-sm text-[#475569]">Working days, duration, fees and slots are separate. Auto-confirm uses one shared daily limit across Clinic, Online and Home visits combined.</p>
             <fieldset disabled={pending} className="flex flex-wrap gap-3">
               <legend className="mb-2 text-sm font-medium">Working days</legend>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
@@ -250,12 +262,12 @@ export function FacilityDoctorScheduleScreen({
                   >
                     <input
                       type="checkbox"
-                      checked={draft.workingDays.includes(index + 1)}
+                      checked={serviceDays.includes(index + 1)}
                       onChange={(event) =>
                         update({
-                          workingDays: event.target.checked
-                            ? [...draft.workingDays, index + 1].sort()
-                            : draft.workingDays.filter(
+                          [daysKey]: event.target.checked
+                            ? [...serviceDays, index + 1].sort()
+                            : serviceDays.filter(
                                 (day) => day !== index + 1
                               ),
                         })
@@ -266,7 +278,7 @@ export function FacilityDoctorScheduleScreen({
                 )
               )}
             </fieldset>
-            <div className="grid gap-4 sm:grid-cols-2">
+            {mode === "clinic" ? <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="clinic-start">Start time (24-hour)</Label>
                 <Input
@@ -291,35 +303,35 @@ export function FacilityDoctorScheduleScreen({
                   disabled={pending}
                 />
               </div>
-            </div>
+            </div> : null}
             <div className="grid gap-4 sm:grid-cols-3">
-              {numberField("slotMinutes", "Clinic slot duration (minutes)")}
-              {numberField(
+              {mode === "clinic" ? numberField("slotMinutes", "Clinic slot duration (minutes)") : null}
+              {mode === "online" ? numberField(
                 "onlineSlotMinutes",
                 "Online slot duration (minutes)"
-              )}
-              {numberField("homeSlotMinutes", "Home visit duration (minutes)")}
-              {numberField("walkinDailyLimit", "Daily clinic slots limit")}
-              {numberField("onlineDailyLimit", "Daily online slots limit")}
-              {numberField("autoAcceptLimit", "Auto-confirm limit")}
-              {numberField("clinicFeeMinor", "Clinic fee (₹)", false, true)}
-              {numberField("onlineFeeMinor", "Online fee (₹)", true, true)}
-              {numberField("homeFeeMinor", "Home visit fee (₹)", true, true)}
-              {numberField("homeRadiusKm", "Home visit radius (km)", true)}
+              ) : null}
+              {mode === "home" ? numberField("homeSlotMinutes", "Home visit duration (minutes)") : null}
+              {mode === "clinic" ? numberField("walkinDailyLimit", "Daily clinic slots limit") : null}
+              {mode === "online" ? numberField("onlineDailyLimit", "Daily online slots limit") : null}
+              {numberField(limitKey, "Shared daily auto-confirm limit")}
+              {mode === "clinic" ? numberField("clinicFeeMinor", "Clinic fee (₹)", false, true) : null}
+              {mode === "online" ? numberField("onlineFeeMinor", "Online fee (₹)", true, true) : null}
+              {mode === "home" ? numberField("homeFeeMinor", "Home visit fee (₹)", true, true) : null}
+              {mode === "home" ? numberField("homeRadiusKm", "Home visit radius (km)", true) : null}
             </div>
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  checked={draft.autoAccept}
+                  checked={draft[acceptKey] ?? false}
                   disabled={pending}
                   onChange={(event) =>
-                    update({ autoAccept: event.target.checked })
+                    update({ [acceptKey]: event.target.checked })
                   }
                 />
-                Auto-confirm bookings
+                Auto-confirm bookings across all service types
               </label>
-              <label className="flex items-center gap-2 text-sm">
+{mode === "home" ?               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={draft.homeVisits}
@@ -329,9 +341,9 @@ export function FacilityDoctorScheduleScreen({
                   }
                 />
                 Enable home visits for this practice
-              </label>
+              </label> : null}
             </div>
-            <Button type="submit" aria-label="Save schedule" disabled={pending}>
+            <Button type="submit" aria-label="Save schedule" disabled={pending || schedule.isFetching}>
               {pending ? <Spinner /> : "Save schedule"}
             </Button>
           </form>
@@ -355,23 +367,6 @@ export function FacilityDoctorScheduleScreen({
                   }}
                   disabled={pending}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="service">Consultation type</Label>
-                <select
-                  id="service"
-                  className="h-9 w-full rounded-lg border px-3 text-sm"
-                  value={mode}
-                  disabled={pending}
-                  onChange={(event) => {
-                    setMode(event.target.value as typeof mode);
-                    setSelected([]);
-                  }}
-                >
-                  <option value="clinic">Clinic visit</option>
-                  <option value="online">Online consultation</option>
-                  <option value="home">Home visit</option>
-                </select>
               </div>
               {["start", "end"].map((part) => (
                 <div key={part} className="space-y-2">
@@ -447,10 +442,7 @@ export function FacilityDoctorScheduleScreen({
                     queryKey: ["facility-practice-schedule", practiceId],
                   });
                   router.refresh();
-                  toast.add({
-                    title: `${response.count} slots published`,
-                    type: "success",
-                  });
+                  toast.add({ title: `${response.count} slots published`, type: "success" });
                 })
               }
             >
@@ -459,8 +451,8 @@ export function FacilityDoctorScheduleScreen({
           </section>
           <section className={card}>
             <h2 className="text-lg font-semibold">Published sessions</h2>
-            {result.sessions.length ? (
-              result.sessions.map((session) => (
+            {result.sessions.filter(session => session.service_mode === mode).length ? (
+              result.sessions.filter(session => session.service_mode === mode).map((session) => (
                 <div
                   key={session.id}
                   className="flex flex-wrap justify-between gap-2 border-b border-[#e2e8f0] py-3 text-sm"
@@ -470,11 +462,12 @@ export function FacilityDoctorScheduleScreen({
                     {formatDisplayDateTime(session.starts_at, session.timezone)}
                   </span>
                   <span>{session.state}</span>
+
                 </div>
               ))
             ) : (
               <p className="text-sm text-[#475569]">
-                No published sessions for this practice.
+                No published sessions for this service.
               </p>
             )}
           </section>

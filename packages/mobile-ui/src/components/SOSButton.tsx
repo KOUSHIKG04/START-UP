@@ -1,11 +1,6 @@
+import { AppText as Text } from "../primitives/AppText";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, View, Pressable, type ViewStyle } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { getSOSButtonDimensions } from "../utils/sosButtonDimensions";
 
@@ -72,7 +67,7 @@ export function SOSButton({
         ]}
       />
 
-      <Text style={isRed ? styles.textWhite : styles.textRed}>SOS</Text>
+      <Text variant="button" style={isRed ? styles.textWhite : styles.textRed}>SOS</Text>
     </Pressable>
   );
 }

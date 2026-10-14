@@ -1,9 +1,5 @@
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { AppText as Text } from "@startup/mobile-ui";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Controller, type Control } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SelectDropdown } from "./SelectDropdown";
@@ -31,7 +27,7 @@ export function FamilyRelationFields({
 }) {
   return (
     <>
-      <Text style={[styles.label, styles.sectionLabel]}>Relation</Text>
+      <Text variant="label" style={[styles.label, styles.sectionLabel]}>Relation</Text>
       <Controller
         control={control}
         name="relation"
