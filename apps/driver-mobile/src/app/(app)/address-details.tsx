@@ -222,9 +222,7 @@ export default function AddressDetailsScreen() {
                   >
                     <Icon
                       size={16}
-                      color={
-                        kind === value ? colors.white : colors.driver.text
-                      }
+                      color={kind === value ? colors.white : colors.driver.text}
                     />
                     <Text
                       style={[

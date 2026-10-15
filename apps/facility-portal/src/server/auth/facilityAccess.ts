@@ -19,23 +19,30 @@ export const getFacilityAccess = cache(async () => {
   } catch (error) {
     // A newly confirmed facility account has no Clinzo identity until it
     // registers its first facility. The registration RPC creates both.
-    if (typeof error === "object" && error !== null && "code" in error
-      && error.code === "42501" && "message" in error
-      && error.message === "Portal membership setup is incomplete") {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "42501" &&
+      "message" in error &&
+      error.message === "Portal membership setup is incomplete"
+    ) {
       return { approved: false, facilities: [] };
     }
     throw error;
   }
   if (facilities.length === 0) return { approved: false, facilities };
 
-  const cases = await Promise.all(facilities.map(async (facility) => {
-    const { data, error } = await client.rpc("get_my_verification_case", {
-      p_subject_type: "facility",
-      p_subject_id: facility.facilityId,
-    });
-    if (error) throw error;
-    return data as { status?: string } | null;
-  }));
+  const cases = await Promise.all(
+    facilities.map(async (facility) => {
+      const { data, error } = await client.rpc("get_my_verification_case", {
+        p_subject_type: "facility",
+        p_subject_id: facility.facilityId,
+      });
+      if (error) throw error;
+      return data as { status?: string } | null;
+    })
+  );
 
   return {
     approved: cases.some((item) => item?.status === "verified"),

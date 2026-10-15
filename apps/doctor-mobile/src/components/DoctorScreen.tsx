@@ -14,7 +14,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FadedScrollView, Button, Header, useKeyboardAwareScroll } from "@startup/mobile-ui";
+import {
+  FadedScrollView,
+  Button,
+  Header,
+  useKeyboardAwareScroll,
+} from "@startup/mobile-ui";
 import { palette, ui } from "./theme";
 
 export function Label({
@@ -76,8 +81,20 @@ export function DoctorHeader({
   trailing?: ReactNode;
   onBackPress?: () => void;
 }) {
-  return <><StatusBar style="light" /><Header title={title} app="doctor" rightAction={trailing}
-    onBackPress={onBackPress ?? (() => router.canGoBack() ? router.back() : router.replace("/"))} /></>;
+  return (
+    <>
+      <StatusBar style="light" />
+      <Header
+        title={title}
+        app="doctor"
+        rightAction={trailing}
+        onBackPress={
+          onBackPress ??
+          (() => (router.canGoBack() ? router.back() : router.replace("/")))
+        }
+      />
+    </>
+  );
 }
 
 export function DoctorScreen({
@@ -97,9 +114,11 @@ export function DoctorScreen({
   scrollResetKey?: number;
 }>) {
   const insets = useSafeAreaInsets();
-  const { scrollRef, keyboardInset, revealFocusedInput, onScroll } = useKeyboardAwareScroll();
+  const { scrollRef, keyboardInset, revealFocusedInput, onScroll } =
+    useKeyboardAwareScroll();
   useEffect(() => {
-    if (scrollResetKey !== undefined) scrollRef.current?.scrollTo({ y: 0, animated: false });
+    if (scrollResetKey !== undefined)
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [scrollResetKey, scrollRef]);
   return (
     <KeyboardAvoidingView
@@ -119,7 +138,10 @@ export function DoctorScreen({
         contentContainerStyle={[
           ui.content,
           contentStyle,
-          { paddingBottom: (bottomNav ? 125 : 24) + insets.bottom + keyboardInset },
+          {
+            paddingBottom:
+              (bottomNav ? 125 : 24) + insets.bottom + keyboardInset,
+          },
         ]}
       >
         {children}

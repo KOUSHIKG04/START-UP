@@ -12,7 +12,9 @@ export function useOnlineVisit(appointmentId?: string) {
   });
   return {
     isLive,
-    appointment: query.data?.find(item => item.id === appointmentId && item.visit_mode === "online"),
+    appointment: query.data?.find(
+      (item) => item.id === appointmentId && item.visit_mode === "online"
+    ),
     loading: query.isLoading,
     error: query.isError,
   };

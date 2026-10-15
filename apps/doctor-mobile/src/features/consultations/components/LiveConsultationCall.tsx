@@ -77,11 +77,21 @@ export function LiveConsultationCall({
   });
   useEffect(() => {
     if (!active || !supabase) return;
-    return subscribeOnlineMessages(supabase, appointmentId, () => {
-      void client.invalidateQueries({
-        queryKey: ["online-messages", appointmentId],
-      });
-    }, () => showToast({ title: "Chat connection interrupted", message: "Messages will catch up when the connection returns.", type: "info" }));
+    return subscribeOnlineMessages(
+      supabase,
+      appointmentId,
+      () => {
+        void client.invalidateQueries({
+          queryKey: ["online-messages", appointmentId],
+        });
+      },
+      () =>
+        showToast({
+          title: "Chat connection interrupted",
+          message: "Messages will catch up when the connection returns.",
+          type: "info",
+        })
+    );
   }, [active, appointmentId, client, showToast]);
 
   async function device(action: () => Promise<unknown>, message: string) {

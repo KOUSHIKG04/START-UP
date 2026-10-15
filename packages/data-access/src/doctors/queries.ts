@@ -37,8 +37,10 @@ export async function listPublicDoctorPractices(
   coordinates?: { latitude: number; longitude: number } | null
 ) {
   const { data, error } = await client.rpc("list_public_doctor_practices", {
-    p_practice_id: uuidSchema.parse(practiceId), p_service_mode: serviceMode,
-    p_latitude: coordinates?.latitude, p_longitude: coordinates?.longitude,
+    p_practice_id: uuidSchema.parse(practiceId),
+    p_service_mode: serviceMode,
+    p_latitude: coordinates?.latitude,
+    p_longitude: coordinates?.longitude,
   });
   if (error) throw error;
   return publicPracticeSchema.array().parse(data);

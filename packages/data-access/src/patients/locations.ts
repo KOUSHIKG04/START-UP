@@ -1,4 +1,7 @@
-import { savedPatientLocationInputSchema, savedPatientLocationSchema } from "@startup/contracts";
+import {
+  savedPatientLocationInputSchema,
+  savedPatientLocationSchema,
+} from "@startup/contracts";
 import type { SavedPatientLocationInput } from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 
@@ -8,7 +11,11 @@ export async function listMyPatientLocations(client: AppSupabaseClient) {
   return savedPatientLocationSchema.array().parse(data);
 }
 
-export async function saveMyPatientLocation(client: AppSupabaseClient, input: SavedPatientLocationInput, locationId?: string) {
+export async function saveMyPatientLocation(
+  client: AppSupabaseClient,
+  input: SavedPatientLocationInput,
+  locationId?: string
+) {
   const location = savedPatientLocationInputSchema.parse(input);
   const { data, error } = await client.rpc("save_my_patient_location", {
     p_location: location,
@@ -18,12 +25,22 @@ export async function saveMyPatientLocation(client: AppSupabaseClient, input: Sa
   return data;
 }
 
-export async function selectMyPatientLocation(client: AppSupabaseClient, locationId: string) {
-  const { error } = await client.rpc("select_my_patient_location", { p_location_id: locationId });
+export async function selectMyPatientLocation(
+  client: AppSupabaseClient,
+  locationId: string
+) {
+  const { error } = await client.rpc("select_my_patient_location", {
+    p_location_id: locationId,
+  });
   if (error) throw error;
 }
 
-export async function deleteMyPatientLocation(client: AppSupabaseClient, locationId: string) {
-  const { error } = await client.rpc("delete_my_patient_location", { p_location_id: locationId });
+export async function deleteMyPatientLocation(
+  client: AppSupabaseClient,
+  locationId: string
+) {
+  const { error } = await client.rpc("delete_my_patient_location", {
+    p_location_id: locationId,
+  });
   if (error) throw error;
 }

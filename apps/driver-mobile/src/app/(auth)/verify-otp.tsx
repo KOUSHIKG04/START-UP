@@ -55,8 +55,9 @@ export default function DriverVerifyOtp() {
       setError(
         cause instanceof Error ? cause.message : "Could not resend the code."
       );
+    } finally {
+      setResending(false);
     }
-    finally { setResending(false); }
   }
 
   return (
@@ -78,7 +79,8 @@ export default function DriverVerifyOtp() {
               <Text style={styles.digitText}>{code[index] ?? ""}</Text>
             </View>
           ))}
-          <Input variant="unstyled"
+          <Input
+            variant="unstyled"
             ref={input}
             accessibilityLabel="Six-digit verification code"
             keyboardType="number-pad"
@@ -95,7 +97,11 @@ export default function DriverVerifyOtp() {
           />
         </Pressable>
 
-        <Button loading={resending} label="Resend OTP" variant="ghost" labelStyle={styles.resendText}
+        <Button
+          loading={resending}
+          label="Resend OTP"
+          variant="ghost"
+          labelStyle={styles.resendText}
           accessibilityRole="button"
           disabled={seconds > 0 || busy || resending}
           onPress={() => void resend()}

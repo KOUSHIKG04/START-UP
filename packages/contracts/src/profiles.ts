@@ -6,7 +6,6 @@ export type OrganizationRole =
   | "dispatcher"
   | "organization_admin";
 
-  
 /** Read-only server projection; never accept these roles from signup metadata. */
 export interface MembershipProjection {
   organizationId: string;

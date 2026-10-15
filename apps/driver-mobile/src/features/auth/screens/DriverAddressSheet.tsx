@@ -48,17 +48,26 @@ export function AddressSheet({
   useToastFeedback({ error });
   const [attemptedConfirm, setAttemptedConfirm] = useState(false);
   const awaitingMap = useRef(false);
-  const chosen = useDriverLocationDraft(state => state.chosen);
-  const clearChosen = useDriverLocationDraft(state => state.clear);
-  useFocusEffect(useCallback(() => {
-    if (!chosen || !awaitingMap.current) return;
-    awaitingMap.current = false;
-    setAddress(current => ({ ...current, line1: chosen.street || chosen.locality || current.line1,
-      line2: chosen.locality || current.line2, city: chosen.city || current.city, state: chosen.state || current.state, pincode: chosen.pincode || current.pincode,
-      latitude: chosen.latitude, longitude: chosen.longitude }));
-    clearChosen();
-    onReopen();
-  }, [chosen, clearChosen, onReopen]));
+  const chosen = useDriverLocationDraft((state) => state.chosen);
+  const clearChosen = useDriverLocationDraft((state) => state.clear);
+  useFocusEffect(
+    useCallback(() => {
+      if (!chosen || !awaitingMap.current) return;
+      awaitingMap.current = false;
+      setAddress((current) => ({
+        ...current,
+        line1: chosen.street || chosen.locality || current.line1,
+        line2: chosen.locality || current.line2,
+        city: chosen.city || current.city,
+        state: chosen.state || current.state,
+        pincode: chosen.pincode || current.pincode,
+        latitude: chosen.latitude,
+        longitude: chosen.longitude,
+      }));
+      clearChosen();
+      onReopen();
+    }, [chosen, clearChosen, onReopen])
+  );
 
   // Only a new confirmed address replaces the draft. Dismissing the drawer
   // must not reset partially entered fields when it is opened again.
@@ -80,7 +89,8 @@ export function AddressSheet({
       state: address.state.trim(),
       pincode: address.pincode.trim(),
       ...(address.latitude !== undefined && address.longitude !== undefined
-        ? { latitude: address.latitude, longitude: address.longitude } : {}),
+        ? { latitude: address.latitude, longitude: address.longitude }
+        : {}),
     };
 
     if (!trimmed.building) {
@@ -119,7 +129,11 @@ export function AddressSheet({
     return (
       <Input
         label={label}
-          invalid={attemptedConfirm && !patientAddressSchema.shape[key].safeParse(address[key].trim()).success}
+        invalid={
+          attemptedConfirm &&
+          !patientAddressSchema.shape[key].safeParse(address[key].trim())
+            .success
+        }
         labelStyle={styles.label}
         containerStyle={styles.field}
         accessibilityLabel={label}
@@ -138,7 +152,8 @@ export function AddressSheet({
   }
 
   return (
-    <ModalSurface layout="custom"
+    <ModalSurface
+      layout="custom"
       visible={visible}
       transparent
       animationType="slide"
@@ -211,20 +226,36 @@ export function AddressSheet({
                 )}
               </View>
 
-              <Button theme="driver" label="Choose location on map" variant="outline"
+              <Button
+                theme="driver"
+                label="Choose location on map"
+                variant="outline"
                 leftIcon={<MapPin size={18} color={colors.driver.primary} />}
                 onPress={() => {
                   Keyboard.dismiss();
                   onClose();
                   clearChosen();
                   awaitingMap.current = true;
-                  router.push({ pathname: profile?.driver?.id ? '/profile-location' : '/registration-location', params: {
-                    
-                    ...(address.latitude !== undefined && address.longitude !== undefined ? {
-                      latitude: String(address.latitude), longitude: String(address.longitude),
-                    } : {}),
-                  } } as Href);
-                }} style={[styles.locationCard, { height: PROFILE_FIELD_HEIGHT, paddingVertical: 0 }]} />
+                  router.push({
+                    pathname: profile?.driver?.id
+                      ? "/profile-location"
+                      : "/registration-location",
+                    params: {
+                      ...(address.latitude !== undefined &&
+                      address.longitude !== undefined
+                        ? {
+                            latitude: String(address.latitude),
+                            longitude: String(address.longitude),
+                          }
+                        : {}),
+                    },
+                  } as Href);
+                }}
+                style={[
+                  styles.locationCard,
+                  { height: PROFILE_FIELD_HEIGHT, paddingVertical: 0 },
+                ]}
+              />
               {/* Confirm Address Button */}
               <Pressable
                 accessibilityRole="button"

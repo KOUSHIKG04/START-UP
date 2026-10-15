@@ -13,8 +13,12 @@ export function Assigning() {
           </View>
         </View>
       </View>
-      <Text variant="cardHeading" style={styles.assigningTitle}>Assigning the ambulance driver</Text>
-      <Text variant="cardHeading" style={styles.assigningSubtitle}>We'll reach you soon</Text>
+      <Text variant="cardHeading" style={styles.assigningTitle}>
+        Assigning the ambulance driver
+      </Text>
+      <Text variant="cardHeading" style={styles.assigningSubtitle}>
+        We'll reach you soon
+      </Text>
     </View>
   );
 }

@@ -47,13 +47,14 @@ export default function DetailsRoute() {
   };
 
   async function save(value: DriverProfile) {
-    
     if (!supabase || !session) throw new Error("Sign in to continue.");
-    
+
     let photoPath: string | undefined = saved?.profile_photo_path ?? undefined;
-    
+
     if (value.photo?.startsWith("file:")) {
-      const isPng = value.photoMimeType === "image/png" || (!value.photoMimeType && value.photo.toLowerCase().endsWith(".png"));
+      const isPng =
+        value.photoMimeType === "image/png" ||
+        (!value.photoMimeType && value.photo.toLowerCase().endsWith(".png"));
       const path = `${session.user.id}/profile/${Crypto.randomUUID()}.${isPng ? "png" : "jpg"}`;
       const bytes = await new File(value.photo).arrayBuffer();
       const upload = await supabase.storage
@@ -80,7 +81,7 @@ export default function DetailsRoute() {
       profilePhotoPath: photoPath,
       consent: true,
     });
-    
+
     await queryClient.invalidateQueries({
       queryKey: ["driver-registration-application"],
     });

@@ -15,4 +15,8 @@ export const useDriverLocationDraft = create<{
   chosen: DriverMapLocation | null;
   choose: (chosen: DriverMapLocation) => void;
   clear: () => void;
-}>((set) => ({ chosen: null, choose: chosen => set({ chosen }), clear: () => set({ chosen: null }) }));
+}>((set) => ({
+  chosen: null,
+  choose: (chosen) => set({ chosen }),
+  clear: () => set({ chosen: null }),
+}));

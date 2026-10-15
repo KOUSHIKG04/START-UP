@@ -1,6 +1,14 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type PressableProps,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { Upload } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
@@ -34,7 +42,11 @@ export function UploadInput({
   const theme = useMobileTheme();
   return (
     <View style={containerStyle}>
-      {label ? <Text variant="label" style={[styles.label, labelStyle]}>{label}</Text> : null}
+      {label ? (
+        <Text variant="label" style={[styles.label, labelStyle]}>
+          {label}
+        </Text>
+      ) : null}
 
       <Pressable
         {...props}
@@ -52,7 +64,8 @@ export function UploadInput({
         ]}
       >
         <Upload color={theme.primary} size={20} strokeWidth={2} />
-        <Text variant="label"
+        <Text
+          variant="label"
           numberOfLines={1}
           style={[
             styles.value,
@@ -64,7 +77,11 @@ export function UploadInput({
         </Text>
       </Pressable>
 
-      {error ? <Text variant="label" style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text variant="label" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

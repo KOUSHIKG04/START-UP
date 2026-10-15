@@ -16,23 +16,25 @@ import { palette, ui } from "../../../components/theme";
 import { supabase, useMobileSession } from "../../../services/supabase";
 export function EarningsScreen({ history = false }: { history?: boolean }) {
   const { profile } = useMobileSession();
-  
+
   const trips = useQuery({
     queryKey: ["my-driver-trips", profile?.driver?.id],
     queryFn: () => listMyDriverTrips(supabase!),
     enabled: Boolean(supabase && profile?.driver?.id),
   });
-  useToastFeedback({ error: trips.isError ? "Could not load trip history." : "" });
-  
+  useToastFeedback({
+    error: trips.isError ? "Could not load trip history." : "",
+  });
+
   const [period, setPeriod] = useState("Today");
-  
+
   const now = new Date();
-  
+
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   if (period === "This Week")
     start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-  
+
   if (period === "This Month") start.setDate(1);
   const filtered =
     trips.data?.filter(
@@ -43,9 +45,7 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
     ) ?? [];
   return (
     <View style={ui.screen}>
-      <PageHeader
-        title={history ? "My Trips" : "My Earnings"}
-      />
+      <PageHeader title={history ? "My Trips" : "My Earnings"} />
       <Body>
         <View
           style={{
@@ -94,7 +94,9 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
           </>
         )}
         <Heading>Trip History ({period})</Heading>
-        {trips.isLoading ? <Skeleton theme="driver" height={92} radius={12} /> : null}
+        {trips.isLoading ? (
+          <Skeleton theme="driver" height={92} radius={12} />
+        ) : null}
         {!trips.isLoading && !filtered.length ? (
           <Card>
             <View style={[ui.center, { paddingVertical: 24 }]}>

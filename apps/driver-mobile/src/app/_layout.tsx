@@ -36,19 +36,28 @@ export default function RootLayout() {
   const routedAccount = useRef<string | null>(null);
   useEffect(() => {
     if (auth.loading || (!loaded && !error)) return;
-    if (!auth.session) { routedAccount.current = null; return; }
+    if (!auth.session) {
+      routedAccount.current = null;
+      return;
+    }
     if (auth.error || routedAccount.current === auth.session.user.id) return;
     routedAccount.current = auth.session.user.id;
     if (!auth.profile?.driver?.id) router.replace("/onboarding");
-  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile, loaded, error]);
+  }, [
+    auth.loading,
+    auth.error,
+    auth.session?.user.id,
+    auth.profile,
+    loaded,
+    error,
+  ]);
 
-  
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync();
   }, [loaded, error]);
-  
+
   if (!loaded && !error) return null;
-  
+
   if (auth.loading)
     return (
       <View style={{ flex: 1 }}>
@@ -72,28 +81,32 @@ export default function RootLayout() {
     <MobileThemeProvider theme="driver">
       <SafeAreaProvider>
         <ToastProvider>
-        <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
-        <QueryProvider>
-          <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
-          {auth.profile?.driver?.id ? <DriverLocationReporter /> : null}
-          <View style={{ flex: 1, backgroundColor: "#fff" }}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: "#fff" },
-                animation: "none",
-              }}
-            >
-              <Stack.Protected guard={Boolean(auth.session && auth.profile?.driver?.id)}>
-                <Stack.Screen name="(app)" />
-              </Stack.Protected>
-              <Stack.Protected guard={!auth.session || !auth.profile?.driver?.id}>
-                <Stack.Screen name="(auth)" />
-              </Stack.Protected>
-            </Stack>
-            <StatusBar style={auth.profile?.driver?.id ? "light" : "dark"} />
-          </View>
-        </QueryProvider>
+          <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
+          <QueryProvider>
+            <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
+            {auth.profile?.driver?.id ? <DriverLocationReporter /> : null}
+            <View style={{ flex: 1, backgroundColor: "#fff" }}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: "#fff" },
+                  animation: "none",
+                }}
+              >
+                <Stack.Protected
+                  guard={Boolean(auth.session && auth.profile?.driver?.id)}
+                >
+                  <Stack.Screen name="(app)" />
+                </Stack.Protected>
+                <Stack.Protected
+                  guard={!auth.session || !auth.profile?.driver?.id}
+                >
+                  <Stack.Screen name="(auth)" />
+                </Stack.Protected>
+              </Stack>
+              <StatusBar style={auth.profile?.driver?.id ? "light" : "dark"} />
+            </View>
+          </QueryProvider>
         </ToastProvider>
       </SafeAreaProvider>
     </MobileThemeProvider>

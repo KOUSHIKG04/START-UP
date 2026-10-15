@@ -54,20 +54,20 @@ registration, company approval, profile editing and ownership isolation.
 
 The structure follows `apps/patient-mobile`: Expo Router files select and connect screens; screen implementations live outside the route tree.
 
-| Location | Responsibility |
-| --- | --- |
-| `src/app/_layout.tsx` | Root stack, shared Albert Sans font loading, splash lifecycle and safe-area provider. The package entry is `expo-router/entry`. |
-| `src/app/*.tsx` | Thin route adapters for welcome, details, documents, verification and chat; connect navigation and store actions to screens. |
-| `src/app/(tabs)/` | Home, Trips, Earnings and Profile navigation with shared `BottomNavBar`. The active-trip route is hidden from the bar. Verification gates the tab area. |
-| `src/screens/registration/RegistrationScreens.tsx` | Welcome, personal details, vehicle/documents and pending/verified presentations. |
-| `src/screens/home/HomeScreen.tsx` | Availability, overview, map preview and expiring request modal. |
-| `src/screens/trip/TripScreen.tsx` | Pickup, arrival/PIN, in-progress and completed-trip states. |
-| `src/screens/chat/ChatScreen.tsx` | Local conversation composer and sample messages. |
-| `src/screens/earnings/EarningsScreen.tsx` | Session earnings and date-filtered history; the Trips route uses the history presentation. |
-| `src/screens/profile/ProfileScreen.tsx` | Profile summary, availability, edit links and support information. |
-| `src/store/driver.ts` | Zustand in-memory profile, verification, availability, dispatch deadline, guarded trip transitions, completed trips and messages. |
-| `src/store/documents.ts` | In-memory selected-document metadata and vehicle details. |
-| `src/components/DriverUI.tsx` | Driver-specific composition helpers for headers, text, cards, metrics and screen spacing. |
+| Location                                           | Responsibility                                                                                                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/_layout.tsx`                              | Root stack, shared Albert Sans font loading, splash lifecycle and safe-area provider. The package entry is `expo-router/entry`.                         |
+| `src/app/*.tsx`                                    | Thin route adapters for welcome, details, documents, verification and chat; connect navigation and store actions to screens.                            |
+| `src/app/(tabs)/`                                  | Home, Trips, Earnings and Profile navigation with shared `BottomNavBar`. The active-trip route is hidden from the bar. Verification gates the tab area. |
+| `src/screens/registration/RegistrationScreens.tsx` | Welcome, personal details, vehicle/documents and pending/verified presentations.                                                                        |
+| `src/screens/home/HomeScreen.tsx`                  | Availability, overview, map preview and expiring request modal.                                                                                         |
+| `src/screens/trip/TripScreen.tsx`                  | Pickup, arrival/PIN, in-progress and completed-trip states.                                                                                             |
+| `src/screens/chat/ChatScreen.tsx`                  | Local conversation composer and sample messages.                                                                                                        |
+| `src/screens/earnings/EarningsScreen.tsx`          | Session earnings and date-filtered history; the Trips route uses the history presentation.                                                              |
+| `src/screens/profile/ProfileScreen.tsx`            | Profile summary, availability, edit links and support information.                                                                                      |
+| `src/store/driver.ts`                              | Zustand in-memory profile, verification, availability, dispatch deadline, guarded trip transitions, completed trips and messages.                       |
+| `src/store/documents.ts`                           | In-memory selected-document metadata and vehicle details.                                                                                               |
+| `src/components/DriverUI.tsx`                      | Driver-specific composition helpers for headers, text, cards, metrics and screen spacing.                                                               |
 
 `@startup/design-tokens` remains the shared source for the driver palette and Albert Sans families. `@startup/mobile-ui` supplies shared buttons, inputs, bottom navigation, fonts and safe-area exports. Driver-specific compositions belong in this app; reusable primitives and token changes belong in the shared packages. Existing product/design context remains authoritative; this extension does not establish a new design system.
 
@@ -86,22 +86,22 @@ All application records live in memory and reset when the app reloads. The docum
 
 Source file: [CLINZO Figma design](https://www.figma.com/design/JPyiy9pnS8Ywy9SlSyGUqu). The 14 supplied nodes map to these implemented routes and states:
 
-| Supplied node | Screen/state | Implementation |
-| --- | --- | --- |
-| `529:11` | Welcome | `/` → `WelcomeScreen` |
-| `677:86` | Personal details | `/details` → `DetailsScreen` |
-| `529:13` | Vehicle and documents | `/documents` → `DocumentsScreen` |
-| `677:302` | Pending verification | `/verification` → `VerificationScreen`, pending |
-| `677:341` | Verified | `/verification` → `VerificationScreen`, verified preview |
-| `617:16` | Offline home | `/home` → `HomeScreen`, offline |
-| `617:78` | Online home | `/home` → `HomeScreen`, online |
-| `617:143` | Incoming request | `/home` → request modal |
-| `617:185` | Navigate to patient | `/trip` → pickup stage |
-| `617:251` | At pickup / patient PIN | `/trip` → arrived stage |
-| `617:321` | Trip in progress | `/trip` → progress stage |
-| `617:383` | Trip complete | `/trip` → complete stage |
-| `701:30` | Patient chat | `/chat` → `ChatScreen` |
-| `617:453` | Earnings | `/earnings` → `EarningsScreen` |
+| Supplied node | Screen/state            | Implementation                                           |
+| ------------- | ----------------------- | -------------------------------------------------------- |
+| `529:11`      | Welcome                 | `/` → `WelcomeScreen`                                    |
+| `677:86`      | Personal details        | `/details` → `DetailsScreen`                             |
+| `529:13`      | Vehicle and documents   | `/documents` → `DocumentsScreen`                         |
+| `677:302`     | Pending verification    | `/verification` → `VerificationScreen`, pending          |
+| `677:341`     | Verified                | `/verification` → `VerificationScreen`, verified preview |
+| `617:16`      | Offline home            | `/home` → `HomeScreen`, offline                          |
+| `617:78`      | Online home             | `/home` → `HomeScreen`, online                           |
+| `617:143`     | Incoming request        | `/home` → request modal                                  |
+| `617:185`     | Navigate to patient     | `/trip` → pickup stage                                   |
+| `617:251`     | At pickup / patient PIN | `/trip` → arrived stage                                  |
+| `617:321`     | Trip in progress        | `/trip` → progress stage                                 |
+| `617:383`     | Trip complete           | `/trip` → complete stage                                 |
+| `701:30`      | Patient chat            | `/chat` → `ChatScreen`                                   |
+| `617:453`     | Earnings                | `/earnings` → `EarningsScreen`                           |
 
 **Custom companion screens:** `/trips` and `/profile` extend the supplied navigation using the incumbent driver visual language; no separate Figma nodes were supplied for them.
 

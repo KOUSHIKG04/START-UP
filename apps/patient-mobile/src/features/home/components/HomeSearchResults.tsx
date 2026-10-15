@@ -38,8 +38,12 @@ export function HomeSearchResults({
               style={styles.rowIcon}
             />
             <View style={styles.rowContent}>
-              <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
-              <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
+              <Text variant="cardHeading" style={styles.itemTitle}>
+                {item.title}
+              </Text>
+              <Text variant="cardHeading" style={styles.itemSubtitle}>
+                {item.type}
+              </Text>
             </View>
           </Pressable>
         ))

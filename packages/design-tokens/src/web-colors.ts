@@ -37,4 +37,3 @@ export const webColors = {
   "dark-sidebar-border": "oklch(1 0 0 / 10%)",
   "dark-sidebar-ring": "oklch(0.556 0 0)",
 } as const;
-

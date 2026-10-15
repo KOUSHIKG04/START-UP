@@ -6,5 +6,11 @@ export default function AmbulanceRoute() {
   const handleFullscreenChange = useCallback((fullscreen: boolean) => {
     router.setParams({ fullscreen: fullscreen ? "true" : "false" });
   }, []);
-  return <AmbulanceBookingScreen onBackPress={() => router.back()} onComplete={() => router.replace("/")} onFullscreenChange={handleFullscreenChange} />;
+  return (
+    <AmbulanceBookingScreen
+      onBackPress={() => router.back()}
+      onComplete={() => router.replace("/")}
+      onFullscreenChange={handleFullscreenChange}
+    />
+  );
 }

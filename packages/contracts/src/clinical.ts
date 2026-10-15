@@ -124,12 +124,22 @@ export type RecordDiagnosisInput = z.infer<typeof recordDiagnosisSchema>;
 export type IssuePrescriptionInput = z.infer<typeof issuePrescriptionSchema>;
 export type RecommendFollowupInput = z.infer<typeof recommendFollowupSchema>;
 
-export const consultationIntakeSchema = z.object({
-  appointmentId: uuidSchema,
-  vitals: recordVitalSchema.omit({ appointmentId: true }).array().max(7),
-  diagnosis: z.string().trim().min(2).max(1000).nullable(),
-}).strict().refine(value => value.vitals.length > 0 || value.diagnosis !== null, { message: "Enter vitals or a diagnosis." })
-  .refine(value => new Set(value.vitals.map(vital => vital.code)).size === value.vitals.length, { message: "Choose each vital once." });
+export const consultationIntakeSchema = z
+  .object({
+    appointmentId: uuidSchema,
+    vitals: recordVitalSchema.omit({ appointmentId: true }).array().max(7),
+    diagnosis: z.string().trim().min(2).max(1000).nullable(),
+  })
+  .strict()
+  .refine((value) => value.vitals.length > 0 || value.diagnosis !== null, {
+    message: "Enter vitals or a diagnosis.",
+  })
+  .refine(
+    (value) =>
+      new Set(value.vitals.map((vital) => vital.code)).size ===
+      value.vitals.length,
+    { message: "Choose each vital once." }
+  );
 export type ConsultationIntakeInput = z.infer<typeof consultationIntakeSchema>;
 
 export const doctorConsultationDraftSchema = z.object({

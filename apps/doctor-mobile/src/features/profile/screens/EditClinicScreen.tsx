@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Keyboard,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Keyboard, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapPin } from "lucide-react-native";
@@ -172,15 +168,27 @@ export function EditClinicScreen() {
               <View style={ui.flex}>{field("state", "State", "State")}</View>
             </View>
             {field("pincode", "Pincode", "6-digit pincode")}
-            <Button theme="doctor" variant="outline" label="Choose location on map" style={styles.input}
+            <Button
+              theme="doctor"
+              variant="outline"
+              label="Choose location on map"
+              style={styles.input}
               leftIcon={<MapPin size={18} color={palette.primary} />}
               onPress={() => {
                 Keyboard.dismiss();
                 clear();
-                router.push({ pathname: "/practice-location", params:
-                  draft.latitude !== null && draft.longitude !== null
-                    ? { latitude: String(draft.latitude), longitude: String(draft.longitude) } : {} });
-              }} />
+                router.push({
+                  pathname: "/practice-location",
+                  params:
+                    draft.latitude !== null && draft.longitude !== null
+                      ? {
+                          latitude: String(draft.latitude),
+                          longitude: String(draft.longitude),
+                        }
+                      : {},
+                });
+              }}
+            />
           </Panel>
           <Button
             theme="doctor"

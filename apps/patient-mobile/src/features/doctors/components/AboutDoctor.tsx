@@ -29,7 +29,9 @@ export function AboutDoctor({
         style={styles.aboutCard}
       >
         <View style={styles.aboutSection}>
-          <Text variant="sectionHeading" style={styles.sectionTitle}>About</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            About
+          </Text>
           <Text variant="body" style={styles.bodyText}>
             {bio || `${doctorName} has not added a biography yet.`}
           </Text>
@@ -38,7 +40,9 @@ export function AboutDoctor({
         <CardSeparator color="#E8ECEF" />
 
         <View style={styles.aboutSection}>
-          <Text variant="sectionHeading" style={styles.sectionTitle}>Hospital</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            Hospital
+          </Text>
           <View style={styles.hospitalRow}>
             <MapPin
               color={colors.patient.primaryDark}
@@ -47,8 +51,12 @@ export function AboutDoctor({
             />
             <View style={styles.hospitalCopy}>
               <Text variant="body" style={styles.hospitalLine}>
-                <Text variant="cardHeading" style={styles.hospitalName}>{facilityName}, </Text>
-                <Text variant="body" style={styles.hospitalAddress}>{facilityAddress}</Text>
+                <Text variant="cardHeading" style={styles.hospitalName}>
+                  {facilityName},{" "}
+                </Text>
+                <Text variant="body" style={styles.hospitalAddress}>
+                  {facilityAddress}
+                </Text>
               </Text>
               {distanceMeters !== null ? (
                 <Text variant="body" style={styles.secondaryText}>
@@ -62,7 +70,9 @@ export function AboutDoctor({
         <CardSeparator color="#E8ECEF" />
 
         <View style={styles.aboutSection}>
-          <Text variant="sectionHeading" style={styles.sectionTitle}>Languages</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            Languages
+          </Text>
           <View style={styles.languageRow}>
             {languages.map((language) => (
               <Chip

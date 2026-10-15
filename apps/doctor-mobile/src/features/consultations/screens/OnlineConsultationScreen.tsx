@@ -4,10 +4,31 @@ import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AudioSession, LiveKitRoom, registerGlobals } from "@livekit/react-native";
-import { getOnlineVideoToken, startOnlineAppointment } from "@startup/data-access";
-import { ChevronLeft, MessageCircle, MicOff, Mic, SwitchCamera, PhoneOff, User } from "lucide-react-native";
-import { Button, Loader, ModalSurface, useToast, useToastFeedback } from "@startup/mobile-ui";
+import {
+  AudioSession,
+  LiveKitRoom,
+  registerGlobals,
+} from "@livekit/react-native";
+import {
+  getOnlineVideoToken,
+  startOnlineAppointment,
+} from "@startup/data-access";
+import {
+  ChevronLeft,
+  MessageCircle,
+  MicOff,
+  Mic,
+  SwitchCamera,
+  PhoneOff,
+  User,
+} from "lucide-react-native";
+import {
+  Button,
+  Loader,
+  ModalSurface,
+  useToast,
+  useToastFeedback,
+} from "@startup/mobile-ui";
 import {
   Heading,
   IconButton,
@@ -20,10 +41,18 @@ import { useOnlineVisit } from "../utils/useOnlineVisit";
 import { supabase } from "../../../services/supabase";
 
 registerGlobals();
-export function OnlineConsultationScreen({ initialChat = false }: { initialChat?: boolean } = {}) {
+export function OnlineConsultationScreen({
+  initialChat = false,
+}: { initialChat?: boolean } = {}) {
   const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
   const live = useOnlineVisit(appointmentId);
-  if (live.isLive) return <LiveOnlineConsultation appointmentId={appointmentId!} initialChat={initialChat} />;
+  if (live.isLive)
+    return (
+      <LiveOnlineConsultation
+        appointmentId={appointmentId!}
+        initialChat={initialChat}
+      />
+    );
   return <DemoOnlineConsultation />;
 }
 
@@ -115,66 +144,216 @@ function DemoOnlineConsultation() {
   );
 }
 
-function LiveOnlineConsultation({ appointmentId, initialChat }: { appointmentId: string; initialChat: boolean }) {
+function LiveOnlineConsultation({
+  appointmentId,
+  initialChat,
+}: {
+  appointmentId: string;
+  initialChat: boolean;
+}) {
   const { showToast } = useToast();
   const live = useOnlineVisit(appointmentId);
   const queryClient = useQueryClient();
   const start = useMutation({
     mutationFn: () => startOnlineAppointment(supabase!, appointmentId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }); },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
+    },
   });
   const token = useQuery({
     queryKey: ["online-video-token", appointmentId],
     queryFn: () => getOnlineVideoToken(supabase!, appointmentId),
-    enabled: Boolean(live.appointment && live.appointment.status === "in_consultation" && supabase),
+    enabled: Boolean(
+      live.appointment &&
+      live.appointment.status === "in_consultation" &&
+      supabase
+    ),
     staleTime: 5 * 60 * 1000,
   });
-  useToastFeedback({ error: start.isError ? "Could not start consultation. Check its scheduled time and status." : token.error instanceof Error ? token.error.message : "" });
+  useToastFeedback({
+    error: start.isError
+      ? "Could not start consultation. Check its scheduled time and status."
+      : token.error instanceof Error
+        ? token.error.message
+        : "",
+  });
   useEffect(() => {
     if (!token.data) return;
-    void AudioSession.startAudioSession().catch(() => showToast({ title: "Audio unavailable", message: "Check microphone permissions.", type: "error" }));
-    return () => { void AudioSession.stopAudioSession().catch(() => undefined); };
+    void AudioSession.startAudioSession().catch(() =>
+      showToast({
+        title: "Audio unavailable",
+        message: "Check microphone permissions.",
+        type: "error",
+      })
+    );
+    return () => {
+      void AudioSession.stopAudioSession().catch(() => undefined);
+    };
   }, [token.data, showToast]);
   const appointment = live.appointment;
-  if (live.loading) return <SafeAreaView style={styles.screen}><Loader theme="doctor" size="large" style={{ flex: 1 }} /></SafeAreaView>;
+  if (live.loading)
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Loader theme="doctor" size="large" style={{ flex: 1 }} />
+      </SafeAreaView>
+    );
   if (!appointment) return <MissingPatient />;
-  if (appointment.status === "confirmed") return <SafeAreaView style={styles.screen}>
-    <Heading>{appointment.patient_name}</Heading>
-    <Label>Start the scheduled consultation when the patient is ready.</Label>
-    <Button loading={start.isPending} theme="doctor" label="Start consultation" disabled={start.isPending} onPress={() => start.mutate()} />
-  </SafeAreaView>;
+  if (appointment.status === "confirmed")
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Heading>{appointment.patient_name}</Heading>
+        <Label>
+          Start the scheduled consultation when the patient is ready.
+        </Label>
+        <Button
+          loading={start.isPending}
+          theme="doctor"
+          label="Start consultation"
+          disabled={start.isPending}
+          onPress={() => start.mutate()}
+        />
+      </SafeAreaView>
+    );
   if (appointment.status !== "in_consultation") return <MissingPatient />;
-  if (!token.data) return <SafeAreaView style={styles.screen}>
-    <Heading>{appointment.patient_name}</Heading>
-    <Loader theme="doctor" size="large" />
-  </SafeAreaView>;
-  return <LiveKitRoom serverUrl={token.data.serverUrl} token={token.data.participantToken} connect audio video onError={error => showToast({ title: "Call connection failed", message: error.message, type: "error" })} onMediaDeviceFailure={() => showToast({ title: "Camera or microphone unavailable", message: "Check permissions. You can still use consultation chat.", type: "error" })}>
-    <LiveVideoStage appointmentId={appointmentId} patientName={appointment.patient_name} patientId={appointment.patient_id} initialChat={initialChat} />
-  </LiveKitRoom>;
+  if (!token.data)
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Heading>{appointment.patient_name}</Heading>
+        <Loader theme="doctor" size="large" />
+      </SafeAreaView>
+    );
+  return (
+    <LiveKitRoom
+      serverUrl={token.data.serverUrl}
+      token={token.data.participantToken}
+      connect
+      audio
+      video
+      onError={(error) =>
+        showToast({
+          title: "Call connection failed",
+          message: error.message,
+          type: "error",
+        })
+      }
+      onMediaDeviceFailure={() =>
+        showToast({
+          title: "Camera or microphone unavailable",
+          message: "Check permissions. You can still use consultation chat.",
+          type: "error",
+        })
+      }
+    >
+      <LiveVideoStage
+        appointmentId={appointmentId}
+        patientName={appointment.patient_name}
+        patientId={appointment.patient_id}
+        initialChat={initialChat}
+      />
+    </LiveKitRoom>
+  );
 }
 
-function LiveVideoStage({ appointmentId, patientName, patientId, initialChat }: { appointmentId: string; patientName: string; patientId: string; initialChat: boolean }) {
+function LiveVideoStage({
+  appointmentId,
+  patientName,
+  patientId,
+  initialChat,
+}: {
+  appointmentId: string;
+  patientName: string;
+  patientId: string;
+  initialChat: boolean;
+}) {
   const [ending, setEnding] = useState(false);
-  const back = () => router.canGoBack() ? router.back() : router.replace("/appointments");
-  return <View style={{ flex: 1 }}>
-    <LiveConsultationCall appointmentId={appointmentId} name={patientName} active initialChat={initialChat} onBack={back} onEnd={() => setEnding(true)} />
-    <ModalSurface visible={ending} onClose={() => setEnding(false)}>
-      <View style={{ gap: 16 }}><Heading>End call?</Heading><Label>Continue with clinical notes for {patientName}.</Label>
-        <Button theme="doctor" label="Continue to clinical notes" onPress={() => { setEnding(false); router.replace({ pathname: "/clinical-notes", params: { appointmentId, patientId, mode: "online" } }); }} />
-        <Button theme="doctor" variant="outline" label="Stay in call" onPress={() => setEnding(false)} />
-      </View>
-    </ModalSurface>
-  </View>;
+  const back = () =>
+    router.canGoBack() ? router.back() : router.replace("/appointments");
+  return (
+    <View style={{ flex: 1 }}>
+      <LiveConsultationCall
+        appointmentId={appointmentId}
+        name={patientName}
+        active
+        initialChat={initialChat}
+        onBack={back}
+        onEnd={() => setEnding(true)}
+      />
+      <ModalSurface visible={ending} onClose={() => setEnding(false)}>
+        <View style={{ gap: 16 }}>
+          <Heading>End call?</Heading>
+          <Label>Continue with clinical notes for {patientName}.</Label>
+          <Button
+            theme="doctor"
+            label="Continue to clinical notes"
+            onPress={() => {
+              setEnding(false);
+              router.replace({
+                pathname: "/clinical-notes",
+                params: { appointmentId, patientId, mode: "online" },
+              });
+            }}
+          />
+          <Button
+            theme="doctor"
+            variant="outline"
+            label="Stay in call"
+            onPress={() => setEnding(false)}
+          />
+        </View>
+      </ModalSurface>
+    </View>
+  );
 }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#CFEDEA", padding: 16 },
   liveScreen: { flex: 1, backgroundColor: "#CFEDEA" },
-  liveStage: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
-  liveHeader: { position: "absolute", top: 12, left: 16, right: 16, flexDirection: "row", alignItems: "center", gap: 12 },
-  liveSelf: { position: "absolute", right: 30, bottom: 150, width: 101, height: 131, backgroundColor: "#0A9E96", borderRadius: 26, alignItems: "center", justifyContent: "center", gap: 8 },
-  liveControls: { position: "absolute", left: 38, right: 38, bottom: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  liveStage: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  liveHeader: {
+    position: "absolute",
+    top: 12,
+    left: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  liveSelf: {
+    position: "absolute",
+    right: 30,
+    bottom: 150,
+    width: 101,
+    height: 131,
+    backgroundColor: "#0A9E96",
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  liveControls: {
+    position: "absolute",
+    left: 38,
+    right: 38,
+    bottom: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   liveDeviceError: { position: "absolute", left: 16, right: 16, bottom: 112 },
-  liveEndPanel: { position: "absolute", left: 16, right: 16, padding: 20, gap: 14, borderRadius: 18, backgroundColor: "white" },
+  liveEndPanel: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    padding: 20,
+    gap: 14,
+    borderRadius: 18,
+    backgroundColor: "white",
+  },
   stage: { flex: 1, alignItems: "center", justifyContent: "center" },
   self: {
     width: 100,

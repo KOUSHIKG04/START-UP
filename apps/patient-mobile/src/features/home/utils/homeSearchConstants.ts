@@ -48,9 +48,7 @@ export function filterSearchDirectory(query: string): SearchItem[] {
 
 export function findSearchItem(query: string): SearchItem | undefined {
   const trimmed = query.trim().toLowerCase();
-  return SEARCH_DIRECTORY.find(
-    (item) => item.title.toLowerCase() === trimmed
-  );
+  return SEARCH_DIRECTORY.find((item) => item.title.toLowerCase() === trimmed);
 }
 
 export function getDoctorResultsSearchRoute(

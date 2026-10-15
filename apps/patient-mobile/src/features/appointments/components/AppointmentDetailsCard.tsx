@@ -91,7 +91,9 @@ function DetailRow({
     <View style={[styles.row, last && styles.lastRow]}>
       <View style={styles.labelGroup}>
         {icon}
-        <Text variant="label" style={styles.label}>{label}</Text>
+        <Text variant="label" style={styles.label}>
+          {label}
+        </Text>
       </View>
       {typeof value === "string" ? (
         <Text variant="bodyEmphasis" numberOfLines={2} style={styles.value}>

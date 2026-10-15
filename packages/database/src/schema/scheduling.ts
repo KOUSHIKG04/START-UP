@@ -50,7 +50,9 @@ export const scheduleRule = clinzo
         }),
       version: integer("version").notNull(),
       family_id: uuid("family_id").notNull(),
-      service_mode: text("service_mode", { enum: ["clinic", "online", "home"] }).notNull().default("clinic"),
+      service_mode: text("service_mode", { enum: ["clinic", "online", "home"] })
+        .notNull()
+        .default("clinic"),
       fee_minor: integer("fee_minor").notNull().default(0),
       automatic: boolean("automatic").notNull().default(false),
       materialized_through: date("materialized_through", { mode: "string" }),
@@ -70,9 +72,17 @@ export const scheduleRule = clinzo
     },
     (table) => [
       uniqueIndex("schedule_rule_uq_1").on(table.family_id, table.version),
-      uniqueIndex("published_service_schedule_uq").on(table.doctor_facility_id, table.service_mode).where(sql`${table.state} = 'published' and ${table.automatic}`),
-      check("schedule_rule_fee_minor_check", sql`${table.fee_minor} between 0 and 100000000`),
-      check("schedule_rule_service_mode_check", sql`${table.service_mode} in ('clinic','online','home')`),
+      uniqueIndex("published_service_schedule_uq")
+        .on(table.doctor_facility_id, table.service_mode)
+        .where(sql`${table.state} = 'published' and ${table.automatic}`),
+      check(
+        "schedule_rule_fee_minor_check",
+        sql`${table.fee_minor} between 0 and 100000000`
+      ),
+      check(
+        "schedule_rule_service_mode_check",
+        sql`${table.service_mode} in ('clinic','online','home')`
+      ),
       index("schedule_rule_doctor_facility_id_idx").on(
         table.doctor_facility_id
       ),
@@ -170,7 +180,11 @@ export const scheduleException = clinzo
         mode: "date",
       }).notNull(),
       reason: text("reason").notNull(),
-      service_mode: text("service_mode", { enum: ["all", "clinic", "online", "home"] }).notNull().default("all"),
+      service_mode: text("service_mode", {
+        enum: ["all", "clinic", "online", "home"],
+      })
+        .notNull()
+        .default("all"),
       state: text("state", { enum: ["active", "revoked"] }).notNull(),
     },
     (table) => [
@@ -179,7 +193,10 @@ export const scheduleException = clinzo
         table.doctor_facility_id
       ),
       check("schedule_exception_ck_1", sql.raw("starts_at < ends_at")),
-      check("schedule_exception_service_mode_check", sql`${table.service_mode} in ('all','clinic','online','home')`),
+      check(
+        "schedule_exception_service_mode_check",
+        sql`${table.service_mode} in ('all','clinic','online','home')`
+      ),
       check("schedule_exception_ck_2", sql.raw("row_version > 0")),
       check(
         "schedule_exception_ck_3",

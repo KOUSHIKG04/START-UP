@@ -1,5 +1,10 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
 export function ActionButton({
@@ -24,7 +29,9 @@ export function ActionButton({
         pressed && styles.pressed,
       ]}
     >
-      <Text variant="button" style={styles.actionText}>{label}</Text>
+      <Text variant="button" style={styles.actionText}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

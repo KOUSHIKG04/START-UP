@@ -8,7 +8,11 @@ export type TextAreaProps = Omit<
   numberOfLines?: number;
 };
 
-export function TextArea({ numberOfLines = 5, style, ...props }: TextAreaProps) {
+export function TextArea({
+  numberOfLines = 5,
+  style,
+  ...props
+}: TextAreaProps) {
   return (
     <Input
       {...props}

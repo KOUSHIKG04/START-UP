@@ -45,7 +45,11 @@ export function HomeVisitAddress({
           <Text variant="cardHeading" style={styles.pinnedLocationTitle}>
             Verified visit location
           </Text>
-          <Text variant="body" numberOfLines={2} style={styles.pinnedLocationAddress}>
+          <Text
+            variant="body"
+            numberOfLines={2}
+            style={styles.pinnedLocationAddress}
+          >
             {verifiedAddress || "Add an address for the doctor’s visit"}
           </Text>
         </View>

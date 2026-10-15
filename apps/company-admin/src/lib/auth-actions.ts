@@ -22,18 +22,18 @@ export async function signIn(_state: { error: string | null }, form: FormData) {
   }
 
   const client = await createClient();
-  
+
   const { error } = await client.auth.signInWithPassword({ email, password });
-  
+
   if (error) return { error: "Sign-in failed. Check your credentials." };
-  
+
   const { data } = await client.rpc("is_company_reviewer");
-  
+
   if (data !== true) {
     await client.auth.signOut();
     return { error: "This account is not a company reviewer." };
   }
-  
+
   redirect("/verification");
 }
 

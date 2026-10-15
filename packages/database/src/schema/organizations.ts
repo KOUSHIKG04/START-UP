@@ -98,7 +98,9 @@ export const facility = clinzo
       active: boolean("active").notNull().default(true),
       verification_status: text("verification_status", {
         enum: ["pending", "verified", "suspended"],
-      }).notNull().default("pending"),
+      })
+        .notNull()
+        .default("pending"),
       registration_number: text("registration_number"),
       bed_service_declared: boolean("bed_service_declared"),
     },
@@ -108,10 +110,22 @@ export const facility = clinzo
       index("facility_location_geo_idx").using("gist", table.location),
       check("facility_ck_1", sql.raw("row_version > 0")),
       check("facility_ck_2", sql.raw("\"kind\" IN ('hospital', 'clinic')")),
-      check("facility_locality_length_ck", sql.raw("locality IS NULL OR length(locality) BETWEEN 2 AND 120")),
-      check("facility_city_length_ck", sql.raw("city IS NULL OR length(city) BETWEEN 2 AND 120")),
-      check("facility_state_length_ck", sql.raw("state IS NULL OR length(state) BETWEEN 2 AND 120")),
-      check("facility_pincode_format_ck", sql.raw("pincode IS NULL OR pincode ~ '^[0-9]{6}$'")),
+      check(
+        "facility_locality_length_ck",
+        sql.raw("locality IS NULL OR length(locality) BETWEEN 2 AND 120")
+      ),
+      check(
+        "facility_city_length_ck",
+        sql.raw("city IS NULL OR length(city) BETWEEN 2 AND 120")
+      ),
+      check(
+        "facility_state_length_ck",
+        sql.raw("state IS NULL OR length(state) BETWEEN 2 AND 120")
+      ),
+      check(
+        "facility_pincode_format_ck",
+        sql.raw("pincode IS NULL OR pincode ~ '^[0-9]{6}$'")
+      ),
     ]
   )
   .enableRLS();

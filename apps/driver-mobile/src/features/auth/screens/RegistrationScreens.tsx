@@ -11,7 +11,12 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, Button, Input, ProfilePhotoButton } from "@startup/mobile-ui";
+import {
+  SafeAreaView,
+  Button,
+  Input,
+  ProfilePhotoButton,
+} from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -207,18 +212,33 @@ export function DetailsScreen({
     setPicking(true);
     setError("");
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) { setError("Allow photo access to choose your profile picture."); return; }
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setError("Allow photo access to choose your profile picture.");
+        return;
+      }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.8,
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
       });
       if (!result.canceled) {
         const file = result.assets[0];
         if ((file.fileSize ?? 0) > 5 * 1024 * 1024)
           setError("Choose a profile photo smaller than 5 MB.");
-        else if (file.mimeType !== "image/jpeg" && file.mimeType !== "image/png")
+        else if (
+          file.mimeType !== "image/jpeg" &&
+          file.mimeType !== "image/png"
+        )
           setError("Choose a JPG or PNG photo.");
-        else setForm(old => ({ ...old, photo: file.uri, photoMimeType: file.mimeType as "image/jpeg" | "image/png" }));
+        else
+          setForm((old) => ({
+            ...old,
+            photo: file.uri,
+            photoMimeType: file.mimeType as "image/jpeg" | "image/png",
+          }));
       }
     } catch {
       setError("Could not open your photos. Please try again.");
@@ -239,15 +259,15 @@ export function DetailsScreen({
         "Enter a 10-digit mobile number, with an optional +91 prefix."
       );
     const birthIso = parseDisplayDate(form.dob);
-    const birthDate = birthIso ? new Date(`${birthIso}T12:00:00`) : new Date(NaN);
+    const birthDate = birthIso
+      ? new Date(`${birthIso}T12:00:00`)
+      : new Date(NaN);
     if (
       Number.isNaN(birthDate.getTime()) ||
       birthDate >= new Date() ||
       birthDate.getFullYear() < 1900
     )
-      return setError(
-        "Enter a valid date of birth, for example 14-06-1990."
-      );
+      return setError("Enter a valid date of birth, for example 14-06-1990.");
     if (!consent)
       return setError("Agree to verification and safety checks to continue.");
     setError("");
@@ -269,9 +289,14 @@ export function DetailsScreen({
         contentContainerStyle={s.detailsContent}
       >
         <View style={s.photoButton}>
-          <ProfilePhotoButton theme="driver" size={84} loading={picking} disabled={picking}
+          <ProfilePhotoButton
+            theme="driver"
+            size={84}
+            loading={picking}
+            disabled={picking}
             source={form.photo ? { uri: form.photo } : undefined}
-            onPress={() => void pickPhoto()} />
+            onPress={() => void pickPhoto()}
+          />
           <Text style={s.photoTitle}>
             {picking ? "Opening photos…" : "Add profile photo"}
           </Text>
@@ -315,13 +340,42 @@ export function DetailsScreen({
             style={s.input}
           />
           <View style={{ gap: 8 }}>
-            <Text style={{ fontFamily: fontFamilies.medium, fontSize: 14, color: "#172B34" }}>Address</Text>
-            <Button theme="driver" variant="outline"
-              style={{ height: 54, backgroundColor: "#FFFFFF", borderColor: "#D1D1D1", borderRadius: 12 }}
+            <Text
+              style={{
+                fontFamily: fontFamilies.medium,
+                fontSize: 14,
+                color: "#172B34",
+              }}
+            >
+              Address
+            </Text>
+            <Button
+              theme="driver"
+              variant="outline"
+              style={{
+                height: 54,
+                backgroundColor: "#FFFFFF",
+                borderColor: "#D1D1D1",
+                borderRadius: 12,
+              }}
               labelStyle={{ flexShrink: 1 }}
-              label={form.address ? [form.address.building, form.address.line1, form.address.city].filter(Boolean).join(", ") : "Add address"}
+              label={
+                form.address
+                  ? [
+                      form.address.building,
+                      form.address.line1,
+                      form.address.city,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "Add address"
+              }
               leftIcon={<MapPin size={18} color={teal} />}
-              onPress={() => { Keyboard.dismiss(); setAddressOpen(true); }} />
+              onPress={() => {
+                Keyboard.dismiss();
+                setAddressOpen(true);
+              }}
+            />
           </View>
         </View>
         <View style={s.bottomForm}>
@@ -338,7 +392,8 @@ export function DetailsScreen({
               I agree to verification and safety checks
             </Text>
           </Pressable>
-          <Button loading={saving}
+          <Button
+            loading={saving}
             theme="driver"
             label="Continue"
             disabled={saving}
@@ -346,12 +401,16 @@ export function DetailsScreen({
           />
         </View>
       </ScrollView>
-      <AddressSheet visible={addressOpen} value={form.address ?? emptyAddress}
-        onClose={() => setAddressOpen(false)} onReopen={() => setAddressOpen(true)}
-        onConfirm={address => {
-          setForm(current => ({ ...current, address, city: address.city }));
+      <AddressSheet
+        visible={addressOpen}
+        value={form.address ?? emptyAddress}
+        onClose={() => setAddressOpen(false)}
+        onReopen={() => setAddressOpen(true)}
+        onConfirm={(address) => {
+          setForm((current) => ({ ...current, address, city: address.city }));
           setAddressOpen(false);
-        }} />
+        }}
+      />
     </Frame>
   );
 }
@@ -485,7 +544,10 @@ export function DocumentsScreen({
         <Text style={s.sectionTitle}>Required documents</Text>
         <View style={s.documentGrid}>
           {documentTypes.map((doc) => (
-            <Button loading={picking === doc.name} variant="ghost" label={doc.name}
+            <Button
+              loading={picking === doc.name}
+              variant="ghost"
+              label={doc.name}
               key={doc.name}
               onPress={() => pick(doc)}
               disabled={picking !== null}
@@ -517,7 +579,8 @@ export function DocumentsScreen({
           PDF, JPG or PNG up to 10 MB. Photos must be JPG or PNG.
         </Text>
         <View style={s.documentFooter}>
-          <Button loading={submitting}
+          <Button
+            loading={submitting}
             theme="driver"
             label="Submit for Verification"
             disabled={picking !== null || submitting}

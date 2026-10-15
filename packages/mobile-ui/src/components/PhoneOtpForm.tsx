@@ -55,7 +55,8 @@ export function PhoneOtpForm({
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
-      <Text variant="screenTitle"
+      <Text
+        variant="screenTitle"
         accessibilityRole="header"
         style={[styles.title, { color: theme.text }]}
       >
@@ -91,7 +92,8 @@ export function PhoneOtpForm({
       ) : null}
       {sent ? (
         <>
-          <Button loading={busy}
+          <Button
+            loading={busy}
             label="Verify and continue"
             disabled={busy || !!configurationError}
             onPress={() => void handleVerify()}
@@ -108,7 +110,8 @@ export function PhoneOtpForm({
           />
         </>
       ) : (
-        <Button loading={busy}
+        <Button
+          loading={busy}
           label="Send sign-in code"
           disabled={busy || !!configurationError}
           onPress={() => void handleSend()}

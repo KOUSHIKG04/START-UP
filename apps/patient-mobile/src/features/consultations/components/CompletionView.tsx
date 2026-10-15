@@ -43,13 +43,23 @@ export function CompletionView({
   onSubmitRating,
 }: CompletionViewProps) {
   const insets = useSafeAreaInsets();
-  const [rating, setRating] = useState<number | undefined>(existingRating ?? undefined);
-  const [ratingSubmitted, setRatingSubmitted] = useState(existingRating != null);
+  const [rating, setRating] = useState<number | undefined>(
+    existingRating ?? undefined
+  );
+  const [ratingSubmitted, setRatingSubmitted] = useState(
+    existingRating != null
+  );
   const [submitting, setSubmitting] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const submitRating = async (comment?: string) => {
-    if (rating === undefined || ratingSubmitted || !onSubmitRating || submitting) return;
+    if (
+      rating === undefined ||
+      ratingSubmitted ||
+      !onSubmitRating ||
+      submitting
+    )
+      return;
     setSubmitting(true);
     try {
       await onSubmitRating(rating, comment);
@@ -84,12 +94,20 @@ export function CompletionView({
                 <HeroIcon color={colors.white} size={50} strokeWidth={1.8} />
               </View>
               <View style={styles.completionCheckBadge}>
-                <CheckCircle2 color={colors.white} size={32} strokeWidth={2.5} />
+                <CheckCircle2
+                  color={colors.white}
+                  size={32}
+                  strokeWidth={2.5}
+                />
               </View>
             </View>
           </View>
-          <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
-          <Text variant="cardHeading" style={styles.completedTitle}>{completionCopy}</Text>
+          <Text variant="cardHeading" style={styles.thankYouTitle}>
+            Thank you!
+          </Text>
+          <Text variant="cardHeading" style={styles.completedTitle}>
+            {completionCopy}
+          </Text>
           <Text variant="body" style={styles.centeredDescription}>
             {appointment.doctorName} has completed your consultation.
           </Text>
@@ -124,7 +142,11 @@ export function CompletionView({
               />
             </View>
             <View style={styles.orderMedicineNotice}>
-              <AlertCircle color={colors.patient.primary} size={16} strokeWidth={2} />
+              <AlertCircle
+                color={colors.patient.primary}
+                size={16}
+                strokeWidth={2}
+              />
               <Text variant="body" style={styles.orderMedicineNoticeText}>
                 Order medicine will work once we start operations.
               </Text>
@@ -134,66 +156,80 @@ export function CompletionView({
           <View style={styles.recordsBanner}>
             <FileText color={colors.patient.primaryDark} size={23} />
             <Text variant="body" style={styles.infoText}>
-              Prescription and consultation notes have been sent to your email and are available in records.
+              Prescription and consultation notes have been sent to your email
+              and are available in records.
             </Text>
           </View>
         )}
       </View>
 
       <View style={styles.bottomSection}>
-        {onSubmitRating ? <Card
-          variant="outlined"
-          backgroundColor="#E8F8F4"
-          borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
-          gap={12}
-          padding={16}
-          style={styles.experienceCard}
-        >
-          <Text variant="cardHeading" style={styles.feedbackTitle}>Rate your doctor</Text>
-          {/* <Text style={styles.feedbackDescription}>
+        {onSubmitRating ? (
+          <Card
+            variant="outlined"
+            backgroundColor="#E8F8F4"
+            borderRadius={radius.md}
+            borderWidth={1}
+            borderColor="#E0E5EB"
+            gap={12}
+            padding={16}
+            style={styles.experienceCard}
+          >
+            <Text variant="cardHeading" style={styles.feedbackTitle}>
+              Rate your doctor
+            </Text>
+            {/* <Text style={styles.feedbackDescription}>
             Your feedback helps us improve
           </Text> */}
-          <View style={styles.ratingRow}>
-            {experienceRatings.map((item, index) => (
-              <Pressable
-                key={item.label}
-                accessibilityLabel={`${index + 1} out of 5, ${item.label}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: rating === index + 1 }}
-                disabled={ratingSubmitted || submitting}
-                onPress={() => setRating(index + 1)}
-                style={({ pressed }) => [
-                  styles.ratingButton,
-                  rating === index + 1 ? styles.selectedRating : undefined,
-                  pressed ? styles.pressed : undefined,
-                ]}
-              >
-                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>{item.emoji}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {!ratingSubmitted ? (
-            <Button loading={submitting}
-              label="Submit"
-              variant="outline"
-              disabled={rating === undefined || submitting}
-              onPress={() => void submitRating().catch(() => {})}
-              style={[
-                styles.experienceSubmitButton,
-                rating !== undefined && styles.experienceSubmitButtonActive,
-              ]}
-              labelStyle={styles.experienceSubmitLabel}
-            />
-          ) : (
-            <View style={styles.ratingSubmittedConfirmation}>
-              <CheckCircle2 color={colors.patient.primaryDark} size={16} strokeWidth={2.4} />
-              <Text variant="bodyEmphasis" style={styles.ratingSubmittedText}>Rating saved. Thank you!</Text>
+            <View style={styles.ratingRow}>
+              {experienceRatings.map((item, index) => (
+                <Pressable
+                  key={item.label}
+                  accessibilityLabel={`${index + 1} out of 5, ${item.label}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: rating === index + 1 }}
+                  disabled={ratingSubmitted || submitting}
+                  onPress={() => setRating(index + 1)}
+                  style={({ pressed }) => [
+                    styles.ratingButton,
+                    rating === index + 1 ? styles.selectedRating : undefined,
+                    pressed ? styles.pressed : undefined,
+                  ]}
+                >
+                  <Text variant="bodyEmphasis" style={styles.ratingEmoji}>
+                    {item.emoji}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
-          )}
-        </Card> : null}
+
+            {!ratingSubmitted ? (
+              <Button
+                loading={submitting}
+                label="Submit"
+                variant="outline"
+                disabled={rating === undefined || submitting}
+                onPress={() => void submitRating().catch(() => {})}
+                style={[
+                  styles.experienceSubmitButton,
+                  rating !== undefined && styles.experienceSubmitButtonActive,
+                ]}
+                labelStyle={styles.experienceSubmitLabel}
+              />
+            ) : (
+              <View style={styles.ratingSubmittedConfirmation}>
+                <CheckCircle2
+                  color={colors.patient.primaryDark}
+                  size={16}
+                  strokeWidth={2.4}
+                />
+                <Text variant="bodyEmphasis" style={styles.ratingSubmittedText}>
+                  Rating saved. Thank you!
+                </Text>
+              </View>
+            )}
+          </Card>
+        ) : null}
 
         <View style={styles.completionActionsRow}>
           <Button
@@ -202,14 +238,18 @@ export function CompletionView({
             style={styles.completionSideButton}
             labelStyle={styles.completionSideButtonLabel}
           />
-          {onSubmitRating && !ratingSubmitted ? <Button
-            label="Share Detailed Feedback"
-            onPress={() => { if (rating !== undefined) setFeedbackOpen(true); }}
-            disabled={rating === undefined || submitting}
-            style={styles.completionSideButton}
-            labelStyle={styles.completionSideButtonLabel}
-            variant="outline"
-          /> : null}
+          {onSubmitRating && !ratingSubmitted ? (
+            <Button
+              label="Share Detailed Feedback"
+              onPress={() => {
+                if (rating !== undefined) setFeedbackOpen(true);
+              }}
+              disabled={rating === undefined || submitting}
+              style={styles.completionSideButton}
+              labelStyle={styles.completionSideButtonLabel}
+              variant="outline"
+            />
+          ) : null}
         </View>
       </View>
 
@@ -236,19 +276,27 @@ function ConsultationSummary({ appointment }: { appointment: Appointment }) {
     >
       <View style={styles.summaryHeading}>
         <ClipboardList color={colors.patient.primaryDark} size={20} />
-        <Text variant="cardHeading" style={styles.cardTitle}>Consultation Summary</Text>
+        <Text variant="cardHeading" style={styles.cardTitle}>
+          Consultation Summary
+        </Text>
       </View>
       <View style={styles.summaryRow}>
         <View style={styles.summaryLabel}>
           <UserRound color={colors.patient.primaryDark} size={18} />
-          <Text variant="body" style={styles.secondaryText}>Doctor</Text>
+          <Text variant="body" style={styles.secondaryText}>
+            Doctor
+          </Text>
         </View>
-        <Text variant="bodyEmphasis" style={styles.summaryValue}>{appointment.doctorName}</Text>
+        <Text variant="bodyEmphasis" style={styles.summaryValue}>
+          {appointment.doctorName}
+        </Text>
       </View>
       <View style={styles.summaryRow}>
         <View style={styles.summaryLabel}>
           <CalendarDays color={colors.patient.primaryDark} size={18} />
-          <Text variant="body" style={styles.secondaryText}>Date & Time</Text>
+          <Text variant="body" style={styles.secondaryText}>
+            Date & Time
+          </Text>
         </View>
         <Text variant="bodyEmphasis" style={styles.summaryValue}>
           {appointment.date}, {appointment.time.split(" – ")[0]}

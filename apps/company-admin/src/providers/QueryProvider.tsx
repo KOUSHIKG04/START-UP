@@ -19,6 +19,6 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   const client = isServer
     ? createQueryClient()
     : (browserClient ??= createQueryClient());
-    
+
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }

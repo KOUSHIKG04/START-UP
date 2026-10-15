@@ -41,7 +41,12 @@ import {
 import { canGeocodeAddress } from "../../features/locations/geocoding";
 import { getDoctorDeviceLocation } from "../../features/locations/deviceLocation";
 
-type Place = { latitude: number; longitude: number; addressLabel: string; mapPlace?: MapPlace };
+type Place = {
+  latitude: number;
+  longitude: number;
+  addressLabel: string;
+  mapPlace?: MapPlace;
+};
 
 export default function SelectLocationScreen() {
   const { profile } = useMobileSession();
@@ -50,7 +55,12 @@ export default function SelectLocationScreen() {
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<Place[]>([]);
   const searchVersion = useRef(0);
-  useEffect(() => () => { searchVersion.current += 1; }, []);
+  useEffect(
+    () => () => {
+      searchVersion.current += 1;
+    },
+    []
+  );
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
@@ -103,11 +113,26 @@ export default function SelectLocationScreen() {
     const query = search.trim();
     try {
       if (supabase) {
-        const result = await searchMapPlaces(supabase, { query, ...(devicePosition ?? {}) });
+        const result = await searchMapPlaces(supabase, {
+          query,
+          ...(devicePosition ?? {}),
+        });
         if (request !== searchVersion.current) return;
         if (result.configured) {
-          setMatches(result.places.map(place => ({ latitude: place.latitude, longitude: place.longitude, addressLabel: place.address, mapPlace: place })));
-          if (!result.places.length) showToast({ title: "No locations found", message: "Try the area and city or a more specific address.", type: "info" });
+          setMatches(
+            result.places.map((place) => ({
+              latitude: place.latitude,
+              longitude: place.longitude,
+              addressLabel: place.address,
+              mapPlace: place,
+            }))
+          );
+          if (!result.places.length)
+            showToast({
+              title: "No locations found",
+              message: "Try the area and city or a more specific address.",
+              type: "info",
+            });
           return;
         }
       }
@@ -141,11 +166,15 @@ export default function SelectLocationScreen() {
           type: "info",
         });
     } catch (cause) {
-      if (request === searchVersion.current) showToast({
-        title: "Location search unavailable",
-        message: cause instanceof Error ? cause.message : "Try again or use your current location.",
-        type: "error",
-      });
+      if (request === searchVersion.current)
+        showToast({
+          title: "Location search unavailable",
+          message:
+            cause instanceof Error
+              ? cause.message
+              : "Try again or use your current location.",
+          type: "error",
+        });
     } finally {
       setBusy(false);
       setPendingAction(null);
@@ -168,7 +197,10 @@ export default function SelectLocationScreen() {
     } catch (cause) {
       showToast({
         title: "Could not use current location",
-        message: cause instanceof Error ? cause.message : "Try again or add an address.",
+        message:
+          cause instanceof Error
+            ? cause.message
+            : "Try again or add an address.",
         type: "error",
       });
     } finally {
@@ -262,7 +294,11 @@ export default function SelectLocationScreen() {
               variant="unstyled"
               accessibilityLabel="Search an area or address"
               value={search}
-              onChangeText={value => { searchVersion.current += 1; setSearch(value); setMatches([]); }}
+              onChangeText={(value) => {
+                searchVersion.current += 1;
+                setSearch(value);
+                setMatches([]);
+              }}
               onSubmitEditing={() => void searchPlaces()}
               returnKeyType="search"
               placeholder="Search an area or address"
@@ -291,9 +327,7 @@ export default function SelectLocationScreen() {
               accessibilityRole="button"
               onPress={() => void useCurrentLocation()}
               style={styles.action}
-              leftIcon={
-                <LocateFixed size={20} color={colors.doctor.primary} />
-              }
+              leftIcon={<LocateFixed size={20} color={colors.doctor.primary} />}
             />
             <Button
               label="Add New Address"
@@ -320,7 +354,9 @@ export default function SelectLocationScreen() {
                         params: {
                           latitude: String(place.latitude),
                           longitude: String(place.longitude),
-                          ...(place.mapPlace ? { place: JSON.stringify(place.mapPlace) } : {}),
+                          ...(place.mapPlace
+                            ? { place: JSON.stringify(place.mapPlace) }
+                            : {}),
                         },
                       })
                     }
@@ -337,8 +373,19 @@ export default function SelectLocationScreen() {
                   </Pressable>
                 ))}
               </View>
-              {matches.some(place => place.mapPlace) ? <Text style={styles.helper}>Google Maps</Text> : null}
-              {matches.flatMap(place => place.mapPlace?.attributions ?? []).map((attribution, index) => <Text key={`${attribution.provider}-${index}`} style={styles.helper}>{attribution.provider}</Text>)}
+              {matches.some((place) => place.mapPlace) ? (
+                <Text style={styles.helper}>Google Maps</Text>
+              ) : null}
+              {matches
+                .flatMap((place) => place.mapPlace?.attributions ?? [])
+                .map((attribution, index) => (
+                  <Text
+                    key={`${attribution.provider}-${index}`}
+                    style={styles.helper}
+                  >
+                    {attribution.provider}
+                  </Text>
+                ))}
             </View>
           ) : null}
           <View style={styles.section}>

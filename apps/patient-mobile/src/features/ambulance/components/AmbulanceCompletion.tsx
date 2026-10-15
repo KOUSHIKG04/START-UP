@@ -32,7 +32,9 @@ export function AmbulanceCompletion({
   onSubmitRating: (rating: number) => Promise<void>;
 }) {
   const [rating, setRating] = useState<number>();
-  const [ratingSubmitted, setRatingSubmitted] = useState(booking.review_rating !== null);
+  const [ratingSubmitted, setRatingSubmitted] = useState(
+    booking.review_rating !== null
+  );
   const [ratingPending, setRatingPending] = useState(false);
   const [ratingError, setRatingError] = useState("");
   useToastFeedback({ error: ratingError });
@@ -45,7 +47,9 @@ export function AmbulanceCompletion({
       await onSubmitRating(rating + 1);
       setRatingSubmitted(true);
     } catch (cause) {
-      setRatingError(cause instanceof Error ? cause.message : "Could not submit rating.");
+      setRatingError(
+        cause instanceof Error ? cause.message : "Could not submit rating."
+      );
     } finally {
       setRatingPending(false);
     }
@@ -66,16 +70,23 @@ export function AmbulanceCompletion({
                 <Ambulance color={colors.white} size={50} strokeWidth={1.8} />
               </View>
               <View style={styles.completionCheckBadge}>
-                <CheckCircle2 color={colors.white} size={32} strokeWidth={2.5} />
+                <CheckCircle2
+                  color={colors.white}
+                  size={32}
+                  strokeWidth={2.5}
+                />
               </View>
             </View>
           </View>
-          <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
+          <Text variant="cardHeading" style={styles.thankYouTitle}>
+            Thank you!
+          </Text>
           <Text variant="cardHeading" style={styles.completedTitle}>
             Your Ambulance Journey is Completed
           </Text>
           <Text variant="body" style={styles.centeredDescription}>
-            Your trip to {booking.destination_address ?? "the destination"} is complete.
+            Your trip to {booking.destination_address ?? "the destination"} is
+            complete.
           </Text>
         </View>
 
@@ -92,41 +103,58 @@ export function AmbulanceCompletion({
         >
           <View style={styles.summaryHeading}>
             <ClipboardList color={colors.patient.primaryDark} size={20} />
-            <Text variant="cardHeading" style={styles.cardTitle}>Emergency Handover Summary</Text>
+            <Text variant="cardHeading" style={styles.cardTitle}>
+              Emergency Handover Summary
+            </Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <Building2 color={colors.patient.primaryDark} size={18} />
-              <Text variant="body" style={styles.secondaryText}>Hospital</Text>
+              <Text variant="body" style={styles.secondaryText}>
+                Hospital
+              </Text>
             </View>
-            <Text variant="bodyEmphasis" style={styles.summaryValue}>{booking.destination_address ?? "Destination unavailable"}</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValue}>
+              {booking.destination_address ?? "Destination unavailable"}
+            </Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <UserRound color={colors.patient.primaryDark} size={18} />
-              <Text variant="body" style={styles.secondaryText}>Driver</Text>
+              <Text variant="body" style={styles.secondaryText}>
+                Driver
+              </Text>
             </View>
             <Text variant="bodyEmphasis" style={styles.summaryValue}>
-              {booking.driver_name ?? "Driver details unavailable"} ({booking.vehicle_registration ?? "Vehicle unavailable"})
+              {booking.driver_name ?? "Driver details unavailable"} (
+              {booking.vehicle_registration ?? "Vehicle unavailable"})
             </Text>
           </View>
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryLabel}>
               <ShieldCheck color={colors.patient.primaryDark} size={18} />
-              <Text variant="body" style={styles.secondaryText}>Service</Text>
+              <Text variant="body" style={styles.secondaryText}>
+                Service
+              </Text>
             </View>
-            <Text variant="bodyEmphasis" style={styles.summaryValue}>{booking.capability_code}</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValue}>
+              {booking.capability_code}
+            </Text>
           </View>
 
           <View style={styles.summaryRowLast}>
             <View style={styles.summaryLabel}>
               <ReceiptText color={colors.patient.primaryDark} size={18} />
-              <Text variant="body" style={styles.secondaryText}>Total Fare</Text>
+              <Text variant="body" style={styles.secondaryText}>
+                Total Fare
+              </Text>
             </View>
-            <Text variant="bodyEmphasis" style={styles.summaryValueTotal}>Fare pending</Text>
+            <Text variant="bodyEmphasis" style={styles.summaryValueTotal}>
+              Fare pending
+            </Text>
           </View>
         </Card>
       </View>
@@ -143,7 +171,9 @@ export function AmbulanceCompletion({
           padding={16}
           style={styles.experienceCard}
         >
-          <Text variant="cardHeading" style={styles.feedbackTitle}>How was your experience?</Text>
+          <Text variant="cardHeading" style={styles.feedbackTitle}>
+            How was your experience?
+          </Text>
           <View style={styles.ratingRow}>
             {experienceRatings.map((item, index) => (
               <Pressable
@@ -159,13 +189,16 @@ export function AmbulanceCompletion({
                   pressed ? styles.pressed : undefined,
                 ]}
               >
-                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>{item.emoji}</Text>
+                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>
+                  {item.emoji}
+                </Text>
               </Pressable>
             ))}
           </View>
 
           {!ratingSubmitted ? (
-            <Button loading={ratingPending}
+            <Button
+              loading={ratingPending}
               label="Submit"
               variant="outline"
               disabled={rating === undefined || ratingPending}

@@ -21,31 +21,42 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
         style={[styles.centeredCard, styles.flatCard]}
       >
         <View style={styles.queueHeading}>
-          <Text variant="cardHeading" style={styles.queueTitle}>You are in queue</Text>
+          <Text variant="cardHeading" style={styles.queueTitle}>
+            You are in queue
+          </Text>
           <View style={styles.liveBadge}>
             <View style={styles.liveDot} />
-            <Text variant="body" style={styles.liveText}>LIVE</Text>
-          </View>
-        </View>
-
-      
-
-        <View style={styles.queueStatsRow}>
-          <View style={styles.queueStatBox}>
-            <Text variant="label" style={styles.statPanelLabel}>TOKEN NUMBER</Text>
-
-            <Text variant="bodyEmphasis" style={styles.statBigNumber}>7</Text>
-          </View>
-
-          <View style={styles.queueStatBox}>
-            <Text variant="label" style={styles.statPanelLabel}>ESTIMATED TIME</Text>
-            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
-              37<Text variant="caption" style={styles.waitTimeUnit}>MIN.</Text>
+            <Text variant="body" style={styles.liveText}>
+              LIVE
             </Text>
           </View>
         </View>
 
-          <View style={styles.peopleAheadSection}>
+        <View style={styles.queueStatsRow}>
+          <View style={styles.queueStatBox}>
+            <Text variant="label" style={styles.statPanelLabel}>
+              TOKEN NUMBER
+            </Text>
+
+            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
+              7
+            </Text>
+          </View>
+
+          <View style={styles.queueStatBox}>
+            <Text variant="label" style={styles.statPanelLabel}>
+              ESTIMATED TIME
+            </Text>
+            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
+              37
+              <Text variant="caption" style={styles.waitTimeUnit}>
+                MIN.
+              </Text>
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.peopleAheadSection}>
           <View style={styles.peopleAvatarsRow}>
             {[1, 2, 3, 4, 5].map((id) => (
               <View key={id} style={styles.avatarCircle}>
@@ -58,7 +69,9 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
               </View>
             ))}
             <View style={styles.plusCircle}>
-              <Text variant="body" style={styles.plusCircleText}>+2</Text>
+              <Text variant="body" style={styles.plusCircleText}>
+                +2
+              </Text>
             </View>
           </View>
         </View>

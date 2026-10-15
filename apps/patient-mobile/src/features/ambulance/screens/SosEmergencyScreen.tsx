@@ -35,32 +35,50 @@ export function SosEmergencyScreen({
           <View style={s.sirenCircle}>
             <Siren color="#FFFFFF" size={20} />
           </View>
-          <Text variant="screenTitle" style={s.headerTitle}>EMERGENCY ACTIVATED</Text>
+          <Text variant="screenTitle" style={s.headerTitle}>
+            EMERGENCY ACTIVATED
+          </Text>
         </View>
 
         <View style={s.content}>
           <View style={s.driverCard}>
             <View style={s.driverTop}>
               <View style={s.avatar}>
-                <Text variant="body" style={s.avatarText}>SN</Text>
+                <Text variant="body" style={s.avatarText}>
+                  SN
+                </Text>
               </View>
               <View style={s.driverCopy}>
-                <Text variant="body" style={s.driverName}>Suresh Nair</Text>
-                <Text variant="body" style={s.driverMeta}>KA02CD5678 • BLS Ambulance</Text>
+                <Text variant="body" style={s.driverName}>
+                  Suresh Nair
+                </Text>
+                <Text variant="body" style={s.driverMeta}>
+                  KA02CD5678 • BLS Ambulance
+                </Text>
               </View>
               <View style={s.rating}>
                 <Star color="#C0392B" size={11} />
-                <Text variant="bodyEmphasis" style={s.ratingText}>4.6</Text>
+                <Text variant="bodyEmphasis" style={s.ratingText}>
+                  4.6
+                </Text>
               </View>
             </View>
             <View style={s.etaRow}>
               <View>
-                <Text variant="caption" style={s.caption}>DISTANCE</Text>
-                <Text variant="bodyEmphasis" style={s.etaValue}>5.1 km</Text>
+                <Text variant="caption" style={s.caption}>
+                  DISTANCE
+                </Text>
+                <Text variant="bodyEmphasis" style={s.etaValue}>
+                  5.1 km
+                </Text>
               </View>
               <View>
-                <Text variant="caption" style={s.caption}>TRAFFIC ETA</Text>
-                <Text variant="bodyEmphasis" style={s.etaValue}>8 mins away</Text>
+                <Text variant="caption" style={s.caption}>
+                  TRAFFIC ETA
+                </Text>
+                <Text variant="bodyEmphasis" style={s.etaValue}>
+                  8 mins away
+                </Text>
               </View>
             </View>
             <DarkButton
@@ -71,18 +89,32 @@ export function SosEmergencyScreen({
           </View>
 
           <View style={s.hospitalCard}>
-            <Text variant="caption" style={s.hospitalBadge}>NEAREST EMERGENCY HOSPITAL</Text>
-            <Text variant="cardHeading" style={s.hospitalName}>Victoria Government Hospital</Text>
+            <Text variant="caption" style={s.hospitalBadge}>
+              NEAREST EMERGENCY HOSPITAL
+            </Text>
+            <Text variant="cardHeading" style={s.hospitalName}>
+              Victoria Government Hospital
+            </Text>
             <Text variant="body" style={s.hospitalAddress}>
               Ft. Victoria Rd, Shivajinagar, Bengaluru
             </Text>
             <View style={s.capacityPill}>
               <View style={s.openDot} />
-              <Text variant="body" style={s.capacityStrong}>ER Open</Text>
-              <Text variant="body" style={s.capacityText}>•</Text>
-              <Text variant="body" style={s.capacityText}>200 Beds Available</Text>
-              <Text variant="body" style={s.capacityText}>•</Text>
-              <Text variant="body" style={s.capacityText}>~1 min drive</Text>
+              <Text variant="body" style={s.capacityStrong}>
+                ER Open
+              </Text>
+              <Text variant="body" style={s.capacityText}>
+                •
+              </Text>
+              <Text variant="body" style={s.capacityText}>
+                200 Beds Available
+              </Text>
+              <Text variant="body" style={s.capacityText}>
+                •
+              </Text>
+              <Text variant="body" style={s.capacityText}>
+                ~1 min drive
+              </Text>
             </View>
             <View style={s.hospitalActions}>
               <DarkButton
@@ -93,7 +125,9 @@ export function SosEmergencyScreen({
               />
               <Pressable style={s.directionButton}>
                 <ArrowRight color="#0C2434" size={15} />
-                <Text variant="body" style={s.directionText}>Directions</Text>
+                <Text variant="body" style={s.directionText}>
+                  Directions
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -119,7 +153,9 @@ export function SosEmergencyScreen({
             onPress={onCancel}
             style={({ pressed }) => [s.cancel, pressed && s.pressed]}
           >
-            <Text variant="body" style={s.cancelText}>I'm Safe — Cancel Emergency</Text>
+            <Text variant="body" style={s.cancelText}>
+              I'm Safe — Cancel Emergency
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -137,8 +173,12 @@ function ActivatingSos() {
           </View>
         </View>
       </View>
-      <Text variant="cardHeading" style={s.activationTitle}>EMERGENCY ACTIVATED</Text>
-      <Text variant="body" style={s.activationCopy}>Getting your precise location...</Text>
+      <Text variant="cardHeading" style={s.activationTitle}>
+        EMERGENCY ACTIVATED
+      </Text>
+      <Text variant="body" style={s.activationCopy}>
+        Getting your precise location...
+      </Text>
     </LinearGradient>
   );
 }
@@ -164,7 +204,9 @@ function DarkButton({
       ]}
     >
       {icon}
-      <Text variant="button" style={s.darkButtonText}>{label}</Text>
+      <Text variant="button" style={s.darkButtonText}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -175,7 +217,9 @@ function Hotline({ label, onPress }: { label: string; onPress: () => void }) {
       onPress={onPress}
       style={({ pressed }) => [s.hotline, pressed && s.pressed]}
     >
-      <Text variant="body" style={s.hotlineText}>{label}</Text>
+      <Text variant="body" style={s.hotlineText}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

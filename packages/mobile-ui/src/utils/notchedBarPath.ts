@@ -13,9 +13,9 @@ export function getNotchedBarPath(width: number, height: number): string {
   const shoulder = 18;
 
   const leftShoulderStart = cx - notchRadius - shoulder; // cx - 50
-  const leftNotchTop = cx - notchRadius + 2;             // cx - 34
-  const rightNotchTop = cx + notchRadius - 2;            // cx + 34
-  const rightShoulderEnd = cx + notchRadius + shoulder;  // cx + 50
+  const leftNotchTop = cx - notchRadius + 2; // cx - 34
+  const rightNotchTop = cx + notchRadius - 2; // cx + 34
+  const rightShoulderEnd = cx + notchRadius + shoulder; // cx + 50
 
   return [
     `M ${r} 0`,

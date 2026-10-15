@@ -22,7 +22,10 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
               pressed ? styles.pressed : undefined,
             ]}
           >
-            <Text variant="label" style={[styles.tabLabel, selected && styles.activeTabLabel]}>
+            <Text
+              variant="label"
+              style={[styles.tabLabel, selected && styles.activeTabLabel]}
+            >
               {label}
             </Text>
           </Pressable>

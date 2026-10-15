@@ -32,10 +32,7 @@ export function HomeVisitScreen() {
     }
   };
   return (
-    <DoctorScreen
-      title="Home visit"
-      bottomNav={false}
-    >
+    <DoctorScreen title="Home visit" bottomNav={false}>
       <Image
         source={require("../../../../assets/figma/map.png")}
         accessibilityLabel="Reference map showing the home visit area in Bengaluru"
@@ -87,7 +84,8 @@ export function HomeVisitScreen() {
         </Heading>
         <View style={ui.row}>
           {[0, 1, 2, 3].map((index) => (
-            <Input variant="unstyled"
+            <Input
+              variant="unstyled"
               key={index}
               ref={(ref) => {
                 inputs.current[index] = ref;

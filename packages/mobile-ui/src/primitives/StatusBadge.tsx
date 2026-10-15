@@ -1,5 +1,12 @@
 import { AppText as Text } from "./AppText";
-import { StyleSheet, View, type StyleProp, type TextStyle, type ViewProps, type ViewStyle } from "react-native";
+import {
+  StyleSheet,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewProps,
+  type ViewStyle,
+} from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type StatusBadgeProps = ViewProps & {

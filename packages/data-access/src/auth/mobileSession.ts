@@ -44,7 +44,10 @@ export function createMobileSession(client: AppSupabaseClient | null) {
     // first sign-in, account switches and retries; preserve settled same-user
     // navigation during ordinary background refreshes.
     emit({
-      loading: state.loading || !sameAccount || (Boolean(state.error) && !state.profile),
+      loading:
+        state.loading ||
+        !sameAccount ||
+        (Boolean(state.error) && !state.profile),
       session,
       profile: sameAccount ? state.profile : null,
       error: null,
@@ -123,7 +126,14 @@ export function createMobileSession(client: AppSupabaseClient | null) {
         await refresh(data.session);
       } catch (error) {
         if (sessionVersion !== version) return;
-        emit({ ...state, loading: false, error: error instanceof Error ? error.message : "Could not restore your session." });
+        emit({
+          ...state,
+          loading: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Could not restore your session.",
+        });
       }
     },
   };

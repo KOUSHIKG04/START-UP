@@ -2,7 +2,13 @@ import { AppText as Text } from "../primitives/AppText";
 import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, StyleSheet, View, type TextStyle, type ViewProps } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type TextStyle,
+  type ViewProps,
+} from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { colors, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
@@ -97,7 +103,8 @@ export function Header({
               ]}
             >
               {title ? (
-                <Text variant="screenTitle"
+                <Text
+                  variant="screenTitle"
                   numberOfLines={readable ? 2 : 1}
                   style={[
                     styles.title,

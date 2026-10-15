@@ -1,6 +1,11 @@
 import { View, Pressable } from "react-native";
 import type { ReactNode } from "react";
-import { Button, Input, ClockTimePicker, FadedScrollView } from "@startup/mobile-ui";
+import {
+  Button,
+  Input,
+  ClockTimePicker,
+  FadedScrollView,
+} from "@startup/mobile-ui";
 import { Heading, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { UnavailableDatePicker } from "./UnavailableDatePicker";
@@ -9,11 +14,19 @@ import {
   type ClinicUnavailability,
 } from "@startup/contracts";
 
-export function ScheduleSection({ title, children }: { title: string; children: ReactNode }) {
-  return <View style={{ gap: 8 }}>
-    <Heading style={{ fontSize: 14 }}>{title}</Heading>
-    <Panel>{children}</Panel>
-  </View>;
+export function ScheduleSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Heading style={{ fontSize: 14 }}>{title}</Heading>
+      <Panel>{children}</Panel>
+    </View>
+  );
 }
 
 export function UnavailableTimePanel({
@@ -53,7 +66,12 @@ export function UnavailableTimePanel({
 }) {
   return (
     <>
-      <UnavailableDatePicker value={leaveDate} onChange={onLeaveDateChange} timeZone={timeZone} disabled={busy} />
+      <UnavailableDatePicker
+        value={leaveDate}
+        onChange={onLeaveDateChange}
+        timeZone={timeZone}
+        disabled={busy}
+      />
       <View style={ui.row}>
         <ClockTimePicker
           theme="doctor"
@@ -136,7 +154,9 @@ export function ConsultationChargesPanel({
 }) {
   return (
     <ScheduleSection title="Consultation Charges">
-      <Label muted style={{ fontSize: 12 }}>Set your appointment fee.</Label>
+      <Label muted style={{ fontSize: 12 }}>
+        Set your appointment fee.
+      </Label>
       {(
         [
           ["Online Consultation", "onlineFee"],
@@ -179,8 +199,14 @@ export function WorkingDaysPanel({
 }) {
   return (
     <ScheduleSection title="Working Days">
-      <Label muted style={{ fontSize: 12 }}>Select your working days.</Label>
-      <FadedScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+      <Label muted style={{ fontSize: 12 }}>
+        Select your working days.
+      </Label>
+      <FadedScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+      >
         {[
           "Monday",
           "Tuesday",
@@ -201,7 +227,9 @@ export function WorkingDaysPanel({
               height: 64,
               borderRadius: 14,
               borderWidth: 1,
-              borderColor: selectedDays.includes(index) ? palette.dark : "#D2D2D2",
+              borderColor: selectedDays.includes(index)
+                ? palette.dark
+                : "#D2D2D2",
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: selectedDays.includes(index)
@@ -212,7 +240,9 @@ export function WorkingDaysPanel({
             <Label
               style={{
                 fontSize: 13,
-                color: selectedDays.includes(index) ? palette.white : palette.text,
+                color: selectedDays.includes(index)
+                  ? palette.white
+                  : palette.text,
               }}
             >
               {day.slice(0, 3)}
@@ -237,7 +267,9 @@ export function ClinicHoursPanel({
 }) {
   return (
     <ScheduleSection title={title}>
-      <Label muted style={{ fontSize: 12 }}>Set your start and end times.</Label>
+      <Label muted style={{ fontSize: 12 }}>
+        Set your start and end times.
+      </Label>
       <View style={ui.row}>
         <ClockTimePicker
           theme="doctor"

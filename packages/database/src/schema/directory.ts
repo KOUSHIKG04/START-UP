@@ -282,64 +282,131 @@ export const doctorFacility = clinzo
 export type DoctorFacility = typeof doctorFacility.$inferSelect;
 export type NewDoctorFacility = typeof doctorFacility.$inferInsert;
 
-export const doctorFacilityRequest = clinzo.table("doctor_facility_request", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  doctor_id: uuid("doctor_id").notNull().references(() => doctor.id, { onDelete: "restrict" }),
-  facility_id: uuid("facility_id").notNull().references(() => facility.id, { onDelete: "restrict" }),
-  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
-  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  reviewed_at: timestamp("reviewed_at", { withTimezone: true }),
-  reviewed_by: uuid("reviewed_by").references(() => identity.id),
-  rejection_reason: text("rejection_reason"),
-  initiated_by: text("initiated_by", { enum: ["doctor", "facility"] }).notNull().default("doctor"),
-}, table => [
-  unique("doctor_facility_request_unique").on(table.doctor_id, table.facility_id),
-  index("doctor_facility_request_facility_pending_idx").on(table.facility_id, table.created_at).where(sql`status = 'pending'`),
-  check("doctor_facility_request_rejection_ck", sql`status <> 'rejected' OR length(trim(coalesce(rejection_reason,''))) BETWEEN 5 AND 500`),
-]).enableRLS();
+export const doctorFacilityRequest = clinzo
+  .table(
+    "doctor_facility_request",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      doctor_id: uuid("doctor_id")
+        .notNull()
+        .references(() => doctor.id, { onDelete: "restrict" }),
+      facility_id: uuid("facility_id")
+        .notNull()
+        .references(() => facility.id, { onDelete: "restrict" }),
+      status: text("status", { enum: ["pending", "approved", "rejected"] })
+        .notNull()
+        .default("pending"),
+      created_at: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+      updated_at: timestamp("updated_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+      reviewed_at: timestamp("reviewed_at", { withTimezone: true }),
+      reviewed_by: uuid("reviewed_by").references(() => identity.id),
+      rejection_reason: text("rejection_reason"),
+      initiated_by: text("initiated_by", { enum: ["doctor", "facility"] })
+        .notNull()
+        .default("doctor"),
+    },
+    (table) => [
+      unique("doctor_facility_request_unique").on(
+        table.doctor_id,
+        table.facility_id
+      ),
+      index("doctor_facility_request_facility_pending_idx")
+        .on(table.facility_id, table.created_at)
+        .where(sql`status = 'pending'`),
+      check(
+        "doctor_facility_request_rejection_ck",
+        sql`status <> 'rejected' OR length(trim(coalesce(rejection_reason,''))) BETWEEN 5 AND 500`
+      ),
+    ]
+  )
+  .enableRLS();
 export type DoctorFacilityRequest = typeof doctorFacilityRequest.$inferSelect;
 
-export const doctorPresence = clinzo.table("doctor_presence", {
-  doctor_id: uuid("doctor_id").primaryKey().references((): AnyPgColumn => doctor.id, { onDelete: "restrict" }),
-  present: boolean("present").notNull().default(false),
-  changed_at: timestamp("changed_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-}).enableRLS();
+export const doctorPresence = clinzo
+  .table("doctor_presence", {
+    doctor_id: uuid("doctor_id")
+      .primaryKey()
+      .references((): AnyPgColumn => doctor.id, { onDelete: "restrict" }),
+    present: boolean("present").notNull().default(false),
+    changed_at: timestamp("changed_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  })
+  .enableRLS();
 
-export const doctorSchedulePreferences = clinzo.table("doctor_schedule_preferences", {
-  doctor_facility_id: uuid("doctor_facility_id").primaryKey().references((): AnyPgColumn => doctorFacility.id, { onDelete: "restrict" }),
-  working_days: smallint("working_days").array().notNull(),
-  online_working_days: smallint("online_working_days").array().notNull().default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
-  home_working_days: smallint("home_working_days").array().notNull().default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
-  online_auto_accept: boolean("online_auto_accept").notNull().default(false),
-  home_auto_accept: boolean("home_auto_accept").notNull().default(false),
-  online_auto_accept_limit: smallint("online_auto_accept_limit").notNull().default(0),
-  home_auto_accept_limit: smallint("home_auto_accept_limit").notNull().default(0),
-  clinic_start: time("clinic_start").notNull(),
-  clinic_end: time("clinic_end").notNull(),
-  online_start: time("online_start").notNull().default("13:00"),
-  online_end: time("online_end").notNull().default("15:00"),
-  home_start: time("home_start").notNull().default("16:00"),
-  home_end: time("home_end").notNull().default("17:00"),
-  slot_minutes: smallint("slot_minutes").notNull(),
-  online_slot_minutes: smallint("online_slot_minutes").notNull(),
-  home_slot_minutes: smallint("home_slot_minutes").notNull(),
-  online_daily_limit: smallint("online_daily_limit").notNull(),
-  walkin_daily_limit: smallint("walkin_daily_limit").notNull(),
-  auto_accept: boolean("auto_accept").notNull().default(false),
-  auto_accept_limit: smallint("auto_accept_limit").notNull().default(0),
-  home_visits: boolean("home_visits").notNull().default(false),
-  home_radius_km: numeric("home_radius_km", { precision: 6, scale: 2 }),
-  online_fee_minor: integer("online_fee_minor"),
-  clinic_fee_minor: integer("clinic_fee_minor").notNull(),
-  home_fee_minor: integer("home_fee_minor"),
-  row_version: bigint("row_version", { mode: "bigint" }).notNull().default(sql`1`),
-  updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-}, (table) => [
-  check("schedule_service_days_check", sql`cardinality(${table.online_working_days}) between 1 and 7 and cardinality(${table.home_working_days}) between 1 and 7 and ${table.online_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[] and ${table.home_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[]`),
-  check("schedule_service_hours_check", sql`${table.online_start} < ${table.online_end} and ${table.home_start} < ${table.home_end}`),
-  check("schedule_service_approval_limits_check", sql`${table.online_auto_accept_limit} between 0 and 100 and ${table.home_auto_accept_limit} between 0 and 100`),
-]).enableRLS();
+export const doctorSchedulePreferences = clinzo
+  .table(
+    "doctor_schedule_preferences",
+    {
+      doctor_facility_id: uuid("doctor_facility_id")
+        .primaryKey()
+        .references((): AnyPgColumn => doctorFacility.id, {
+          onDelete: "restrict",
+        }),
+      working_days: smallint("working_days").array().notNull(),
+      online_working_days: smallint("online_working_days")
+        .array()
+        .notNull()
+        .default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
+      home_working_days: smallint("home_working_days")
+        .array()
+        .notNull()
+        .default(sql`ARRAY[1,2,3,4,5]::smallint[]`),
+      online_auto_accept: boolean("online_auto_accept")
+        .notNull()
+        .default(false),
+      home_auto_accept: boolean("home_auto_accept").notNull().default(false),
+      online_auto_accept_limit: smallint("online_auto_accept_limit")
+        .notNull()
+        .default(0),
+      home_auto_accept_limit: smallint("home_auto_accept_limit")
+        .notNull()
+        .default(0),
+      clinic_start: time("clinic_start").notNull(),
+      clinic_end: time("clinic_end").notNull(),
+      online_start: time("online_start").notNull().default("13:00"),
+      online_end: time("online_end").notNull().default("15:00"),
+      home_start: time("home_start").notNull().default("16:00"),
+      home_end: time("home_end").notNull().default("17:00"),
+      slot_minutes: smallint("slot_minutes").notNull(),
+      online_slot_minutes: smallint("online_slot_minutes").notNull(),
+      home_slot_minutes: smallint("home_slot_minutes").notNull(),
+      online_daily_limit: smallint("online_daily_limit").notNull(),
+      walkin_daily_limit: smallint("walkin_daily_limit").notNull(),
+      auto_accept: boolean("auto_accept").notNull().default(false),
+      auto_accept_limit: smallint("auto_accept_limit").notNull().default(0),
+      home_visits: boolean("home_visits").notNull().default(false),
+      home_radius_km: numeric("home_radius_km", { precision: 6, scale: 2 }),
+      online_fee_minor: integer("online_fee_minor"),
+      clinic_fee_minor: integer("clinic_fee_minor").notNull(),
+      home_fee_minor: integer("home_fee_minor"),
+      row_version: bigint("row_version", { mode: "bigint" })
+        .notNull()
+        .default(sql`1`),
+      updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+    },
+    (table) => [
+      check(
+        "schedule_service_days_check",
+        sql`cardinality(${table.online_working_days}) between 1 and 7 and cardinality(${table.home_working_days}) between 1 and 7 and ${table.online_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[] and ${table.home_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[]`
+      ),
+      check(
+        "schedule_service_hours_check",
+        sql`${table.online_start} < ${table.online_end} and ${table.home_start} < ${table.home_end}`
+      ),
+      check(
+        "schedule_service_approval_limits_check",
+        sql`${table.online_auto_accept_limit} between 0 and 100 and ${table.home_auto_accept_limit} between 0 and 100`
+      ),
+    ]
+  )
+  .enableRLS();
 
 export const practiceService = clinzo
   .table(

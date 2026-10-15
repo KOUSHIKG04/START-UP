@@ -98,7 +98,7 @@ export function HospitalSettingsScreen() {
       getMyVerificationCase(supabase!, "doctor", sessionProfile!.doctor!.id),
     enabled: Boolean(supabase && sessionProfile?.doctor?.id),
   });
-  
+
   const [openingPractice, setOpeningPractice] = useState<string | null>(null);
   async function manageSchedule(practiceId: string) {
     if (!sessionProfile?.doctor?.id || openingPractice) return;

@@ -20,14 +20,13 @@ export function DocumentActions({
   approvalLabel?: string;
   canApprove?: boolean;
 }) {
-
   const [state, action, pending] = useActionState(
     reviewDocument.bind(null, caseId, documentId),
     { error: null, success: null }
   );
 
   useReviewToast(state);
-  
+
   return (
     <form action={action} className="mt-4 flex flex-wrap items-end gap-3">
       <div className="min-w-[220px] flex-1 space-y-1">
@@ -49,7 +48,11 @@ export function DocumentActions({
       >
         Reject
       </Button>
-      <Button name="decision" value="approved" disabled={pending || !canApprove}>
+      <Button
+        name="decision"
+        value="approved"
+        disabled={pending || !canApprove}
+      >
         {approvalLabel}
       </Button>
     </form>
@@ -127,7 +130,13 @@ function Field({
   return (
     <div className="space-y-1">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} placeholder={placeholder} required={required} />
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        required={required}
+      />
     </div>
   );
 }

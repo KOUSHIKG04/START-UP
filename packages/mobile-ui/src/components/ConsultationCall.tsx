@@ -1,6 +1,16 @@
 import { AppText as Text } from "../primitives/AppText";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ActivityIndicator, Animated, FlatList, KeyboardAvoidingView, PanResponder, Platform, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Animated,
+  FlatList,
+  KeyboardAvoidingView,
+  PanResponder,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Camera,
@@ -282,7 +292,10 @@ export function ConsultationCall(props: ConsultationCallProps) {
                       : styles.received,
                   ]}
                 >
-                  <Text variant="body" style={[styles.message, { color: palette.text }]}>
+                  <Text
+                    variant="body"
+                    style={[styles.message, { color: palette.text }]}
+                  >
                     {item.body}
                   </Text>
                   <Text variant="caption" style={styles.time}>

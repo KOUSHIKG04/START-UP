@@ -1,7 +1,14 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Keyboard, Platform, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import Constants from "expo-constants";
 import * as Location from "expo-location";
@@ -70,9 +77,18 @@ export default function PickLocationScreen() {
   const pointRef = useRef<Point | null>(initialPoint);
   const initialPlace = useMemo(() => {
     try {
-      const result = mapPlaceSchema.safeParse(JSON.parse(first(params.place) ?? "null"));
-      return result.success && initialPoint && result.data.latitude === initialPoint.latitude && result.data.longitude === initialPoint.longitude ? result.data : null;
-    } catch { return null; }
+      const result = mapPlaceSchema.safeParse(
+        JSON.parse(first(params.place) ?? "null")
+      );
+      return result.success &&
+        initialPoint &&
+        result.data.latitude === initialPoint.latitude &&
+        result.data.longitude === initialPoint.longitude
+        ? result.data
+        : null;
+    } catch {
+      return null;
+    }
   }, [params.place, initialPoint]);
   const selectedPlace = useRef<MapPlace | null>(initialPlace);
   const operation = useRef(0);
@@ -113,7 +129,12 @@ export default function PickLocationScreen() {
   }, []);
 
   const onMapLoaded = useCallback(() => {
-    if (pointRef.current) googleMapRef.current?.setCameraPosition({ coordinates: pointRef.current, zoom: 16, duration: 0 });
+    if (pointRef.current)
+      googleMapRef.current?.setCameraPosition({
+        coordinates: pointRef.current,
+        zoom: 16,
+        duration: 0,
+      });
   }, []);
 
   function moveCamera(next: Point) {
@@ -273,11 +294,16 @@ export default function PickLocationScreen() {
     setAddressLabel("");
     const timer = setTimeout(() => {
       void resolvePatientAddress(point, () => active)
-        .then(address => {
+        .then((address) => {
           if (!active) return;
           setAddressLabel(address.address);
-          setDetails({ street: address.street, locality: address.locality,
-            city: address.city, state: address.state, pincode: address.pincode });
+          setDetails({
+            street: address.street,
+            locality: address.locality,
+            city: address.city,
+            state: address.state,
+            pincode: address.pincode,
+          });
         })
         .catch((cause: unknown) => {
           if (active) {
@@ -285,7 +311,10 @@ export default function PickLocationScreen() {
             setAddressLabel("");
             showToast({
               title: "Could not fill this address",
-              message: cause instanceof Error ? cause.message : "Retry the lookup or enter the address manually.",
+              message:
+                cause instanceof Error
+                  ? cause.message
+                  : "Retry the lookup or enter the address manually.",
               type: "error",
             });
           }
@@ -341,7 +370,10 @@ export default function PickLocationScreen() {
   const onCameraMove = useCallback(
     (event: { coordinates: { latitude?: number; longitude?: number } }) => {
       if (!mapTouched.current) return;
-      const next = validPoint(event.coordinates.latitude, event.coordinates.longitude);
+      const next = validPoint(
+        event.coordinates.latitude,
+        event.coordinates.longitude
+      );
       if (!next) return;
       if (cameraMoveTimer.current) clearTimeout(cameraMoveTimer.current);
       // Native maps emit an event on every frame. Resolve the address once the
@@ -402,7 +434,8 @@ export default function PickLocationScreen() {
               ref={googleMapRef}
               style={styles.map}
               cameraPosition={cameraPosition}
-              onMapLoaded={onMapLoaded} onCameraMove={onCameraMove}
+              onMapLoaded={onMapLoaded}
+              onCameraMove={onCameraMove}
               onMapClick={onMapClick}
             />
           ) : null}
@@ -465,20 +498,31 @@ export default function PickLocationScreen() {
                 >
                   <MapPin size={18} color={colors.patient.primary} />
                   <View style={styles.resultCopy}>
-                    <Text variant="body" numberOfLines={1} style={styles.resultName}>
+                    <Text
+                      variant="body"
+                      numberOfLines={1}
+                      style={styles.resultName}
+                    >
                       {result.name}
                     </Text>
-                    <Text variant="body" numberOfLines={2} style={styles.resultAddress}>
+                    <Text
+                      variant="body"
+                      numberOfLines={2}
+                      style={styles.resultAddress}
+                    >
                       {result.address}
                     </Text>
                   </View>
                 </Pressable>
               ))}
-              <Text variant="body" style={styles.googleAttribution}>Google Maps</Text>
+              <Text variant="body" style={styles.googleAttribution}>
+                Google Maps
+              </Text>
               {searchResults
                 .flatMap((p) => p.attributions)
                 .map((a, i) => (
-                  <Text variant="body"
+                  <Text
+                    variant="body"
                     key={`${a.provider}-${i}`}
                     style={styles.googleAttribution}
                   >
@@ -506,7 +550,11 @@ export default function PickLocationScreen() {
           {point ? (
             <View style={styles.place}>
               <MapPin size={20} color={colors.patient.primary} />
-              <Text variant="cardHeading" style={styles.placeTitle} numberOfLines={2}>
+              <Text
+                variant="cardHeading"
+                style={styles.placeTitle}
+                numberOfLines={2}
+              >
                 {placeLabel || "Selected map point"}
               </Text>
             </View>

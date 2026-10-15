@@ -34,7 +34,18 @@ function EmailConfirmationNotice({
         confirmation link. Open it, then return here and sign in to create your
         patient profile.
       </Text>
-      <Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>} label="Back to sign in" onPress={onBackToSignIn} />
+      <Button
+        theme="patient"
+        style={onboardingButtonStyles.button}
+        labelStyle={onboardingButtonStyles.label}
+        rightIcon={
+          <Text variant="button" style={onboardingButtonStyles.label}>
+            ›
+          </Text>
+        }
+        label="Back to sign in"
+        onPress={onBackToSignIn}
+      />
     </>
   );
 }
@@ -65,7 +76,8 @@ function EmailCredentialsForm({
 
   return (
     <>
-      <Input variant="unstyled"
+      <Input
+        variant="unstyled"
         accessibilityLabel="Email"
         autoCapitalize="none"
         autoComplete="email"
@@ -76,7 +88,8 @@ function EmailCredentialsForm({
         style={styles.input}
         editable={!busy}
       />
-      <Input variant="unstyled"
+      <Input
+        variant="unstyled"
         accessibilityLabel="Password"
         autoComplete={isSignUp ? "new-password" : "password"}
         secureTextEntry
@@ -87,7 +100,8 @@ function EmailCredentialsForm({
         editable={!busy}
       />
       {isSignUp ? (
-        <Input variant="unstyled"
+        <Input
+          variant="unstyled"
           accessibilityLabel="Confirm password"
           autoComplete="new-password"
           secureTextEntry
@@ -98,7 +112,16 @@ function EmailCredentialsForm({
           editable={!busy}
         />
       ) : null}
-      <Button loading={busy} theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>}
+      <Button
+        loading={busy}
+        theme="patient"
+        style={onboardingButtonStyles.button}
+        labelStyle={onboardingButtonStyles.label}
+        rightIcon={
+          <Text variant="button" style={onboardingButtonStyles.label}>
+            ›
+          </Text>
+        }
         label={submitLabel}
         disabled={isSubmitDisabled}
         onPress={onSubmit}
@@ -122,7 +145,9 @@ export function DevEmailAuthForm(props: DevEmailAuthFormProps) {
   if (props.confirmationPending) {
     return (
       <View style={styles.form}>
-        <Text variant="cardHeading" style={styles.formHeading}>Check your email</Text>
+        <Text variant="cardHeading" style={styles.formHeading}>
+          Check your email
+        </Text>
         <EmailConfirmationNotice
           email={props.email}
           onBackToSignIn={props.onBackToSignIn}

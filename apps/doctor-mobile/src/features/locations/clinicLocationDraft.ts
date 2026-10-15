@@ -15,4 +15,8 @@ export const useClinicLocationDraft = create<{
   chosen: ClinicMapLocation | null;
   choose: (chosen: ClinicMapLocation) => void;
   clear: () => void;
-}>((set) => ({ chosen: null, choose: chosen => set({ chosen }), clear: () => set({ chosen: null }) }));
+}>((set) => ({
+  chosen: null,
+  choose: (chosen) => set({ chosen }),
+  clear: () => set({ chosen: null }),
+}));

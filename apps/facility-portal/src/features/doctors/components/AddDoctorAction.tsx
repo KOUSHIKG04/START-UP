@@ -15,7 +15,7 @@ export function AddDoctorAction() {
       />
       <Button
         onClick={() => setIsAddDoctorOpen(true)}
-        className="bg-[#07595d] hover:bg-[#064e52] text-white text-[12px] font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+        className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#07595d] px-4 py-2 text-[12px] font-bold text-white shadow-xs transition-colors hover:bg-[#064e52]"
       >
         <span>Add new Doctor</span>
         <Plus className="size-4 stroke-[2.5]" />

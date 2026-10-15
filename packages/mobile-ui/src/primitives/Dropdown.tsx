@@ -2,7 +2,17 @@ import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import { memo, useCallback, useRef, useState, type ReactNode } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, View, useWindowDimensions, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
@@ -66,7 +76,8 @@ function calculateMenuPosition({
   if (!triggerPosition) return { menuTop: 0, menuLeft: 12, targetWidth: 160 };
 
   const shouldOpenAbove =
-    triggerPosition.y + triggerPosition.height + MENU_GAP + menuHeight > windowHeight;
+    triggerPosition.y + triggerPosition.height + MENU_GAP + menuHeight >
+    windowHeight;
   const menuTop = shouldOpenAbove
     ? Math.max(MENU_GAP, triggerPosition.y - menuHeight - MENU_GAP)
     : triggerPosition.y + triggerPosition.height + MENU_GAP;
@@ -116,7 +127,8 @@ const DropdownOptionRow = memo(function DropdownOptionRow({
         option.disabled && styles.optionDisabled,
       ]}
     >
-      <Text variant="body"
+      <Text
+        variant="body"
         numberOfLines={1}
         style={[
           styles.optionLabel,
@@ -131,11 +143,7 @@ const DropdownOptionRow = memo(function DropdownOptionRow({
         {option.label}
       </Text>
       {isSelected ? (
-        <Check
-          color={primaryColor}
-          size={16}
-          strokeWidth={2.4}
-        />
+        <Check color={primaryColor} size={16} strokeWidth={2.4} />
       ) : null}
     </Pressable>
   );
@@ -193,7 +201,7 @@ export function Dropdown({
       onValueChange(option.value);
       closeMenu();
     },
-    [onValueChange],
+    [onValueChange]
   );
 
   const { menuTop, menuLeft, targetWidth } = calculateMenuPosition({
@@ -224,7 +232,7 @@ export function Dropdown({
       themeColors.primaryText,
       themeColors.primary,
       selectOption,
-    ],
+    ]
   );
 
   const displayValue =
@@ -235,7 +243,11 @@ export function Dropdown({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text variant="label" style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text variant="label" style={styles.label}>
+          {label}
+        </Text>
+      ) : null}
 
       <Pressable
         ref={triggerRef}
@@ -259,7 +271,8 @@ export function Dropdown({
         ]}
       >
         {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
-        <Text variant="body"
+        <Text
+          variant="body"
           numberOfLines={1}
           style={[
             styles.value,
@@ -288,9 +301,14 @@ export function Dropdown({
         )}
       </Pressable>
 
-      {error ? <Text variant="label" style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text variant="label" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
 
-      <ModalSurface layout="custom"
+      <ModalSurface
+        layout="custom"
         animationType="fade"
         onClose={closeMenu}
         statusBarTranslucent
@@ -301,7 +319,10 @@ export function Dropdown({
           <Pressable
             accessibilityLabel="Close options"
             onPress={closeMenu}
-            style={[styles.backdrop, backdropColor ? { backgroundColor: backdropColor } : undefined]}
+            style={[
+              styles.backdrop,
+              backdropColor ? { backgroundColor: backdropColor } : undefined,
+            ]}
           />
 
           {triggerPosition ? (

@@ -45,7 +45,12 @@ export function ProfileScreen() {
     queryFn: () => listMyAmbulanceFleet(supabase!),
     enabled: Boolean(supabase && profile?.driver?.id),
   });
-  useToastFeedback({ error: fleet.isError || driver.isError ? "Could not load your partner details." : "" });
+  useToastFeedback({
+    error:
+      fleet.isError || driver.isError
+        ? "Could not load your partner details."
+        : "",
+  });
 
   const photo = useQuery({
     queryKey: ["my-driver-photo", driver.data?.profile_photo_path],
@@ -94,10 +99,20 @@ export function ProfileScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["driver-fleet", profile?.driver?.id],
       });
-      showToast({ title: value ? "You are available" : "You are offline", type: "success" });
+      showToast({
+        title: value ? "You are available" : "You are offline",
+        type: "success",
+      });
     } catch (cause) {
-      const feedback = cause instanceof Error ? cause.message : "Could not update availability.";
-      showToast({ title: "Availability update failed", message: feedback, type: "error" });
+      const feedback =
+        cause instanceof Error
+          ? cause.message
+          : "Could not update availability.";
+      showToast({
+        title: "Availability update failed",
+        message: feedback,
+        type: "error",
+      });
     } finally {
       setBusy(false);
     }

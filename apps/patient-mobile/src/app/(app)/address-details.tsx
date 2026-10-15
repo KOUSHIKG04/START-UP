@@ -2,7 +2,14 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -217,7 +224,8 @@ export default function AddressDetailsScreen() {
                         kind === value ? colors.white : colors.patient.text
                       }
                     />
-                    <Text variant="bodyEmphasis"
+                    <Text
+                      variant="bodyEmphasis"
                       style={[
                         styles.kindText,
                         kind === value && styles.kindTextSelected,
@@ -280,7 +288,9 @@ export default function AddressDetailsScreen() {
                   style={styles.change}
                 >
                   <MapPin size={18} color={colors.patient.primary} />
-                  <Text variant="body" style={styles.changeText}>Change</Text>
+                  <Text variant="body" style={styles.changeText}>
+                    Change
+                  </Text>
                 </Pressable>
               </View>
               <View style={styles.split}>

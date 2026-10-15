@@ -51,7 +51,7 @@ export function VirtualList<T>({
       ref={parentRef}
       className={cn(
         "relative w-full overflow-auto rounded-xl border border-[#e2e8f0] bg-white shadow-2xs",
-        className,
+        className
       )}
       style={{ height }}
     >

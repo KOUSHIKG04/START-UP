@@ -6,7 +6,14 @@ import {
   getMyDoctorProfile,
   updateMyDoctorProfile,
 } from "@startup/data-access";
-import { Button, Input, SafeAreaView, Skeleton, useToast, useToastFeedback } from "@startup/mobile-ui";
+import {
+  Button,
+  Input,
+  SafeAreaView,
+  Skeleton,
+  useToast,
+  useToastFeedback,
+} from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
 import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
 
@@ -44,13 +51,21 @@ export function LiveDoctorProfileScreen() {
       setEditing(false);
       await client.invalidateQueries({ queryKey: ["my-doctor-profile"] });
     },
-    onError: (error) => { showToast({ title: "Could not save profile", message: error.message, type: "error" }); },
+    onError: (error) => {
+      showToast({
+        title: "Could not save profile",
+        message: error.message,
+        type: "error",
+      });
+    },
   });
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Doctor profile</Text>
-        {profile.isLoading ? <Skeleton theme="doctor" height={120} radius={12} /> : null}
+        {profile.isLoading ? (
+          <Skeleton theme="doctor" height={120} radius={12} />
+        ) : null}
         {profile.data ? (
           <>
             <Text>Status: {profile.data.credential_status}</Text>
@@ -58,23 +73,62 @@ export function LiveDoctorProfileScreen() {
               Registration: {profile.data.registration_authority} ·{" "}
               {profile.data.registration_number}
             </Text>
-            <Text>Practicing since {formatDisplayDate(profile.data.practice_started_on)}</Text>
+            <Text>
+              Practicing since{" "}
+              {formatDisplayDate(profile.data.practice_started_on)}
+            </Text>
             <Text>
               Specialties:{" "}
               {profile.data.specialties.map((item) => item.name).join(", ") ||
                 "Awaiting verified specialty assignment"}
             </Text>
-            {editing ? <>
-              <Input label="Full name" value={name} onChangeText={setName} />
-              <Input label="Bio" value={bio} onChangeText={setBio} multiline />
-              <Input label="Languages (codes separated by commas)" value={languages} onChangeText={setLanguages} placeholder="en, hi" />
-              <Button loading={save.isPending} label={save.isPending ? "Saving…" : "Save profile"} disabled={save.isPending} onPress={() => save.mutate()} />
-              <Button label="Cancel" variant="outline" disabled={save.isPending} onPress={() => { if (profile.data) { setName(profile.data.full_name); setBio(profile.data.bio ?? ""); setLanguages(profile.data.languages.join(", ")); } setEditing(false); }} />
-            </> : <>
-              <Text>{profile.data.bio || "Add a bio to introduce yourself to patients."}</Text>
-              <Text>Languages: {profile.data.languages.join(", ") || "Not added"}</Text>
-              <Button label="Edit profile" onPress={() => setEditing(true)} />
-            </>}
+            {editing ? (
+              <>
+                <Input label="Full name" value={name} onChangeText={setName} />
+                <Input
+                  label="Bio"
+                  value={bio}
+                  onChangeText={setBio}
+                  multiline
+                />
+                <Input
+                  label="Languages (codes separated by commas)"
+                  value={languages}
+                  onChangeText={setLanguages}
+                  placeholder="en, hi"
+                />
+                <Button
+                  loading={save.isPending}
+                  label={save.isPending ? "Saving…" : "Save profile"}
+                  disabled={save.isPending}
+                  onPress={() => save.mutate()}
+                />
+                <Button
+                  label="Cancel"
+                  variant="outline"
+                  disabled={save.isPending}
+                  onPress={() => {
+                    if (profile.data) {
+                      setName(profile.data.full_name);
+                      setBio(profile.data.bio ?? "");
+                      setLanguages(profile.data.languages.join(", "));
+                    }
+                    setEditing(false);
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <Text>
+                  {profile.data.bio ||
+                    "Add a bio to introduce yourself to patients."}
+                </Text>
+                <Text>
+                  Languages: {profile.data.languages.join(", ") || "Not added"}
+                </Text>
+                <Button label="Edit profile" onPress={() => setEditing(true)} />
+              </>
+            )}
             <Text style={styles.subtitle}>Associated facilities</Text>
             {profile.data.facilities.map((facility) => (
               <View key={facility.practice_id} style={styles.card}>

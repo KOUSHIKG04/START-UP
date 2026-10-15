@@ -15,9 +15,11 @@ import {
 import { supabase, useMobileSession } from "../../../services/supabase";
 
 export default function AddFamilyScreen() {
-  useFocusEffect(useCallback(() => {
-    setStatusBarStyle("dark");
-  }, []));
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, [])
+  );
   const { profile } = useMobileSession();
 
   const familyQuery = useQuery({
@@ -30,7 +32,11 @@ export default function AddFamilyScreen() {
 
   return (
     <OnboardingShell
-      onBack={() => router.canGoBack() ? router.back() : router.replace("/(app)/(tabs)/profile")}
+      onBack={() =>
+        router.canGoBack()
+          ? router.back()
+          : router.replace("/(app)/(tabs)/profile")
+      }
       bottomArt={false}
       scroll
     >
@@ -38,7 +44,9 @@ export default function AddFamilyScreen() {
         <View style={styles.topSection}>
           <View style={styles.header}>
             <View style={styles.titleRow}>
-              <Text variant="cardHeading" style={styles.title}>Add Family Members</Text>
+              <Text variant="cardHeading" style={styles.title}>
+                Add Family Members
+              </Text>
               <View style={styles.iconWrap}>
                 <Users
                   size={24}
@@ -57,7 +65,9 @@ export default function AddFamilyScreen() {
                     <UserRound size={18} color={colors.white} strokeWidth={2} />
                   </View>
                   <View style={styles.memberInfo}>
-                    <Text variant="body" style={styles.memberName}>{member.full_name}</Text>
+                    <Text variant="body" style={styles.memberName}>
+                      {member.full_name}
+                    </Text>
                     <Text variant="body" style={styles.memberMeta}>
                       {member.relation}
                       {member.age_years !== null
@@ -66,10 +76,21 @@ export default function AddFamilyScreen() {
                       {member.blood_group ? ` · ${member.blood_group}` : ""}
                     </Text>
                   </View>
-                  {member.can_edit ? <Button theme="patient" variant="outline" label="Edit"
-                    style={{ backgroundColor: colors.white }}
-                    accessibilityLabel={`Edit ${member.full_name}`}
-                    onPress={() => router.push({ pathname: "/(app)/add-family-member", params: { memberId: member.id } })} /> : null}
+                  {member.can_edit ? (
+                    <Button
+                      theme="patient"
+                      variant="outline"
+                      label="Edit"
+                      style={{ backgroundColor: colors.white }}
+                      accessibilityLabel={`Edit ${member.full_name}`}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(app)/add-family-member",
+                          params: { memberId: member.id },
+                        })
+                      }
+                    />
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -86,7 +107,9 @@ export default function AddFamilyScreen() {
               color={colors.patient.primaryDark}
               strokeWidth={1.8}
             />
-            <Text variant="body" style={styles.addText}>Add Family Member</Text>
+            <Text variant="body" style={styles.addText}>
+              Add Family Member
+            </Text>
             <Plus
               size={22}
               color={colors.patient.primaryDark}
@@ -100,7 +123,11 @@ export default function AddFamilyScreen() {
             theme="patient"
             style={onboardingButtonStyles.button}
             labelStyle={onboardingButtonStyles.label}
-            rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>}
+            rightIcon={
+              <Text variant="button" style={onboardingButtonStyles.label}>
+                ›
+              </Text>
+            }
             label={familyMembers.length > 0 ? "Continue" : "Skip and Continue"}
             onPress={() => router.replace("/(app)/(tabs)")}
           />

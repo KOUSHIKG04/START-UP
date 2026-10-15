@@ -25,7 +25,11 @@ export function HomeFeedContent({
   isLoading: boolean;
   isError: boolean;
 }) {
-  useToastFeedback({ error: isError ? "Could not load appointments. Open Bookings to retry." : "" });
+  useToastFeedback({
+    error: isError
+      ? "Could not load appointments. Open Bookings to retry."
+      : "",
+  });
   return (
     <>
       <View style={styles.actionsRow}>
@@ -39,9 +43,7 @@ export function HomeFeedContent({
             onPress={
               action.consultationType
                 ? () =>
-                    router.push(
-                      getFindDoctorRoute(action.consultationType!)
-                    )
+                    router.push(getFindDoctorRoute(action.consultationType!))
                 : undefined
             }
             surfaceSize={52}
@@ -62,7 +64,14 @@ export function HomeFeedContent({
       </View>
 
       <View style={styles.bookingGuideLink}>
-        <BookingGuideLink onPress={() => router.push({ pathname: "/learn-booking", params: { consultationType: "Clinic Visit" } } as Href)} />
+        <BookingGuideLink
+          onPress={() =>
+            router.push({
+              pathname: "/learn-booking",
+              params: { consultationType: "Clinic Visit" },
+            } as Href)
+          }
+        />
       </View>
 
       {upcoming?.length ? (

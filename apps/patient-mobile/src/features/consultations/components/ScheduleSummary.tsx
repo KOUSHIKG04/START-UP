@@ -1,6 +1,11 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
-import { Building2, CalendarDays, Clock3, UserRound } from "lucide-react-native";
+import {
+  Building2,
+  CalendarDays,
+  Clock3,
+  UserRound,
+} from "lucide-react-native";
 import { colors, fontFamilies, radius, shadows } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
 import type { Appointment } from "../../appointments/types/appointment";
@@ -19,17 +24,29 @@ export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
     >
       <View style={styles.doctorHeaderRow}>
         <View style={styles.doctorAvatar}>
-          <UserRound color={colors.patient.primaryDark} size={25} strokeWidth={2} />
+          <UserRound
+            color={colors.patient.primaryDark}
+            size={25}
+            strokeWidth={2}
+          />
         </View>
 
         <View style={styles.doctorInfo}>
           <View style={styles.doctorNameRow}>
-            <Text variant="cardHeading" numberOfLines={1} style={styles.doctorName}>
+            <Text
+              variant="cardHeading"
+              numberOfLines={1}
+              style={styles.doctorName}
+            >
               {appointment.doctorName}
             </Text>
           </View>
 
-          <Text variant="label" numberOfLines={1} style={styles.doctorQualification}>
+          <Text
+            variant="label"
+            numberOfLines={1}
+            style={styles.doctorQualification}
+          >
             {appointment.qualification}
             {appointment.experience ? ` • ${appointment.experience}` : ""}
           </Text>
@@ -39,11 +56,21 @@ export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
       <View style={styles.scheduleGrid}>
         <View style={styles.scheduleCell}>
           <View style={styles.scheduleIconSurface}>
-            <CalendarDays color={colors.patient.primaryDark} size={15} strokeWidth={2} />
+            <CalendarDays
+              color={colors.patient.primaryDark}
+              size={15}
+              strokeWidth={2}
+            />
           </View>
           <View style={styles.scheduleCellText}>
-            <Text variant="label" style={styles.scheduleCellLabel}>Date</Text>
-            <Text variant="bodyEmphasis" numberOfLines={1} style={styles.scheduleCellValue}>
+            <Text variant="label" style={styles.scheduleCellLabel}>
+              Date
+            </Text>
+            <Text
+              variant="bodyEmphasis"
+              numberOfLines={1}
+              style={styles.scheduleCellValue}
+            >
               {appointment.date}
             </Text>
           </View>
@@ -51,11 +78,21 @@ export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
 
         <View style={styles.scheduleCell}>
           <View style={styles.scheduleIconSurface}>
-            <Clock3 color={colors.patient.primaryDark} size={15} strokeWidth={2} />
+            <Clock3
+              color={colors.patient.primaryDark}
+              size={15}
+              strokeWidth={2}
+            />
           </View>
           <View style={styles.scheduleCellText}>
-            <Text variant="label" style={styles.scheduleCellLabel}>Time</Text>
-            <Text variant="bodyEmphasis" numberOfLines={1} style={styles.scheduleCellValue}>
+            <Text variant="label" style={styles.scheduleCellLabel}>
+              Time
+            </Text>
+            <Text
+              variant="bodyEmphasis"
+              numberOfLines={1}
+              style={styles.scheduleCellValue}
+            >
               {appointment.time}
             </Text>
           </View>
@@ -64,7 +101,11 @@ export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
 
       {appointment.hospital ? (
         <View style={styles.hospitalRow}>
-          <Building2 color={colors.patient.primaryDark} size={13} strokeWidth={2} />
+          <Building2
+            color={colors.patient.primaryDark}
+            size={13}
+            strokeWidth={2}
+          />
           <Text variant="body" numberOfLines={1} style={styles.hospitalText}>
             {appointment.hospital}
             {appointment.location ? ` • ${appointment.location}` : ""}

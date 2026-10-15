@@ -47,7 +47,9 @@ export function ProdAuthChoices({
         ]}
       >
         <GoogleIcon size={20} />
-        <Text variant="button" style={styles.socialButtonText}>Continue with google</Text>
+        <Text variant="button" style={styles.socialButtonText}>
+          Continue with google
+        </Text>
       </Pressable>
 
       {/* Continue with Phone */}
@@ -60,14 +62,11 @@ export function ProdAuthChoices({
           pressed && styles.buttonPressed,
         ]}
       >
-        <Phone
-          size={19}
-          color={colors.patient.primaryDark}
-          strokeWidth={2.2}
-        />
-        <Text variant="button" style={styles.socialButtonText}>Continue with Phone</Text>
+        <Phone size={19} color={colors.patient.primaryDark} strokeWidth={2.2} />
+        <Text variant="button" style={styles.socialButtonText}>
+          Continue with Phone
+        </Text>
       </Pressable>
-
     </View>
   );
 }

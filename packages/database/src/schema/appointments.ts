@@ -86,7 +86,9 @@ export const appointment = clinzo
         { onDelete: "restrict" }
       ),
       reason: text("reason"),
-      visit_mode: text("visit_mode", { enum: ["clinic", "online", "home"] }).notNull().default("clinic"),
+      visit_mode: text("visit_mode", { enum: ["clinic", "online", "home"] })
+        .notNull()
+        .default("clinic"),
       confirmed_at: timestamp("confirmed_at", {
         withTimezone: true,
         mode: "date",
@@ -140,8 +142,14 @@ export const appointment = clinzo
         table.replaces_appointment_id
       ),
       check("appointment_ck_1", sql.raw("fee_minor >= 0")),
-      check("appointment_visit_mode_ck", sql.raw("visit_mode IN ('clinic','online','home')")),
-      check("appointment_reason_ck", sql.raw("reason IS NULL OR length(trim(reason)) BETWEEN 1 AND 1000")),
+      check(
+        "appointment_visit_mode_ck",
+        sql.raw("visit_mode IN ('clinic','online','home')")
+      ),
+      check(
+        "appointment_reason_ck",
+        sql.raw("reason IS NULL OR length(trim(reason)) BETWEEN 1 AND 1000")
+      ),
       check(
         "appointment_ck_2",
         sql.raw(

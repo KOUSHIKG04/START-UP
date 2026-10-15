@@ -11,11 +11,16 @@ export function EmergencyNumbers() {
         <Pressable
           key={item.number}
           onPress={() => void Linking.openURL(`tel:${item.number}`)}
-          style={({ pressed }) => [styles.numberCard, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.numberCard,
+            pressed && styles.pressed,
+          ]}
         >
           <View style={styles.numberHeader}>
             <Phone color="#087F78" size={13} />
-            <Text variant="bodyEmphasis" style={styles.numberText}>{item.number}</Text>
+            <Text variant="bodyEmphasis" style={styles.numberText}>
+              {item.number}
+            </Text>
           </View>
           <Text variant="label" numberOfLines={1} style={styles.numberLabel}>
             {item.label}

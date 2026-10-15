@@ -4,7 +4,11 @@ import * as React from "react";
 import { DataTable } from "@startup/web-ui/components/data-table";
 import { doctorColumns } from "./doctorColumns";
 import type { DoctorRecord } from "../types/doctorManagement";
-import type { PaginationState, SortingState, OnChangeFn } from "@tanstack/react-table";
+import type {
+  PaginationState,
+  SortingState,
+  OnChangeFn,
+} from "@tanstack/react-table";
 
 export interface DoctorTableProps {
   data: DoctorRecord[];

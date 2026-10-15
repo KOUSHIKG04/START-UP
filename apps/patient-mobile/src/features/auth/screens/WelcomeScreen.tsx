@@ -3,21 +3,70 @@ import { Button } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { onboardingButtonStyles, OnboardingShell } from "../components/OnboardingShell";
+import {
+  onboardingButtonStyles,
+  OnboardingShell,
+} from "../components/OnboardingShell";
 
 export default function WelcomeScreen() {
-  return <OnboardingShell><View style={styles.body}>
-    <View style={styles.brand}><Text variant="inherit" style={styles.name}>Clinzo<Text variant="inherit" style={styles.plus}>+</Text></Text><Text variant="label" style={styles.tagline}>Right Care. Right Time.</Text></View>
-    <View style={styles.action}><Button theme="patient" style={onboardingButtonStyles.button} labelStyle={onboardingButtonStyles.label} rightIcon={<Text variant="button" style={onboardingButtonStyles.label}>›</Text>} label="GET STARTED" onPress={() => router.push("/login")} /><Text variant="label" style={styles.trust}>Your care journey starts here</Text></View>
-  </View></OnboardingShell>;
+  return (
+    <OnboardingShell>
+      <View style={styles.body}>
+        <View style={styles.brand}>
+          <Text variant="inherit" style={styles.name}>
+            Clinzo
+            <Text variant="inherit" style={styles.plus}>
+              +
+            </Text>
+          </Text>
+          <Text variant="label" style={styles.tagline}>
+            Right Care. Right Time.
+          </Text>
+        </View>
+        <View style={styles.action}>
+          <Button
+            theme="patient"
+            style={onboardingButtonStyles.button}
+            labelStyle={onboardingButtonStyles.label}
+            rightIcon={
+              <Text variant="button" style={onboardingButtonStyles.label}>
+                ›
+              </Text>
+            }
+            label="GET STARTED"
+            onPress={() => router.push("/login")}
+          />
+          <Text variant="label" style={styles.trust}>
+            Your care journey starts here
+          </Text>
+        </View>
+      </View>
+    </OnboardingShell>
+  );
 }
 
 const styles = StyleSheet.create({
   body: { flex: 1, alignItems: "center", paddingTop: 195 },
   brand: { alignItems: "center" },
-  name: { color: colors.patient.primaryDark, fontFamily: fontFamilies.medium, fontSize: 48 },
+  name: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.medium,
+    fontSize: 48,
+  },
   plus: { fontSize: 30 },
-  tagline: { color: colors.black, fontFamily: fontFamilies.regular, fontStyle: "italic", fontSize: 16, marginTop: 3 },
+  tagline: {
+    color: colors.black,
+    fontFamily: fontFamilies.regular,
+    fontStyle: "italic",
+    fontSize: 16,
+    marginTop: 3,
+  },
   action: { width: "100%", maxWidth: 296, marginTop: 108 },
-  trust: { color: "#6B7280", textAlign: "center", fontFamily: fontFamilies.regular, fontSize: 13, marginTop: 16 },
+  trust: {
+    color: "#6B7280",
+    textAlign: "center",
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    marginTop: 16,
+  },
 });

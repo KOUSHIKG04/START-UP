@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCompanyFacilityBedDeclaration, getCompanyVerificationCase, listCompanyDoctorFacilityRequests } from "@startup/data-access";
+import {
+  getCompanyFacilityBedDeclaration,
+  getCompanyVerificationCase,
+  listCompanyDoctorFacilityRequests,
+} from "@startup/data-access";
 import { formatDisplayDate, formatDisplayDateTime } from "@startup/contracts";
 import { requireReviewer } from "@/lib/reviewer";
 import { StatusBadge } from "@/features/verification/status-badge";
@@ -30,23 +34,58 @@ export default async function CaseDetail({
   const [{ id }, client] = await Promise.all([params, requireReviewer()]);
   const item = await getCompanyVerificationCase(client, id);
   if (!item) notFound();
-  const facilityRequests = item.subject_type === "doctor"
-    ? await listCompanyDoctorFacilityRequests(client, id) : [];
-  const bedDeclaration = item.subject_type === "facility"
-    ? await getCompanyFacilityBedDeclaration(client, id) : null;
+  const facilityRequests =
+    item.subject_type === "doctor"
+      ? await listCompanyDoctorFacilityRequests(client, id)
+      : [];
+  const bedDeclaration =
+    item.subject_type === "facility"
+      ? await getCompanyFacilityBedDeclaration(client, id)
+      : null;
   const current = item.documents.filter(
     (document) => document.status !== "superseded"
   );
-  const requiredKinds = item.subject_type === "doctor"
-    ? ["medical_registration", "medical_degree", ...(item.doctor?.requires_clinic_licence === true ? ["clinic_operating_licence"] : [])]
-    : item.subject_type === "facility"
-      ? ["registration_certificate", "operating_licence"]
-      : ["aadhaar", "pan", "driving_licence", "vehicle_rc", "insurance", "fitness", "ambulance_image", "equipment_images"];
-  const missingKinds = requiredKinds.filter(kind => !current.some(document => document.kind === kind));
-  const claimedQualification = typeof item.doctor?.claimed_qualification === "string" ? item.doctor.claimed_qualification : "";
-  const reviewedQualification = typeof item.doctor?.reviewed_qualification === "string" ? item.doctor.reviewed_qualification : "";
-  const qualificationApproved = item.subject_type !== "doctor" || Boolean(claimedQualification && claimedQualification === reviewedQualification);
-  const allApproved = missingKinds.length === 0 && current.every(document => document.status === "approved") && qualificationApproved;
+  const requiredKinds =
+    item.subject_type === "doctor"
+      ? [
+          "medical_registration",
+          "medical_degree",
+          ...(item.doctor?.requires_clinic_licence === true
+            ? ["clinic_operating_licence"]
+            : []),
+        ]
+      : item.subject_type === "facility"
+        ? ["registration_certificate", "operating_licence"]
+        : [
+            "aadhaar",
+            "pan",
+            "driving_licence",
+            "vehicle_rc",
+            "insurance",
+            "fitness",
+            "ambulance_image",
+            "equipment_images",
+          ];
+  const missingKinds = requiredKinds.filter(
+    (kind) => !current.some((document) => document.kind === kind)
+  );
+  const claimedQualification =
+    typeof item.doctor?.claimed_qualification === "string"
+      ? item.doctor.claimed_qualification
+      : "";
+  const reviewedQualification =
+    typeof item.doctor?.reviewed_qualification === "string"
+      ? item.doctor.reviewed_qualification
+      : "";
+  const qualificationApproved =
+    item.subject_type !== "doctor" ||
+    Boolean(
+      claimedQualification && claimedQualification === reviewedQualification
+    );
+  const allApproved =
+    missingKinds.length === 0 &&
+    current.every((document) => document.status === "approved") &&
+    qualificationApproved;
   const details = item.doctor ?? item.facility ?? item.driver;
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -79,8 +118,54 @@ export default async function CaseDetail({
             ))}
         </dl>
       </section>
-      {item.subject_type === "doctor" && <section className="bg-card rounded-xl border p-5"><h2 className="font-semibold">Hospital / clinic association</h2>{facilityRequests.length ? <ul className="mt-3 space-y-3 text-sm">{facilityRequests.map((request,index)=><li key={`${request.facility_name}-${index}`} className="rounded-lg border p-3"><strong>{request.facility_name}</strong> · {request.facility_kind}<p className="text-muted-foreground">{request.facility_address}</p><p>Requested by {request.initiated_by}; facility decision: {request.status}; practice {request.practice_active ? "active" : "not active"}</p></li>)}</ul> : <p className="text-muted-foreground mt-2 text-sm">No registered facility request. A solo doctor may operate their own clinic after credential approval.</p>}</section>}
-      {bedDeclaration && <section className="bg-card rounded-xl border p-5"><h2 className="font-semibold">Declared bed services</h2><p className="mt-2 text-sm">{bedDeclaration.offers_beds === null ? "Not declared by this existing facility" : bedDeclaration.offers_beds ? "Beds offered" : "Beds not offered"}</p>{bedDeclaration.bed_types.length > 0 && <p className="mt-1 text-sm text-muted-foreground">{bedDeclaration.bed_types.join(", ")}</p>}</section>}
+      {item.subject_type === "doctor" && (
+        <section className="bg-card rounded-xl border p-5">
+          <h2 className="font-semibold">Hospital / clinic association</h2>
+          {facilityRequests.length ? (
+            <ul className="mt-3 space-y-3 text-sm">
+              {facilityRequests.map((request, index) => (
+                <li
+                  key={`${request.facility_name}-${index}`}
+                  className="rounded-lg border p-3"
+                >
+                  <strong>{request.facility_name}</strong> ·{" "}
+                  {request.facility_kind}
+                  <p className="text-muted-foreground">
+                    {request.facility_address}
+                  </p>
+                  <p>
+                    Requested by {request.initiated_by}; facility decision:{" "}
+                    {request.status}; practice{" "}
+                    {request.practice_active ? "active" : "not active"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted-foreground mt-2 text-sm">
+              No registered facility request. A solo doctor may operate their
+              own clinic after credential approval.
+            </p>
+          )}
+        </section>
+      )}
+      {bedDeclaration && (
+        <section className="bg-card rounded-xl border p-5">
+          <h2 className="font-semibold">Declared bed services</h2>
+          <p className="mt-2 text-sm">
+            {bedDeclaration.offers_beds === null
+              ? "Not declared by this existing facility"
+              : bedDeclaration.offers_beds
+                ? "Beds offered"
+                : "Beds not offered"}
+          </p>
+          {bedDeclaration.bed_types.length > 0 && (
+            <p className="text-muted-foreground mt-1 text-sm">
+              {bedDeclaration.bed_types.join(", ")}
+            </p>
+          )}
+        </section>
+      )}
       <section className="space-y-3">
         <div>
           <h2 className="font-semibold">Documents</h2>
@@ -100,9 +185,13 @@ export default async function CaseDetail({
                   Version {document.version} · Submitted{" "}
                   {formatDisplayDate(document.submitted_at, "Asia/Kolkata")}
                 </p>
-                {item.subject_type === "doctor" && document.kind === "medical_degree" ? (
+                {item.subject_type === "doctor" &&
+                document.kind === "medical_degree" ? (
                   <p className="mt-2 text-sm">
-                    Claimed qualifications: <strong>{claimedQualification || "Not submitted yet"}</strong>
+                    Claimed qualifications:{" "}
+                    <strong>
+                      {claimedQualification || "Not submitted yet"}
+                    </strong>
                   </p>
                 ) : null}
               </div>
@@ -126,7 +215,19 @@ export default async function CaseDetail({
               </p>
             )}
             {document.status === "pending" && (
-              <DocumentActions caseId={id} documentId={document.id} approvalLabel={document.kind === "medical_degree" ? "Approve degree and qualifications" : undefined} canApprove={document.kind !== "medical_degree" || Boolean(claimedQualification)} />
+              <DocumentActions
+                caseId={id}
+                documentId={document.id}
+                approvalLabel={
+                  document.kind === "medical_degree"
+                    ? "Approve degree and qualifications"
+                    : undefined
+                }
+                canApprove={
+                  document.kind !== "medical_degree" ||
+                  Boolean(claimedQualification)
+                }
+              />
             )}
           </article>
         ))}
@@ -140,13 +241,20 @@ export default async function CaseDetail({
         <section className="bg-card rounded-xl border p-5">
           <h2 className="font-semibold">Complete verification</h2>
           <p className="text-muted-foreground mt-1 mb-4 text-sm">
-            Every required document and the doctor's claimed qualifications must be reviewed before verification.
+            Every required document and the doctor's claimed qualifications must
+            be reviewed before verification.
           </p>
           {allApproved ? (
             <FinalizeAction caseId={id} subjectType={item.subject_type} />
           ) : (
             <p className="text-muted-foreground text-sm">
-              {item.subject_type === "doctor" && !claimedQualification ? "Awaiting the doctor's qualifications." : missingKinds.length ? `Awaiting ${missingKinds.map(kind => documentNames[kind] ?? kind.replaceAll("_", " ")).join(", ")}.` : !qualificationApproved ? "Review the claimed qualifications against the degree certificate." : "Review all pending or rejected documents first."}
+              {item.subject_type === "doctor" && !claimedQualification
+                ? "Awaiting the doctor's qualifications."
+                : missingKinds.length
+                  ? `Awaiting ${missingKinds.map((kind) => documentNames[kind] ?? kind.replaceAll("_", " ")).join(", ")}.`
+                  : !qualificationApproved
+                    ? "Review the claimed qualifications against the degree certificate."
+                    : "Review all pending or rejected documents first."}
             </p>
           )}
         </section>

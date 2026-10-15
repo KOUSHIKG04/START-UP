@@ -20,7 +20,10 @@ export function PatientCard({
   actionLabel?: string;
 }) {
   const completed = appointment.status === "completed";
-  const expiredRequest=appointment.status==="pending" && Date.parse(appointment.request_expires_at ?? appointment.starts_at)<=Date.now();
+  const expiredRequest =
+    appointment.status === "pending" &&
+    Date.parse(appointment.request_expires_at ?? appointment.starts_at) <=
+      Date.now();
   const consultationLabel =
     appointment.visit_mode === "online"
       ? "Video Consultation"
@@ -59,14 +62,16 @@ export function PatientCard({
         <View style={styles.badge}>
           <Label style={styles.badgeText}>
             {home
-              ? expiredRequest ? "REQUEST EXPIRED" : completed
-                ? "COMPLETED"
-                : (appointment.visit_mode === "clinic"
-                    ? (appointment.queue_state ?? appointment.status)
-                    : appointment.status
-                  )
-                    .replaceAll("_", " ")
-                    .toUpperCase()
+              ? expiredRequest
+                ? "REQUEST EXPIRED"
+                : completed
+                  ? "COMPLETED"
+                  : (appointment.visit_mode === "clinic"
+                      ? (appointment.queue_state ?? appointment.status)
+                      : appointment.status
+                    )
+                      .replaceAll("_", " ")
+                      .toUpperCase()
               : appointment.visit_mode === "online"
                 ? "ONLINE"
                 : "CLINIC VISIT"}
@@ -84,7 +89,14 @@ export function PatientCard({
             <Label style={styles.secondary}>
               Type: <Label style={styles.time}>{consultationLabel}</Label>
             </Label>
-            <Label style={styles.time}>{new Date(appointment.starts_at).toLocaleDateString("en-IN", {day:"numeric",month:"short",timeZone:appointment.timezone})} · {time}</Label>
+            <Label style={styles.time}>
+              {new Date(appointment.starts_at).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                timeZone: appointment.timezone,
+              })}{" "}
+              · {time}
+            </Label>
           </View>
           {!completed && onAction ? (
             <Button

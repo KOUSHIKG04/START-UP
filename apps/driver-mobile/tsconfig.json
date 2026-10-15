@@ -5,7 +5,9 @@
     "paths": {
       "@startup/design-tokens": ["../../packages/design-tokens/src/index.ts"],
       "@startup/mobile-ui": ["../../packages/mobile-ui/src/index.ts"],
-      "react-native-safe-area-context": ["./node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts"]
+      "react-native-safe-area-context": [
+        "./node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts"
+      ]
     }
   },
   "include": [
@@ -15,10 +17,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "dist-native",
-    "tests"
-  ]
+  "exclude": ["node_modules", "dist", "dist-native", "tests"]
 }

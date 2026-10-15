@@ -9,7 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { AccessibilityInfo, Animated, PanResponder, StyleSheet, View, useWindowDimensions } from "react-native";
+import {
+  AccessibilityInfo,
+  Animated,
+  PanResponder,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { CircleCheck, CircleAlert, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -174,11 +181,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               color={toast.type === "error" ? theme.danger : theme.primary}
             />
             <View style={styles.copy}>
-              <Text variant="bodyEmphasis" style={[styles.title, { color: theme.text }]}>
+              <Text
+                variant="bodyEmphasis"
+                style={[styles.title, { color: theme.text }]}
+              >
                 {toast.title}
               </Text>
               {toast.message ? (
-                <Text variant="body" style={[styles.message, { color: theme.textMuted }]}>
+                <Text
+                  variant="body"
+                  style={[styles.message, { color: theme.textMuted }]}
+                >
                   {toast.message}
                 </Text>
               ) : null}

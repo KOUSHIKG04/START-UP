@@ -43,7 +43,10 @@ export function PrescriptionScreen() {
     if (!readOnly) update(appointment.id, patient.id, { medicines });
   };
 
-  const handleUpdateTiming = (medicineId: string, timing: Medicine["timing"]) => {
+  const handleUpdateTiming = (
+    medicineId: string,
+    timing: Medicine["timing"]
+  ) => {
     changeMedicines(
       visit.medicines.map((m) => (m.id === medicineId ? { ...m, timing } : m))
     );
@@ -105,9 +108,7 @@ export function PrescriptionScreen() {
   };
 
   return (
-    <DoctorScreen
-      title="Write prescription"
-    >
+    <DoctorScreen title="Write prescription">
       {visit.signed && (
         <Label style={ui.success}>
           Demo prescription signed and saved locally. No prescription was sent.

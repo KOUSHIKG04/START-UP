@@ -1,7 +1,15 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, View, type PressableProps, type TextProps, type ViewProps, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type PressableProps,
+  type TextProps,
+  type ViewProps,
+  type ViewStyle,
+} from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { type AppTheme } from "../utils/appTheme";
 
@@ -113,7 +121,8 @@ export function CardTitle({
 }: CardTitleProps) {
   const themeColors = useMobileTheme(theme);
   return (
-    <Text variant="cardHeading"
+    <Text
+      variant="cardHeading"
       {...props}
       style={[
         styles.title,
@@ -130,7 +139,8 @@ export type CardDescriptionProps = TextProps;
 export function CardDescription({ style, ...props }: CardDescriptionProps) {
   const theme = useMobileTheme();
   return (
-    <Text variant="body"
+    <Text
+      variant="body"
       {...props}
       style={[styles.description, { color: theme.textMuted }, style]}
     />

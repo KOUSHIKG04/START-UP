@@ -7,7 +7,10 @@ import { router } from "expo-router";
 import { TriangleAlert } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { mobileSession, useMobileSession } from "../../../services/supabase";
-import { onboardingButtonStyles, OnboardingShell } from "../components/OnboardingShell";
+import {
+  onboardingButtonStyles,
+  OnboardingShell,
+} from "../components/OnboardingShell";
 
 export default function SetupScreen() {
   const auth = useMobileSession();
@@ -20,19 +23,29 @@ export default function SetupScreen() {
     let active = true;
     setError("");
     setReady(false);
-    Promise.resolve(mobileSession.refresh()).then(() => {
-      if (!active) return;
-      const { error: accountError } = mobileSession.getSnapshot();
-      if (accountError) throw new Error(accountError);
-      setReady(true);
-    }).catch(cause => {
-      if (active) setError(cause instanceof Error ? cause.message : "Could not load your account.");
-    });
-    return () => { active = false; };
+    Promise.resolve(mobileSession.refresh())
+      .then(() => {
+        if (!active) return;
+        const { error: accountError } = mobileSession.getSnapshot();
+        if (accountError) throw new Error(accountError);
+        setReady(true);
+      })
+      .catch((cause) => {
+        if (active)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Could not load your account."
+          );
+      });
+    return () => {
+      active = false;
+    };
   }, [attempt]);
   useEffect(() => {
     if (auth.loading || auth.error || !auth.session) return;
-    if (auth.profile?.patient_id && auth.profile.patient_profile_complete) router.replace("/(app)/(tabs)");
+    if (auth.profile?.patient_id && auth.profile.patient_profile_complete)
+      router.replace("/(app)/(tabs)");
     else router.replace("/onboarding");
   }, [auth.loading, auth.error, auth.session?.user.id, auth.profile]);
 
@@ -43,9 +56,18 @@ export default function SetupScreen() {
   return (
     <OnboardingShell onBack={() => router.back()}>
       <View style={styles.body}>
-        <Text variant="pageHeadline" style={styles.title}>Welcome to <Text variant="inherit" style={styles.brand}>Clinzo⁺</Text></Text>
-        <Text variant="body" style={styles.caption}>Setting things up for you..</Text>
-        <View style={styles.track}><View style={styles.progress} /></View>
+        <Text variant="pageHeadline" style={styles.title}>
+          Welcome to{" "}
+          <Text variant="inherit" style={styles.brand}>
+            Clinzo⁺
+          </Text>
+        </Text>
+        <Text variant="body" style={styles.caption}>
+          Setting things up for you..
+        </Text>
+        <View style={styles.track}>
+          <View style={styles.progress} />
+        </View>
         {/* Temporarily hidden: onboarding SOS, instructions, and manual continuation.
         <Pressable
           accessibilityRole="button"
@@ -74,13 +96,62 @@ export default function SetupScreen() {
   );
 }
 const styles = StyleSheet.create({
-  body: { flex: 1, alignItems: "center", justifyContent: "center" }, title: { fontFamily: fontFamilies.medium, fontSize: 32, color: colors.black, textAlign: "center" }, brand: { color: colors.patient.primaryDark },
-  caption: { fontFamily: fontFamilies.regular, fontSize: 18, marginTop: 47, textAlign: "center" },
-  track: { height: 9, borderRadius: 10, width: "85%", maxWidth: 286, backgroundColor: "#D9D9D9", marginTop: 14 }, progress: { height: 9, borderRadius: 10, width: "65%", backgroundColor: colors.patient.primaryDark },
+  body: { flex: 1, alignItems: "center", justifyContent: "center" },
+  title: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 32,
+    color: colors.black,
+    textAlign: "center",
+  },
+  brand: { color: colors.patient.primaryDark },
+  caption: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 18,
+    marginTop: 47,
+    textAlign: "center",
+  },
+  track: {
+    height: 9,
+    borderRadius: 10,
+    width: "85%",
+    maxWidth: 286,
+    backgroundColor: "#D9D9D9",
+    marginTop: 14,
+  },
+  progress: {
+    height: 9,
+    borderRadius: 10,
+    width: "65%",
+    backgroundColor: colors.patient.primaryDark,
+  },
   complete: { width: "100%" },
-  sos: { marginTop: 40, width: "100%", minHeight: 48, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 999, backgroundColor: "#E32228", flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", boxShadow: "0px 5px 12px #DB141440" },
+  sos: {
+    marginTop: 40,
+    width: "100%",
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 999,
+    backgroundColor: "#E32228",
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0px 5px 12px #DB141440",
+  },
   sosPressed: { opacity: 0.8 },
-  sosTitle: { fontFamily: fontFamilies.bold, fontSize: 16, color: colors.white },
-  instruction: { fontFamily: fontFamilies.regular, fontSize: 14, lineHeight: 20, color: colors.textSecondary, textAlign: "center", marginTop: 16 },
+  sosTitle: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    color: colors.white,
+  },
+  instruction: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginTop: 16,
+  },
   continue: { width: "100%", marginTop: 28 },
 });

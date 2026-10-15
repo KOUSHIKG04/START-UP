@@ -22,9 +22,23 @@ function ProfileStat({ label, value }: { label: string; value: string }) {
       borderRadius={10}
       padding={8}
       gap={4}
-      style={[styles.stat, readable && { height: undefined, minHeight: 44, paddingVertical: 6 }]}
+      style={[
+        styles.stat,
+        readable && { height: undefined, minHeight: 44, paddingVertical: 6 },
+      ]}
     >
-      <Text variant="label" style={styles.label} numberOfLines={readable ? 2 : 1} adjustsFontSizeToFit={!readable} minimumFontScale={0.9}>{label}: <Text variant="body" style={styles.value}>{value}</Text></Text>
+      <Text
+        variant="label"
+        style={styles.label}
+        numberOfLines={readable ? 2 : 1}
+        adjustsFontSizeToFit={!readable}
+        minimumFontScale={0.9}
+      >
+        {label}:{" "}
+        <Text variant="body" style={styles.value}>
+          {value}
+        </Text>
+      </Text>
     </Card>
   );
 }

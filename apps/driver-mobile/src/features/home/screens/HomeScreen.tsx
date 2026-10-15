@@ -5,19 +5,19 @@ import { locationHeadline } from "../../locations/savedLocationDisplay";
 import { ModalSurface } from "@startup/mobile-ui";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { useEffect, useState } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { Image, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ambulance, Bell, ChevronDown, MapPin, CircleAlert, User } from "lucide-react-native";
+import {
+  Ambulance,
+  Bell,
+  ChevronDown,
+  MapPin,
+  CircleAlert,
+  User,
+} from "lucide-react-native";
 import {
   listMyDriverLocations,
   getMyDriverProfile,
@@ -27,7 +27,12 @@ import {
   respondMyDriverOffer,
   setMyDriverAvailability,
 } from "@startup/data-access";
-import { Button, useToast, useToastFeedback, useTimeGreeting } from "@startup/mobile-ui";
+import {
+  Button,
+  useToast,
+  useToastFeedback,
+  useTimeGreeting,
+} from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -43,18 +48,32 @@ export function HomeScreen() {
   const greeting = useTimeGreeting();
   const insets = useSafeAreaInsets();
   const [showNotifications, setShowNotifications] = useState(false);
-  useEffect(() => { router.prefetch("/select-location"); }, []);
+  useEffect(() => {
+    router.prefetch("/select-location");
+  }, []);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
   const [responding, setResponding] = useState<boolean | null>(null);
   const client = useQueryClient();
   const { showToast } = useToast();
   const driverId = profile?.driver?.id;
-  
-  const locations = useQuery({ queryKey: ["my-driver-locations", driverId], queryFn: () => listMyDriverLocations(supabase!), enabled: Boolean(supabase && driverId) });
-  const selectedLocation = locations.data?.find(item => item.selected);
-  const driverProfile = useQuery({ queryKey: ["my-driver-profile", driverId], queryFn: () => getMyDriverProfile(supabase!), enabled: Boolean(supabase && driverId) });
-  useToastFeedback({ error: locations.isError ? "Could not load saved locations. Tap the location to retry." : "" });
+
+  const locations = useQuery({
+    queryKey: ["my-driver-locations", driverId],
+    queryFn: () => listMyDriverLocations(supabase!),
+    enabled: Boolean(supabase && driverId),
+  });
+  const selectedLocation = locations.data?.find((item) => item.selected);
+  const driverProfile = useQuery({
+    queryKey: ["my-driver-profile", driverId],
+    queryFn: () => getMyDriverProfile(supabase!),
+    enabled: Boolean(supabase && driverId),
+  });
+  useToastFeedback({
+    error: locations.isError
+      ? "Could not load saved locations. Tap the location to retry."
+      : "",
+  });
   const fleet = useQuery({
     queryKey: ["driver-fleet", driverId],
     queryFn: () => listMyAmbulanceFleet(supabase!),
@@ -69,9 +88,18 @@ export function HomeScreen() {
 
   useEffect(() => {
     const now = Date.now();
-    const deadlines = (offers.data ?? []).map(offer => Date.parse(offer.expires_at)).filter(deadline => deadline > now);
+    const deadlines = (offers.data ?? [])
+      .map((offer) => Date.parse(offer.expires_at))
+      .filter((deadline) => deadline > now);
     if (!deadlines.length) return;
-    const timer = setTimeout(() => { void client.invalidateQueries({ queryKey: ["driver-offers", driverId] }); }, Math.min(...deadlines) - now + 50);
+    const timer = setTimeout(
+      () => {
+        void client.invalidateQueries({
+          queryKey: ["driver-offers", driverId],
+        });
+      },
+      Math.min(...deadlines) - now + 50
+    );
     return () => clearTimeout(timer);
   }, [offers.data, client, driverId]);
 
@@ -80,14 +108,19 @@ export function HomeScreen() {
     queryFn: () => listMyDriverTrips(supabase!),
     enabled: Boolean(supabase && driverId),
   });
-  useToastFeedback({ error: offers.isError || trips.isError || fleet.isError ? "Could not refresh requests or status." : "" });
+  useToastFeedback({
+    error:
+      offers.isError || trips.isError || fleet.isError
+        ? "Could not refresh requests or status."
+        : "",
+  });
 
   const vehicle =
     fleet.data?.find((item) => item.desired_availability === "online") ??
     fleet.data?.find((item) => item.ready_to_go_available);
-  
+
   const online = vehicle?.desired_availability === "online";
-  
+
   const active = trips.data?.find(
     (item) => !["completed", "cancelled"].includes(item.status)
   );
@@ -105,7 +138,6 @@ export function HomeScreen() {
       item.status === "pending" && new Date(item.expires_at).getTime() > now
   );
 
-
   const remaining = offer
     ? Math.max(
         0,
@@ -114,16 +146,15 @@ export function HomeScreen() {
     : 0;
 
   useEffect(() => {
-    
     if (!offer) return;
-    
+
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [offer?.id]);
 
   async function changeAvailability(value: boolean) {
     if (!supabase || !vehicle || busy) return;
-   
+
     setBusy(true);
 
     try {
@@ -132,7 +163,7 @@ export function HomeScreen() {
 
       if (value) {
         const permission = await Location.requestForegroundPermissionsAsync();
-        
+
         if (!permission.granted)
           throw new Error("Allow location to go Available.");
         const position = await Location.getCurrentPositionAsync({
@@ -141,7 +172,7 @@ export function HomeScreen() {
 
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
-        
+
         try {
           await Location.requestBackgroundPermissionsAsync();
         } catch {
@@ -157,18 +188,30 @@ export function HomeScreen() {
       });
 
       await client.invalidateQueries({ queryKey: ["driver-fleet", driverId] });
-      showToast({ title: value ? "You are available" : "You are offline", type: "success" });
+      showToast({
+        title: value ? "You are available" : "You are offline",
+        type: "success",
+      });
     } catch (cause) {
-      const feedback = cause instanceof Error ? cause.message : "Could not update availability.";
-      showToast({ title: "Availability update failed", message: feedback, type: "error" });
+      const feedback =
+        cause instanceof Error
+          ? cause.message
+          : "Could not update availability.";
+      showToast({
+        title: "Availability update failed",
+        message: feedback,
+        type: "error",
+      });
     } finally {
-      setBusy(false); setResponding(null);
+      setBusy(false);
+      setResponding(null);
     }
   }
 
   async function respond(accept: boolean) {
     if (!supabase || !offer || busy) return;
-    setBusy(true); setResponding(accept);
+    setBusy(true);
+    setResponding(accept);
     try {
       await respondMyDriverOffer(supabase, offer.id, accept);
       void Haptics.notificationAsync(
@@ -178,34 +221,69 @@ export function HomeScreen() {
         client.invalidateQueries({ queryKey: ["driver-offers", driverId] }),
         client.invalidateQueries({ queryKey: ["my-driver-trips", driverId] }),
       ]);
-      showToast({ title: accept ? "Request accepted" : "Request declined", type: "success" });
+      showToast({
+        title: accept ? "Request accepted" : "Request declined",
+        type: "success",
+      });
       if (accept) router.push("/trip");
     } catch {
-      const feedback = "The request expired or is no longer available. Refresh and try again.";
-      showToast({ title: "Request unavailable", message: feedback, type: "error" });
+      const feedback =
+        "The request expired or is no longer available. Refresh and try again.";
+      showToast({
+        title: "Request unavailable",
+        message: feedback,
+        type: "error",
+      });
     } finally {
-      setBusy(false); setResponding(null);
+      setBusy(false);
+      setResponding(null);
     }
   }
-  
+
   return (
     <View style={ui.screen}>
       <StatusBar style="light" />
-      <View style={[styles.header, { minHeight: Math.max(165, insets.top + 88) }]}>
+      <View
+        style={[styles.header, { minHeight: Math.max(165, insets.top + 88) }]}
+      >
         <View style={[styles.headerRow, { marginTop: insets.top + 18 }]}>
-          <Text style={styles.greeting} numberOfLines={1}>{greeting}! {driverProfile.data?.full_name ?? "Driver"}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`} onPress={() => router.push("/select-location")} style={styles.location}>
+          <Text style={styles.greeting} numberOfLines={1}>
+            {greeting}! {driverProfile.data?.full_name ?? "Driver"}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Selected location: ${locationHeadline(selectedLocation)}. Change location`}
+            onPress={() => router.push("/select-location")}
+            style={styles.location}
+          >
             <MapPin size={15} strokeWidth={2} color={colors.white} />
-            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{locationHeadline(selectedLocation)}</Text>
+            <Text
+              style={styles.locationText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {locationHeadline(selectedLocation)}
+            </Text>
             <ChevronDown size={15} color={colors.white} />
           </Pressable>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={10} onPress={() => setShowNotifications(true)} style={({ pressed }) => [styles.notificationButton, { top: insets.top + 22 }, pressed && styles.notificationButtonPressed]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Notifications"
+          hitSlop={10}
+          onPress={() => setShowNotifications(true)}
+          style={({ pressed }) => [
+            styles.notificationButton,
+            { top: insets.top + 22 },
+            pressed && styles.notificationButtonPressed,
+          ]}
+        >
           <Bell size={20} strokeWidth={1.9} color={palette.primary} />
         </Pressable>
       </View>
       <Body>
-        <View style={ui.between}><Heading>{online ? "Available" : "Offline"}</Heading>
+        <View style={ui.between}>
+          <Heading>{online ? "Available" : "Offline"}</Heading>
           <Switch
             accessibilityLabel="Receive emergency requests"
             value={online}
@@ -285,7 +363,8 @@ export function HomeScreen() {
           </Card>
         ) : null}
       </Body>
-      <ModalSurface layout="custom"
+      <ModalSurface
+        layout="custom"
         visible={Boolean(offer)}
         transparent
         animationType="fade"
@@ -332,7 +411,8 @@ export function HomeScreen() {
               ]}
             />
             <View style={[ui.row, { marginTop: 20 }]}>
-              <Button loading={busy && responding === false}
+              <Button
+                loading={busy && responding === false}
                 theme="driver"
                 variant="outline"
                 label="Reject"
@@ -340,7 +420,8 @@ export function HomeScreen() {
                 disabled={busy}
                 onPress={() => void respond(false)}
               />
-              <Button loading={busy && responding === true}
+              <Button
+                loading={busy && responding === true}
                 theme="driver"
                 label="Accept"
                 style={ui.grow}
@@ -351,7 +432,10 @@ export function HomeScreen() {
           </View>
         </View>
       </ModalSurface>
-      <NotificationDrawer visible={showNotifications} onClose={() => setShowNotifications(false)} />
+      <NotificationDrawer
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </View>
   );
 }
@@ -365,12 +449,46 @@ function Address({ label, text }: { label: string; text: string }) {
 }
 const styles = StyleSheet.create({
   header: { backgroundColor: palette.primary },
-  headerRow: { height: 70, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 24 },
-  greeting: { color: colors.white, fontFamily: fontFamilies.semibold, fontSize: 22, fontWeight: "600", lineHeight: 34, paddingRight: 52, maxWidth: "100%" },
-  notificationButton: { position: "absolute", right: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", ...shadows.card },
+  headerRow: {
+    height: 70,
+    justifyContent: "center",
+    alignItems: "flex-start",
+    paddingHorizontal: 24,
+  },
+  greeting: {
+    color: colors.white,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 22,
+    fontWeight: "600",
+    lineHeight: 34,
+    paddingRight: 52,
+    maxWidth: "100%",
+  },
+  notificationButton: {
+    position: "absolute",
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadows.card,
+  },
   notificationButtonPressed: { opacity: 0.75, transform: [{ scale: 0.95 }] },
-  location: { flexDirection: "row", alignItems: "center", gap: 5, maxWidth: "75%", minHeight: 26 },
-  locationText: { color: colors.white, fontFamily: fontFamilies.medium, fontSize: 13, flexShrink: 1 },
+  location: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    maxWidth: "75%",
+    minHeight: 26,
+  },
+  locationText: {
+    color: colors.white,
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    flexShrink: 1,
+  },
   wait: {
     backgroundColor: palette.soft,
     borderRadius: 12,

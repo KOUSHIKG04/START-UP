@@ -23,18 +23,33 @@ export function LocationFields({
     <View style={styles.locations}>
       <Pressable
         onPress={onCurrentLocationPress}
-        style={({ pressed }) => [styles.locationCard, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.locationCard,
+          pressed && styles.pressed,
+        ]}
         accessibilityRole="button"
         accessibilityLabel="Current location, tap to set pickup on map"
       >
         <View style={styles.pickupDot} />
-        <Text variant="body" style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{pickupAddress || "Current Location"}</Text>
-        {locating ? <Loader theme="patient" size="small" /> : <MapPin color="#008877" size={19} />}
+        <Text
+          variant="body"
+          style={styles.locationText}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {pickupAddress || "Current Location"}
+        </Text>
+        {locating ? (
+          <Loader theme="patient" size="small" />
+        ) : (
+          <MapPin color="#008877" size={19} />
+        )}
       </Pressable>
 
       <View style={styles.locationCard}>
         <View style={styles.dropDot} />
-        <Input variant="unstyled"
+        <Input
+          variant="unstyled"
           value={destination}
           onChangeText={onChange}
           onFocus={onFocus}

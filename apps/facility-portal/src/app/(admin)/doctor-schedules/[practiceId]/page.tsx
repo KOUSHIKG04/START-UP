@@ -6,9 +6,6 @@ export default async function ManageDoctorSchedulePage({
 }) {
   const { practiceId } = await params;
   return (
-    <FacilityDoctorScheduleScreen
-      key={practiceId}
-      practiceId={practiceId}
-    />
+    <FacilityDoctorScheduleScreen key={practiceId} practiceId={practiceId} />
   );
 }

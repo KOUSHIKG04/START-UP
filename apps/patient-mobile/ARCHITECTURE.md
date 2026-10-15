@@ -3,22 +3,22 @@
 `src/app` contains Expo Router layouts and route adapters. Adapters read route
 parameters and connect screen callbacks to navigation. UI lives in `src/features`.
 
-| Folder | Responsibility |
-| --- | --- |
-| `features/auth` | Login and onboarding placeholders |
-| `features/home` | Home screen, search overlay and home sections |
-| `features/doctors` | Search, results, doctor profile and related UI |
-| `features/appointments` | Appointment list, booking status, appointment types and parameters |
-| `features/consultations` | Clinic, home and online visits, completion and feedback |
-| `features/ambulance` | Ambulance booking, tracking, payment, completion and SOS |
-| `features/records` | Medical records |
-| `features/prescriptions` | Prescription display |
-| `features/medicines` | Medicine display |
-| `features/profile` | Profile, settings and related dialogs |
-| `components` | UI shared across unrelated features |
-| `types`, `hooks`, `utils` | Cross-feature types and helpers only |
-| `services` | Empty platform integration placeholders |
-| `providers`, `stores` | Reserved for future providers and client state |
+| Folder                    | Responsibility                                                     |
+| ------------------------- | ------------------------------------------------------------------ |
+| `features/auth`           | Login and onboarding placeholders                                  |
+| `features/home`           | Home screen, search overlay and home sections                      |
+| `features/doctors`        | Search, results, doctor profile and related UI                     |
+| `features/appointments`   | Appointment list, booking status, appointment types and parameters |
+| `features/consultations`  | Clinic, home and online visits, completion and feedback            |
+| `features/ambulance`      | Ambulance booking, tracking, payment, completion and SOS           |
+| `features/records`        | Medical records                                                    |
+| `features/prescriptions`  | Prescription display                                               |
+| `features/medicines`      | Medicine display                                                   |
+| `features/profile`        | Profile, settings and related dialogs                              |
+| `components`              | UI shared across unrelated features                                |
+| `types`, `hooks`, `utils` | Cross-feature types and helpers only                               |
+| `services`                | Empty platform integration placeholders                            |
+| `providers`, `stores`     | Reserved for future providers and client state                     |
 
 Within each feature, `screens`, `components`, `types` and `utils` own existing
 implementation. `api` and `hooks` placeholders are reserved for backend integration.

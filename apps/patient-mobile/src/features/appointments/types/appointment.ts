@@ -3,10 +3,7 @@ export type AppointmentStatus = "pending" | "approved";
 export type ConsultationType = "Clinic Visit" | "Home Visit" | "Online";
 
 export type VisitSessionMode =
-  | "clinic-check-in"
-  | "home-tracking"
-  | "online-video"
-  | "online-chat";
+  "clinic-check-in" | "home-tracking" | "online-video" | "online-chat";
 
 export type Appointment = {
   id: string;

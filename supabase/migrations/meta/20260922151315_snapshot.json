@@ -238,56 +238,40 @@
         "ambulance_booking_patient_id_patient_id_fk": {
           "name": "ambulance_booking_patient_id_patient_id_fk",
           "tableFrom": "ambulance_booking",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_booking_requested_by_identity_id_fk": {
           "name": "ambulance_booking_requested_by_identity_id_fk",
           "tableFrom": "ambulance_booking",
-          "columnsFrom": [
-            "requested_by"
-          ],
+          "columnsFrom": ["requested_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_booking_guest_session_id_guest_emergency_session_id_fk": {
           "name": "ambulance_booking_guest_session_id_guest_emergency_session_id_fk",
           "tableFrom": "ambulance_booking",
-          "columnsFrom": [
-            "guest_session_id"
-          ],
+          "columnsFrom": ["guest_session_id"],
           "tableTo": "guest_emergency_session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_booking_destination_facility_id_facility_id_fk": {
           "name": "ambulance_booking_destination_facility_id_facility_id_fk",
           "tableFrom": "ambulance_booking",
-          "columnsFrom": [
-            "destination_facility_id"
-          ],
+          "columnsFrom": ["destination_facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -433,28 +417,20 @@
         "booking_capability_booking_id_ambulance_booking_id_fk": {
           "name": "booking_capability_booking_id_ambulance_booking_id_fk",
           "tableFrom": "booking_capability",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "booking_capability_capability_id_capability_id_fk": {
           "name": "booking_capability_capability_id_capability_id_fk",
           "tableFrom": "booking_capability",
-          "columnsFrom": [
-            "capability_id"
-          ],
+          "columnsFrom": ["capability_id"],
           "tableTo": "capability",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -591,42 +567,30 @@
         "booking_destination_change_booking_id_ambulance_booking_id_fk": {
           "name": "booking_destination_change_booking_id_ambulance_booking_id_fk",
           "tableFrom": "booking_destination_change",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "booking_destination_change_facility_id_facility_id_fk": {
           "name": "booking_destination_change_facility_id_facility_id_fk",
           "tableFrom": "booking_destination_change",
-          "columnsFrom": [
-            "facility_id"
-          ],
+          "columnsFrom": ["facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "booking_destination_change_changed_by_identity_id_fk": {
           "name": "booking_destination_change_changed_by_identity_id_fk",
           "tableFrom": "booking_destination_change",
-          "columnsFrom": [
-            "changed_by"
-          ],
+          "columnsFrom": ["changed_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -749,14 +713,10 @@
         "patient_ambulance_pin_patient_id_patient_id_fk": {
           "name": "patient_ambulance_pin_patient_id_patient_id_fk",
           "tableFrom": "patient_ambulance_pin",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -861,28 +821,20 @@
         "pin_attempt_trip_id_trip_id_fk": {
           "name": "pin_attempt_trip_id_trip_id_fk",
           "tableFrom": "pin_attempt",
-          "columnsFrom": [
-            "trip_id"
-          ],
+          "columnsFrom": ["trip_id"],
           "tableTo": "trip",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "pin_attempt_driver_id_driver_id_fk": {
           "name": "pin_attempt_driver_id_driver_id_fk",
           "tableFrom": "pin_attempt",
-          "columnsFrom": [
-            "driver_id"
-          ],
+          "columnsFrom": ["driver_id"],
           "tableTo": "driver",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -1120,28 +1072,20 @@
         "driver_identity_id_identity_id_fk": {
           "name": "driver_identity_id_identity_id_fk",
           "tableFrom": "driver",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "driver_organization_id_organization_id_fk": {
           "name": "driver_organization_id_organization_id_fk",
           "tableFrom": "driver",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "organization",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -1352,28 +1296,20 @@
         "driver_shift_driver_id_driver_id_fk": {
           "name": "driver_shift_driver_id_driver_id_fk",
           "tableFrom": "driver_shift",
-          "columnsFrom": [
-            "driver_id"
-          ],
+          "columnsFrom": ["driver_id"],
           "tableTo": "driver",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "driver_shift_vehicle_id_vehicle_id_fk": {
           "name": "driver_shift_vehicle_id_vehicle_id_fk",
           "tableFrom": "driver_shift",
-          "columnsFrom": [
-            "vehicle_id"
-          ],
+          "columnsFrom": ["vehicle_id"],
           "tableTo": "vehicle",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -1501,14 +1437,10 @@
         "vehicle_organization_id_organization_id_fk": {
           "name": "vehicle_organization_id_organization_id_fk",
           "tableFrom": "vehicle",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "organization",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -1638,28 +1570,20 @@
         "vehicle_capability_vehicle_id_vehicle_id_fk": {
           "name": "vehicle_capability_vehicle_id_vehicle_id_fk",
           "tableFrom": "vehicle_capability",
-          "columnsFrom": [
-            "vehicle_id"
-          ],
+          "columnsFrom": ["vehicle_id"],
           "tableTo": "vehicle",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "vehicle_capability_capability_id_capability_id_fk": {
           "name": "vehicle_capability_capability_id_capability_id_fk",
           "tableFrom": "vehicle_capability",
-          "columnsFrom": [
-            "capability_id"
-          ],
+          "columnsFrom": ["capability_id"],
           "tableTo": "capability",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2001,130 +1925,90 @@
         "appointment_patient_id_patient_id_fk": {
           "name": "appointment_patient_id_patient_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_session_id_session_id_fk": {
           "name": "appointment_session_id_session_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "session_id"
-          ],
+          "columnsFrom": ["session_id"],
           "tableTo": "session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_window_id_appointment_window_id_fk": {
           "name": "appointment_window_id_appointment_window_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "window_id"
-          ],
+          "columnsFrom": ["window_id"],
           "tableTo": "appointment_window",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_practice_service_id_practice_service_id_fk": {
           "name": "appointment_practice_service_id_practice_service_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "practice_service_id"
-          ],
+          "columnsFrom": ["practice_service_id"],
           "tableTo": "practice_service",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_requested_by_identity_id_fk": {
           "name": "appointment_requested_by_identity_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "requested_by"
-          ],
+          "columnsFrom": ["requested_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_decision_by_identity_id_fk": {
           "name": "appointment_decision_by_identity_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "decision_by"
-          ],
+          "columnsFrom": ["decision_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_replaces_appointment_id_appointment_id_fk": {
           "name": "appointment_replaces_appointment_id_appointment_id_fk",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "replaces_appointment_id"
-          ],
+          "columnsFrom": ["replaces_appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_composite_fk_1": {
           "name": "appointment_composite_fk_1",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "window_id",
-            "session_id"
-          ],
+          "columnsFrom": ["window_id", "session_id"],
           "tableTo": "appointment_window",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id",
-            "session_id"
-          ],
+          "columnsTo": ["id", "session_id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_composite_fk_2": {
           "name": "appointment_composite_fk_2",
           "tableFrom": "appointment",
-          "columnsFrom": [
-            "session_id",
-            "practice_service_id"
-          ],
+          "columnsFrom": ["session_id", "practice_service_id"],
           "tableTo": "session_service",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "session_id",
-            "practice_service_id"
-          ],
+          "columnsTo": ["session_id", "practice_service_id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2298,42 +2182,30 @@
         "appointment_checkin_appointment_id_appointment_id_fk": {
           "name": "appointment_checkin_appointment_id_appointment_id_fk",
           "tableFrom": "appointment_checkin",
-          "columnsFrom": [
-            "appointment_id"
-          ],
+          "columnsFrom": ["appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_checkin_token_id_checkin_token_id_fk": {
           "name": "appointment_checkin_token_id_checkin_token_id_fk",
           "tableFrom": "appointment_checkin",
-          "columnsFrom": [
-            "token_id"
-          ],
+          "columnsFrom": ["token_id"],
           "tableTo": "checkin_token",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "appointment_checkin_checked_in_by_identity_id_fk": {
           "name": "appointment_checkin_checked_in_by_identity_id_fk",
           "tableFrom": "appointment_checkin",
-          "columnsFrom": [
-            "checked_in_by"
-          ],
+          "columnsFrom": ["checked_in_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2452,14 +2324,10 @@
         "checkin_token_appointment_id_appointment_id_fk": {
           "name": "checkin_token_appointment_id_appointment_id_fk",
           "tableFrom": "checkin_token",
-          "columnsFrom": [
-            "appointment_id"
-          ],
+          "columnsFrom": ["appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2605,28 +2473,20 @@
         "clinical_attachment_consultation_id_consultation_id_fk": {
           "name": "clinical_attachment_consultation_id_consultation_id_fk",
           "tableFrom": "clinical_attachment",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_attachment_uploaded_by_identity_id_fk": {
           "name": "clinical_attachment_uploaded_by_identity_id_fk",
           "tableFrom": "clinical_attachment",
-          "columnsFrom": [
-            "uploaded_by"
-          ],
+          "columnsFrom": ["uploaded_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2756,42 +2616,30 @@
         "clinical_note_consultation_id_consultation_id_fk": {
           "name": "clinical_note_consultation_id_consultation_id_fk",
           "tableFrom": "clinical_note",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_note_author_id_identity_id_fk": {
           "name": "clinical_note_author_id_identity_id_fk",
           "tableFrom": "clinical_note",
-          "columnsFrom": [
-            "author_id"
-          ],
+          "columnsFrom": ["author_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_note_supersedes_id_clinical_note_id_fk": {
           "name": "clinical_note_supersedes_id_clinical_note_id_fk",
           "tableFrom": "clinical_note",
-          "columnsFrom": [
-            "supersedes_id"
-          ],
+          "columnsFrom": ["supersedes_id"],
           "tableTo": "clinical_note",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -2964,42 +2812,30 @@
         "consultation_appointment_id_appointment_id_fk": {
           "name": "consultation_appointment_id_appointment_id_fk",
           "tableFrom": "consultation",
-          "columnsFrom": [
-            "appointment_id"
-          ],
+          "columnsFrom": ["appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "consultation_patient_id_patient_id_fk": {
           "name": "consultation_patient_id_patient_id_fk",
           "tableFrom": "consultation",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "consultation_doctor_id_doctor_id_fk": {
           "name": "consultation_doctor_id_doctor_id_fk",
           "tableFrom": "consultation",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -3140,42 +2976,30 @@
         "consultation_diagnosis_consultation_id_consultation_id_fk": {
           "name": "consultation_diagnosis_consultation_id_consultation_id_fk",
           "tableFrom": "consultation_diagnosis",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "consultation_diagnosis_recorded_by_identity_id_fk": {
           "name": "consultation_diagnosis_recorded_by_identity_id_fk",
           "tableFrom": "consultation_diagnosis",
-          "columnsFrom": [
-            "recorded_by"
-          ],
+          "columnsFrom": ["recorded_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "consultation_diagnosis_supersedes_id_consultation_diagnosis_id_fk": {
           "name": "consultation_diagnosis_supersedes_id_consultation_diagnosis_id_fk",
           "tableFrom": "consultation_diagnosis",
-          "columnsFrom": [
-            "supersedes_id"
-          ],
+          "columnsFrom": ["supersedes_id"],
           "tableTo": "consultation_diagnosis",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -3317,42 +3141,30 @@
         "followup_recommendation_consultation_id_consultation_id_fk": {
           "name": "followup_recommendation_consultation_id_consultation_id_fk",
           "tableFrom": "followup_recommendation",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "followup_recommendation_recommended_by_identity_id_fk": {
           "name": "followup_recommendation_recommended_by_identity_id_fk",
           "tableFrom": "followup_recommendation",
-          "columnsFrom": [
-            "recommended_by"
-          ],
+          "columnsFrom": ["recommended_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "followup_recommendation_booked_appointment_id_appointment_id_fk": {
           "name": "followup_recommendation_booked_appointment_id_appointment_id_fk",
           "tableFrom": "followup_recommendation",
-          "columnsFrom": [
-            "booked_appointment_id"
-          ],
+          "columnsFrom": ["booked_appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -3511,42 +3323,30 @@
         "vital_observation_consultation_id_consultation_id_fk": {
           "name": "vital_observation_consultation_id_consultation_id_fk",
           "tableFrom": "vital_observation",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "vital_observation_recorded_by_identity_id_fk": {
           "name": "vital_observation_recorded_by_identity_id_fk",
           "tableFrom": "vital_observation",
-          "columnsFrom": [
-            "recorded_by"
-          ],
+          "columnsFrom": ["recorded_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "vital_observation_supersedes_id_vital_observation_id_fk": {
           "name": "vital_observation_supersedes_id_vital_observation_id_fk",
           "tableFrom": "vital_observation",
-          "columnsFrom": [
-            "supersedes_id"
-          ],
+          "columnsFrom": ["supersedes_id"],
           "tableTo": "vital_observation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -3718,14 +3518,10 @@
         "doctor_identity_id_identity_id_fk": {
           "name": "doctor_identity_id_identity_id_fk",
           "tableFrom": "doctor",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -3881,28 +3677,20 @@
         "doctor_facility_doctor_id_doctor_id_fk": {
           "name": "doctor_facility_doctor_id_doctor_id_fk",
           "tableFrom": "doctor_facility",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "doctor_facility_facility_id_facility_id_fk": {
           "name": "doctor_facility_facility_id_facility_id_fk",
           "tableFrom": "doctor_facility",
-          "columnsFrom": [
-            "facility_id"
-          ],
+          "columnsFrom": ["facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -4005,14 +3793,10 @@
         "doctor_language_doctor_id_doctor_id_fk": {
           "name": "doctor_language_doctor_id_doctor_id_fk",
           "tableFrom": "doctor_language",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -4130,28 +3914,20 @@
         "doctor_specialty_doctor_id_doctor_id_fk": {
           "name": "doctor_specialty_doctor_id_doctor_id_fk",
           "tableFrom": "doctor_specialty",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "doctor_specialty_specialty_id_specialty_id_fk": {
           "name": "doctor_specialty_specialty_id_specialty_id_fk",
           "tableFrom": "doctor_specialty",
-          "columnsFrom": [
-            "specialty_id"
-          ],
+          "columnsFrom": ["specialty_id"],
           "tableTo": "specialty",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -4291,14 +4067,10 @@
         "practice_service_doctor_facility_id_doctor_facility_id_fk": {
           "name": "practice_service_doctor_facility_id_doctor_facility_id_fk",
           "tableFrom": "practice_service",
-          "columnsFrom": [
-            "doctor_facility_id"
-          ],
+          "columnsFrom": ["doctor_facility_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -4593,28 +4365,20 @@
         "symptom_specialty_symptom_id_symptom_id_fk": {
           "name": "symptom_specialty_symptom_id_symptom_id_fk",
           "tableFrom": "symptom_specialty",
-          "columnsFrom": [
-            "symptom_id"
-          ],
+          "columnsFrom": ["symptom_id"],
           "tableTo": "symptom",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "symptom_specialty_specialty_id_specialty_id_fk": {
           "name": "symptom_specialty_specialty_id_specialty_id_fk",
           "tableFrom": "symptom_specialty",
-          "columnsFrom": [
-            "specialty_id"
-          ],
+          "columnsFrom": ["specialty_id"],
           "tableTo": "specialty",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -4877,88 +4641,60 @@
         "ambulance_assignment_booking_id_ambulance_booking_id_fk": {
           "name": "ambulance_assignment_booking_id_ambulance_booking_id_fk",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_assignment_offer_id_dispatch_offer_id_fk": {
           "name": "ambulance_assignment_offer_id_dispatch_offer_id_fk",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "offer_id"
-          ],
+          "columnsFrom": ["offer_id"],
           "tableTo": "dispatch_offer",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_assignment_shift_id_driver_shift_id_fk": {
           "name": "ambulance_assignment_shift_id_driver_shift_id_fk",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "shift_id"
-          ],
+          "columnsFrom": ["shift_id"],
           "tableTo": "driver_shift",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_assignment_driver_id_driver_id_fk": {
           "name": "ambulance_assignment_driver_id_driver_id_fk",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "driver_id"
-          ],
+          "columnsFrom": ["driver_id"],
           "tableTo": "driver",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_assignment_vehicle_id_vehicle_id_fk": {
           "name": "ambulance_assignment_vehicle_id_vehicle_id_fk",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "vehicle_id"
-          ],
+          "columnsFrom": ["vehicle_id"],
           "tableTo": "vehicle",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_assignment_composite_fk_1": {
           "name": "ambulance_assignment_composite_fk_1",
           "tableFrom": "ambulance_assignment",
-          "columnsFrom": [
-            "shift_id",
-            "driver_id",
-            "vehicle_id"
-          ],
+          "columnsFrom": ["shift_id", "driver_id", "vehicle_id"],
           "tableTo": "driver_shift",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id",
-            "driver_id",
-            "vehicle_id"
-          ],
+          "columnsTo": ["id", "driver_id", "vehicle_id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5110,28 +4846,20 @@
         "dispatch_offer_round_id_dispatch_round_id_fk": {
           "name": "dispatch_offer_round_id_dispatch_round_id_fk",
           "tableFrom": "dispatch_offer",
-          "columnsFrom": [
-            "round_id"
-          ],
+          "columnsFrom": ["round_id"],
           "tableTo": "dispatch_round",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "dispatch_offer_shift_id_driver_shift_id_fk": {
           "name": "dispatch_offer_shift_id_driver_shift_id_fk",
           "tableFrom": "dispatch_offer",
-          "columnsFrom": [
-            "shift_id"
-          ],
+          "columnsFrom": ["shift_id"],
           "tableTo": "driver_shift",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5280,14 +5008,10 @@
         "dispatch_round_booking_id_ambulance_booking_id_fk": {
           "name": "dispatch_round_booking_id_ambulance_booking_id_fk",
           "tableFrom": "dispatch_round",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5408,14 +5132,10 @@
         "emergency_case_booking_id_ambulance_booking_id_fk": {
           "name": "emergency_case_booking_id_ambulance_booking_id_fk",
           "tableFrom": "emergency_case",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5545,28 +5265,20 @@
         "emergency_start_override_trip_id_trip_id_fk": {
           "name": "emergency_start_override_trip_id_trip_id_fk",
           "tableFrom": "emergency_start_override",
-          "columnsFrom": [
-            "trip_id"
-          ],
+          "columnsFrom": ["trip_id"],
           "tableTo": "trip",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "emergency_start_override_approved_by_identity_id_fk": {
           "name": "emergency_start_override_approved_by_identity_id_fk",
           "tableFrom": "emergency_start_override",
-          "columnsFrom": [
-            "approved_by"
-          ],
+          "columnsFrom": ["approved_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5685,14 +5397,10 @@
         "guest_emergency_session_claimed_identity_id_identity_id_fk": {
           "name": "guest_emergency_session_claimed_identity_id_identity_id_fk",
           "tableFrom": "guest_emergency_session",
-          "columnsFrom": [
-            "claimed_identity_id"
-          ],
+          "columnsFrom": ["claimed_identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5818,42 +5526,30 @@
         "triage_observation_emergency_case_id_emergency_case_id_fk": {
           "name": "triage_observation_emergency_case_id_emergency_case_id_fk",
           "tableFrom": "triage_observation",
-          "columnsFrom": [
-            "emergency_case_id"
-          ],
+          "columnsFrom": ["emergency_case_id"],
           "tableTo": "emergency_case",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "triage_observation_recorded_by_identity_id_fk": {
           "name": "triage_observation_recorded_by_identity_id_fk",
           "tableFrom": "triage_observation",
-          "columnsFrom": [
-            "recorded_by"
-          ],
+          "columnsFrom": ["recorded_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "triage_observation_suggested_facility_id_facility_id_fk": {
           "name": "triage_observation_suggested_facility_id_facility_id_fk",
           "tableFrom": "triage_observation",
-          "columnsFrom": [
-            "suggested_facility_id"
-          ],
+          "columnsFrom": ["suggested_facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -5984,28 +5680,20 @@
         "ambulance_review_trip_id_trip_id_fk": {
           "name": "ambulance_review_trip_id_trip_id_fk",
           "tableFrom": "ambulance_review",
-          "columnsFrom": [
-            "trip_id"
-          ],
+          "columnsFrom": ["trip_id"],
           "tableTo": "trip",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "ambulance_review_submitted_by_identity_id_fk": {
           "name": "ambulance_review_submitted_by_identity_id_fk",
           "tableFrom": "ambulance_review",
-          "columnsFrom": [
-            "submitted_by"
-          ],
+          "columnsFrom": ["submitted_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -6143,28 +5831,20 @@
         "doctor_review_appointment_id_appointment_id_fk": {
           "name": "doctor_review_appointment_id_appointment_id_fk",
           "tableFrom": "doctor_review",
-          "columnsFrom": [
-            "appointment_id"
-          ],
+          "columnsFrom": ["appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "doctor_review_submitted_by_identity_id_fk": {
           "name": "doctor_review_submitted_by_identity_id_fk",
           "tableFrom": "doctor_review",
-          "columnsFrom": [
-            "submitted_by"
-          ],
+          "columnsFrom": ["submitted_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -6272,14 +5952,10 @@
         "platform_feedback_identity_id_identity_id_fk": {
           "name": "platform_feedback_identity_id_identity_id_fk",
           "tableFrom": "platform_feedback",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -6642,28 +6318,20 @@
         "patient_access_patient_id_patient_id_fk": {
           "name": "patient_access_patient_id_patient_id_fk",
           "tableFrom": "patient_access",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "patient_access_identity_id_identity_id_fk": {
           "name": "patient_access_identity_id_identity_id_fk",
           "tableFrom": "patient_access",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -6774,14 +6442,10 @@
         "patient_contact_patient_id_patient_id_fk": {
           "name": "patient_contact_patient_id_patient_id_fk",
           "tableFrom": "patient_contact",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -6927,28 +6591,20 @@
         "domain_event_actor_id_identity_id_fk": {
           "name": "domain_event_actor_id_identity_id_fk",
           "tableFrom": "domain_event",
-          "columnsFrom": [
-            "actor_id"
-          ],
+          "columnsFrom": ["actor_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "domain_event_guest_session_id_guest_emergency_session_id_fk": {
           "name": "domain_event_guest_session_id_guest_emergency_session_id_fk",
           "tableFrom": "domain_event",
-          "columnsFrom": [
-            "guest_session_id"
-          ],
+          "columnsFrom": ["guest_session_id"],
           "tableTo": "guest_emergency_session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -7083,14 +6739,10 @@
         "event_delivery_event_id_domain_event_id_fk": {
           "name": "event_delivery_event_id_domain_event_id_fk",
           "tableFrom": "event_delivery",
-          "columnsFrom": [
-            "event_id"
-          ],
+          "columnsFrom": ["event_id"],
           "tableTo": "domain_event",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -7380,28 +7032,20 @@
         "notification_delivery_intent_id_notification_intent_id_fk": {
           "name": "notification_delivery_intent_id_notification_intent_id_fk",
           "tableFrom": "notification_delivery",
-          "columnsFrom": [
-            "intent_id"
-          ],
+          "columnsFrom": ["intent_id"],
           "tableTo": "notification_intent",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "notification_delivery_endpoint_id_notification_endpoint_id_fk": {
           "name": "notification_delivery_endpoint_id_notification_endpoint_id_fk",
           "tableFrom": "notification_delivery",
-          "columnsFrom": [
-            "endpoint_id"
-          ],
+          "columnsFrom": ["endpoint_id"],
           "tableTo": "notification_endpoint",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -7542,14 +7186,10 @@
         "notification_endpoint_identity_id_identity_id_fk": {
           "name": "notification_endpoint_identity_id_identity_id_fk",
           "tableFrom": "notification_endpoint",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -7696,42 +7336,30 @@
         "notification_intent_recipient_id_identity_id_fk": {
           "name": "notification_intent_recipient_id_identity_id_fk",
           "tableFrom": "notification_intent",
-          "columnsFrom": [
-            "recipient_id"
-          ],
+          "columnsFrom": ["recipient_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "notification_intent_event_id_domain_event_id_fk": {
           "name": "notification_intent_event_id_domain_event_id_fk",
           "tableFrom": "notification_intent",
-          "columnsFrom": [
-            "event_id"
-          ],
+          "columnsFrom": ["event_id"],
           "tableTo": "domain_event",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "notification_intent_occurrence_id_reminder_occurrence_id_fk": {
           "name": "notification_intent_occurrence_id_reminder_occurrence_id_fk",
           "tableFrom": "notification_intent",
-          "columnsFrom": [
-            "occurrence_id"
-          ],
+          "columnsFrom": ["occurrence_id"],
           "tableTo": "reminder_occurrence",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -7871,14 +7499,10 @@
         "notification_preference_identity_id_identity_id_fk": {
           "name": "notification_preference_identity_id_identity_id_fk",
           "tableFrom": "notification_preference",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8011,14 +7635,10 @@
         "reminder_occurrence_schedule_id_reminder_schedule_id_fk": {
           "name": "reminder_occurrence_schedule_id_reminder_schedule_id_fk",
           "tableFrom": "reminder_occurrence",
-          "columnsFrom": [
-            "schedule_id"
-          ],
+          "columnsFrom": ["schedule_id"],
           "tableTo": "reminder_schedule",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8191,56 +7811,40 @@
         "reminder_schedule_patient_id_patient_id_fk": {
           "name": "reminder_schedule_patient_id_patient_id_fk",
           "tableFrom": "reminder_schedule",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "reminder_schedule_phase_id_medication_phase_id_fk": {
           "name": "reminder_schedule_phase_id_medication_phase_id_fk",
           "tableFrom": "reminder_schedule",
-          "columnsFrom": [
-            "phase_id"
-          ],
+          "columnsFrom": ["phase_id"],
           "tableTo": "medication_phase",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "reminder_schedule_timing_id_medication_timing_id_fk": {
           "name": "reminder_schedule_timing_id_medication_timing_id_fk",
           "tableFrom": "reminder_schedule",
-          "columnsFrom": [
-            "timing_id"
-          ],
+          "columnsFrom": ["timing_id"],
           "tableTo": "medication_timing",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "reminder_schedule_followup_id_followup_recommendation_id_fk": {
           "name": "reminder_schedule_followup_id_followup_recommendation_id_fk",
           "tableFrom": "reminder_schedule",
-          "columnsFrom": [
-            "followup_id"
-          ],
+          "columnsFrom": ["followup_id"],
           "tableTo": "followup_recommendation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8249,12 +7853,7 @@
       "uniqueConstraints": {
         "reminder_schedule_uq_1": {
           "name": "reminder_schedule_uq_1",
-          "columns": [
-            "phase_id",
-            "timing_id",
-            "followup_id",
-            "generation"
-          ],
+          "columns": ["phase_id", "timing_id", "followup_id", "generation"],
           "nullsNotDistinct": true
         }
       },
@@ -8417,14 +8016,10 @@
         "facility_organization_id_organization_id_fk": {
           "name": "facility_organization_id_organization_id_fk",
           "tableFrom": "facility",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "organization",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8553,28 +8148,20 @@
         "member_doctor_scope_member_id_organization_member_id_fk": {
           "name": "member_doctor_scope_member_id_organization_member_id_fk",
           "tableFrom": "member_doctor_scope",
-          "columnsFrom": [
-            "member_id"
-          ],
+          "columnsFrom": ["member_id"],
           "tableTo": "organization_member",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "member_doctor_scope_doctor_facility_id_doctor_facility_id_fk": {
           "name": "member_doctor_scope_doctor_facility_id_doctor_facility_id_fk",
           "tableFrom": "member_doctor_scope",
-          "columnsFrom": [
-            "doctor_facility_id"
-          ],
+          "columnsFrom": ["doctor_facility_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8796,42 +8383,30 @@
         "organization_member_identity_id_identity_id_fk": {
           "name": "organization_member_identity_id_identity_id_fk",
           "tableFrom": "organization_member",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "organization_member_organization_id_organization_id_fk": {
           "name": "organization_member_organization_id_organization_id_fk",
           "tableFrom": "organization_member",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "organization",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "organization_member_facility_id_facility_id_fk": {
           "name": "organization_member_facility_id_facility_id_fk",
           "tableFrom": "organization_member",
-          "columnsFrom": [
-            "facility_id"
-          ],
+          "columnsFrom": ["facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -8840,12 +8415,7 @@
       "uniqueConstraints": {
         "organization_member_uq_1": {
           "name": "organization_member_uq_1",
-          "columns": [
-            "identity_id",
-            "organization_id",
-            "facility_id",
-            "role"
-          ],
+          "columns": ["identity_id", "organization_id", "facility_id", "role"],
           "nullsNotDistinct": true
         }
       },
@@ -9026,28 +8596,20 @@
         "fare_quote_booking_id_ambulance_booking_id_fk": {
           "name": "fare_quote_booking_id_ambulance_booking_id_fk",
           "tableFrom": "fare_quote",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "fare_quote_accepted_by_identity_id_fk": {
           "name": "fare_quote_accepted_by_identity_id_fk",
           "tableFrom": "fare_quote",
-          "columnsFrom": [
-            "accepted_by"
-          ],
+          "columnsFrom": ["accepted_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -9265,56 +8827,40 @@
         "payment_booking_id_ambulance_booking_id_fk": {
           "name": "payment_booking_id_ambulance_booking_id_fk",
           "tableFrom": "payment",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "payment_fare_quote_id_fare_quote_id_fk": {
           "name": "payment_fare_quote_id_fare_quote_id_fk",
           "tableFrom": "payment",
-          "columnsFrom": [
-            "fare_quote_id"
-          ],
+          "columnsFrom": ["fare_quote_id"],
           "tableTo": "fare_quote",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "payment_reported_by_identity_id_fk": {
           "name": "payment_reported_by_identity_id_fk",
           "tableFrom": "payment",
-          "columnsFrom": [
-            "reported_by"
-          ],
+          "columnsFrom": ["reported_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "payment_confirmed_by_identity_id_fk": {
           "name": "payment_confirmed_by_identity_id_fk",
           "tableFrom": "payment",
-          "columnsFrom": [
-            "confirmed_by"
-          ],
+          "columnsFrom": ["confirmed_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -9475,14 +9021,10 @@
         "provider_event_payment_id_payment_id_fk": {
           "name": "provider_event_payment_id_payment_id_fk",
           "tableFrom": "provider_event",
-          "columnsFrom": [
-            "payment_id"
-          ],
+          "columnsFrom": ["payment_id"],
           "tableTo": "payment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -9630,28 +9172,20 @@
         "refund_payment_id_payment_id_fk": {
           "name": "refund_payment_id_payment_id_fk",
           "tableFrom": "refund",
-          "columnsFrom": [
-            "payment_id"
-          ],
+          "columnsFrom": ["payment_id"],
           "tableTo": "payment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "refund_requested_by_identity_id_fk": {
           "name": "refund_requested_by_identity_id_fk",
           "tableFrom": "refund",
-          "columnsFrom": [
-            "requested_by"
-          ],
+          "columnsFrom": ["requested_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -9806,14 +9340,10 @@
         "medication_phase_prescription_item_id_prescription_item_id_fk": {
           "name": "medication_phase_prescription_item_id_prescription_item_id_fk",
           "tableFrom": "medication_phase",
-          "columnsFrom": [
-            "prescription_item_id"
-          ],
+          "columnsFrom": ["prescription_item_id"],
           "tableTo": "prescription_item",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -9943,14 +9473,10 @@
         "medication_timing_phase_id_medication_phase_id_fk": {
           "name": "medication_timing_phase_id_medication_phase_id_fk",
           "tableFrom": "medication_timing",
-          "columnsFrom": [
-            "phase_id"
-          ],
+          "columnsFrom": ["phase_id"],
           "tableTo": "medication_phase",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10077,14 +9603,10 @@
         "patient_routine_patient_id_patient_id_fk": {
           "name": "patient_routine_patient_id_patient_id_fk",
           "tableFrom": "patient_routine",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10171,14 +9693,10 @@
         "prescription_consultation_id_consultation_id_fk": {
           "name": "prescription_consultation_id_consultation_id_fk",
           "tableFrom": "prescription",
-          "columnsFrom": [
-            "consultation_id"
-          ],
+          "columnsFrom": ["consultation_id"],
           "tableTo": "consultation",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10304,14 +9822,10 @@
         "prescription_item_revision_id_prescription_revision_id_fk": {
           "name": "prescription_item_revision_id_prescription_revision_id_fk",
           "tableFrom": "prescription_item",
-          "columnsFrom": [
-            "revision_id"
-          ],
+          "columnsFrom": ["revision_id"],
           "tableTo": "prescription_revision",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10479,42 +9993,30 @@
         "prescription_revision_prescription_id_prescription_id_fk": {
           "name": "prescription_revision_prescription_id_prescription_id_fk",
           "tableFrom": "prescription_revision",
-          "columnsFrom": [
-            "prescription_id"
-          ],
+          "columnsFrom": ["prescription_id"],
           "tableTo": "prescription",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "prescription_revision_supersedes_id_prescription_revision_id_fk": {
           "name": "prescription_revision_supersedes_id_prescription_revision_id_fk",
           "tableFrom": "prescription_revision",
-          "columnsFrom": [
-            "supersedes_id"
-          ],
+          "columnsFrom": ["supersedes_id"],
           "tableTo": "prescription_revision",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "prescription_revision_signed_by_identity_id_fk": {
           "name": "prescription_revision_signed_by_identity_id_fk",
           "tableFrom": "prescription_revision",
-          "columnsFrom": [
-            "signed_by"
-          ],
+          "columnsFrom": ["signed_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10708,28 +10210,20 @@
         "queue_entry_queue_id_session_queue_id_fk": {
           "name": "queue_entry_queue_id_session_queue_id_fk",
           "tableFrom": "queue_entry",
-          "columnsFrom": [
-            "queue_id"
-          ],
+          "columnsFrom": ["queue_id"],
           "tableTo": "session_queue",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "queue_entry_appointment_id_appointment_id_fk": {
           "name": "queue_entry_appointment_id_appointment_id_fk",
           "tableFrom": "queue_entry",
-          "columnsFrom": [
-            "appointment_id"
-          ],
+          "columnsFrom": ["appointment_id"],
           "tableTo": "appointment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10846,14 +10340,10 @@
         "session_queue_session_id_session_id_fk": {
           "name": "session_queue_session_id_session_id_fk",
           "tableFrom": "session_queue",
-          "columnsFrom": [
-            "session_id"
-          ],
+          "columnsFrom": ["session_id"],
           "tableTo": "session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -10999,14 +10489,10 @@
         "appointment_window_session_id_session_id_fk": {
           "name": "appointment_window_session_id_session_id_fk",
           "tableFrom": "appointment_window",
-          "columnsFrom": [
-            "session_id"
-          ],
+          "columnsFrom": ["session_id"],
           "tableTo": "session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -11150,14 +10636,10 @@
         "doctor_booking_day_doctor_id_doctor_id_fk": {
           "name": "doctor_booking_day_doctor_id_doctor_id_fk",
           "tableFrom": "doctor_booking_day",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -11249,14 +10731,10 @@
         "schedule_break_schedule_rule_id_schedule_rule_id_fk": {
           "name": "schedule_break_schedule_rule_id_schedule_rule_id_fk",
           "tableFrom": "schedule_break",
-          "columnsFrom": [
-            "schedule_rule_id"
-          ],
+          "columnsFrom": ["schedule_rule_id"],
           "tableTo": "schedule_rule",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -11381,28 +10859,20 @@
         "schedule_exception_doctor_id_doctor_id_fk": {
           "name": "schedule_exception_doctor_id_doctor_id_fk",
           "tableFrom": "schedule_exception",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "schedule_exception_doctor_facility_id_doctor_facility_id_fk": {
           "name": "schedule_exception_doctor_facility_id_doctor_facility_id_fk",
           "tableFrom": "schedule_exception",
-          "columnsFrom": [
-            "doctor_facility_id"
-          ],
+          "columnsFrom": ["doctor_facility_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -11585,14 +11055,10 @@
         "schedule_rule_doctor_facility_id_doctor_facility_id_fk": {
           "name": "schedule_rule_doctor_facility_id_doctor_facility_id_fk",
           "tableFrom": "schedule_rule",
-          "columnsFrom": [
-            "doctor_facility_id"
-          ],
+          "columnsFrom": ["doctor_facility_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -11818,88 +11284,60 @@
         "session_doctor_facility_id_doctor_facility_id_fk": {
           "name": "session_doctor_facility_id_doctor_facility_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "doctor_facility_id"
-          ],
+          "columnsFrom": ["doctor_facility_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_doctor_id_doctor_id_fk": {
           "name": "session_doctor_id_doctor_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_id"],
           "tableTo": "doctor",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_booking_day_id_doctor_booking_day_id_fk": {
           "name": "session_booking_day_id_doctor_booking_day_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "booking_day_id"
-          ],
+          "columnsFrom": ["booking_day_id"],
           "tableTo": "doctor_booking_day",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_schedule_rule_id_schedule_rule_id_fk": {
           "name": "session_schedule_rule_id_schedule_rule_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "schedule_rule_id"
-          ],
+          "columnsFrom": ["schedule_rule_id"],
           "tableTo": "schedule_rule",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_composite_fk_1": {
           "name": "session_composite_fk_1",
           "tableFrom": "session",
-          "columnsFrom": [
-            "doctor_facility_id",
-            "doctor_id"
-          ],
+          "columnsFrom": ["doctor_facility_id", "doctor_id"],
           "tableTo": "doctor_facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id",
-            "doctor_id"
-          ],
+          "columnsTo": ["id", "doctor_id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_composite_fk_2": {
           "name": "session_composite_fk_2",
           "tableFrom": "session",
-          "columnsFrom": [
-            "booking_day_id",
-            "doctor_id"
-          ],
+          "columnsFrom": ["booking_day_id", "doctor_id"],
           "tableTo": "doctor_booking_day",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id",
-            "doctor_id"
-          ],
+          "columnsTo": ["id", "doctor_id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -12029,28 +11467,20 @@
         "session_service_session_id_session_id_fk": {
           "name": "session_service_session_id_session_id_fk",
           "tableFrom": "session_service",
-          "columnsFrom": [
-            "session_id"
-          ],
+          "columnsFrom": ["session_id"],
           "tableTo": "session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "session_service_practice_service_id_practice_service_id_fk": {
           "name": "session_service_practice_service_id_practice_service_id_fk",
           "tableFrom": "session_service",
-          "columnsFrom": [
-            "practice_service_id"
-          ],
+          "columnsFrom": ["practice_service_id"],
           "tableTo": "practice_service",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -12223,56 +11653,40 @@
         "audit_log_actor_id_identity_id_fk": {
           "name": "audit_log_actor_id_identity_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "actor_id"
-          ],
+          "columnsFrom": ["actor_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "audit_log_guest_session_id_guest_emergency_session_id_fk": {
           "name": "audit_log_guest_session_id_guest_emergency_session_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "guest_session_id"
-          ],
+          "columnsFrom": ["guest_session_id"],
           "tableTo": "guest_emergency_session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "audit_log_organization_id_organization_id_fk": {
           "name": "audit_log_organization_id_organization_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "organization",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "audit_log_facility_id_facility_id_fk": {
           "name": "audit_log_facility_id_facility_id_fk",
           "tableFrom": "audit_log",
-          "columnsFrom": [
-            "facility_id"
-          ],
+          "columnsFrom": ["facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -12437,56 +11851,40 @@
         "clinical_access_grant_patient_id_patient_id_fk": {
           "name": "clinical_access_grant_patient_id_patient_id_fk",
           "tableFrom": "clinical_access_grant",
-          "columnsFrom": [
-            "patient_id"
-          ],
+          "columnsFrom": ["patient_id"],
           "tableTo": "patient",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_access_grant_identity_id_identity_id_fk": {
           "name": "clinical_access_grant_identity_id_identity_id_fk",
           "tableFrom": "clinical_access_grant",
-          "columnsFrom": [
-            "identity_id"
-          ],
+          "columnsFrom": ["identity_id"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_access_grant_facility_id_facility_id_fk": {
           "name": "clinical_access_grant_facility_id_facility_id_fk",
           "tableFrom": "clinical_access_grant",
-          "columnsFrom": [
-            "facility_id"
-          ],
+          "columnsFrom": ["facility_id"],
           "tableTo": "facility",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "clinical_access_grant_granted_by_identity_id_fk": {
           "name": "clinical_access_grant_granted_by_identity_id_fk",
           "tableFrom": "clinical_access_grant",
-          "columnsFrom": [
-            "granted_by"
-          ],
+          "columnsFrom": ["granted_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -12653,28 +12051,20 @@
         "driver_location_latest_driver_id_driver_id_fk": {
           "name": "driver_location_latest_driver_id_driver_id_fk",
           "tableFrom": "driver_location_latest",
-          "columnsFrom": [
-            "driver_id"
-          ],
+          "columnsFrom": ["driver_id"],
           "tableTo": "driver",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "driver_location_latest_shift_id_driver_shift_id_fk": {
           "name": "driver_location_latest_shift_id_driver_shift_id_fk",
           "tableFrom": "driver_location_latest",
-          "columnsFrom": [
-            "shift_id"
-          ],
+          "columnsFrom": ["shift_id"],
           "tableTo": "driver_shift",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -12850,56 +12240,40 @@
         "tracking_share_trip_id_trip_id_fk": {
           "name": "tracking_share_trip_id_trip_id_fk",
           "tableFrom": "tracking_share",
-          "columnsFrom": [
-            "trip_id"
-          ],
+          "columnsFrom": ["trip_id"],
           "tableTo": "trip",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "tracking_share_created_by_identity_id_fk": {
           "name": "tracking_share_created_by_identity_id_fk",
           "tableFrom": "tracking_share",
-          "columnsFrom": [
-            "created_by"
-          ],
+          "columnsFrom": ["created_by"],
           "tableTo": "identity",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "tracking_share_guest_session_id_guest_emergency_session_id_fk": {
           "name": "tracking_share_guest_session_id_guest_emergency_session_id_fk",
           "tableFrom": "tracking_share",
-          "columnsFrom": [
-            "guest_session_id"
-          ],
+          "columnsFrom": ["guest_session_id"],
           "tableTo": "guest_emergency_session",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "tracking_share_contact_id_patient_contact_id_fk": {
           "name": "tracking_share_contact_id_patient_contact_id_fk",
           "tableFrom": "tracking_share",
-          "columnsFrom": [
-            "contact_id"
-          ],
+          "columnsFrom": ["contact_id"],
           "tableTo": "patient_contact",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -13080,28 +12454,20 @@
         "trip_location_trip_id_trip_id_fk": {
           "name": "trip_location_trip_id_trip_id_fk",
           "tableFrom": "trip_location",
-          "columnsFrom": [
-            "trip_id"
-          ],
+          "columnsFrom": ["trip_id"],
           "tableTo": "trip",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "trip_location_assignment_id_ambulance_assignment_id_fk": {
           "name": "trip_location_assignment_id_ambulance_assignment_id_fk",
           "tableFrom": "trip_location",
-          "columnsFrom": [
-            "assignment_id"
-          ],
+          "columnsFrom": ["assignment_id"],
           "tableTo": "ambulance_assignment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }
@@ -13109,10 +12475,7 @@
       "compositePrimaryKeys": {
         "trip_location_id_received_at_pk": {
           "name": "trip_location_id_received_at_pk",
-          "columns": [
-            "id",
-            "received_at"
-          ]
+          "columns": ["id", "received_at"]
         }
       },
       "uniqueConstraints": {},
@@ -13273,28 +12636,20 @@
         "trip_booking_id_ambulance_booking_id_fk": {
           "name": "trip_booking_id_ambulance_booking_id_fk",
           "tableFrom": "trip",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "ambulance_booking",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         },
         "trip_assignment_id_ambulance_assignment_id_fk": {
           "name": "trip_assignment_id_ambulance_assignment_id_fk",
           "tableFrom": "trip",
-          "columnsFrom": [
-            "assignment_id"
-          ],
+          "columnsFrom": ["assignment_id"],
           "tableTo": "ambulance_assignment",
           "schemaTo": "clinzo",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "restrict"
         }

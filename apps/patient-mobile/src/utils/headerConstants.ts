@@ -28,7 +28,7 @@ export function getHeaderAnimationStyles(
 
   const collapsedHeight = topInset + collapsedHeaderH;
   const searchStartTop = expandedHeight - searchOverlap;
-  const searchEndTop = options?.searchEndTop ?? (topInset + 20);
+  const searchEndTop = options?.searchEndTop ?? topInset + 20;
 
   const expandedHeaderStyle = {
     opacity: scrollY.interpolate({

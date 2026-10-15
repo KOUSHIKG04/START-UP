@@ -387,7 +387,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 3,
   },
-  card: { backgroundColor: colors.white, borderRadius: 17, gap: 13, padding: 1, marginTop: 8 },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 17,
+    gap: 13,
+    padding: 1,
+    marginTop: 8,
+  },
   fieldLabel: {
     color: colors.doctor.text,
     fontFamily: fontFamilies.medium,
@@ -422,9 +428,21 @@ const styles = StyleSheet.create({
     borderColor: "#D9DDE0",
     overflow: "hidden",
   },
-  changeMap: { flex: 1, width: "100%", justifyContent: "center", alignItems: "center" },
+  changeMap: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   changeMapImage: { opacity: 0.5 },
-  changeContent: { alignItems: "center", gap: 2, backgroundColor: "#FFFFFFD9", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3 },
+  changeContent: {
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "#FFFFFFD9",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
   changeText: {
     color: colors.doctor.primary,
     fontFamily: fontFamilies.semibold,

@@ -80,14 +80,21 @@ export function UnavailableTimeManager() {
   );
   const [scopes, setScopes] = useState<Scope[]>(["all"]);
   function toggleScope(value: Scope) {
-    setScopes(current => {
+    setScopes((current) => {
       if (value === "all") return ["all"];
-      const next = current.filter(item => item !== "all");
-      const chosen = next.includes(value) ? next.filter(item => item !== value) : [...next, value];
+      const next = current.filter((item) => item !== "all");
+      const chosen = next.includes(value)
+        ? next.filter((item) => item !== value)
+        : [...next, value];
       return chosen.length === 0 || chosen.length === 3 ? ["all"] : chosen;
     });
   }
-  const scopeLabel = scopes.includes("all") ? "all services" : filters.filter(([value]) => scopes.includes(value)).map(([,label]) => label).join(" and ");
+  const scopeLabel = scopes.includes("all")
+    ? "all services"
+    : filters
+        .filter(([value]) => scopes.includes(value))
+        .map(([, label]) => label)
+        .join(" and ");
   const [date, setDate] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
@@ -192,63 +199,76 @@ export function UnavailableTimeManager() {
         </Panel>
       ) : null}
       <Panel>
-      <Heading style={{ fontSize: 15, fontFamily: fontFamilies.regular, fontWeight: "400" }}>
-        Unavailable time / Leave
-      </Heading>
-      <FadedScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}
-      >
-        {filters.map(([value, label]) => (
-          <Chip key={value} theme="doctor" variant="radio" label={label}
-            accessibilityRole="checkbox" selected={scopes.includes(value)} disabled={busy}
-            onPress={() => toggleScope(value)} />
-        ))}
-      </FadedScrollView>
-      <Label muted>This block applies to {scopeLabel.toLowerCase()}.</Label>
-      {practices.isLoading || unavailable.isLoading ? (
-        <Loader theme="doctor" />
-      ) : null}
-      {!practices.isLoading && !practiceId ? (
-        <Label muted>
-          An active practice is required to manage unavailable time.
-        </Label>
-      ) : null}
-      {practiceId ? (
-        <UnavailableTimePanel
-          timeZone={zone}
-          leaveDate={date}
-          onLeaveDateChange={setDate}
-          leaveStart={start}
-          onLeaveStartChange={setStart}
-          leaveEnd={end}
-          onLeaveEndChange={setEnd}
-          leaveReason={reason}
-          onLeaveReasonChange={setReason}
-          busy={busy}
-          pendingAction={pending}
-          canAdd={Boolean(
-            zone &&
-            date &&
-            start &&
-            end &&
-            reason.trim().length >= 2 &&
-            !unavailable.isFetching
-          )}
-          onAddLeave={() => void add()}
-          unavailable={(
-            unavailable.data as ClinicUnavailability[] | undefined
-          )?.filter(
-            (item) =>
-              scopes.includes("all") ||
-              item.service_mode === "all" ||
-              scopes.includes(item.service_mode)
-          )}
-          onRemoveLeave={remove}
-          isError={unavailable.isError || practices.isError || doctor.isError}
-        />
-      ) : null}
+        <Heading
+          style={{
+            fontSize: 15,
+            fontFamily: fontFamilies.regular,
+            fontWeight: "400",
+          }}
+        >
+          Unavailable time / Leave
+        </Heading>
+        <FadedScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
+          {filters.map(([value, label]) => (
+            <Chip
+              key={value}
+              theme="doctor"
+              variant="radio"
+              label={label}
+              accessibilityRole="checkbox"
+              selected={scopes.includes(value)}
+              disabled={busy}
+              onPress={() => toggleScope(value)}
+            />
+          ))}
+        </FadedScrollView>
+        <Label muted>This block applies to {scopeLabel.toLowerCase()}.</Label>
+        {practices.isLoading || unavailable.isLoading ? (
+          <Loader theme="doctor" />
+        ) : null}
+        {!practices.isLoading && !practiceId ? (
+          <Label muted>
+            An active practice is required to manage unavailable time.
+          </Label>
+        ) : null}
+        {practiceId ? (
+          <UnavailableTimePanel
+            timeZone={zone}
+            leaveDate={date}
+            onLeaveDateChange={setDate}
+            leaveStart={start}
+            onLeaveStartChange={setStart}
+            leaveEnd={end}
+            onLeaveEndChange={setEnd}
+            leaveReason={reason}
+            onLeaveReasonChange={setReason}
+            busy={busy}
+            pendingAction={pending}
+            canAdd={Boolean(
+              zone &&
+              date &&
+              start &&
+              end &&
+              reason.trim().length >= 2 &&
+              !unavailable.isFetching
+            )}
+            onAddLeave={() => void add()}
+            unavailable={(
+              unavailable.data as ClinicUnavailability[] | undefined
+            )?.filter(
+              (item) =>
+                scopes.includes("all") ||
+                item.service_mode === "all" ||
+                scopes.includes(item.service_mode)
+            )}
+            onRemoveLeave={remove}
+            isError={unavailable.isError || practices.isError || doctor.isError}
+          />
+        ) : null}
       </Panel>
     </>
   );

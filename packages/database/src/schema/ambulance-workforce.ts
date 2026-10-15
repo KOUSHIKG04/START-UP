@@ -78,7 +78,10 @@ export const driver = clinzo
       index("driver_identity_id_idx").on(table.identity_id),
       index("driver_organization_id_idx").on(table.organization_id),
       check("driver_ck_1", sql.raw("row_version > 0")),
-      check("driver_home_address_check", sql.raw("clinzo.valid_driver_address(home_address)")),
+      check(
+        "driver_home_address_check",
+        sql.raw("clinzo.valid_driver_address(home_address)")
+      ),
       check(
         "driver_city_length",
         sql.raw("city IS NULL OR length(city) BETWEEN 2 AND 120")
@@ -152,7 +155,10 @@ export const driverRegistrationApplication = clinzo
       uniqueIndex("driver_registration_application_identity_uq").on(
         table.identity_id
       ),
-      check("driver_registration_application_home_address_check", sql.raw("clinzo.valid_driver_address(home_address)")),
+      check(
+        "driver_registration_application_home_address_check",
+        sql.raw("clinzo.valid_driver_address(home_address)")
+      ),
       check(
         "driver_registration_application_row_version_ck",
         sql.raw("row_version > 0")

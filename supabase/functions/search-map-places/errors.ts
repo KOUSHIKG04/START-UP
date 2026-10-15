@@ -1,5 +1,4 @@
 export function placeSearchError(status: number, reason?: string) {
-
   if (reason === "SERVICE_DISABLED")
     return "Enable Places API (New) in the Google Cloud project used by the server key.";
 
@@ -17,7 +16,7 @@ export function placeSearchError(status: number, reason?: string) {
 
   if (status === 429)
     return "Google place-search quota is exceeded. Retry later.";
-  
+
   if (status === 403)
     return "Google denied place search. Check Places API (New), billing and server key restrictions.";
 

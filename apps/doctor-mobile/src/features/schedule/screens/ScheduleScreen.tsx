@@ -40,7 +40,11 @@ import {
 import { palette, ui } from "../../../components/theme";
 import { DatePicker } from "../../../components/DatePicker";
 import { formatDisplayDate } from "@startup/contracts";
-import { previewTimeBlock, scheduleError, suggestConsultationDuration } from "../utils/schedule";
+import {
+  previewTimeBlock,
+  scheduleError,
+  suggestConsultationDuration,
+} from "../utils/schedule";
 import type { Schedule } from "../../../types/doctor";
 import {
   ConsultationChargesPanel,
@@ -71,7 +75,8 @@ function NumberSetting({
   const [text, setText] = useState(String(value));
   useEffect(() => setText(String(value)), [value]);
   const parsed = /^\d+$/.test(text) ? Number(text) : NaN;
-  const current = Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : value;
+  const current =
+    Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : value;
   const commit = (next: number) => {
     const bounded = Math.max(min, Math.min(max, next));
     setText(String(bounded));
@@ -80,46 +85,109 @@ function NumberSetting({
   return (
     <View style={{ gap: 6 }}>
       <View style={ui.between}>
-        <Label style={{ fontSize: 13, lineHeight: 20, includeFontPadding: false }}>{title}</Label>
-        {!stepper ? <Label muted style={{ fontSize: 12 }}>
-          {min}–{max} {suffix}
-        </Label> : null}
+        <Label
+          style={{ fontSize: 13, lineHeight: 20, includeFontPadding: false }}
+        >
+          {title}
+        </Label>
+        {!stepper ? (
+          <Label muted style={{ fontSize: 12 }}>
+            {min}–{max} {suffix}
+          </Label>
+        ) : null}
       </View>
       {stepper ? (
-        <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: palette.border, borderRadius: 10, overflow: "hidden" }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={`Decrease ${title}`} accessibilityState={{ disabled: disabled || current <= min }}
-            disabled={disabled || current <= min} onPress={() => commit(current - 1)}
-            style={({ pressed }) => ({ width: 44, height: 46, alignItems: "center", justifyContent: "center", borderRightWidth: 1, borderColor: palette.border, opacity: disabled || current <= min ? 0.3 : 1, backgroundColor: pressed ? palette.subtle : palette.surface })}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            borderWidth: 1,
+            borderColor: palette.border,
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Decrease ${title}`}
+            accessibilityState={{ disabled: disabled || current <= min }}
+            disabled={disabled || current <= min}
+            onPress={() => commit(current - 1)}
+            style={({ pressed }) => ({
+              width: 44,
+              height: 46,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRightWidth: 1,
+              borderColor: palette.border,
+              opacity: disabled || current <= min ? 0.3 : 1,
+              backgroundColor: pressed ? palette.subtle : palette.surface,
+            })}
+          >
             <Minus size={20} color={palette.primary} />
           </Pressable>
-          <Input variant="unstyled" accessibilityLabel={`${title} in ${suffix}`} value={text} disabled={disabled}
-            style={{ flex: 1, minWidth: 0, height: 46, paddingHorizontal: 0, paddingVertical: 0, textAlign: "center", textAlignVertical: "center", fontSize: 16, color: palette.header }}
+          <Input
+            variant="unstyled"
+            accessibilityLabel={`${title} in ${suffix}`}
+            value={text}
+            disabled={disabled}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              height: 46,
+              paddingHorizontal: 0,
+              paddingVertical: 0,
+              textAlign: "center",
+              textAlignVertical: "center",
+              fontSize: 16,
+              color: palette.header,
+            }}
             onChangeText={(next) => {
               if (!/^\d{0,3}$/.test(next)) return;
               setText(next);
               const number = Number(next);
-              if (next !== "" && number >= min && number <= max) onChange(number);
+              if (next !== "" && number >= min && number <= max)
+                onChange(number);
             }}
-            onBlur={() => commit(Number.isFinite(parsed) ? parsed : value)} selectTextOnFocus keyboardType="number-pad" />
-          <Pressable accessibilityRole="button" accessibilityLabel={`Increase ${title}`} accessibilityState={{ disabled: disabled || current >= max }}
-            disabled={disabled || current >= max} onPress={() => commit(current + 1)}
-            style={({ pressed }) => ({ width: 44, height: 46, alignItems: "center", justifyContent: "center", borderLeftWidth: 1, borderColor: palette.border, opacity: disabled || current >= max ? 0.3 : 1, backgroundColor: pressed ? palette.subtle : palette.surface })}>
+            onBlur={() => commit(Number.isFinite(parsed) ? parsed : value)}
+            selectTextOnFocus
+            keyboardType="number-pad"
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Increase ${title}`}
+            accessibilityState={{ disabled: disabled || current >= max }}
+            disabled={disabled || current >= max}
+            onPress={() => commit(current + 1)}
+            style={({ pressed }) => ({
+              width: 44,
+              height: 46,
+              alignItems: "center",
+              justifyContent: "center",
+              borderLeftWidth: 1,
+              borderColor: palette.border,
+              opacity: disabled || current >= max ? 0.3 : 1,
+              backgroundColor: pressed ? palette.subtle : palette.surface,
+            })}
+          >
             <Plus size={20} color={palette.primary} />
           </Pressable>
         </View>
-      ) : <Input
-        accessibilityLabel={`${title} in ${suffix}`}
-        value={text}
-        onChangeText={(next) => {
-          if (/^\d{0,3}$/.test(next)) {
-            setText(next);
-            if (next !== "") onChange(Number(next));
-          }
-        }}
-        onBlur={() => setText(String(value))}
-        selectTextOnFocus
-        keyboardType="number-pad"
-      />}
+      ) : (
+        <Input
+          accessibilityLabel={`${title} in ${suffix}`}
+          value={text}
+          onChangeText={(next) => {
+            if (/^\d{0,3}$/.test(next)) {
+              setText(next);
+              if (next !== "") onChange(Number(next));
+            }
+          }}
+          onBlur={() => setText(String(value))}
+          selectTextOnFocus
+          keyboardType="number-pad"
+        />
+      )}
     </View>
   );
 }
@@ -284,16 +352,35 @@ export function ScheduleScreen({
   ]);
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
-  const [availabilityDuration, setAvailabilityDuration] = useState<number | null>(null);
+  const [availabilityDuration, setAvailabilityDuration] = useState<
+    number | null
+  >(null);
   const [showAutoBookingHelp, setShowAutoBookingHelp] = useState(false);
-  const [suggestedDuration, setSuggestedDuration] = useState<number | null>(null);
+  const [suggestedDuration, setSuggestedDuration] = useState<number | null>(
+    null
+  );
   const [effectiveDate, setEffectiveDate] = useState("");
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: zone || "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-  const startsFrom = effectiveDate && effectiveDate >= today ? effectiveDate : today;
-  useEffect(() => { setEffectiveDate(""); setSuggestedDuration(null); }, [selectedPracticeId, mode]);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: zone || "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const startsFrom =
+    effectiveDate && effectiveDate >= today ? effectiveDate : today;
+  useEffect(() => {
+    setEffectiveDate("");
+    setSuggestedDuration(null);
+  }, [selectedPracticeId, mode]);
   const dailyLimit = mode === "online" ? draft.online : draft.walkIn;
-  const suggestion = suggestConsultationDuration(draft.start, draft.end, dailyLimit);
-  const suggestedTimes = suggestedDuration ? previewTimeBlock(draft.start, draft.end, suggestedDuration) : [];
+  const suggestion = suggestConsultationDuration(
+    draft.start,
+    draft.end,
+    dailyLimit
+  );
+  const suggestedTimes = suggestedDuration
+    ? previewTimeBlock(draft.start, draft.end, suggestedDuration)
+    : [];
   const update = (changes: Partial<Schedule>) => {
     dirty.current = true;
     setDraft((current) => ({ ...current, ...changes }));
@@ -437,7 +524,9 @@ export function ScheduleScreen({
       ) : null}
       {practices.data && practices.data.length > 1 ? (
         <ScheduleSection title="Your clinic">
-          <Label muted style={{ fontSize: 12 }}>Select your clinic or hospital.</Label>
+          <Label muted style={{ fontSize: 12 }}>
+            Select your clinic or hospital.
+          </Label>
           <View style={ui.wrap}>
             {(practices.data as ClinicPractice[]).map(
               (practice: ClinicPractice) => (
@@ -505,65 +594,91 @@ export function ScheduleScreen({
             ? "Set your visit duration."
             : "Duration sets appointment times. The daily limit caps bookings."}
         </Label>
-        <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
-        {mode === "clinic" ? (
-          <ClockDurationPicker
-            label="Consultation duration"
-            value={draft.duration}
-            min={5}
-            max={120}
-            theme="doctor"
-            disabled={busy}
-            onChange={(duration) => { update({ duration }); setAvailabilityDuration(duration); }}
-          />
-        ) : null}
-        {mode === "online" ? (
-          <ClockDurationPicker
-            label="Consultation duration"
-            value={draft.onlineDuration}
-            min={5}
-            max={120}
-            theme="doctor"
-            disabled={busy}
-            onChange={(onlineDuration) => { update({ onlineDuration }); setAvailabilityDuration(onlineDuration); }}
-          />
-        ) : null}
-        {mode === "home" ? (
-          <ClockDurationPicker
-            label="Home-visit slot duration"
-            value={draft.homeDuration}
-            min={30}
-            max={120}
-            theme="doctor"
-            disabled={busy}
-            onChange={(homeDuration) => { update({ homeDuration }); setAvailabilityDuration(homeDuration); }}
-          />
-        ) : null}
-        {mode !== "home" ? (
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <NumberSetting
-              title="Daily booking limit"
-              stepper
+        <View
+          style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}
+        >
+          {mode === "clinic" ? (
+            <ClockDurationPicker
+              label="Consultation duration"
+              value={draft.duration}
+              min={5}
+              max={120}
+              theme="doctor"
               disabled={busy}
-              value={mode === "online" ? draft.online : draft.walkIn}
-              min={0}
-              max={100}
-              suffix="bookings"
-              onChange={(value) => update(mode === "online" ? { online: value } : { walkIn: value })}
+              onChange={(duration) => {
+                update({ duration });
+                setAvailabilityDuration(duration);
+              }}
             />
-          </View>
-        ) : null}
+          ) : null}
+          {mode === "online" ? (
+            <ClockDurationPicker
+              label="Consultation duration"
+              value={draft.onlineDuration}
+              min={5}
+              max={120}
+              theme="doctor"
+              disabled={busy}
+              onChange={(onlineDuration) => {
+                update({ onlineDuration });
+                setAvailabilityDuration(onlineDuration);
+              }}
+            />
+          ) : null}
+          {mode === "home" ? (
+            <ClockDurationPicker
+              label="Home-visit slot duration"
+              value={draft.homeDuration}
+              min={30}
+              max={120}
+              theme="doctor"
+              disabled={busy}
+              onChange={(homeDuration) => {
+                update({ homeDuration });
+                setAvailabilityDuration(homeDuration);
+              }}
+            />
+          ) : null}
+          {mode !== "home" ? (
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <NumberSetting
+                title="Daily booking limit"
+                stepper
+                disabled={busy}
+                value={mode === "online" ? draft.online : draft.walkIn}
+                min={0}
+                max={100}
+                suffix="bookings"
+                onChange={(value) =>
+                  update(
+                    mode === "online" ? { online: value } : { walkIn: value }
+                  )
+                }
+              />
+            </View>
+          ) : null}
         </View>
-        {mode !== "home" ? <>
-          <Label muted style={{ fontSize: 12 }}>Changing the daily limit does not change appointment times.</Label>
-          {!saved.data?.published_modes?.includes(mode) ? <>
-          <Label muted style={{ fontSize: 12 }}>Preview a duration based on your hours and daily limit.</Label>
-          <Button
-            theme="doctor" variant="outline" label="Suggest duration"
-            disabled={busy || suggestion === null}
-            onPress={() => setSuggestedDuration(suggestion)}
-          /></> : null}
-        </> : null}
+        {mode !== "home" ? (
+          <>
+            <Label muted style={{ fontSize: 12 }}>
+              Changing the daily limit does not change appointment times.
+            </Label>
+            {!saved.data?.published_modes?.includes(mode) ? (
+              <>
+                <Label muted style={{ fontSize: 12 }}>
+                  Preview a duration based on your hours and daily limit.
+                </Label>
+                <Button
+                  theme="doctor"
+                  variant="outline"
+                  label="Suggest duration"
+                  disabled={busy || suggestion === null}
+                  onPress={() => setSuggestedDuration(suggestion)}
+                />
+              </>
+            ) : null}
+          </>
+        ) : null}
       </ScheduleSection>
       <ScheduleSection title="Auto Accept Bookings">
         <View style={ui.between}>
@@ -575,7 +690,9 @@ export function ScheduleScreen({
             trackColor={{ false: "#D1D5DB", true: palette.primary }}
           />
         </View>
-        <Label muted style={{ fontSize: 12 }}>Set your daily auto-booking limit.</Label>
+        <Label muted style={{ fontSize: 12 }}>
+          Set your daily auto-booking limit.
+        </Label>
         {draft.autoAccept && (
           <>
             <NumberSetting
@@ -588,8 +705,13 @@ export function ScheduleScreen({
               suffix="bookings"
               onChange={(autoLimit) => update({ autoLimit })}
             />
-            <Button theme="doctor" variant="outline" label="Set auto-booking limit" disabled={busy}
-              onPress={() => setShowAutoBookingHelp(true)} />
+            <Button
+              theme="doctor"
+              variant="outline"
+              label="Set auto-booking limit"
+              disabled={busy}
+              onPress={() => setShowAutoBookingHelp(true)}
+            />
           </>
         )}
       </ScheduleSection>
@@ -635,11 +757,24 @@ export function ScheduleScreen({
                 : "An active clinic or hospital association is required before you can save a schedule."}
         </Label>
       ) : null}
-      {selectedPractice?.verified ? <ScheduleSection title="Apply changes from">
-        <Label muted style={{ fontSize: 12 }}>New appointment times apply from this date. Existing appointments and pending requests keep their times. Daily booking limits apply when saved.</Label>
-        <DatePicker key={`${selectedPracticeId}:${mode}`} value={startsFrom} onChange={setEffectiveDate}
-          timeZone={zone} minDate={today} disabled={busy} label="Start date" />
-      </ScheduleSection> : null}
+      {selectedPractice?.verified ? (
+        <ScheduleSection title="Apply changes from">
+          <Label muted style={{ fontSize: 12 }}>
+            New appointment times apply from this date. Existing appointments
+            and pending requests keep their times. Daily booking limits apply
+            when saved.
+          </Label>
+          <DatePicker
+            key={`${selectedPracticeId}:${mode}`}
+            value={startsFrom}
+            onChange={setEffectiveDate}
+            timeZone={zone}
+            minDate={today}
+            disabled={busy}
+            label="Start date"
+          />
+        </ScheduleSection>
+      ) : null}
       <Button
         loading={pendingAction === "save"}
         theme="doctor"
@@ -652,54 +787,111 @@ export function ScheduleScreen({
           practices.isFetching ||
           saved.isFetching ||
           saved.isError ||
-          !zone || doctorProfile.isError ||
+          !zone ||
+          doctorProfile.isError ||
           !selectedPracticeId
         }
         onPress={() => void save()}
       />
-      <ModalSurface visible={showAutoBookingHelp} onClose={() => setShowAutoBookingHelp(false)}>
+      <ModalSurface
+        visible={showAutoBookingHelp}
+        onClose={() => setShowAutoBookingHelp(false)}
+      >
         <Heading style={{ fontSize: 18 }}>Automatic bookings</Heading>
-        <Label muted>Up to {draft.autoLimit} bookings per day are auto-accepted across Clinic, Online and Home visits combined.</Label>
+        <Label muted>
+          Up to {draft.autoLimit} bookings per day are auto-accepted across
+          Clinic, Online and Home visits combined.
+        </Label>
         {[
           "Bookings are accepted instantly under the limit.",
           "Bookings beyond the limit need manual approval.",
-        ].map(text => <View key={text} style={ui.row}>
-          <Check size={14} color={palette.primary} />
-          <Label muted style={{ flex: 1 }}>{text}</Label>
-        </View>)}
-        <Button theme="doctor" label="Got it" onPress={() => setShowAutoBookingHelp(false)} />
+        ].map((text) => (
+          <View key={text} style={ui.row}>
+            <Check size={14} color={palette.primary} />
+            <Label muted style={{ flex: 1 }}>
+              {text}
+            </Label>
+          </View>
+        ))}
+        <Button
+          theme="doctor"
+          label="Got it"
+          onPress={() => setShowAutoBookingHelp(false)}
+        />
       </ModalSurface>
-      <ModalSurface visible={showScheduleHelp} onClose={() => setShowScheduleHelp(false)}>
+      <ModalSurface
+        visible={showScheduleHelp}
+        onClose={() => setShowScheduleHelp(false)}
+      >
         <Heading style={{ fontSize: 18 }}>Set your schedule</Heading>
         <Label muted>
-          Choose working days, hours and the slot interval. Publishing creates the
-          next 30 days automatically. Auto-accept uses one shared daily limit
-          across all services. The daily booking limit counts active bookings;
-          patients can choose any available time within your working hours.
+          Choose working days, hours and the slot interval. Publishing creates
+          the next 30 days automatically. Auto-accept uses one shared daily
+          limit across all services. The daily booking limit counts active
+          bookings; patients can choose any available time within your working
+          hours.
         </Label>
-        <Button theme="doctor" label="Got it" onPress={() => setShowScheduleHelp(false)} />
+        <Button
+          theme="doctor"
+          label="Got it"
+          onPress={() => setShowScheduleHelp(false)}
+        />
       </ModalSurface>
-      <ModalSurface visible={availabilityDuration !== null} onClose={() => setAvailabilityDuration(null)}>
+      <ModalSurface
+        visible={availabilityDuration !== null}
+        onClose={() => setAvailabilityDuration(null)}
+      >
         <Heading style={{ fontSize: 18 }}>Automatic availability</Heading>
         <Label muted>
-          When you publish, slots are created every {availabilityDuration} minutes
-          on your selected working days. Unavailable time and existing appointments
-          are respected.
+          When you publish, slots are created every {availabilityDuration}{" "}
+          minutes on your selected working days. Unavailable time and existing
+          appointments are respected.
         </Label>
-        <Button theme="doctor" label="Got it" onPress={() => setAvailabilityDuration(null)} />
+        <Button
+          theme="doctor"
+          label="Got it"
+          onPress={() => setAvailabilityDuration(null)}
+        />
       </ModalSurface>
-      <ModalSurface visible={suggestedDuration !== null} onClose={() => setSuggestedDuration(null)}>
-        <Heading style={{ fontSize: 18 }}>Suggested consultation duration</Heading>
+      <ModalSurface
+        visible={suggestedDuration !== null}
+        onClose={() => setSuggestedDuration(null)}
+      >
+        <Heading style={{ fontSize: 18 }}>
+          Suggested consultation duration
+        </Heading>
         <Label>{suggestedDuration} minutes per consultation</Label>
-        <Label muted>{suggestedTimes.length} appointment times within your hours, with up to {dailyLimit} bookings per day.</Label>
-        <Label muted>{suggestedTimes.slice(0, 4).join(" · ")}{suggestedTimes.length > 4 ? " …" : ""}</Label>
-        <Label muted>Review this duration before publishing. Later daily-limit changes will not recalculate it.</Label>
-        <Button theme="doctor" label="Use this duration" onPress={() => {
-          if (suggestedDuration === null) return;
-          update(mode === "online" ? { onlineDuration: suggestedDuration } : { duration: suggestedDuration });
-          setSuggestedDuration(null);
-        }} />
-        <Button theme="doctor" variant="outline" label="Keep current duration" onPress={() => setSuggestedDuration(null)} />
+        <Label muted>
+          {suggestedTimes.length} appointment times within your hours, with up
+          to {dailyLimit} bookings per day.
+        </Label>
+        <Label muted>
+          {suggestedTimes.slice(0, 4).join(" · ")}
+          {suggestedTimes.length > 4 ? " …" : ""}
+        </Label>
+        <Label muted>
+          Review this duration before publishing. Later daily-limit changes will
+          not recalculate it.
+        </Label>
+        <Button
+          theme="doctor"
+          label="Use this duration"
+          onPress={() => {
+            if (suggestedDuration === null) return;
+            update(
+              mode === "online"
+                ? { onlineDuration: suggestedDuration }
+                : { duration: suggestedDuration }
+            );
+            setSuggestedDuration(null);
+          }}
+        />
+        <Button
+          theme="doctor"
+          variant="outline"
+          label="Keep current duration"
+          onPress={() => setSuggestedDuration(null)}
+        />
       </ModalSurface>
     </DoctorScreen>
   );

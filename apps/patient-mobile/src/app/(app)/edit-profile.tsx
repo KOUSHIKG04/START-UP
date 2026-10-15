@@ -32,7 +32,9 @@ export default function EditPatientProfile() {
   if (detail.error || !detail.data)
     return (
       <View style={{ padding: 24 }}>
-        <Text variant="body" accessibilityRole="alert">Could not load your profile.</Text>
+        <Text variant="body" accessibilityRole="alert">
+          Could not load your profile.
+        </Text>
       </View>
     );
   return (

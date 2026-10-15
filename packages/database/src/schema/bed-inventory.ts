@@ -27,10 +27,20 @@ export const bedType = clinzo
   )
   .enableRLS();
 
-export const facilityBedOffering = clinzo.table("facility_bed_offering", {
-  facility_id: uuid("facility_id").notNull().references(() => facility.id, { onDelete: "restrict" }),
-  bed_type_id: uuid("bed_type_id").notNull().references(() => bedType.id, { onDelete: "restrict" }),
-}, table => [primaryKey({ columns: [table.facility_id, table.bed_type_id] })]).enableRLS();
+export const facilityBedOffering = clinzo
+  .table(
+    "facility_bed_offering",
+    {
+      facility_id: uuid("facility_id")
+        .notNull()
+        .references(() => facility.id, { onDelete: "restrict" }),
+      bed_type_id: uuid("bed_type_id")
+        .notNull()
+        .references(() => bedType.id, { onDelete: "restrict" }),
+    },
+    (table) => [primaryKey({ columns: [table.facility_id, table.bed_type_id] })]
+  )
+  .enableRLS();
 
 export const facilityBedInventory = clinzo
   .table(

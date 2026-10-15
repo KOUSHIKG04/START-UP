@@ -3,15 +3,26 @@ import { AppState } from "react-native";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
 import { useQuery } from "@tanstack/react-query";
-import { listMyAmbulanceFleet, updateMyDriverLocation } from "@startup/data-access";
+import {
+  listMyAmbulanceFleet,
+  updateMyDriverLocation,
+} from "@startup/data-access";
 import { supabase, useMobileSession } from "../../services/supabase";
-import { startDriverBackgroundLocation, stopDriverBackgroundLocation } from "./backgroundLocationTask";
+import {
+  startDriverBackgroundLocation,
+  stopDriverBackgroundLocation,
+} from "./backgroundLocationTask";
 
 export function DriverLocationReporter() {
   const { profile } = useMobileSession();
-  const fleet = useQuery({ queryKey: ["driver-fleet", profile?.driver?.id],
-    queryFn: () => listMyAmbulanceFleet(supabase!), enabled: Boolean(supabase && profile?.driver?.id),});
-  const shiftId = fleet.data?.find((vehicle) => vehicle.desired_availability === "online")?.active_shift_id;
+  const fleet = useQuery({
+    queryKey: ["driver-fleet", profile?.driver?.id],
+    queryFn: () => listMyAmbulanceFleet(supabase!),
+    enabled: Boolean(supabase && profile?.driver?.id),
+  });
+  const shiftId = fleet.data?.find(
+    (vehicle) => vehicle.desired_availability === "online"
+  )?.active_shift_id;
 
   useEffect(() => {
     if (!shiftId || !supabase) {
@@ -33,36 +44,59 @@ export function DriverLocationReporter() {
       const nextSequence = ++sequence;
       try {
         await updateMyDriverLocation(client, {
-          shiftId: shiftId!, latitude: position.coords.latitude, longitude: position.coords.longitude,
-          accuracyMeters: accuracy, deviceAt: new Date(position.timestamp).toISOString(),
-          streamEpoch, sequence: nextSequence,
+          shiftId: shiftId!,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracyMeters: accuracy,
+          deviceAt: new Date(position.timestamp).toISOString(),
+          streamEpoch,
+          sequence: nextSequence,
         });
       } catch {
         // The server discards stale or unauthorized locations; retry on the next foreground sample.
-      } finally { inFlight = false; }
+      } finally {
+        inFlight = false;
+      }
     }
 
     async function sample() {
       if (disposed || inFlight || AppState.currentState !== "active") return;
       try {
-        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
         await publish(position);
-      } catch { /* A stale location is excluded from dispatch and patient tracking. */ }
+      } catch {
+        /* A stale location is excluded from dispatch and patient tracking. */
+      }
     }
 
     void (async () => {
       const permission = await Location.getForegroundPermissionsAsync();
       if (!permission.granted || disposed) return;
       subscription = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.Balanced, timeInterval: 15000, distanceInterval: 20 },
-        (position) => { void publish(position); }
+        {
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 15000,
+          distanceInterval: 20,
+        },
+        (position) => {
+          void publish(position);
+        }
       );
       if (disposed) subscription.remove();
       else void sample();
     })();
     void startDriverBackgroundLocation().catch(() => {});
-    const timer = setInterval(() => { void sample(); }, 45000);
-    return () => { disposed = true; clearInterval(timer); subscription?.remove(); void stopDriverBackgroundLocation().catch(() => {}); };
+    const timer = setInterval(() => {
+      void sample();
+    }, 45000);
+    return () => {
+      disposed = true;
+      clearInterval(timer);
+      subscription?.remove();
+      void stopDriverBackgroundLocation().catch(() => {});
+    };
   }, [shiftId]);
   return null;
 }

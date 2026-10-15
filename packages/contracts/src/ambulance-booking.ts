@@ -90,19 +90,41 @@ export type CancelAmbulanceBookingInput = z.infer<
 export type DriverOffer = z.infer<typeof driverOfferSchema>;
 
 export const googleHospitalSchema = z.object({
-  id: z.string(), source: z.literal("google"), place_id: z.string().min(1).max(300),
-  name: z.string(), address: z.string(), latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180), distance_meters: z.number().int().nullable(),
-  attributions: z.array(z.object({ provider: z.string(), uri: z.url().optional() })).default([]),
+  id: z.string(),
+  source: z.literal("google"),
+  place_id: z.string().min(1).max(300),
+  name: z.string(),
+  address: z.string(),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  distance_meters: z.number().int().nullable(),
+  attributions: z
+    .array(z.object({ provider: z.string(), uri: z.url().optional() }))
+    .default([]),
 });
-export const googleHospitalSearchSchema = z.object({
-  latitude: z.number().min(-90).max(90), longitude: z.number().min(-180).max(180),
-  query: z.string().trim().max(160).default(""),
-}).strict();
-export const googleHospitalSearchResultSchema = z.object({ configured: z.boolean(), places: googleHospitalSchema.array() });
-export const requestGoogleAmbulanceBookingSchema = requestAmbulanceBookingSchema.omit({ destinationFacilityId: true }).extend({
-  destinationPlaceId: z.string().regex(/^[A-Za-z0-9_-]+$/).min(1).max(300),
-}).strict();
+export const googleHospitalSearchSchema = z
+  .object({
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    query: z.string().trim().max(160).default(""),
+  })
+  .strict();
+export const googleHospitalSearchResultSchema = z.object({
+  configured: z.boolean(),
+  places: googleHospitalSchema.array(),
+});
+export const requestGoogleAmbulanceBookingSchema = requestAmbulanceBookingSchema
+  .omit({ destinationFacilityId: true })
+  .extend({
+    destinationPlaceId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]+$/)
+      .min(1)
+      .max(300),
+  })
+  .strict();
 export type GoogleHospital = z.infer<typeof googleHospitalSchema>;
 export type AmbulanceHospital = PublicHospital | GoogleHospital;
-export type RequestGoogleAmbulanceBookingInput = z.infer<typeof requestGoogleAmbulanceBookingSchema>;
+export type RequestGoogleAmbulanceBookingInput = z.infer<
+  typeof requestGoogleAmbulanceBookingSchema
+>;

@@ -33,7 +33,10 @@ import {
 } from "@startup/mobile-ui";
 import { doctorLanguageName } from "@startup/contracts";
 import { useQuery } from "@tanstack/react-query";
-import { getMyDoctorPersonalAddress, getMyDoctorProfile } from "@startup/data-access";
+import {
+  getMyDoctorPersonalAddress,
+  getMyDoctorProfile,
+} from "@startup/data-access";
 import { palette, ui } from "../../../components/theme";
 import { supabase, useMobileSession } from "../../../services/supabase";
 const rows = [
@@ -55,14 +58,18 @@ const rows = [
     color: "#FF7800",
     background: "#FFF3E2",
   },
-  { title: "Settings", icon: Settings, color: "#008877", background: "#EFFFF9" },
+  {
+    title: "Settings",
+    icon: Settings,
+    color: "#008877",
+    background: "#EFFFF9",
+  },
   {
     title: "Hospital Settings",
     icon: Building,
     color: "#7565FF",
     background: "#F3F1FF",
   },
-
 ];
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -137,8 +144,13 @@ export function ProfileScreen() {
                   <View style={styles.identityCopy}>
                     <Text style={styles.name}>
                       {name}
-                      {profile.data?.qualification || profile.data?.qualification_claim ? (
-                        <Text style={styles.qualification}> {profile.data.qualification || profile.data.qualification_claim}</Text>
+                      {profile.data?.qualification ||
+                      profile.data?.qualification_claim ? (
+                        <Text style={styles.qualification}>
+                          {" "}
+                          {profile.data.qualification ||
+                            profile.data.qualification_claim}
+                        </Text>
                       ) : null}
                     </Text>
                     <Text style={styles.specialty}>
@@ -210,7 +222,20 @@ export function ProfileScreen() {
               <ProfileDetail
                 icon={<MapPin size={18} color={palette.primary} />}
                 label="Personal address"
-                value={personalAddress.isError ? "Could not load address" : [personalAddress.data?.building, personalAddress.data?.street, personalAddress.data?.locality, personalAddress.data?.city, personalAddress.data?.state, personalAddress.data?.pincode].filter(Boolean).join(", ") || "Not added"}
+                value={
+                  personalAddress.isError
+                    ? "Could not load address"
+                    : [
+                        personalAddress.data?.building,
+                        personalAddress.data?.street,
+                        personalAddress.data?.locality,
+                        personalAddress.data?.city,
+                        personalAddress.data?.state,
+                        personalAddress.data?.pincode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "Not added"
+                }
               />
               <ProfileDetail
                 icon={<GraduationCap size={18} color={palette.primary} />}
@@ -311,12 +336,14 @@ export function ProfileScreen() {
                 accessibilityLabel={title}
                 onPress={() =>
                   router.push(
-                    title === "Settings" ? "/settings" : title === "Hospital Settings"
-                      ? "/hospital-settings"
-                      : {
-                          pathname: "/profile-option",
-                          params: { option: title },
-                        }
+                    title === "Settings"
+                      ? "/settings"
+                      : title === "Hospital Settings"
+                        ? "/hospital-settings"
+                        : {
+                            pathname: "/profile-option",
+                            params: { option: title },
+                          }
                   )
                 }
                 style={({ pressed }) => [
@@ -409,7 +436,11 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     color: palette.white,
   },
-  qualification: { fontFamily: fontFamilies.regular, fontSize: 12, color: "#FFFFFFE6" },
+  qualification: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    color: "#FFFFFFE6",
+  },
   specialty: {
     fontFamily: fontFamilies.regular,
     fontSize: 13,

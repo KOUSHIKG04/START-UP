@@ -46,11 +46,13 @@ export default function UpcomingAppointmentCard({
 }: UpcomingAppointmentCardProps) {
   return (
     <View style={styles.appointmentSection}>
-      {showHeader ? <SectionHeader
-        title="Upcoming Appointments"
-        seeAllText="View all"
-        onSeeAllPress={() => router.push("/appointments")}
-      /> : null}
+      {showHeader ? (
+        <SectionHeader
+          title="Upcoming Appointments"
+          seeAllText="View all"
+          onSeeAllPress={() => router.push("/appointments")}
+        />
+      ) : null}
       <Card
         accessibilityLabel={`Upcoming appointment with ${doctorName} on ${date} at ${time}`}
         backgroundColor={gradients.patientBanner.colors[1]}
@@ -109,26 +111,32 @@ export default function UpcomingAppointmentCard({
           />
         </CardContent>
 
-        {onReschedulePress || onViewProfilePress ? <CardFooter gap={14} style={styles.cardFooter}>
-          {onReschedulePress ? <Button
-            hitSlop={4}
-            label="Re-schedule"
-            onPress={onReschedulePress}
-            style={styles.actionButton}
-            labelStyle={styles.actionLabel}
-            theme="patient"
-            variant="secondary"
-          /> : null}
-          {onViewProfilePress ? <Button
-            hitSlop={4}
-            label="View Profile"
-            onPress={onViewProfilePress}
-            style={styles.actionButton}
-            labelStyle={styles.actionLabel}
-            theme="patient"
-            variant="secondary"
-          /> : null}
-        </CardFooter> : null}
+        {onReschedulePress || onViewProfilePress ? (
+          <CardFooter gap={14} style={styles.cardFooter}>
+            {onReschedulePress ? (
+              <Button
+                hitSlop={4}
+                label="Re-schedule"
+                onPress={onReschedulePress}
+                style={styles.actionButton}
+                labelStyle={styles.actionLabel}
+                theme="patient"
+                variant="secondary"
+              />
+            ) : null}
+            {onViewProfilePress ? (
+              <Button
+                hitSlop={4}
+                label="View Profile"
+                onPress={onViewProfilePress}
+                style={styles.actionButton}
+                labelStyle={styles.actionLabel}
+                theme="patient"
+                variant="secondary"
+              />
+            ) : null}
+          </CardFooter>
+        ) : null}
       </Card>
     </View>
   );
@@ -146,7 +154,8 @@ function AppointmentDetail({ icon, label, value }: AppointmentDetailProps) {
       <View style={styles.detailIcon}>{icon}</View>
       <View style={styles.detailText}>
         {/* <Text style={styles.detailLabel}>{label}</Text> */}
-        <Text variant="bodyEmphasis"
+        <Text
+          variant="bodyEmphasis"
           adjustsFontSizeToFit
           minimumFontScale={0.86}
           numberOfLines={1}
@@ -265,6 +274,6 @@ const styles = StyleSheet.create({
   appointmentSection: {
     gap: 10,
     marginTop: 10,
-    marginBottom:10
+    marginBottom: 10,
   },
 });

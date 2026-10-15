@@ -20,7 +20,9 @@ export function AmbulancePayment({
 }: {
   onPaymentComplete: () => void;
 }) {
-  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "cash">("upi");
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "cash">(
+    "upi"
+  );
 
   return (
     <ScrollView
@@ -32,7 +34,9 @@ export function AmbulancePayment({
           <CheckCircle2 color="#059669" size={26} strokeWidth={2.2} />
         </View>
         <View style={styles.handoverCopy}>
-          <Text variant="cardHeading" style={styles.handoverTitle}>Patient Handed Over</Text>
+          <Text variant="cardHeading" style={styles.handoverTitle}>
+            Patient Handed Over
+          </Text>
           <Text variant="cardHeading" style={styles.handoverSubtitle}>
             Emergency care initiated at {ambulanceTrip.dropoff.split(",")[0]}
           </Text>
@@ -42,54 +46,90 @@ export function AmbulancePayment({
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Building2 color="#087F78" size={18} />
-          <Text variant="cardHeading" style={styles.cardTitle}>Hospital Emergency Admission</Text>
+          <Text variant="cardHeading" style={styles.cardTitle}>
+            Hospital Emergency Admission
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Hospital</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>{ambulanceTrip.dropoff.split(",")[0]}</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Hospital
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            {ambulanceTrip.dropoff.split(",")[0]}
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Ward</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>Emergency & Trauma Care (Ground Floor)</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Ward
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            Emergency & Trauma Care (Ground Floor)
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Driver / Unit</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Driver / Unit
+          </Text>
           <Text variant="bodyEmphasis" style={styles.infoValue}>
             {ambulanceTrip.driver} ({ambulanceTrip.vehicle})
           </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Trip Duration</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>16 mins • {ambulanceTrip.distance}</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Trip Duration
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            16 mins • {ambulanceTrip.distance}
+          </Text>
         </View>
       </View>
 
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <ReceiptText color="#087F78" size={18} />
-          <Text variant="cardHeading" style={styles.cardTitle}>Fare Breakdown</Text>
+          <Text variant="cardHeading" style={styles.cardTitle}>
+            Fare Breakdown
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Base Ambulance Dispatch</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>₹500</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Base Ambulance Dispatch
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            ₹500
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>ALS Support & Oxygen Kit</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>₹600</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            ALS Support & Oxygen Kit
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            ₹600
+          </Text>
         </View>
         <View style={styles.infoRow}>
-          <Text variant="label" style={styles.infoLabel}>Emergency Priority Charge</Text>
-          <Text variant="bodyEmphasis" style={styles.infoValue}>₹100</Text>
+          <Text variant="label" style={styles.infoLabel}>
+            Emergency Priority Charge
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.infoValue}>
+            ₹100
+          </Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.totalRow}>
-          <Text variant="label" style={styles.totalLabel}>Total Payable Amount</Text>
-          <Text variant="bodyEmphasis" style={styles.totalValue}>₹{ambulanceTrip.fare}</Text>
+          <Text variant="label" style={styles.totalLabel}>
+            Total Payable Amount
+          </Text>
+          <Text variant="bodyEmphasis" style={styles.totalValue}>
+            ₹{ambulanceTrip.fare}
+          </Text>
         </View>
       </View>
 
       <View style={styles.card}>
-        <Text variant="cardHeading" style={styles.cardTitle}>Select Payment Method</Text>
+        <Text variant="cardHeading" style={styles.cardTitle}>
+          Select Payment Method
+        </Text>
         <View style={styles.methodsList}>
           <Pressable
             onPress={() => setPaymentMethod("upi")}
@@ -112,8 +152,12 @@ export function AmbulancePayment({
                 />
               </View>
               <View style={styles.methodCopy}>
-                <Text variant="body" style={styles.methodName}>UPI (Google Pay / PhonePe / Paytm)</Text>
-                <Text variant="label" style={styles.methodHint}>Instant 1-click payment</Text>
+                <Text variant="body" style={styles.methodName}>
+                  UPI (Google Pay / PhonePe / Paytm)
+                </Text>
+                <Text variant="label" style={styles.methodHint}>
+                  Instant 1-click payment
+                </Text>
               </View>
             </View>
             <View
@@ -149,8 +193,12 @@ export function AmbulancePayment({
                 />
               </View>
               <View style={styles.methodCopy}>
-                <Text variant="body" style={styles.methodName}>Credit / Debit Card</Text>
-                <Text variant="label" style={styles.methodHint}>Visa, Mastercard, RuPay</Text>
+                <Text variant="body" style={styles.methodName}>
+                  Credit / Debit Card
+                </Text>
+                <Text variant="label" style={styles.methodHint}>
+                  Visa, Mastercard, RuPay
+                </Text>
               </View>
             </View>
             <View
@@ -186,8 +234,12 @@ export function AmbulancePayment({
                 />
               </View>
               <View style={styles.methodCopy}>
-                <Text variant="body" style={styles.methodName}>Cash / Hospital Billing</Text>
-                <Text variant="label" style={styles.methodHint}>Pay directly at admission desk</Text>
+                <Text variant="body" style={styles.methodName}>
+                  Cash / Hospital Billing
+                </Text>
+                <Text variant="label" style={styles.methodHint}>
+                  Pay directly at admission desk
+                </Text>
               </View>
             </View>
             <View

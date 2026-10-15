@@ -4,7 +4,6 @@ import { placeSearchError } from "./errors.ts";
 
 export default {
   fetch: withSupabase({ auth: "user" }, async (request, ctx) => {
-
     if (request.method !== "POST")
       return Response.json({ error: "Method not allowed" }, { status: 405 });
 

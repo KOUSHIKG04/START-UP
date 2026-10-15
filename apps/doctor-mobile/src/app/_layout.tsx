@@ -16,11 +16,11 @@ import {
 } from "@startup/mobile-ui";
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
-import { signOutWithPushCleanup, useDeviceNotifications } from "../features/notifications/deviceNotifications";
 import {
-  mobileSession,
-  useMobileSession,
-} from "../services/supabase";
+  signOutWithPushCleanup,
+  useDeviceNotifications,
+} from "../features/notifications/deviceNotifications";
+import { mobileSession, useMobileSession } from "../services/supabase";
 
 void SplashScreen.preventAutoHideAsync();
 export const unstable_settings = { initialRouteName: "(app)" };
@@ -39,11 +39,22 @@ export default function RootLayout() {
   const routedAccount = useRef<string | null>(null);
   useEffect(() => {
     if (auth.loading || (!loaded && !error)) return;
-    if (!auth.session) { routedAccount.current = null; return; }
+    if (!auth.session) {
+      routedAccount.current = null;
+      return;
+    }
     if (auth.error || routedAccount.current === auth.session.user.id) return;
     routedAccount.current = auth.session.user.id;
-    if (auth.profile?.doctor?.status !== "verified") router.replace(auth.profile?.doctor ? "/review-status" : "/onboarding");
-  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile, loaded, error]);
+    if (auth.profile?.doctor?.status !== "verified")
+      router.replace(auth.profile?.doctor ? "/review-status" : "/onboarding");
+  }, [
+    auth.loading,
+    auth.error,
+    auth.session?.user.id,
+    auth.profile,
+    loaded,
+    error,
+  ]);
 
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync();
@@ -76,32 +87,40 @@ export default function RootLayout() {
     <MobileThemeProvider theme="doctor">
       <SafeAreaProvider>
         <ToastProvider>
-        <SessionFeedback error={auth.error} />
-        <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
-        <QueryProvider>
-          <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
-          <View style={styles.root}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: "none",
-                contentStyle: styles.scene,
-              }}
-            >
-              <Stack.Protected
-                guard={Boolean(auth.session && auth.profile?.doctor?.status === "verified")}
+          <SessionFeedback error={auth.error} />
+          <DeviceNotificationsBridge identityId={auth.profile?.identity_id} />
+          <QueryProvider>
+            <LiveUpdatesBridge identityId={auth.profile?.identity_id} />
+            <View style={styles.root}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: "none",
+                  contentStyle: styles.scene,
+                }}
               >
-                <Stack.Screen name="(app)" />
-              </Stack.Protected>
-              <Stack.Protected
-                guard={!auth.session || auth.profile?.doctor?.status !== "verified"}
-              >
-                <Stack.Screen name="(auth)" />
-              </Stack.Protected>
-            </Stack>
-            <StatusBar style={auth.profile?.doctor?.status === "verified" ? "light" : "dark"} />
-          </View>
-        </QueryProvider>
+                <Stack.Protected
+                  guard={Boolean(
+                    auth.session && auth.profile?.doctor?.status === "verified"
+                  )}
+                >
+                  <Stack.Screen name="(app)" />
+                </Stack.Protected>
+                <Stack.Protected
+                  guard={
+                    !auth.session || auth.profile?.doctor?.status !== "verified"
+                  }
+                >
+                  <Stack.Screen name="(auth)" />
+                </Stack.Protected>
+              </Stack>
+              <StatusBar
+                style={
+                  auth.profile?.doctor?.status === "verified" ? "light" : "dark"
+                }
+              />
+            </View>
+          </QueryProvider>
         </ToastProvider>
       </SafeAreaProvider>
     </MobileThemeProvider>

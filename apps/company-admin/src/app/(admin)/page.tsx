@@ -8,17 +8,17 @@ import { StatusBadge } from "@/features/verification/status-badge";
 export default async function OverviewPage() {
   const client = await requireReviewer();
   const cases = await listCompanyVerificationCases(client);
-  
+
   const pending = cases.filter(
     (item) => item.status === "pending" || item.status === "under_review"
   ).length;
-  
+
   const needsResubmission = cases.filter(
     (item) => item.status === "needs_resubmission"
   ).length;
-  
+
   const verified = cases.filter((item) => item.status === "verified").length;
-  
+
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <header>

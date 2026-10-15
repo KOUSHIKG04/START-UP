@@ -12,16 +12,22 @@ export default async function FacilityVerificationPage() {
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 p-6 lg:p-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Facility verification</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Facility verification
+        </h1>
         <form action={signOut} className="mt-3">
-          <button type="submit" className="text-sm underline">Sign out</button>
+          <button type="submit" className="text-sm underline">
+            Sign out
+          </button>
         </form>
       </header>
-      <FacilityVerificationForm facilities={facilities.map((facility) => ({
-        facility_id: facility.facilityId,
-        facility_name: facility.facilityName,
-        facility_kind: facility.facilityKind,
-      }))} />
+      <FacilityVerificationForm
+        facilities={facilities.map((facility) => ({
+          facility_id: facility.facilityId,
+          facility_name: facility.facilityName,
+          facility_kind: facility.facilityKind,
+        }))}
+      />
     </main>
   );
 }

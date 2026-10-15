@@ -2,7 +2,15 @@ import { AppText as Text, AppTextInput } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import type { Ref } from "react";
-import { StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  View,
+  type StyleProp,
+  type TextInputProps,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
 export type InputProps = TextInputProps & {
@@ -48,14 +56,19 @@ export function Input({
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ ...accessibilityState, disabled }}
       editable={!disabled && editable}
-      placeholderTextColor={placeholderTextColor ?? (variant === "outlined" ? theme.placeholder : undefined)}
+      placeholderTextColor={
+        placeholderTextColor ??
+        (variant === "outlined" ? theme.placeholder : undefined)
+      }
       style={[
         variant === "outlined" ? styles.input : undefined,
-        variant === "outlined" ? {
-          backgroundColor: theme.surface,
-          color: theme.text,
-          borderColor: theme.border,
-        } : undefined,
+        variant === "outlined"
+          ? {
+              backgroundColor: theme.surface,
+              color: theme.text,
+              borderColor: theme.border,
+            }
+          : undefined,
         disabled ? styles.inputDisabled : undefined,
         style,
         readable && variant === "outlined" && { minHeight: 52 },
@@ -66,25 +79,40 @@ export function Input({
   );
   // A chat composer, search row or hidden OTP field must remain in its parent's
   // layout; labels and form containers are added only when actually requested.
-  const control = prefix ? <View style={styles.prefixContainer}>
-    {input}
-    <View pointerEvents="none" style={styles.prefixArea}>
-      <Text variant="body" style={[styles.prefixText, { color: theme.text }]}>{prefix}</Text>
-      <View style={[styles.prefixDivider, { backgroundColor: theme.border }]} />
+  const control = prefix ? (
+    <View style={styles.prefixContainer}>
+      {input}
+      <View pointerEvents="none" style={styles.prefixArea}>
+        <Text variant="body" style={[styles.prefixText, { color: theme.text }]}>
+          {prefix}
+        </Text>
+        <View
+          style={[styles.prefixDivider, { backgroundColor: theme.border }]}
+        />
+      </View>
     </View>
-  </View> : input;
+  ) : (
+    input
+  );
   if (variant === "unstyled" && !label && !error) return control;
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? (
-        <Text variant="label" style={[styles.label, { color: theme.text }, labelStyle]}>
+        <Text
+          variant="label"
+          style={[styles.label, { color: theme.text }, labelStyle]}
+        >
           {label}
         </Text>
       ) : null}
 
       {control}
 
-      {error ? <Text variant="label" style={[styles.error, errorStyle]}>{error}</Text> : null}
+      {error ? (
+        <Text variant="label" style={[styles.error, errorStyle]}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -92,7 +120,15 @@ export function Input({
 const styles = StyleSheet.create({
   prefixContainer: { position: "relative" },
   prefixedInput: { paddingLeft: 70 },
-  prefixArea: { position: "absolute", left: 16, top: 0, bottom: 0, flexDirection: "row", alignItems: "center", gap: 12 },
+  prefixArea: {
+    position: "absolute",
+    left: 16,
+    top: 0,
+    bottom: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   prefixText: { fontFamily: fontFamilies.medium, fontSize: 15 },
   prefixDivider: { width: 1, height: 22 },
   label: {

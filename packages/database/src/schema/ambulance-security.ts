@@ -64,7 +64,9 @@ export const patientAmbulancePin = clinzo
     },
     (table) => [
       uniqueIndex("patient_ambulance_pin_uq_1").on(table.patient_id),
-      uniqueIndex("patient_ambulance_pin_vault_secret_id_key").on(table.vault_secret_id),
+      uniqueIndex("patient_ambulance_pin_vault_secret_id_key").on(
+        table.vault_secret_id
+      ),
       index("patient_ambulance_pin_patient_id_idx").on(table.patient_id),
       check(
         "patient_ambulance_pin_ck_1",

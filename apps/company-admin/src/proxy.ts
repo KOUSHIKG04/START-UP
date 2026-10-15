@@ -5,11 +5,11 @@ import { companyAdminAuthCookie } from "./lib/supabase-cookie";
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  
+
   if (!url || !key) return NextResponse.next();
-  
+
   let response = NextResponse.next({ request });
-  
+
   const client = createServerClient(url, key, {
     cookieOptions: { name: companyAdminAuthCookie },
     cookies: {
@@ -23,9 +23,9 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  
+
   await client.auth.getClaims();
-  
+
   return response;
 }
 

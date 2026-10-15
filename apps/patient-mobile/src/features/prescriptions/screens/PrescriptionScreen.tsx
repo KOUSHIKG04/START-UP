@@ -41,16 +41,23 @@ export function PrescriptionScreen({
     queryFn: () => listMyClinicalRecords(supabase!),
     enabled: Boolean(supabase),
   });
-  useFocusEffect(useCallback(() => {
-    if (supabase) void clinicalRecords.refetch();
-  }, [clinicalRecords.refetch]));
-  useToastFeedback({ error: clinicalRecords.isError ? "Could not load prescriptions. Please retry." : "" });
+  useFocusEffect(
+    useCallback(() => {
+      if (supabase) void clinicalRecords.refetch();
+    }, [clinicalRecords.refetch])
+  );
+  useToastFeedback({
+    error: clinicalRecords.isError
+      ? "Could not load prescriptions. Please retry."
+      : "",
+  });
 
   const records = clinicalRecords.data ?? [];
   const targetId = appointmentId ?? appointment?.id;
   const record: ClinicalRecord | undefined = targetId
     ? records.find(
-        (r: ClinicalRecord) => r.appointment_id === targetId || r.appointment_code === targetId
+        (r: ClinicalRecord) =>
+          r.appointment_id === targetId || r.appointment_code === targetId
       )
     : records[0];
 
@@ -87,12 +94,17 @@ export function PrescriptionScreen({
           <Skeleton theme="patient" height={180} radius={14} />
         ) : clinicalRecords.isError ? (
           <View style={styles.centerBox}>
-            <Button label="Retry" onPress={() => void clinicalRecords.refetch()} />
+            <Button
+              label="Retry"
+              onPress={() => void clinicalRecords.refetch()}
+            />
           </View>
         ) : !record?.prescription_code ? (
           <View style={styles.emptyCard}>
             <FileText color={colors.patient.primary} size={42} />
-            <Text variant="cardHeading" style={styles.emptyTitle}>No signed prescription yet</Text>
+            <Text variant="cardHeading" style={styles.emptyTitle}>
+              No signed prescription yet
+            </Text>
             <Text variant="cardHeading" style={styles.emptySubtitle}>
               When your doctor completes your consultation and issues a
               prescription, it will appear here.
@@ -125,7 +137,9 @@ export function PrescriptionScreen({
                   Prescription #{record.prescription_code ?? "not issued"}
                 </Text>
                 <Text variant="body" style={styles.secondaryText}>
-                  {record.signed_at ? `Consultation completed ${formatDate(record.signed_at)}` : "Consultation in progress"}
+                  {record.signed_at
+                    ? `Consultation completed ${formatDate(record.signed_at)}`
+                    : "Consultation in progress"}
                 </Text>
               </View>
               <Chip
@@ -137,7 +151,9 @@ export function PrescriptionScreen({
 
             {record.vitals.length > 0 ? (
               <View style={styles.vitalsContainer}>
-                <Text variant="body" style={styles.vitalsHeader}>Recorded Vitals</Text>
+                <Text variant="body" style={styles.vitalsHeader}>
+                  Recorded Vitals
+                </Text>
                 <View style={styles.vitalsRow}>
                   {record.vitals.map((v) => (
                     <View key={v.code} style={styles.vitalCard}>
@@ -155,7 +171,9 @@ export function PrescriptionScreen({
 
             <View style={styles.medicinesCard}>
               <View style={styles.sectionHeader}>
-                <Text variant="sectionHeading" style={styles.sectionTitle}>Medicines</Text>
+                <Text variant="sectionHeading" style={styles.sectionTitle}>
+                  Medicines
+                </Text>
                 <Chip label={primaryDiagnosis} style={styles.diagnosisChip} />
               </View>
               {record.medicines.length === 0 ? (
@@ -183,7 +201,10 @@ export function PrescriptionScreen({
                       style={styles.medicineRow}
                     >
                       <View style={styles.medicineNumber}>
-                        <Text variant="bodyEmphasis" style={styles.medicineNumberText}>
+                        <Text
+                          variant="bodyEmphasis"
+                          style={styles.medicineNumberText}
+                        >
                           {index + 1}
                         </Text>
                       </View>
@@ -191,7 +212,11 @@ export function PrescriptionScreen({
                         <Text variant="body" style={styles.medicineName}>
                           {medicine.medicine_name} {medicine.strength}
                         </Text>
-                        <Text variant="body" numberOfLines={2} style={styles.medicineDose}>
+                        <Text
+                          variant="body"
+                          numberOfLines={2}
+                          style={styles.medicineDose}
+                        >
                           {scheduleInfo || "As directed by physician"}
                         </Text>
                       </View>
@@ -217,19 +242,24 @@ export function PrescriptionScreen({
               ) : null}
             </View>
 
-            {record.assessment || record.followup ? <View style={styles.adviceBanner}>
-              <View style={styles.adviceIcon}>
-                <Info color={colors.patient.primaryDark} size={18} />
+            {record.assessment || record.followup ? (
+              <View style={styles.adviceBanner}>
+                <View style={styles.adviceIcon}>
+                  <Info color={colors.patient.primaryDark} size={18} />
+                </View>
+                <View style={styles.flexCopy}>
+                  <Text variant="cardHeading" style={styles.adviceTitle}>
+                    {record.assessment ?? "Follow-up recommended"}
+                  </Text>
+                  {record.followup ? (
+                    <Text variant="body" style={styles.secondaryText}>
+                      Follow-up: {formatDate(record.followup.recommended_date)}{" "}
+                      · {record.followup.reason}
+                    </Text>
+                  ) : null}
+                </View>
               </View>
-              <View style={styles.flexCopy}>
-                <Text variant="cardHeading" style={styles.adviceTitle}>
-                  {record.assessment ?? "Follow-up recommended"}
-                </Text>
-                {record.followup ? <Text variant="body" style={styles.secondaryText}>
-                  Follow-up: {formatDate(record.followup.recommended_date)} · {record.followup.reason}
-                </Text> : null}
-              </View>
-            </View> : null}
+            ) : null}
 
             <View style={styles.actionRow}>
               <Button

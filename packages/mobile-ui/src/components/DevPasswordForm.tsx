@@ -50,7 +50,8 @@ export function DevPasswordForm({
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
-      <Text variant="cardHeading"
+      <Text
+        variant="cardHeading"
         accessibilityRole="header"
         style={[styles.title, { color: theme.text }]}
       >

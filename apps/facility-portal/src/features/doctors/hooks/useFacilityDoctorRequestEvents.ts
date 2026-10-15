@@ -19,24 +19,37 @@ export function useFacilityDoctorRequestEvents(scope: string) {
       queued = true;
       queueMicrotask(() => {
         queued = false;
-        if (active) void queryClient.invalidateQueries({ queryKey: ["facility-doctor-requests"] });
+        if (active)
+          void queryClient.invalidateQueries({
+            queryKey: ["facility-doctor-requests"],
+          });
       });
     };
     const reportFailure = () => {
       if (!active || warned) return;
       warned = true;
-      toast.add({ title: "Live doctor request updates unavailable", description: "Refresh the page to check the latest requests.", type: "error" });
+      toast.add({
+        title: "Live doctor request updates unavailable",
+        description: "Refresh the page to check the latest requests.",
+        type: "error",
+      });
     };
     async function connect() {
       await client.realtime.setAuth();
       if (!active) return;
       for (const facilityId of scope.split(":")) {
-        const channel = client.channel(`facility-associations:${facilityId}`, { config: { private: true } })
+        const channel = client
+          .channel(`facility-associations:${facilityId}`, {
+            config: { private: true },
+          })
           .on("broadcast", { event: "doctor_association_changed" }, refresh)
-          .subscribe(status => {
+          .subscribe((status) => {
             // One catch-up read after joining/rejoining closes the initial-load/offline gap.
-            if (status === "SUBSCRIBED") { warned = false; refresh(); }
-            else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") reportFailure();
+            if (status === "SUBSCRIBED") {
+              warned = false;
+              refresh();
+            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+              reportFailure();
           });
         channels.push(channel);
       }
@@ -44,7 +57,8 @@ export function useFacilityDoctorRequestEvents(scope: string) {
     void connect().catch(reportFailure);
     return () => {
       active = false;
-      for (const channel of channels) void client.removeChannel(channel).catch(() => undefined);
+      for (const channel of channels)
+        void client.removeChannel(channel).catch(() => undefined);
     };
   }, [queryClient, scope]);
 }

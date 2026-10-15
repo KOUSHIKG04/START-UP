@@ -16,7 +16,7 @@ export default async function AppointmentsPage() {
     loadError =
       "Appointments are unavailable. Confirm portal membership and apply the care-access migrations.";
   }
-  
+
   return (
     <AppointmentsScreen appointments={appointments} loadError={loadError} />
   );

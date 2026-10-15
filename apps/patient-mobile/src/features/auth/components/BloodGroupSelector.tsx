@@ -24,9 +24,14 @@ export function BloodGroupSelector({
           accessibilityState={{ selected: value === item }}
           hitSlop={6}
           onPress={() => onChange(item)}
-          style={[styles.blood, value === item && styles.selectedBlood, invalid && styles.invalid]}
+          style={[
+            styles.blood,
+            value === item && styles.selectedBlood,
+            invalid && styles.invalid,
+          ]}
         >
-          <Text variant="bodyEmphasis"
+          <Text
+            variant="bodyEmphasis"
             style={[
               styles.bloodText,
               value === item && styles.selectedBloodText,

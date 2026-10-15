@@ -36,24 +36,32 @@ export function AmbulanceOption({
       ]}
     >
       <View
-        style={[
-          styles.ambulanceIcon,
-          selected && styles.ambulanceIconSelected,
-        ]}
+        style={[styles.ambulanceIcon, selected && styles.ambulanceIconSelected]}
       >
         {getAmbulanceIcon(item.id)}
       </View>
       <View style={styles.ambulanceCopy}>
-        <Text variant="body" style={styles.ambulanceName}>{item.title}</Text>
-        <Text variant="body" numberOfLines={1} style={styles.ambulanceDescription}>
+        <Text variant="body" style={styles.ambulanceName}>
+          {item.title}
+        </Text>
+        <Text
+          variant="body"
+          numberOfLines={1}
+          style={styles.ambulanceDescription}
+        >
           {item.description.replace("and", "&")}
         </Text>
       </View>
       <View style={styles.priceBlock}>
-        <Text variant="bodyEmphasis" style={[styles.price, selected && styles.selectedPrice]}>
+        <Text
+          variant="bodyEmphasis"
+          style={[styles.price, selected && styles.selectedPrice]}
+        >
           {item.fare === null ? "Fare pending" : `₹${item.fare}`}
         </Text>
-        <Text variant="body" style={styles.eta}>ETA {item.eta ?? "pending"}</Text>
+        <Text variant="body" style={styles.eta}>
+          ETA {item.eta ?? "pending"}
+        </Text>
       </View>
     </Pressable>
   );

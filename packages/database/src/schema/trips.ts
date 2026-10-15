@@ -105,9 +105,7 @@ export const trip = clinzo
       ),
       check(
         "trip_ck_4",
-        sql.raw(
-          "status <> 'completed' OR pin_credential_version IS NOT NULL"
-        )
+        sql.raw("status <> 'completed' OR pin_credential_version IS NOT NULL")
       ),
       check("trip_ck_5", sql.raw("row_version > 0")),
       check(

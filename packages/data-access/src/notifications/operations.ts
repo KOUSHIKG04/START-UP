@@ -7,7 +7,10 @@ export async function listMyNotifications(client: AppSupabaseClient) {
   return inAppNotificationSchema.array().parse(data);
 }
 
-export async function markMyNotificationsRead(client: AppSupabaseClient, ids?: string[]) {
+export async function markMyNotificationsRead(
+  client: AppSupabaseClient,
+  ids?: string[]
+) {
   const { data, error } = await client.rpc("mark_my_notifications_read", {
     p_ids: ids?.map((id) => uuidSchema.parse(id)) ?? null,
   });
@@ -15,7 +18,11 @@ export async function markMyNotificationsRead(client: AppSupabaseClient, ids?: s
   return data;
 }
 
-export async function registerMyExpoPushToken(client: AppSupabaseClient, installationId: string, token: string) {
+export async function registerMyExpoPushToken(
+  client: AppSupabaseClient,
+  installationId: string,
+  token: string
+) {
   const { data, error } = await client.rpc("register_my_expo_push_token", {
     p_installation_id: installationId,
     p_token: token,
@@ -24,13 +31,23 @@ export async function registerMyExpoPushToken(client: AppSupabaseClient, install
   return data;
 }
 
-export async function revokeMyExpoPushToken(client: AppSupabaseClient, installationId: string) {
-  const { error } = await client.rpc("revoke_my_expo_push_token", { p_installation_id: installationId });
+export async function revokeMyExpoPushToken(
+  client: AppSupabaseClient,
+  installationId: string
+) {
+  const { error } = await client.rpc("revoke_my_expo_push_token", {
+    p_installation_id: installationId,
+  });
   if (error) throw error;
 }
 
-export async function dismissMyNotification(client: AppSupabaseClient, id: string) {
-  const { data, error } = await client.rpc("dismiss_my_notification", { p_id: uuidSchema.parse(id) });
+export async function dismissMyNotification(
+  client: AppSupabaseClient,
+  id: string
+) {
+  const { data, error } = await client.rpc("dismiss_my_notification", {
+    p_id: uuidSchema.parse(id),
+  });
   if (error) throw error;
   return data;
 }

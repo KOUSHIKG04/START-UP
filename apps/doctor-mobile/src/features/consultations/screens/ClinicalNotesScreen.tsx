@@ -3,7 +3,11 @@ import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { FileText } from "lucide-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { completeOnlineAppointment, listMyPracticeAppointments, transitionClinicAppointment } from "@startup/data-access";
+import {
+  completeOnlineAppointment,
+  listMyPracticeAppointments,
+  transitionClinicAppointment,
+} from "@startup/data-access";
 import { uuidSchema } from "@startup/contracts";
 import { Button, Input, Loader, TextArea } from "@startup/mobile-ui";
 import {
@@ -46,20 +50,29 @@ export function ClinicalNotesScreen() {
   const [completeMessage, setCompleteMessage] = useState("");
 
   const completeMutation = useMutation({
-    mutationFn: () => liveAppointment?.visit_mode === "online"
-      ? completeOnlineAppointment(supabase!, liveAppointment.id, assessment.trim())
-      : transitionClinicAppointment(supabase!, {
-        appointmentId: liveAppointment!.id,
-        expectedVersion: Number(liveAppointment!.row_version),
-        action: "complete",
-        note: assessment.trim() || null,
-      }),
+    mutationFn: () =>
+      liveAppointment?.visit_mode === "online"
+        ? completeOnlineAppointment(
+            supabase!,
+            liveAppointment.id,
+            assessment.trim()
+          )
+        : transitionClinicAppointment(supabase!, {
+            appointmentId: liveAppointment!.id,
+            expectedVersion: Number(liveAppointment!.row_version),
+            action: "complete",
+            note: assessment.trim() || null,
+          }),
     onSuccess: () => {
       setCompleteMessage("Consultation signed and completed.");
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
     },
     onError: () => {
-      setCompleteMessage("Could not complete consultation. Check current status.");
+      setCompleteMessage(
+        "Could not complete consultation. Check current status."
+      );
     },
   });
 
@@ -71,27 +84,58 @@ export function ClinicalNotesScreen() {
   const [confirm, setConfirm] = useState(false);
 
   if (isLiveAppointment && liveAppointment) {
-    if (liveAppointment.status === "in_consultation" && liveAppointment.can_consult) {
-      return <ConsultationForm appointmentId={liveAppointment.id} patientName={liveAppointment.patient_name}
-        timezone={liveAppointment.timezone} completing={completeMutation.isPending} assessmentStep={<>
-          <Input label="Assessment" value={assessment} onChangeText={setAssessment} multiline maxLength={10000}
-            disabled={completeMutation.isPending} />
-          <Button loading={completeMutation.isPending} theme="doctor" label="Sign and complete"
-            disabled={completeMutation.isPending || !assessment.trim()} onPress={() => completeMutation.mutate()} />
-          {completeMessage ? <Label style={completeMessage.startsWith("Could") ? ui.error : ui.success}>{completeMessage}</Label> : null}
-        </>} />;
+    if (
+      liveAppointment.status === "in_consultation" &&
+      liveAppointment.can_consult
+    ) {
+      return (
+        <ConsultationForm
+          appointmentId={liveAppointment.id}
+          patientName={liveAppointment.patient_name}
+          timezone={liveAppointment.timezone}
+          completing={completeMutation.isPending}
+          assessmentStep={
+            <>
+              <Input
+                label="Assessment"
+                value={assessment}
+                onChangeText={setAssessment}
+                multiline
+                maxLength={10000}
+                disabled={completeMutation.isPending}
+              />
+              <Button
+                loading={completeMutation.isPending}
+                theme="doctor"
+                label="Sign and complete"
+                disabled={completeMutation.isPending || !assessment.trim()}
+                onPress={() => completeMutation.mutate()}
+              />
+              {completeMessage ? (
+                <Label
+                  style={
+                    completeMessage.startsWith("Could") ? ui.error : ui.success
+                  }
+                >
+                  {completeMessage}
+                </Label>
+              ) : null}
+            </>
+          }
+        />
+      );
     }
     return (
-      <DoctorScreen
-        title={liveAppointment.patient_name}
-      >
+      <DoctorScreen title={liveAppointment.patient_name}>
         {liveAppointment.status === "completed" ? (
           <Panel style={{ marginTop: 16 }}>
             <Label style={ui.success}>
               This consultation has been completed and signed.
             </Label>
           </Panel>
-        ) : <Label>Start this consultation from the appointment page.</Label>}
+        ) : (
+          <Label>Start this consultation from the appointment page.</Label>
+        )}
         {completeMessage ? (
           <Label
             style={completeMessage.startsWith("Could") ? ui.error : ui.success}
@@ -104,16 +148,28 @@ export function ClinicalNotesScreen() {
   }
 
   if (isLiveAppointment) {
-    return <DoctorScreen title="Consultation details"><Panel>{appointmentsQuery.isLoading ? <Loader theme="doctor" style={{ minHeight: 72 }} /> : <Label muted>{appointmentsQuery.isError ? "Could not load this consultation. Try again." : "This consultation is unavailable for your account."}</Label>}</Panel></DoctorScreen>;
+    return (
+      <DoctorScreen title="Consultation details">
+        <Panel>
+          {appointmentsQuery.isLoading ? (
+            <Loader theme="doctor" style={{ minHeight: 72 }} />
+          ) : (
+            <Label muted>
+              {appointmentsQuery.isError
+                ? "Could not load this consultation. Try again."
+                : "This consultation is unavailable for your account."}
+            </Label>
+          )}
+        </Panel>
+      </DoctorScreen>
+    );
   }
 
   if (!patient || !appointment) return <MissingPatient />;
   const visit = visits[appointment.id] ?? createConsultation(patient.id);
 
   return (
-    <DoctorScreen
-      title={patient.name}
-    >
+    <DoctorScreen title={patient.name}>
       <Heading style={{ fontSize: 13 }}>Recorded Vitals</Heading>
       <View style={ui.row}>
         {[

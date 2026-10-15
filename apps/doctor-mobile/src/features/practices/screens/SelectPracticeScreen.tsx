@@ -62,7 +62,7 @@ export function SelectPracticeScreen() {
         (item) => item.practice_id === practice.practice_id
       )?.address ?? "",
   }));
-  
+
   const filtered = locations.filter((item) =>
     `${item.facility_name} ${item.address}`
       .toLowerCase()

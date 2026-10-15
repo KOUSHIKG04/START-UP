@@ -1,7 +1,15 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useRef, type ReactNode } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  type PressableProps,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { appThemeColors, type AppTheme } from "../utils/appTheme";
 
@@ -70,20 +78,24 @@ export function Button({
       style={(state) => {
         const callerStyle = typeof style === "function" ? style(state) : style;
         const layout = StyleSheet.flatten(callerStyle);
-        const widthControlled = layout?.width !== undefined ||
+        const widthControlled =
+          layout?.width !== undefined ||
           (typeof layout?.flex === "number" && layout.flex > 0) ||
           (typeof layout?.flexGrow === "number" && layout.flexGrow > 0);
         return [
-        styles.button,
-        palette.container,
-        state.pressed && !disabled && !loading ? styles.pressed : undefined,
-        disabled && !loading ? styles.disabled : undefined,
-        loading && idleSize.current
-          ? { minWidth: widthControlled ? undefined : idleSize.current.width, minHeight: idleSize.current.height }
-          : undefined,
-        callerStyle,
-        loading ? styles.loading : undefined,
-      ];
+          styles.button,
+          palette.container,
+          state.pressed && !disabled && !loading ? styles.pressed : undefined,
+          disabled && !loading ? styles.disabled : undefined,
+          loading && idleSize.current
+            ? {
+                minWidth: widthControlled ? undefined : idleSize.current.width,
+                minHeight: idleSize.current.height,
+              }
+            : undefined,
+          callerStyle,
+          loading ? styles.loading : undefined,
+        ];
       }}
     >
       {loading ? (
@@ -91,25 +103,30 @@ export function Button({
           size="small"
           color={StyleSheet.flatten(labelStyle)?.color ?? palette.label.color}
         />
-      ) : children ?? (
-        <>
-          {leftIcon}
-          {label ? (
-            <Text variant="button"
-              numberOfLines={1}
-              style={[
-                styles.label,
-                themeColors === appThemeColors.doctor ? styles.doctorLabel : undefined,
-                palette.label,
-                disabled ? styles.disabledLabel : undefined,
-                labelStyle,
-              ]}
-            >
-              {label}
-            </Text>
-          ) : null}
-          {rightIcon}
-        </>
+      ) : (
+        (children ?? (
+          <>
+            {leftIcon}
+            {label ? (
+              <Text
+                variant="button"
+                numberOfLines={1}
+                style={[
+                  styles.label,
+                  themeColors === appThemeColors.doctor
+                    ? styles.doctorLabel
+                    : undefined,
+                  palette.label,
+                  disabled ? styles.disabledLabel : undefined,
+                  labelStyle,
+                ]}
+              >
+                {label}
+              </Text>
+            ) : null}
+            {rightIcon}
+          </>
+        ))
       )}
     </Pressable>
   );

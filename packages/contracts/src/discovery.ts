@@ -39,7 +39,11 @@ export const publicPracticeSchema = z.object({
   timezone: z.string(),
   practice_service_id: uuidSchema.nullable(),
   has_available_slots: z.boolean().default(false),
-  next_available_at: z.string().datetime({ offset: true }).nullable().optional(),
+  next_available_at: z
+    .string()
+    .datetime({ offset: true })
+    .nullable()
+    .optional(),
   service_code: z.string(),
   service_name: z.string(),
   fee_minor: z.string().nullable(),

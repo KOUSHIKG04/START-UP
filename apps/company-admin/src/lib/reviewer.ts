@@ -13,10 +13,10 @@ export async function requireReviewer() {
 
   const client = await createClient();
   const { data, error } = await client.auth.getClaims();
-  
+
   if (error || !data) redirect("/login");
-  
+
   if (!(await isCompanyReviewer(client))) redirect("/login?error=access");
-  
+
   return client;
 }

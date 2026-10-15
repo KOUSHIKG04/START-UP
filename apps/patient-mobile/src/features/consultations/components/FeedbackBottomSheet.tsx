@@ -1,7 +1,13 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { CheckCircle2 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, TextArea } from "@startup/mobile-ui";
@@ -41,7 +47,8 @@ export default function FeedbackBottomSheet({
   };
 
   return (
-    <ModalSurface layout="custom"
+    <ModalSurface
+      layout="custom"
       animationType="slide"
       onClose={submitted ? undefined : handleClose}
       statusBarTranslucent
@@ -65,11 +72,21 @@ export default function FeedbackBottomSheet({
             <View style={styles.thankYouContainer}>
               <View style={styles.successHaloOuter}>
                 <View style={styles.successHaloInner}>
-                  <CheckCircle2 color={colors.white} size={44} strokeWidth={2.5} />
+                  <CheckCircle2
+                    color={colors.white}
+                    size={44}
+                    strokeWidth={2.5}
+                  />
                 </View>
               </View>
-              <Text variant="cardHeading" style={styles.thankYouTitle}>Thank you!</Text>
-              <Button label="Done" onPress={handleClose} style={styles.submitButton} />
+              <Text variant="cardHeading" style={styles.thankYouTitle}>
+                Thank you!
+              </Text>
+              <Button
+                label="Done"
+                onPress={handleClose}
+                style={styles.submitButton}
+              />
             </View>
           ) : (
             <>
@@ -84,7 +101,8 @@ export default function FeedbackBottomSheet({
                 onChangeText={setFeedback}
                 style={styles.textArea}
               />
-              <Button loading={submitting}
+              <Button
+                loading={submitting}
                 disabled={!feedback.trim() || submitting}
                 label="Submit"
                 onPress={() => void submit()}

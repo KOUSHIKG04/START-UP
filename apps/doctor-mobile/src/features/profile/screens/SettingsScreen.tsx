@@ -72,7 +72,11 @@ export function SettingsScreen() {
         </View>
       </Card>
       {[
-        { title: "Notification Preferences", subtitle: "Manage device notification permissions", icon: Bell },
+        {
+          title: "Notification Preferences",
+          subtitle: "Manage device notification permissions",
+          icon: Bell,
+        },
         {
           title: "Help & Support",
           subtitle: "Contact your clinic or operator",

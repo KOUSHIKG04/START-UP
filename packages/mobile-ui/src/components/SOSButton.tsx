@@ -67,7 +67,9 @@ export function SOSButton({
         ]}
       />
 
-      <Text variant="button" style={isRed ? styles.textWhite : styles.textRed}>SOS</Text>
+      <Text variant="button" style={isRed ? styles.textWhite : styles.textRed}>
+        SOS
+      </Text>
     </Pressable>
   );
 }

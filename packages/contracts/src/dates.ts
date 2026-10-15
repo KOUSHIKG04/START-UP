@@ -69,5 +69,7 @@ export function formatDisplayDateTime(
 /** Tomorrow's calendar date in the practice timezone, independent of device time. */
 export function nextLocalDate(timeZone?: string, now = new Date()): string {
   const today = parseDisplayDate(formatDisplayDate(now, timeZone))!;
-  return new Date(Date.parse(`${today}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+  return new Date(Date.parse(`${today}T00:00:00Z`) + 86400000)
+    .toISOString()
+    .slice(0, 10);
 }

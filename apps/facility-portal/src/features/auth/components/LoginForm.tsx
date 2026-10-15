@@ -20,7 +20,12 @@ export function LoginForm({
     error: null,
   });
   useEffect(() => {
-    if (state.error) toast.add({ title: "Sign in failed", description: state.error, type: "error" });
+    if (state.error)
+      toast.add({
+        title: "Sign in failed",
+        description: state.error,
+        type: "error",
+      });
   }, [state.error]);
 
   return (
@@ -58,7 +63,10 @@ export function LoginForm({
 
           <p className="text-muted-foreground mt-6 text-center text-sm">
             New hospital or clinic?{" "}
-            <Link href="/register" className="text-foreground font-medium underline underline-offset-4">
+            <Link
+              href="/register"
+              className="text-foreground font-medium underline underline-offset-4"
+            >
               Sign up
             </Link>
           </p>

@@ -4,14 +4,14 @@ Patient, Doctor, Driver and Web Admin share one Supabase project per environment
 Supabase Auth, PostgreSQL, RPC, RLS, Realtime, Storage and Edge Functions form the
 backend. There is no separately deployed Bun API.
 
-| Location                              | Responsibility                                       |
-| ------------------------------------- | ---------------------------------------------------- |
-| packages/database/src/schema | Server-only Drizzle models                           |
-| packages/data-access                  | Shared typed Supabase client and reusable operations |
-| supabase/migrations                   | Reviewed SQL: tables, constraints, RPC and policies  |
-| supabase/functions                    | Trusted integration handlers deployed to Supabase    |
-| supabase/config.toml                  | Local CLI configuration; not hosted credentials      |
-| packages/database/tooling/seed.ts     | Explicit synthetic development fixture               |
+| Location                          | Responsibility                                       |
+| --------------------------------- | ---------------------------------------------------- |
+| packages/database/src/schema      | Server-only Drizzle models                           |
+| packages/data-access              | Shared typed Supabase client and reusable operations |
+| supabase/migrations               | Reviewed SQL: tables, constraints, RPC and policies  |
+| supabase/functions                | Trusted integration handlers deployed to Supabase    |
+| supabase/config.toml              | Local CLI configuration; not hosted credentials      |
+| packages/database/tooling/seed.ts | Explicit synthetic development fixture               |
 
 ## Current implementation
 

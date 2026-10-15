@@ -38,7 +38,14 @@ module.exports = {
   android: {
     ...expo.android,
     package: `com.clinzo.doctor${suffix}`,
-    ...(googleMapsApiKey ? { config: { ...expo.android?.config, googleMaps: { apiKey: googleMapsApiKey } } } : {}),
+    ...(googleMapsApiKey
+      ? {
+          config: {
+            ...expo.android?.config,
+            googleMaps: { apiKey: googleMapsApiKey },
+          },
+        }
+      : {}),
   },
   ios: { ...expo.ios, bundleIdentifier: `com.clinzo.doctor${suffix}` },
 };

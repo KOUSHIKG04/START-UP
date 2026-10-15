@@ -35,25 +35,31 @@ export const doctorApi = {
     status,
     specialization,
     signal,
-  }: DoctorFilters & { signal?: AbortSignal } = {}): Promise<DoctorListResponse> => {
+  }: DoctorFilters & {
+    signal?: AbortSignal;
+  } = {}): Promise<DoctorListResponse> => {
     // Check if request was aborted
     if (signal?.aborted) {
       throw new DOMException("Aborted", "AbortError");
     }
 
     const response = await fetch("/api/doctors", { signal, cache: "no-store" });
-    if (!response.ok) throw new Error("Could not load the facility doctor directory.");
-    let result: DoctorRecord[] = facilityDoctorRosterItemSchema.array().parse(await response.json()).map((row) => ({
-      id: row.id,
-      name: row.name,
-      specialization: row.specialization,
-      clinzoId: row.clinzo_id,
-      phone: row.phone,
-      status: row.on_leave ? "On Leave" : "Active",
-      avatar: "",
-      verified: row.verified,
-      present: row.present,
-    }));
+    if (!response.ok)
+      throw new Error("Could not load the facility doctor directory.");
+    let result: DoctorRecord[] = facilityDoctorRosterItemSchema
+      .array()
+      .parse(await response.json())
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        specialization: row.specialization,
+        clinzoId: row.clinzo_id,
+        phone: row.phone,
+        status: row.on_leave ? "On Leave" : "Active",
+        avatar: "",
+        verified: row.verified,
+        present: row.present,
+      }));
 
     if (search.trim()) {
       const q = search.toLowerCase().trim();
@@ -62,17 +68,19 @@ export const doctorApi = {
           d.name.toLowerCase().includes(q) ||
           d.specialization.toLowerCase().includes(q) ||
           d.clinzoId.toLowerCase().includes(q) ||
-          d.phone.toLowerCase().includes(q),
+          d.phone.toLowerCase().includes(q)
       );
     }
 
     if (status && status !== "all") {
-      result = result.filter((d) => d.status.toLowerCase() === status.toLowerCase());
+      result = result.filter(
+        (d) => d.status.toLowerCase() === status.toLowerCase()
+      );
     }
 
     if (specialization && specialization !== "all") {
       result = result.filter(
-        (d) => d.specialization.toLowerCase() === specialization.toLowerCase(),
+        (d) => d.specialization.toLowerCase() === specialization.toLowerCase()
       );
     }
 
@@ -85,7 +93,9 @@ export const doctorApi = {
       items: paginatedItems,
       summary: {
         total: result.length,
-        active: result.filter((doctor) => doctor.present && doctor.status === "Active").length,
+        active: result.filter(
+          (doctor) => doctor.present && doctor.status === "Active"
+        ).length,
         verified: result.filter((doctor) => doctor.verified).length,
       },
       total,
@@ -94,7 +104,6 @@ export const doctorApi = {
       totalPages,
     };
   },
-
 };
 
 /**
@@ -103,7 +112,7 @@ export const doctorApi = {
 export function useDoctors(
   userId: string,
   organizationId: string,
-  filters: { page: number; search: string },
+  filters: { page: number; search: string }
 ) {
   return useQuery({
     queryKey: ["doctors", userId, organizationId, filters],
@@ -118,16 +127,33 @@ export function useDoctors(
  * Handles search state, pagination, and TanStack Query synchronization.
  */
 export function useDoctorDirectory(initialFilters?: Partial<DoctorFilters>) {
-  const [searchTerm, setSearchTerm] = React.useState(initialFilters?.search || "");
+  const [searchTerm, setSearchTerm] = React.useState(
+    initialFilters?.search || ""
+  );
   const [page, setPage] = React.useState(initialFilters?.page || 1);
-  const [pageSize, setPageSize] = React.useState(initialFilters?.pageSize || 10);
+  const [pageSize, setPageSize] = React.useState(
+    initialFilters?.pageSize || 10
+  );
   const [status, setStatus] = React.useState(initialFilters?.status || "all");
-  const [specialization, setSpecialization] = React.useState(initialFilters?.specialization || "all");
+  const [specialization, setSpecialization] = React.useState(
+    initialFilters?.specialization || "all"
+  );
 
   const query = useQuery({
-    queryKey: ["doctors", "directory", { search: searchTerm, page, pageSize, status, specialization }],
+    queryKey: [
+      "doctors",
+      "directory",
+      { search: searchTerm, page, pageSize, status, specialization },
+    ],
     queryFn: ({ signal }) =>
-      doctorApi.list({ search: searchTerm, page, pageSize, status, specialization, signal }),
+      doctorApi.list({
+        search: searchTerm,
+        page,
+        pageSize,
+        status,
+        specialization,
+        signal,
+      }),
     staleTime: 30_000,
   });
 

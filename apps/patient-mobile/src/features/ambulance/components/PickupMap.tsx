@@ -27,14 +27,21 @@ export function PickupMap({
         />
       </View>
       <View style={styles.pickupPanel}>
-        <Text variant="cardHeading" style={styles.pickupTitle}>Confirm your pickup</Text>
+        <Text variant="cardHeading" style={styles.pickupTitle}>
+          Confirm your pickup
+        </Text>
         <View style={styles.pickupSearch}>
-          <Text variant="body" numberOfLines={1} style={styles.pickupPlaceholder}>
+          <Text
+            variant="body"
+            numberOfLines={1}
+            style={styles.pickupPlaceholder}
+          >
             {destination || "Search hospital or clinic"}
           </Text>
           <Search color="#71818F" size={18} />
         </View>
-        <Input variant="unstyled"
+        <Input
+          variant="unstyled"
           value={address}
           onChangeText={onAddressChange}
           placeholder="Add Building , gate /Floor (Optional)"

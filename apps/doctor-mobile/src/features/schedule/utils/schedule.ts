@@ -12,11 +12,34 @@ export function formatTime(value: number) {
   const hour = Math.floor(value / 60);
   return `${String(hour % 12 || 12).padStart(2, "0")}:${String(value % 60).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
 }
-export function scheduleError(schedule: Schedule, mode: "clinic" | "online" | "home" = "clinic"): string | undefined {
-  if (!Number.isInteger(schedule.duration) || schedule.duration < 5 || schedule.duration > 120) return "Enter a clinic slot duration from 5 to 120 minutes.";
-  if (!Number.isInteger(schedule.onlineDuration) || schedule.onlineDuration < 5 || schedule.onlineDuration > 120) return "Enter an online slot duration from 5 to 120 minutes.";
-  if (!Number.isInteger(schedule.homeDuration) || schedule.homeDuration < 30 || schedule.homeDuration > 120) return "Enter a home-visit slot duration from 30 to 120 minutes.";
-  if (![schedule.online, schedule.walkIn, schedule.autoLimit].every(value => Number.isInteger(value) && value >= 0 && value <= 100)) return "Enter daily limits from 0 to 100.";
+export function scheduleError(
+  schedule: Schedule,
+  mode: "clinic" | "online" | "home" = "clinic"
+): string | undefined {
+  if (
+    !Number.isInteger(schedule.duration) ||
+    schedule.duration < 5 ||
+    schedule.duration > 120
+  )
+    return "Enter a clinic slot duration from 5 to 120 minutes.";
+  if (
+    !Number.isInteger(schedule.onlineDuration) ||
+    schedule.onlineDuration < 5 ||
+    schedule.onlineDuration > 120
+  )
+    return "Enter an online slot duration from 5 to 120 minutes.";
+  if (
+    !Number.isInteger(schedule.homeDuration) ||
+    schedule.homeDuration < 30 ||
+    schedule.homeDuration > 120
+  )
+    return "Enter a home-visit slot duration from 30 to 120 minutes.";
+  if (
+    ![schedule.online, schedule.walkIn, schedule.autoLimit].every(
+      (value) => Number.isInteger(value) && value >= 0 && value <= 100
+    )
+  )
+    return "Enter daily limits from 0 to 100.";
   if (!schedule.days.length) return "Select at least one working day.";
   if (
     !Number.isFinite(minutes(schedule.start)) ||
@@ -25,7 +48,12 @@ export function scheduleError(schedule: Schedule, mode: "clinic" | "online" | "h
     return "Enter clinic hours as HH:MM; the end may be 24:00.";
   if (endMinutes(schedule.end) <= minutes(schedule.start))
     return "End time must be after start time.";
-  const duration = mode === "online" ? schedule.onlineDuration : mode === "home" ? schedule.homeDuration : schedule.duration;
+  const duration =
+    mode === "online"
+      ? schedule.onlineDuration
+      : mode === "home"
+        ? schedule.homeDuration
+        : schedule.duration;
   if (endMinutes(schedule.end) - minutes(schedule.start) < duration)
     return "Working hours must fit at least one appointment slot.";
   if (
@@ -47,21 +75,43 @@ export function previewSlots(schedule: Schedule): string[] {
 }
 
 /** A setup suggestion only; changing a booking cap never changes the interval. */
-export function suggestConsultationDuration(start: string, end: string, dailyLimit: number): number | null {
+export function suggestConsultationDuration(
+  start: string,
+  end: string,
+  dailyLimit: number
+): number | null {
   const available = endMinutes(end) - minutes(start);
-  if (!Number.isFinite(available) || available < 5 || !Number.isInteger(dailyLimit) || dailyLimit < 1) return null;
+  if (
+    !Number.isFinite(available) ||
+    available < 5 ||
+    !Number.isInteger(dailyLimit) ||
+    dailyLimit < 1
+  )
+    return null;
   return Math.min(120, Math.max(5, Math.floor(available / dailyLimit / 5) * 5));
 }
 
-export function previewTimeBlock(start: string, end: string, duration: number): string[] {
-  return slotStartTimes(start, end, duration).map((slot) => formatTime(minutes(slot)));
+export function previewTimeBlock(
+  start: string,
+  end: string,
+  duration: number
+): string[] {
+  return slotStartTimes(start, end, duration).map((slot) =>
+    formatTime(minutes(slot))
+  );
 }
 
-export function slotStartTimes(start: string, end: string, duration: number): string[] {
+export function slotStartTimes(
+  start: string,
+  end: string,
+  duration: number
+): string[] {
   if (
     !Number.isFinite(minutes(start)) ||
     !Number.isFinite(endMinutes(end)) ||
-    !Number.isInteger(duration) || duration < 5 || duration > 120
+    !Number.isInteger(duration) ||
+    duration < 5 ||
+    duration > 120
   )
     return [];
   const result: string[] = [];
@@ -70,12 +120,18 @@ export function slotStartTimes(start: string, end: string, duration: number): st
     time + duration <= endMinutes(end);
     time += duration
   )
-    result.push(`${String(Math.floor(time / 60)).padStart(2, "0")}:${String(time % 60).padStart(2, "0")}`);
+    result.push(
+      `${String(Math.floor(time / 60)).padStart(2, "0")}:${String(time % 60).padStart(2, "0")}`
+    );
   return result;
 }
 
-export function toggleSelectedSlot(slots: string[], slot: string, limit: number): string[] {
-  if (slots.includes(slot)) return slots.filter(item => item !== slot);
+export function toggleSelectedSlot(
+  slots: string[],
+  slot: string,
+  limit: number
+): string[] {
+  if (slots.includes(slot)) return slots.filter((item) => item !== slot);
   if (!Number.isInteger(limit) || limit <= slots.length) return slots;
   return [...slots, slot];
 }

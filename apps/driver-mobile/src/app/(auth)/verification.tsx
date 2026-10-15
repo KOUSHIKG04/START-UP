@@ -16,7 +16,7 @@ import {
 
 export default function DriverVerification() {
   const { profile, session } = useMobileSession();
-  
+
   const application = useQuery({
     queryKey: ["driver-registration-application"],
     queryFn: () => getMyDriverRegistrationApplication(supabase!),
@@ -46,7 +46,7 @@ export default function DriverVerification() {
         </Text>
       </View>
     );
-    
+
   return (
     <VerificationScreen
       verified={profile?.driver?.status === "verified"}

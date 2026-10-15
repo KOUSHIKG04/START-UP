@@ -1,13 +1,7 @@
 import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import {
@@ -36,7 +30,6 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
   useToastFeedback({ error });
 
-
   async function signIn() {
     if (!devPasswordLoginEnabled || busy) return;
     if (!supabase) {
@@ -54,7 +47,6 @@ export default function LoginScreen() {
       setBusy(false);
     }
   }
-
 
   async function signUp() {
     if (!devPasswordLoginEnabled || busy) return;
@@ -95,9 +87,7 @@ export default function LoginScreen() {
     } finally {
       setBusy(false);
     }
-
   }
-
 
   function switchEmailMode() {
     setEmailMode(emailMode === "signin" ? "signup" : "signin");
@@ -106,12 +96,8 @@ export default function LoginScreen() {
     setConfirmationPending(false);
   }
 
-
   return (
-    <OnboardingShell
-      onBack={() => router.back()}
-      scroll={emailOpen}
-    >
+    <OnboardingShell onBack={() => router.back()} scroll={emailOpen}>
       <View style={styles.body}>
         {devPasswordLoginEnabled ? (
           <View style={styles.switchContainer}>
@@ -119,16 +105,31 @@ export default function LoginScreen() {
               <Pressable
                 key={loginMode}
                 accessibilityRole="tab"
-                accessibilityState={{ selected: mode === loginMode, disabled: busy }}
-                accessibilityLabel={loginMode === "dev" ? "Switch to Development mode" : "Switch to Production mode"}
+                accessibilityState={{
+                  selected: mode === loginMode,
+                  disabled: busy,
+                }}
+                accessibilityLabel={
+                  loginMode === "dev"
+                    ? "Switch to Development mode"
+                    : "Switch to Production mode"
+                }
                 disabled={busy}
                 onPress={() => {
                   setMode(loginMode);
                   setError("");
                 }}
-                style={[styles.modeButton, mode === loginMode && styles.modeButtonActive]}
+                style={[
+                  styles.modeButton,
+                  mode === loginMode && styles.modeButtonActive,
+                ]}
               >
-                <Text style={[styles.modeText, mode === loginMode && styles.modeTextActive]}>
+                <Text
+                  style={[
+                    styles.modeText,
+                    mode === loginMode && styles.modeTextActive,
+                  ]}
+                >
                   {loginMode === "dev" ? "Dev (Email)" : "Prod (Figma)"}
                 </Text>
               </Pressable>
@@ -169,7 +170,8 @@ export default function LoginScreen() {
               </>
             ) : (
               <>
-                <Input variant="unstyled"
+                <Input
+                  variant="unstyled"
                   accessibilityLabel="Email"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -181,7 +183,8 @@ export default function LoginScreen() {
                   style={styles.input}
                   editable={!busy}
                 />
-                <Input variant="unstyled"
+                <Input
+                  variant="unstyled"
                   accessibilityLabel="Password"
                   autoComplete={
                     emailMode === "signup" ? "new-password" : "password"
@@ -195,7 +198,8 @@ export default function LoginScreen() {
                   editable={!busy}
                 />
                 {emailMode === "signup" ? (
-                  <Input variant="unstyled"
+                  <Input
+                    variant="unstyled"
                     accessibilityLabel="Confirm password"
                     autoComplete="new-password"
                     secureTextEntry
@@ -208,7 +212,8 @@ export default function LoginScreen() {
                   />
                 ) : null}
 
-                <OnboardingButton loading={busy}
+                <OnboardingButton
+                  loading={busy}
                   label={
                     busy
                       ? "Please wait…"
@@ -249,9 +254,13 @@ export default function LoginScreen() {
               <OnboardingButton
                 variant="outline"
                 label="Continue with Google"
-                onPress={() => setError(devPasswordLoginEnabled
-                  ? "Google sign-in is not configured yet. Use Dev (Email) for testing."
-                  : "Google sign-in is not configured yet.")}
+                onPress={() =>
+                  setError(
+                    devPasswordLoginEnabled
+                      ? "Google sign-in is not configured yet. Use Dev (Email) for testing."
+                      : "Google sign-in is not configured yet."
+                  )
+                }
               />
               <OnboardingButton
                 variant="outline"
@@ -270,7 +279,6 @@ export default function LoginScreen() {
     </OnboardingShell>
   );
 }
-
 
 const styles = StyleSheet.create({
   body: { flex: 1, alignItems: "center", paddingTop: 24 },
@@ -312,7 +320,13 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   link: { color: colors.patient.primaryDark },
-  form: { width: "100%", maxWidth: 330, gap: 14, marginTop: 32, paddingBottom: 24 },
+  form: {
+    width: "100%",
+    maxWidth: 330,
+    gap: 14,
+    marginTop: 32,
+    paddingBottom: 24,
+  },
   formHeading: {
     fontFamily: fontFamilies.medium,
     fontSize: 22,

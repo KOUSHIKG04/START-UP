@@ -10,7 +10,11 @@ export function SectionTitle({
   children: ReactNode;
   style?: StyleProp<TextStyle>;
 }) {
-  return <Text variant="sectionHeading" style={[styles.sectionTitle, style]}>{children}</Text>;
+  return (
+    <Text variant="sectionHeading" style={[styles.sectionTitle, style]}>
+      {children}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({

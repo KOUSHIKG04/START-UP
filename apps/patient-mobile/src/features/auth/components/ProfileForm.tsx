@@ -97,7 +97,9 @@ function getInitialFormValues(
     email: initialProfile?.email ?? (!family ? initialEmail : ""),
     address: initialProfile?.address ?? undefined,
     relation: initialProfile?.relation ?? "Son",
-    phone: contactPhoneForInput(initialProfile?.contact_phone || (!family ? initialPhone : "")),
+    phone: contactPhoneForInput(
+      initialProfile?.contact_phone || (!family ? initialPhone : "")
+    ),
     notify: initialProfile?.notify ?? false,
   };
 }
@@ -288,7 +290,10 @@ export function ProfileForm({
       centerContent
       onBack={() => {
         if (router.canGoBack()) router.back();
-        else router.replace(initialProfile || family ? "/(app)/(tabs)/profile" : "/login");
+        else
+          router.replace(
+            initialProfile || family ? "/(app)/(tabs)/profile" : "/login"
+          );
       }}
     >
       <View style={styles.body}>
@@ -354,10 +359,16 @@ export function ProfileForm({
                 keyboardType="phone-pad"
                 autoComplete="tel"
                 placeholder="Mobile number"
-                prefix={field.value.startsWith("+") && !field.value.startsWith("+91") ? undefined : "+91"}
+                prefix={
+                  field.value.startsWith("+") && !field.value.startsWith("+91")
+                    ? undefined
+                    : "+91"
+                }
                 placeholderTextColor={PROFILE_PLACEHOLDER_COLOR}
                 value={field.value}
-                onChangeText={(value) => field.onChange(contactPhoneForInput(value))}
+                onChangeText={(value) =>
+                  field.onChange(contactPhoneForInput(value))
+                }
                 onBlur={field.onBlur}
                 style={[profileFormStyles.control, profileFormStyles.text]}
               />
@@ -403,7 +414,9 @@ export function ProfileForm({
           </View>
 
           <View style={styles.genderColumn}>
-            <Text variant="label" style={styles.label}>Gender</Text>
+            <Text variant="label" style={styles.label}>
+              Gender
+            </Text>
             <Controller
               control={control}
               name="gender"
@@ -429,7 +442,9 @@ export function ProfileForm({
           </View>
         </View>
 
-        <Text variant="label" style={[styles.label, styles.sectionLabel]}>Blood Group</Text>
+        <Text variant="label" style={[styles.label, styles.sectionLabel]}>
+          Blood Group
+        </Text>
         <Controller
           control={control}
           name="bloodGroup"
@@ -476,7 +491,7 @@ export function ProfileForm({
                   onboardingButtonStyles.outline,
                 ]}
                 labelStyle={onboardingButtonStyles.outlineLabel}
-               
+
                 label="Skip for now"
                 variant="outline"
                 disabled={isSubmitting}
@@ -485,11 +500,12 @@ export function ProfileForm({
             </View>
           ) : null}
           <View style={family ? { flex: 1 } : undefined}>
-            <Button loading={isSubmitting}
+            <Button
+              loading={isSubmitting}
               theme="patient"
               style={onboardingButtonStyles.button}
               labelStyle={onboardingButtonStyles.label}
-           
+
               label={isSubmitting ? "Saving…" : "Save Profile"}
               disabled={isSubmitting}
               onPress={handleSubmit(onSubmit)}

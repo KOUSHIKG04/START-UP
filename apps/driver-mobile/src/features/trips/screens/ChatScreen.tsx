@@ -80,10 +80,7 @@ export function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={ui.screen}
     >
-      <PageHeader
-        title="Rajesh Kumar"
-        onBack={() => router.back()}
-      />
+      <PageHeader title="Rajesh Kumar" onBack={() => router.back()} />
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -124,7 +121,8 @@ export function ChatScreen() {
               )}
             </ScrollView>
             <View style={ui.row}>
-              <Input variant="unstyled"
+              <Input
+                variant="unstyled"
                 accessibilityLabel="Message to patient"
                 value={draft}
                 onChangeText={setDraft}

@@ -18,8 +18,18 @@ type NullableRpcArguments = {
   save_my_patient_location: "p_location_id";
   save_my_doctor_profile_with_address: "p_bio";
   update_my_doctor_profile: "p_bio";
-  search_public_practices: "p_query" | "p_specialty_code" | "p_latitude" | "p_longitude" | "p_practice_id";
-  search_public_practices_for_mode: "p_query" | "p_specialty_code" | "p_latitude" | "p_longitude" | "p_practice_id";
+  search_public_practices:
+    | "p_query"
+    | "p_specialty_code"
+    | "p_latitude"
+    | "p_longitude"
+    | "p_practice_id";
+  search_public_practices_for_mode:
+    | "p_query"
+    | "p_specialty_code"
+    | "p_latitude"
+    | "p_longitude"
+    | "p_practice_id";
   submit_my_doctor_review: "p_comment";
   decide_my_facility_doctor_request: "p_reason";
   mark_my_notifications_read: "p_ids";
@@ -29,11 +39,16 @@ type NullableRpcArguments = {
 type HostedFunctions = HostedDatabase["public"]["Functions"];
 type WireArgs<Name, Args> = {
   [Key in keyof Args]: Name extends "finalize_company_verification"
-    ? Key extends "p_driver_details" ? Record<string, unknown> | null : Args[Key]
-    : Key extends "p_expected_version" ? Args[Key] | string
-    : Name extends keyof NullableRpcArguments
-      ? Key extends NullableRpcArguments[Name] ? Args[Key] | null : Args[Key]
-      : Args[Key];
+    ? Key extends "p_driver_details"
+      ? Record<string, unknown> | null
+      : Args[Key]
+    : Key extends "p_expected_version"
+      ? Args[Key] | string
+      : Name extends keyof NullableRpcArguments
+        ? Key extends NullableRpcArguments[Name]
+          ? Args[Key] | null
+          : Args[Key]
+        : Args[Key];
 };
 type WireFunctions = {
   [Name in keyof HostedFunctions]: Omit<HostedFunctions[Name], "Args"> & {
@@ -41,19 +56,21 @@ type WireFunctions = {
   };
 };
 export type Database = Omit<HostedDatabase, "public"> & {
-  public: Omit<HostedDatabase["public"], "Functions"> & { Functions: WireFunctions & {
-    // Local migration; replace with hosted introspection after deployment.
-    book_portal_walk_in_appointment: {
-      Args: {
-        p_practice_id: string;
-        p_window_id: string;
-        p_practice_service_id: string;
-        p_patient_name: string;
-        p_patient_phone: string | null;
-        p_reason: string | null;
-        p_idempotency_key: string;
+  public: Omit<HostedDatabase["public"], "Functions"> & {
+    Functions: WireFunctions & {
+      // Local migration; replace with hosted introspection after deployment.
+      book_portal_walk_in_appointment: {
+        Args: {
+          p_practice_id: string;
+          p_window_id: string;
+          p_practice_service_id: string;
+          p_patient_name: string;
+          p_patient_phone: string | null;
+          p_reason: string | null;
+          p_idempotency_key: string;
+        };
+        Returns: string;
       };
-      Returns: string;
     };
-  } };
+  };
 };

@@ -46,7 +46,9 @@ export async function addMyFamilyProfile(
       relation: value.relation,
       phone: value.phone,
       notify: value.notify,
-      ...(value.profilePhotoPath ? { profile_photo_path: value.profilePhotoPath } : {}),
+      ...(value.profilePhotoPath
+        ? { profile_photo_path: value.profilePhotoPath }
+        : {}),
     },
   });
   if (error) throw error;
@@ -70,7 +72,9 @@ export async function updateMyFamilyProfile(
       relation: value.relation,
       phone: value.phone,
       notify: value.notify,
-      ...(value.profilePhotoPath ? { profile_photo_path: value.profilePhotoPath } : {}),
+      ...(value.profilePhotoPath
+        ? { profile_photo_path: value.profilePhotoPath }
+        : {}),
     },
   });
   if (error) throw error;

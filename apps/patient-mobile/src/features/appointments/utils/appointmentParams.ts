@@ -14,8 +14,7 @@ export function appointmentFromParams(params: AppointmentParams): Appointment {
     id: first(params.id) ?? "#APT20260820",
     backendId: first(params.backendId),
     doctorName: first(params.doctorName) ?? "Dr. Ananya Sharma",
-    qualification:
-      first(params.qualification) ?? "MBBS, MD (General Medicine)",
+    qualification: first(params.qualification) ?? "MBBS, MD (General Medicine)",
     specialty: first(params.specialty) ?? "General Physician",
     consultationType: parseConsultationType(params.consultationType),
     date: first(params.date) ?? "20 Aug 2026",

@@ -19,7 +19,6 @@ export default function DriverVerification() {
     enabled: Boolean(supabase && profile?.driver?.id),
   });
 
-
   if (fleet.isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -30,8 +29,8 @@ export default function DriverVerification() {
   const verified =
     profile?.driver?.status === "verified" &&
     Boolean(fleet.data?.some((vehicle) => vehicle.ready_to_go_available));
-  
-    return (
+
+  return (
     <VerificationScreen
       verified={verified}
       onBack={() => router.back()}

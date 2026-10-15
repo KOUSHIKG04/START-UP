@@ -37,27 +37,38 @@ export async function loadPortalWalkInSlots(practiceId: string) {
   await requireApprovedFacility();
   const client = await createClient();
   const practices = await listMyPractices(client);
-  if (!practices.some((practice) => practice.practice_id === parsed.data && practice.verified))
+  if (
+    !practices.some(
+      (practice) => practice.practice_id === parsed.data && practice.verified
+    )
+  )
     return [];
-  return (await listPracticeClinicSlots(client, parsed.data, undefined, 100, "clinic"))
-    .map((slot) => ({
-      windowId: slot.window_id,
-      practiceServiceId: slot.practice_service_id,
-      startsAt: slot.starts_at,
-      endsAt: slot.ends_at,
-      timezone: slot.timezone,
-      feeMinor: slot.fee_minor,
-      currency: slot.currency,
-    }));
+  return (
+    await listPracticeClinicSlots(client, parsed.data, undefined, 100, "clinic")
+  ).map((slot) => ({
+    windowId: slot.window_id,
+    practiceServiceId: slot.practice_service_id,
+    startsAt: slot.starts_at,
+    endsAt: slot.ends_at,
+    timezone: slot.timezone,
+    feeMinor: slot.fee_minor,
+    currency: slot.currency,
+  }));
 }
 
-export async function createPortalWalkInAppointment(input: unknown): Promise<{ error: string | null }> {
+export async function createPortalWalkInAppointment(
+  input: unknown
+): Promise<{ error: string | null }> {
   const parsed = portalWalkInBookingSchema.safeParse(input);
-  if (!parsed.success) return { error: "Enter a patient name and choose an available clinic slot." };
+  if (!parsed.success)
+    return {
+      error: "Enter a patient name and choose an available clinic slot.",
+    };
   await requireApprovedFacility();
   const client = await createClient();
   const { data: claims, error: authError } = await client.auth.getClaims();
-  if (authError || !claims) return { error: "Your session expired. Sign in again." };
+  if (authError || !claims)
+    return { error: "Your session expired. Sign in again." };
   try {
     await bookPortalWalkInAppointment(client, parsed.data);
     revalidatePath("/appointments");
@@ -65,12 +76,23 @@ export async function createPortalWalkInAppointment(input: unknown): Promise<{ e
     revalidatePath("/dashboard");
     return { error: null };
   } catch (error) {
-    const code = typeof error === "object" && error !== null && "code" in error
-      ? String(error.code) : null;
-    if (code === "23514") return { error: "That slot is full. Choose another time." };
-    if (code === "22023") return { error: "That slot is no longer available. Refresh the times and try again." };
-    if (code === "42501") return { error: "You do not have access to book this doctor." };
-    return { error: "Could not create the appointment. Check your connection and try again." };
+    const code =
+      typeof error === "object" && error !== null && "code" in error
+        ? String(error.code)
+        : null;
+    if (code === "23514")
+      return { error: "That slot is full. Choose another time." };
+    if (code === "22023")
+      return {
+        error:
+          "That slot is no longer available. Refresh the times and try again.",
+      };
+    if (code === "42501")
+      return { error: "You do not have access to book this doctor." };
+    return {
+      error:
+        "Could not create the appointment. Check your connection and try again.",
+    };
   }
 }
 
@@ -112,12 +134,15 @@ export async function changePortalAppointment(
       typeof error === "object" && error !== null && "code" in error
         ? String(error.code)
         : null;
-    if ((code === "PT409" || code === "40001"))
+    if (code === "PT409" || code === "40001")
       return { error: "This appointment changed. Refresh and try again." };
     if (code === "42501")
       return { error: "You do not have access to this appointment or action." };
     if (code === "22023" && parsed.data.action === "approve")
-      return { error: "This request has expired or its appointment slot has started. Refresh to see current requests." };
+      return {
+        error:
+          "This request has expired or its appointment slot has started. Refresh to see current requests.",
+      };
     return {
       error: "Could not update this appointment. Refresh and try again.",
     };

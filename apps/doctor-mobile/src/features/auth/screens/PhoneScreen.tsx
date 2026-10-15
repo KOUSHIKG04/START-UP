@@ -12,7 +12,6 @@ import {
 } from "../components/OnboardingShell";
 
 export default function PhoneScreen() {
-
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -38,9 +37,7 @@ export default function PhoneScreen() {
     } finally {
       setBusy(false);
     }
-
   }
-
 
   return (
     <OnboardingShell onBack={() => router.back()}>
@@ -50,7 +47,8 @@ export default function PhoneScreen() {
         <View style={styles.number}>
           <Text style={styles.country}>+91</Text>
           <View style={styles.divider} />
-          <Input variant="unstyled"
+          <Input
+            variant="unstyled"
             accessibilityLabel="Mobile number"
             keyboardType="phone-pad"
             textContentType="telephoneNumber"
@@ -64,7 +62,8 @@ export default function PhoneScreen() {
         </View>
 
         <View style={styles.action}>
-          <OnboardingButton loading={busy}
+          <OnboardingButton
+            loading={busy}
             label={busy ? "Sending…" : "Send OTP"}
             disabled={busy || phone.replace(/\D/g, "").length !== 10}
             onPress={() => void submit()}
@@ -75,7 +74,6 @@ export default function PhoneScreen() {
     </OnboardingShell>
   );
 }
-
 
 const styles = StyleSheet.create({
   body: { alignItems: "center", paddingTop: 24 },

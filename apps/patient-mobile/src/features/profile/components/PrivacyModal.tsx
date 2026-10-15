@@ -13,41 +13,52 @@ export function PrivacyModal({
   onClose: () => void;
 }) {
   return (
-    <ModalSurface visible={visible} onClose={onClose} contentStyle={styles.modalCard}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalTitleRow}>
-              <ShieldCheck color={colors.patient.primaryDark} size={20} />
-              <Text variant="cardHeading" style={styles.modalTitle}>Privacy & Security</Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              style={({ pressed }) => [styles.modalCloseBtn, pressed && styles.pressed]}
-            >
-              <X color={colors.patient.textSecondary} size={18} />
-            </Pressable>
-          </View>
+    <ModalSurface
+      visible={visible}
+      onClose={onClose}
+      contentStyle={styles.modalCard}
+    >
+      <View style={styles.modalHeader}>
+        <View style={styles.modalTitleRow}>
+          <ShieldCheck color={colors.patient.primaryDark} size={20} />
+          <Text variant="cardHeading" style={styles.modalTitle}>
+            Privacy & Security
+          </Text>
+        </View>
+        <Pressable
+          onPress={onClose}
+          style={({ pressed }) => [
+            styles.modalCloseBtn,
+            pressed && styles.pressed,
+          ]}
+        >
+          <X color={colors.patient.textSecondary} size={18} />
+        </Pressable>
+      </View>
 
-          <View style={styles.modalBody}>
-            <Text variant="body" style={styles.modalDescription}>
-              Your medical history, prescriptions, and consult notes are
-              end-to-end encrypted and HIPAA compliant.
+      <View style={styles.modalBody}>
+        <Text variant="body" style={styles.modalDescription}>
+          Your medical history, prescriptions, and consult notes are end-to-end
+          encrypted and HIPAA compliant.
+        </Text>
+
+        {privacyHighlights.map((point) => (
+          <View key={point} style={styles.privacyBullet}>
+            <CheckCircle2 color="#059669" size={16} />
+            <Text variant="body" style={styles.privacyBulletText}>
+              {point}
             </Text>
-
-            {privacyHighlights.map((point) => (
-              <View key={point} style={styles.privacyBullet}>
-                <CheckCircle2 color="#059669" size={16} />
-                <Text variant="body" style={styles.privacyBulletText}>{point}</Text>
-              </View>
-            ))}
           </View>
+        ))}
+      </View>
 
-          <Button
-            label="Understood"
-            variant="primary"
-            theme="patient"
-            onPress={onClose}
-            style={styles.modalButton}
-          />
+      <Button
+        label="Understood"
+        variant="primary"
+        theme="patient"
+        onPress={onClose}
+        style={styles.modalButton}
+      />
     </ModalSurface>
   );
 }

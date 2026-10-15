@@ -13,11 +13,17 @@ export interface ClinicVisitFlowProps {
   onComplete: () => void;
 }
 
-export function ClinicVisitFlow({ appointment, onComplete }: ClinicVisitFlowProps) {
+export function ClinicVisitFlow({
+  appointment,
+  onComplete,
+}: ClinicVisitFlowProps) {
   const [checkedIn, setCheckedIn] = useState(false);
 
   return (
-    <FadedScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <FadedScrollView
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       <ScheduleSummary appointment={appointment} />
       {checkedIn ? (
         <QueueStatus onComplete={onComplete} />
@@ -34,9 +40,15 @@ export function ClinicVisitFlow({ appointment, onComplete }: ClinicVisitFlowProp
             style={[styles.centeredCard, styles.flatCard, styles.noBorderCard]}
           >
             <View style={styles.qrSurface}>
-              <QrCode color={colors.patient.text} size={112} strokeWidth={1.5} />
+              <QrCode
+                color={colors.patient.text}
+                size={112}
+                strokeWidth={1.5}
+              />
             </View>
-            <Text variant="body" style={styles.checkInCode}>BK12454OPY</Text>
+            <Text variant="body" style={styles.checkInCode}>
+              BK12454OPY
+            </Text>
             <Text variant="body" style={styles.centeredDescription}>
               Show this check-in code at reception to mark your attendance.
             </Text>
@@ -53,11 +65,18 @@ export function ClinicVisitFlow({ appointment, onComplete }: ClinicVisitFlowProp
             <View style={styles.locationRow}>
               <MapPin color={colors.patient.primaryDark} size={21} />
               <View style={styles.flexCopy}>
-                <Text variant="cardHeading" style={styles.cardTitle}>{appointment.hospital}</Text>
-                <Text variant="body" style={styles.secondaryText}>{appointment.location}</Text>
+                <Text variant="cardHeading" style={styles.cardTitle}>
+                  {appointment.hospital}
+                </Text>
+                <Text variant="body" style={styles.secondaryText}>
+                  {appointment.location}
+                </Text>
               </View>
             </View>
-            <Button label="I’ve checked in" onPress={() => setCheckedIn(true)} />
+            <Button
+              label="I’ve checked in"
+              onPress={() => setCheckedIn(true)}
+            />
           </Card>
         </>
       )}

@@ -41,11 +41,11 @@ async function installationId() {
 async function register() {
   if (!supabase || !Notifications || Platform.OS === "web" || !Device.isDevice)
     return;
-  
+
   const projectId =
     Constants.easConfig?.projectId ??
     Constants.expoConfig?.extra?.eas?.projectId;
-    
+
   if (typeof projectId !== "string" || !projectId) return;
 
   if (Platform.OS === "android") {
@@ -63,7 +63,7 @@ async function register() {
   if (!permission.granted) return;
 
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-  
+
   await registerMyExpoPushToken(supabase, await installationId(), token);
 }
 
@@ -75,7 +75,10 @@ function openNotification(response: NotificationResponse) {
   else if (route === "/visit-session") router.push("/visit-session");
 }
 
-export function useDeviceNotifications(identityId: string | undefined, showToast: (input: ToastInput) => void) {
+export function useDeviceNotifications(
+  identityId: string | undefined,
+  showToast: (input: ToastInput) => void
+) {
   useEffect(() => {
     if (!identityId || !Notifications || Platform.OS === "web") return;
     let active = true;
@@ -85,14 +88,20 @@ export function useDeviceNotifications(identityId: string | undefined, showToast
 
     const responseListener =
       Notifications.addNotificationResponseReceivedListener(openNotification);
-    const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
-      const { title, body } = notification.request.content;
-      showToast({ title: title ?? "Notification", message: body ?? undefined, type: title?.toLowerCase().includes("confirmed") ? "success" : "info" });
-    });
-    
-      void register().catch(() => {});
-    
-      void Notifications.getLastNotificationResponseAsync()
+    const foregroundListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        const { title, body } = notification.request.content;
+        showToast({
+          title: title ?? "Notification",
+          message: body ?? undefined,
+          type: title?.toLowerCase().includes("confirmed") ? "success" : "info",
+        });
+      }
+    );
+
+    void register().catch(() => {});
+
+    void Notifications.getLastNotificationResponseAsync()
       .then((response) => {
         if (active && response) {
           openNotification(response);
@@ -133,7 +142,7 @@ export async function schedulePatientLocalNotification(
   const permission = await Notifications.getPermissionsAsync();
 
   if (!permission.granted) return;
-  
+
   await Notifications.scheduleNotificationAsync({
     content: { title, body },
     trigger: null,

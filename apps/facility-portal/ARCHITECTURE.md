@@ -8,25 +8,25 @@ Each implemented feature exposes its supported entry points through `index.ts`.
 
 ## Folder ownership
 
-| Folder | Responsibility |
-| --- | --- |
-| `src/app` | Next.js routes, layouts, metadata, loading and error boundaries |
-| `src/app/(admin)` | Thin route adapters and one shared admin layout |
-| `src/app/(auth)` | Login, signup and facility-verification route adapters, outside the admin shell |
-| `src/features/dashboard` | Existing dashboard screen and future dashboard operations |
-| `src/features/auth` | Login screen, form component and login constants |
-| `src/features/doctors` | Doctor directory, schedules, add-doctor UI, feature hooks, types and constants |
-| `src/features/appointments` | Appointment screen, record types, demo rows and filter/summary constants |
-| `src/features/dispatch` | Future ambulance dispatch operations |
-| `src/features/facilities` | Bed management screen, allocation hook, types and constants |
-| `src/features/staff` | Future staff membership and permissions UI |
-| `src/components/admin` | Shared admin layout, sidebar and reusable navigation components |
-| `src/components/admin/utils` | Shell-owned navigation, brand and demo-user constants |
-| `src/server/auth` | Future additional server-side identity checks |
-| `src/lib/supabase` | Request-scoped server client, cookie proxy and public config |
-| `src/server/observability` | Future server logging and instrumentation |
-| `src/lib` | Small cross-feature helpers and future browser client configuration |
-| `src/providers` | Client providers, added only when an integration needs them |
+| Folder                       | Responsibility                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| `src/app`                    | Next.js routes, layouts, metadata, loading and error boundaries                 |
+| `src/app/(admin)`            | Thin route adapters and one shared admin layout                                 |
+| `src/app/(auth)`             | Login, signup and facility-verification route adapters, outside the admin shell |
+| `src/features/dashboard`     | Existing dashboard screen and future dashboard operations                       |
+| `src/features/auth`          | Login screen, form component and login constants                                |
+| `src/features/doctors`       | Doctor directory, schedules, add-doctor UI, feature hooks, types and constants  |
+| `src/features/appointments`  | Appointment screen, record types, demo rows and filter/summary constants        |
+| `src/features/dispatch`      | Future ambulance dispatch operations                                            |
+| `src/features/facilities`    | Bed management screen, allocation hook, types and constants                     |
+| `src/features/staff`         | Future staff membership and permissions UI                                      |
+| `src/components/admin`       | Shared admin layout, sidebar and reusable navigation components                 |
+| `src/components/admin/utils` | Shell-owned navigation, brand and demo-user constants                           |
+| `src/server/auth`            | Future additional server-side identity checks                                   |
+| `src/lib/supabase`           | Request-scoped server client, cookie proxy and public config                    |
+| `src/server/observability`   | Future server logging and instrumentation                                       |
+| `src/lib`                    | Small cross-feature helpers and future browser client configuration             |
+| `src/providers`              | Client providers, added only when an integration needs them                     |
 
 Route groups do not add URL segments. The admin routes require an authenticated
 account with a company-verified facility. Accounts without approval go to
@@ -36,14 +36,14 @@ operation by membership; bed inventory also requires a verified facility at the
 database boundary. The portal uses email/password Auth with cookie refresh in
 `src/proxy.ts`.
 
-| URL | Feature screen |
-| --- | --- |
-| `/`, `/dashboard` | `dashboard/screens/DashboardScreen.tsx` |
-| `/appointments` | `appointments/screens/AppointmentsScreen.tsx` |
-| `/bed-management` | `facilities/screens/BedManagementScreen.tsx` |
-| `/doctor-management` | `doctors/screens/DoctorManagementScreen.tsx` |
-| `/doctor-schedules` | `doctors/screens/DoctorSchedulesScreen.tsx` |
-| `/login` | `auth/screens/LoginScreen.tsx` |
+| URL                  | Feature screen                                |
+| -------------------- | --------------------------------------------- |
+| `/`, `/dashboard`    | `dashboard/screens/DashboardScreen.tsx`       |
+| `/appointments`      | `appointments/screens/AppointmentsScreen.tsx` |
+| `/bed-management`    | `facilities/screens/BedManagementScreen.tsx`  |
+| `/doctor-management` | `doctors/screens/DoctorManagementScreen.tsx`  |
+| `/doctor-schedules`  | `doctors/screens/DoctorSchedulesScreen.tsx`   |
+| `/login`             | `auth/screens/LoginScreen.tsx`                |
 
 The admin shell is mounted once in `(admin)/layout.tsx`, so its sidebar state is
 preserved during navigation between admin pages. Do not wrap individual screens

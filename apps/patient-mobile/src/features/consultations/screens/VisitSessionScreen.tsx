@@ -50,15 +50,17 @@ export function VisitSessionScreen({
 
   return (
     <View style={styles.screen}>
-      <Header
-        title={getTitle(mode)}
-        app="patient"
-        onBackPress={onBackPress}
-      />
+      <Header title={getTitle(mode)} app="patient" onBackPress={onBackPress} />
       {mode === "clinic-check-in" ? (
-        <ClinicVisitFlow appointment={appointment} onComplete={() => setCompleted(true)} />
+        <ClinicVisitFlow
+          appointment={appointment}
+          onComplete={() => setCompleted(true)}
+        />
       ) : (
-        <HomeVisitFlow appointment={appointment} onComplete={() => setCompleted(true)} />
+        <HomeVisitFlow
+          appointment={appointment}
+          onComplete={() => setCompleted(true)}
+        />
       )}
     </View>
   );

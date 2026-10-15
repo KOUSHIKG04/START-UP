@@ -8,9 +8,11 @@
 @source "../../../../packages/web-ui/src";
 
 @theme inline {
-  --font-sans: var(--font-albert-sans), var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans:
+    var(--font-albert-sans), var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-albert-sans), var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading:
+    var(--font-albert-sans), var(--font-geist-sans), system-ui, sans-serif;
 }
 
 body {

@@ -13,7 +13,10 @@ export default function GroupLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="select-location" options={{ animation: "slide_from_right", statusBarStyle: "light" }} />
+      <Stack.Screen
+        name="select-location"
+        options={{ animation: "slide_from_right", statusBarStyle: "light" }}
+      />
     </Stack>
   );
 }

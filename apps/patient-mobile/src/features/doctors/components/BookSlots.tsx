@@ -21,8 +21,14 @@ import { formatConsultationFee } from "../utils/doctorDisplay";
 
 function localDateKey(value: Date, timeZone?: string): string {
   if (timeZone) {
-    const parts = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(value);
-    const part = (type: string) => parts.find(item => item.type === type)?.value;
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(value);
+    const part = (type: string) =>
+      parts.find((item) => item.type === type)?.value;
     return `${part("year")}-${part("month")}-${part("day")}`;
   }
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
@@ -44,7 +50,9 @@ export function BookSlots({
   useToastFeedback({ error: error ?? "" });
   const { showToast } = useToast();
   const noSlotsNotice = useRef("");
-  const [requestedMonthOffset, setSelectedMonthOffset] = useState<number | null>(null);
+  const [requestedMonthOffset, setSelectedMonthOffset] = useState<
+    number | null
+  >(null);
   const [requestedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -58,17 +66,41 @@ export function BookSlots({
     setPatientId(patientOptions.find((option) => option.verified)?.id ?? "");
   }, [patientOptions, selectedPatientIsVerified]);
 
-  const today = useMemo(() => timeZone ? new Date(`${localDateKey(new Date(), timeZone)}T12:00:00`) : new Date(), [timeZone]);
-  const availableDates = useMemo(() => new Set(slots.map(slot => localDateKey(new Date(slot.starts_at), timeZone))), [slots, timeZone]);
+  const today = useMemo(
+    () =>
+      timeZone
+        ? new Date(`${localDateKey(new Date(), timeZone)}T12:00:00`)
+        : new Date(),
+    [timeZone]
+  );
+  const availableDates = useMemo(
+    () =>
+      new Set(
+        slots.map((slot) => localDateKey(new Date(slot.starts_at), timeZone))
+      ),
+    [slots, timeZone]
+  );
   const sortedDates = [...availableDates].sort();
-  const [firstYear, firstMonth] = (sortedDates[0] ?? localDateKey(today)).split("-").map(Number);
-  const selectedMonthOffset = requestedMonthOffset ?? (firstYear - today.getFullYear()) * 12 + firstMonth - 1 - today.getMonth();
-  const selectedMonth = new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1);
+  const [firstYear, firstMonth] = (sortedDates[0] ?? localDateKey(today))
+    .split("-")
+    .map(Number);
+  const selectedMonthOffset =
+    requestedMonthOffset ??
+    (firstYear - today.getFullYear()) * 12 + firstMonth - 1 - today.getMonth();
+  const selectedMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + selectedMonthOffset,
+    1
+  );
   const monthPrefix = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, "0")}-`;
   // Derive a valid date from the latest response on every render, including
   // after publication, cancellation, or a cached empty response is refreshed.
-  const selectedDate = requestedDate && requestedDate.startsWith(monthPrefix) && availableDates.has(requestedDate)
-    ? requestedDate : sortedDates.find(date => date.startsWith(monthPrefix)) ?? null;
+  const selectedDate =
+    requestedDate &&
+    requestedDate.startsWith(monthPrefix) &&
+    availableDates.has(requestedDate)
+      ? requestedDate
+      : (sortedDates.find((date) => date.startsWith(monthPrefix)) ?? null);
   const monthOptions = useMemo(
     () =>
       Array.from({ length: 12 }, (_, offset) => {
@@ -107,7 +139,8 @@ export function BookSlots({
           key,
           dayNumber: date.getDate(),
           day: date.toLocaleDateString("en-US", { weekday: "short" }),
-          closed: key < todayKey || (!loading && !error && !availableDates.has(key)),
+          closed:
+            key < todayKey || (!loading && !error && !availableDates.has(key)),
         };
       }
     );
@@ -144,10 +177,9 @@ export function BookSlots({
         animated: false,
       });
       datesScrollRef.current?.scrollTo({
-        x:
-          selectedDate
-            ? Math.max(0, (Number(selectedDate.slice(-2)) - 1) * 62 - 110)
-            : 0,
+        x: selectedDate
+          ? Math.max(0, (Number(selectedDate.slice(-2)) - 1) * 62 - 110)
+          : 0,
         animated: false,
       });
     }, 120);
@@ -158,7 +190,9 @@ export function BookSlots({
     setSelectedMonthOffset(index);
     const month = new Date(today.getFullYear(), today.getMonth() + index, 1);
     const prefix = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-`;
-    setSelectedDate([...availableDates].sort().find(date => date.startsWith(prefix)) ?? null);
+    setSelectedDate(
+      [...availableDates].sort().find((date) => date.startsWith(prefix)) ?? null
+    );
     setSelectedTime(null);
   };
 
@@ -168,7 +202,9 @@ export function BookSlots({
     if (
       !loading &&
       !error &&
-      !slots.some((slot) => localDateKey(new Date(slot.starts_at), timeZone) === key)
+      !slots.some(
+        (slot) => localDateKey(new Date(slot.starts_at), timeZone) === key
+      )
     ) {
       showToast({
         title: "No times on this date",
@@ -196,8 +232,16 @@ export function BookSlots({
       >
         <View style={styles.bookingSection}>
           <View style={styles.sectionHeadingRow}>
-            <Text variant="sectionHeading" style={styles.sectionTitle}>Select date</Text>
-            <Text variant="sectionHeading" style={styles.sectionTitle}>{new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1).getFullYear()}</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>
+              Select date
+            </Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>
+              {new Date(
+                today.getFullYear(),
+                today.getMonth() + selectedMonthOffset,
+                1
+              ).getFullYear()}
+            </Text>
           </View>
           <FadedScrollView
             ref={monthsScrollRef}
@@ -254,7 +298,8 @@ export function BookSlots({
                     selected ? styles.selectedDateCard : undefined,
                   ]}
                 >
-                  <Text variant="caption"
+                  <Text
+                    variant="caption"
                     style={[
                       styles.dateNumber,
                       selected ? styles.selectedDateNumber : undefined,
@@ -263,7 +308,8 @@ export function BookSlots({
                   >
                     {date.dayNumber}
                   </Text>
-                  <Text variant="caption"
+                  <Text
+                    variant="caption"
                     style={[
                       styles.dateDay,
                       selected ? styles.selectedDateDay : undefined,
@@ -280,15 +326,26 @@ export function BookSlots({
 
         <View style={styles.bookingSection}>
           <View style={styles.sectionHeadingRow}>
-            <Text variant="sectionHeading" style={styles.sectionTitle}>Select time</Text>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>
+              Select time
+            </Text>
             {dateSlots.length > 0 ? (
               <Text variant="body" style={styles.availability}>
                 {dateSlots.length} slots available
               </Text>
             ) : null}
           </View>
-          {selectedDate && !loading && !error && dateSlots.length === 0 ? <Text variant="body" style={styles.availability}>Not available on this date. Choose another date.</Text> : null}
-          {!selectedDate && !loading && !error ? <Text variant="body" style={styles.availability}>No appointment times in this month. Choose another month or check back later.</Text> : null}
+          {selectedDate && !loading && !error && dateSlots.length === 0 ? (
+            <Text variant="body" style={styles.availability}>
+              Not available on this date. Choose another date.
+            </Text>
+          ) : null}
+          {!selectedDate && !loading && !error ? (
+            <Text variant="body" style={styles.availability}>
+              No appointment times in this month. Choose another month or check
+              back later.
+            </Text>
+          ) : null}
           <View style={styles.slotGrid}>
             {dateSlots.map((slot) => {
               const time = new Date(slot.starts_at).toLocaleTimeString([], {
@@ -320,8 +377,14 @@ export function BookSlots({
         </View>
 
         <View style={styles.bookingSection}>
-          <Text variant="sectionHeading" style={styles.sectionTitle}>For whom?</Text>
-          <FadedScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.patientRow}>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            For whom?
+          </Text>
+          <FadedScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.patientRow}
+          >
             {patientOptions.map((option) => (
               <Chip
                 key={option.id}
@@ -338,7 +401,9 @@ export function BookSlots({
         </View>
 
         <View style={styles.bookingSection}>
-          <Text variant="sectionHeading" style={styles.sectionTitle}>Reason for visit (optional)</Text>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            Reason for visit (optional)
+          </Text>
           <Input
             accessibilityLabel="Reason for visit"
             placeholder="e.g. Fever, back pain, routine check-up..."
@@ -350,7 +415,12 @@ export function BookSlots({
         {loading ? <Loader theme="patient" style={styles.loading} /> : null}
       </Card>
 
-      {selectedSlot ? <Text variant="bodyEmphasis">Consultation fee: {formatConsultationFee(selectedSlot.fee_minor, selectedSlot.currency)}</Text> : null}
+      {selectedSlot ? (
+        <Text variant="bodyEmphasis">
+          Consultation fee:{" "}
+          {formatConsultationFee(selectedSlot.fee_minor, selectedSlot.currency)}
+        </Text>
+      ) : null}
       <View style={styles.actions}>
         <Button
           label="About Doctor"

@@ -39,7 +39,10 @@ export const months: readonly MonthOption[] = [
   { name: "December", short: "Dec", index: 11, days: 31 },
 ] as const;
 
-export function getDatesForMonth(monthIndex: number, year: number = 2026): BookingDate[] {
+export function getDatesForMonth(
+  monthIndex: number,
+  year: number = 2026
+): BookingDate[] {
   const month = months[monthIndex];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const result: BookingDate[] = [];

@@ -26,17 +26,17 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
       const doctor = row.original;
       return (
         <div className="flex items-center gap-2.5">
-          <Avatar className="size-8 rounded-full border border-slate-200 shrink-0">
+          <Avatar className="size-8 shrink-0 rounded-full border border-slate-200">
             <AvatarImage src={doctor.avatar} alt={doctor.name} />
-            <AvatarFallback className="bg-[#e6f4f5] text-[#07595d] text-xs font-semibold">
+            <AvatarFallback className="bg-[#e6f4f5] text-xs font-semibold text-[#07595d]">
               {doctor.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="font-semibold text-[#0f172a] truncate leading-tight">
+            <p className="truncate leading-tight font-semibold text-[#0f172a]">
               {doctor.name}
             </p>
-            <p className="text-[11px] text-[#94a3b8] flex items-center gap-1 mt-0.5 truncate">
+            <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-[#94a3b8]">
               <Phone className="size-2.5 shrink-0" />
               {doctor.phone}
             </p>
@@ -50,7 +50,7 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
     header: "Specialization",
     cell: ({ row }) => (
       <div className="flex items-center gap-1.5 font-medium text-[#0f172a]">
-        <Stethoscope className="size-3.5 text-[#07595d]/60 shrink-0" />
+        <Stethoscope className="size-3.5 shrink-0 text-[#07595d]/60" />
         <span>{row.original.specialization}</span>
       </div>
     ),
@@ -59,7 +59,7 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
     accessorKey: "clinzoId",
     header: "Clinzo ID",
     cell: ({ row }) => (
-      <span className="font-mono text-[12px] font-semibold text-[#07595d] bg-[#e6f4f5] px-2 py-0.5 rounded">
+      <span className="rounded bg-[#e6f4f5] px-2 py-0.5 font-mono text-[12px] font-semibold text-[#07595d]">
         {row.original.clinzoId}
       </span>
     ),
@@ -85,7 +85,7 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
 
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${badgeStyle}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${badgeStyle}`}
         >
           <span className={`size-1.5 rounded-full ${dotColor}`} />
           {status}
@@ -105,7 +105,7 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 p-0 text-[#94a3b8] hover:text-[#0f172a] hover:bg-slate-100 rounded-lg"
+                className="size-8 rounded-lg p-0 text-[#94a3b8] hover:bg-slate-100 hover:text-[#0f172a]"
               >
                 <MoreVertical className="size-4" />
                 <span className="sr-only">Open menu</span>
@@ -116,16 +116,16 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
                 {doctor.name}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+              <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
                 <Eye className="size-3.5 text-[#64748b]" />
                 View Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+              <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
                 <Edit className="size-3.5 text-[#64748b]" />
                 Edit Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
                 Deactivate
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -25,7 +25,7 @@ export function VerificationFilters({
   const [type, setType] = useState(initialType);
   const [status, setStatus] = useState(initialStatus);
   const [query, setQuery] = useState(initialQuery);
-  
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -34,12 +34,12 @@ export function VerificationFilters({
     if (type !== "all") params.set("type", type);
 
     if (status !== "all") params.set("status", status);
-    
+
     if (query.trim()) params.set("q", query.trim());
-    
+
     router.push(`/verification${params.size ? `?${params}` : ""}`);
   }
-  
+
   return (
     <form
       onSubmit={submit}

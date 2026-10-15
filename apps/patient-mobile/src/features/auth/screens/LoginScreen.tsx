@@ -10,13 +10,8 @@ import {
   signInWithDevPassword,
   signUpWithDevPassword,
 } from "@startup/data-access";
-import {
-  devPasswordLoginEnabled,
-  supabase,
-} from "../../../services/supabase";
-import {
-  OnboardingShell,
-} from "../components/OnboardingShell";
+import { devPasswordLoginEnabled, supabase } from "../../../services/supabase";
+import { OnboardingShell } from "../components/OnboardingShell";
 import { DevEmailAuthForm } from "../components/DevEmailAuthForm";
 import { ProdAuthChoices } from "../components/ProdAuthChoices";
 
@@ -75,7 +70,9 @@ export default function LoginScreen() {
       else setConfirmationPending(true);
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Could not create your account."
+        cause instanceof Error
+          ? cause.message
+          : "Could not create your account."
       );
     } finally {
       setBusy(false);
@@ -132,7 +129,8 @@ export default function LoginScreen() {
                 mode === "dev" && styles.switchBtnActive,
               ]}
             >
-              <Text variant="body"
+              <Text
+                variant="body"
                 style={[
                   styles.switchBtnText,
                   mode === "dev" && styles.switchBtnTextActive,
@@ -155,7 +153,8 @@ export default function LoginScreen() {
                 mode === "prod" && styles.switchBtnActive,
               ]}
             >
-              <Text variant="body"
+              <Text
+                variant="body"
                 style={[
                   styles.switchBtnText,
                   mode === "prod" && styles.switchBtnTextActive,
@@ -170,10 +169,15 @@ export default function LoginScreen() {
         <Text variant="screenTitle" style={styles.heading}>
           Welcome to{" "}
           <Text variant="inherit" style={styles.brand}>
-            Clinzo<Text variant="body" style={styles.plus}>⁺</Text>
+            Clinzo
+            <Text variant="body" style={styles.plus}>
+              ⁺
+            </Text>
           </Text>
         </Text>
-        <Text variant="label" style={styles.tagline}>Right Care. Right Time.</Text>
+        <Text variant="label" style={styles.tagline}>
+          Right Care. Right Time.
+        </Text>
 
         {mode === "dev" ? (
           <DevEmailAuthForm
@@ -205,11 +209,16 @@ export default function LoginScreen() {
           </>
         )}
 
-            <Text variant="body" style={styles.terms}>
-              By continuing, you agree to our{"\n"}
-              <Text variant="inherit" style={styles.link}>Terms of Services</Text> and{" "}
-              <Text variant="inherit" style={styles.link}>Privacy Policy</Text>
-            </Text>
+        <Text variant="body" style={styles.terms}>
+          By continuing, you agree to our{"\n"}
+          <Text variant="inherit" style={styles.link}>
+            Terms of Services
+          </Text>{" "}
+          and{" "}
+          <Text variant="inherit" style={styles.link}>
+            Privacy Policy
+          </Text>
+        </Text>
       </View>
     </OnboardingShell>
   );

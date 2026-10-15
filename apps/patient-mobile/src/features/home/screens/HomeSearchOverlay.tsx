@@ -4,8 +4,21 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchPublicPractices } from "@startup/data-access";
 import { supabase } from "../../../services/supabase";
-import { Keyboard, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { ChevronDown, Clock, MapPin, Search, Sparkles, X } from "lucide-react-native";
+import {
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import {
+  ChevronDown,
+  Clock,
+  MapPin,
+  Search,
+  Sparkles,
+  X,
+} from "lucide-react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, SearchInput } from "@startup/mobile-ui";
@@ -30,7 +43,9 @@ export function HomeSearchOverlay({
 }: HomeSearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [recents, setRecents] = useState<SearchItem[]>(() => [...INITIAL_RECENTS]);
+  const [recents, setRecents] = useState<SearchItem[]>(() => [
+    ...INITIAL_RECENTS,
+  ]);
 
   const trimmedQuery = query.trim().toLowerCase();
   useEffect(() => {
@@ -39,12 +54,24 @@ export function HomeSearchOverlay({
   }, [query]);
   const doctorQuery = useQuery({
     queryKey: ["patient-search-doctors", debouncedQuery],
-    queryFn: () => searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
+    queryFn: () =>
+      searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
     enabled: visible && Boolean(supabase) && debouncedQuery.length >= 2,
   });
-  const doctorResults: SearchItem[] = [...new Map((doctorQuery.data ?? [])
-    .filter(item => item.doctor_name.toLowerCase().includes(trimmedQuery))
-    .map(item => [item.doctor_id, { id: `doctor-${item.doctor_id}`, title: item.doctor_name, type: "Doctor" as const }])).values()];
+  const doctorResults: SearchItem[] = [
+    ...new Map(
+      (doctorQuery.data ?? [])
+        .filter((item) => item.doctor_name.toLowerCase().includes(trimmedQuery))
+        .map((item) => [
+          item.doctor_id,
+          {
+            id: `doctor-${item.doctor_id}`,
+            title: item.doctor_name,
+            type: "Doctor" as const,
+          },
+        ])
+    ).values(),
+  ];
   const searchResults = [...doctorResults, ...filterSearchDirectory(query)];
 
   const handleClose = () => {
@@ -87,7 +114,8 @@ export function HomeSearchOverlay({
   };
 
   return (
-    <ModalSurface layout="custom"
+    <ModalSurface
+      layout="custom"
       animationType="fade"
       onClose={handleClose}
       statusBarTranslucent={true}
@@ -106,7 +134,9 @@ export function HomeSearchOverlay({
               style={styles.locationSelector}
             >
               <MapPin color={colors.white} size={18} strokeWidth={2} />
-              <Text variant="body" style={styles.locationText}>{selectedCity}</Text>
+              <Text variant="body" style={styles.locationText}>
+                {selectedCity}
+              </Text>
               <ChevronDown color={colors.white} size={16} strokeWidth={2.2} />
             </Pressable>
           }
@@ -134,7 +164,11 @@ export function HomeSearchOverlay({
                   onPress={() => setQuery("")}
                   style={styles.clearInputButton}
                 >
-                  <X color={colors.patient.primaryDark} size={20} strokeWidth={2.4} />
+                  <X
+                    color={colors.patient.primaryDark}
+                    size={20}
+                    strokeWidth={2.4}
+                  />
                 </Pressable>
               ) : undefined
             }
@@ -169,8 +203,12 @@ export function HomeSearchOverlay({
                       style={styles.rowIcon}
                     />
                     <View style={styles.rowContent}>
-                      <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
-                      <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
+                      <Text variant="cardHeading" style={styles.itemTitle}>
+                        {item.title}
+                      </Text>
+                      <Text variant="cardHeading" style={styles.itemSubtitle}>
+                        {item.type}
+                      </Text>
                     </View>
                   </Pressable>
                 ))
@@ -205,7 +243,9 @@ export function HomeSearchOverlay({
                       hitSlop={8}
                       onPress={handleClearAll}
                     >
-                      <Text variant="body" style={styles.clearAllText}>CLEAR</Text>
+                      <Text variant="body" style={styles.clearAllText}>
+                        CLEAR
+                      </Text>
                     </Pressable>
                   </View>
 
@@ -227,8 +267,15 @@ export function HomeSearchOverlay({
                           style={styles.rowIcon}
                         />
                         <View style={styles.rowContent}>
-                          <Text variant="cardHeading" style={styles.itemTitle}>{item.title}</Text>
-                          <Text variant="cardHeading" style={styles.itemSubtitle}>{item.type}</Text>
+                          <Text variant="cardHeading" style={styles.itemTitle}>
+                            {item.title}
+                          </Text>
+                          <Text
+                            variant="cardHeading"
+                            style={styles.itemSubtitle}
+                          >
+                            {item.type}
+                          </Text>
                         </View>
                         <Pressable
                           accessibilityLabel={`Remove ${item.title} from recents`}
@@ -273,7 +320,9 @@ export function HomeSearchOverlay({
                         pressed && styles.chipPressed,
                       ]}
                     >
-                      <Text variant="label" style={styles.chipText}>{item.title}</Text>
+                      <Text variant="label" style={styles.chipText}>
+                        {item.title}
+                      </Text>
                     </Pressable>
                   ))}
                 </View>

@@ -53,7 +53,12 @@ export type BookSlotsProps = {
   consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
   onGoToAbout: () => void;
-  slots: { window_id: string; starts_at: string; fee_minor: string; currency: string }[];
+  slots: {
+    window_id: string;
+    starts_at: string;
+    fee_minor: string;
+    currency: string;
+  }[];
   patientOptions: { id: string; label: string; verified: boolean }[];
   loading?: boolean;
   error?: string | null;

@@ -38,7 +38,9 @@ export function Suggestions({
         </Text>
         {onClose ? (
           <Pressable onPress={onClose} hitSlop={10}>
-            <Text variant="body" style={styles.suggestionsCloseBtn}>Done</Text>
+            <Text variant="body" style={styles.suggestionsCloseBtn}>
+              Done
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -60,18 +62,49 @@ export function Suggestions({
                 <MapPin color="#087F78" size={20} />
               </View>
               <View style={styles.suggestionCopy}>
-                <Text variant="body" numberOfLines={1} style={styles.suggestionName}>
+                <Text
+                  variant="body"
+                  numberOfLines={1}
+                  style={styles.suggestionName}
+                >
                   {name}
                 </Text>
-                <Text variant="body" numberOfLines={1} style={styles.suggestionAddress}>
+                <Text
+                  variant="body"
+                  numberOfLines={1}
+                  style={styles.suggestionAddress}
+                >
                   {address}
                 </Text>
-                {"source" in hospital ? <Text variant="caption" style={{ color: "#5E5E5E", fontFamily: fontFamilies.regular, fontSize: 12 }}>Google Maps</Text> : null}
-                {"source" in hospital ? hospital.attributions.map(a => <Text variant="caption" key={a.provider} style={{ color: "#5E5E5E", fontSize: 12 }}>{a.provider}</Text>) : null}
+                {"source" in hospital ? (
+                  <Text
+                    variant="caption"
+                    style={{
+                      color: "#5E5E5E",
+                      fontFamily: fontFamilies.regular,
+                      fontSize: 12,
+                    }}
+                  >
+                    Google Maps
+                  </Text>
+                ) : null}
+                {"source" in hospital
+                  ? hospital.attributions.map((a) => (
+                      <Text
+                        variant="caption"
+                        key={a.provider}
+                        style={{ color: "#5E5E5E", fontSize: 12 }}
+                      >
+                        {a.provider}
+                      </Text>
+                    ))
+                  : null}
                 <View style={styles.suggestionMetaRow}>
                   <Clock3 color="#087F78" size={12} />
                   <Text variant="body" style={styles.suggestionMetaText}>
-                    {distance_meters === null ? "Distance unavailable" : `${(distance_meters / 1000).toFixed(1)} km away`}
+                    {distance_meters === null
+                      ? "Distance unavailable"
+                      : `${(distance_meters / 1000).toFixed(1)} km away`}
                   </Text>
                 </View>
               </View>

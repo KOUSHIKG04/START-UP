@@ -41,7 +41,8 @@ export default function DriverPhone() {
         <Text style={styles.title}>Enter your mobile number</Text>
         <View style={styles.number}>
           <Text style={styles.country}>+91</Text>
-          <Input variant="unstyled"
+          <Input
+            variant="unstyled"
             accessibilityLabel="Mobile number"
             keyboardType="phone-pad"
             autoComplete="tel"
@@ -53,7 +54,11 @@ export default function DriverPhone() {
           />
         </View>
 
-        <Button loading={busy} label="Send OTP" variant="primary" labelStyle={styles.buttonText}
+        <Button
+          loading={busy}
+          label="Send OTP"
+          variant="primary"
+          labelStyle={styles.buttonText}
           accessibilityRole="button"
           disabled={busy || phone.replace(/\D/g, "").length !== 10}
           onPress={() => void submit()}

@@ -15,7 +15,13 @@ import {
   requestAmbulanceBooking,
 } from "@startup/data-access";
 import type { RequestAmbulanceBookingInput } from "@startup/contracts";
-import { Button, Header, Input, Loader, SafeAreaView } from "@startup/mobile-ui";
+import {
+  Button,
+  Header,
+  Input,
+  Loader,
+  SafeAreaView,
+} from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import { LiveAmbulanceRequestsList } from "../components/LiveAmbulanceRequestsList";
 
@@ -45,7 +51,12 @@ export function LiveAmbulanceBookingScreen({
     queryFn: () => listPublicHospitals(supabase!, pickup ?? undefined),
     enabled: !!supabase,
   });
-  useToastFeedback({ error: error || (hospitals.isError ? "Could not load hospitals. Try again." : ""), success: message });
+  useToastFeedback({
+    error:
+      error ||
+      (hospitals.isError ? "Could not load hospitals. Try again." : ""),
+    success: message,
+  });
   const bookings = useQuery({
     queryKey: ["my-ambulance-bookings"],
     queryFn: () => listMyAmbulanceBookings(supabase!),
@@ -166,14 +177,25 @@ export function LiveAmbulanceBookingScreen({
     <SafeAreaView style={styles.screen}>
       <Header title="Ambulance" app="patient" onBackPress={onBackPress} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="cardHeading" style={styles.title}>Request an ambulance</Text>
+        <Text variant="cardHeading" style={styles.title}>
+          Request an ambulance
+        </Text>
         <Text variant="body">
           Choose a hospital and required ambulance type. We will show assignment
           status here.
         </Text>
-        <Button loading={locating}
-          label={pickup ? "Refresh pickup location" : "Use current pickup location"}
-          accessibilityLabel={locating ? "Locating pickup" : pickup ? "Refresh pickup location" : "Use current pickup location"}
+        <Button
+          loading={locating}
+          label={
+            pickup ? "Refresh pickup location" : "Use current pickup location"
+          }
+          accessibilityLabel={
+            locating
+              ? "Locating pickup"
+              : pickup
+                ? "Refresh pickup location"
+                : "Use current pickup location"
+          }
           leftIcon={locating ? <Loader theme="patient" /> : undefined}
           disabled={locating}
           variant="outline"
@@ -193,7 +215,9 @@ export function LiveAmbulanceBookingScreen({
             setIdempotencyKey(Crypto.randomUUID());
           }}
         />
-        <Text variant="body" style={styles.subtitle}>Ambulance type</Text>
+        <Text variant="body" style={styles.subtitle}>
+          Ambulance type
+        </Text>
         <View style={styles.options}>
           {(["BLS", "ALS", "NICU"] as const).map((code) => (
             <Button
@@ -207,14 +231,22 @@ export function LiveAmbulanceBookingScreen({
             />
           ))}
         </View>
-        <Text variant="body" style={styles.subtitle}>Destination hospital</Text>
-        {hospitals.isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
+        <Text variant="body" style={styles.subtitle}>
+          Destination hospital
+        </Text>
+        {hospitals.isLoading ? (
+          <Loader theme="patient" style={{ minHeight: 44 }} />
+        ) : null}
         {hospitals.data?.length === 0 ? (
-          <Text variant="body">No active hospitals are available in the directory yet.</Text>
+          <Text variant="body">
+            No active hospitals are available in the directory yet.
+          </Text>
         ) : null}
         {hospitals.data?.map((hospital) => (
           <View key={hospital.id} style={styles.card}>
-            <Text variant="body" style={styles.name}>{hospital.name}</Text>
+            <Text variant="body" style={styles.name}>
+              {hospital.name}
+            </Text>
             <Text variant="body">{hospital.address}</Text>
             {hospital.distance_meters !== null ? (
               <Text variant="body">
@@ -233,7 +265,8 @@ export function LiveAmbulanceBookingScreen({
             />
           </View>
         ))}
-        <Button loading={request.isPending}
+        <Button
+          loading={request.isPending}
           label="Request ambulance"
           disabled={
             request.isPending ||
@@ -245,7 +278,9 @@ export function LiveAmbulanceBookingScreen({
           onPress={() => request.mutate()}
         />
         {activeBooking ? (
-          <Text variant="body">You already have an active ambulance request.</Text>
+          <Text variant="body">
+            You already have an active ambulance request.
+          </Text>
         ) : null}
         <LiveAmbulanceRequestsList
           bookings={bookings.data}
@@ -262,7 +297,6 @@ export function LiveAmbulanceBookingScreen({
           isCancelPending={cancel.isPending}
           onCancel={(b) => cancel.mutate(b)}
         />
-
       </ScrollView>
     </SafeAreaView>
   );

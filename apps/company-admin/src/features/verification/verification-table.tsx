@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@startup/web-ui/components/data-table";
-import { formatDisplayDate, type VerificationQueueItem } from "@startup/contracts";
+import {
+  formatDisplayDate,
+  type VerificationQueueItem,
+} from "@startup/contracts";
 import { StatusBadge } from "./status-badge";
 
 const columns: ColumnDef<VerificationQueueItem, unknown>[] = [

@@ -1,6 +1,9 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
-import { getMyPatientVerificationPin, subscribeAppChanges } from "@startup/data-access";
+import {
+  getMyPatientVerificationPin,
+  subscribeAppChanges,
+} from "@startup/data-access";
 import { AppState, Pressable, StyleSheet, View } from "react-native";
 import { ChevronDown, Lock } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
@@ -28,9 +31,16 @@ export function ProfilePinCard() {
     let again = false;
     const load = async () => {
       if (!current) return;
-      if (AppState.currentState !== "active") { again = true; return; }
-      if (inFlight) { again = true; return; }
-      inFlight = true; again = false;
+      if (AppState.currentState !== "active") {
+        again = true;
+        return;
+      }
+      if (inFlight) {
+        again = true;
+        return;
+      }
+      inFlight = true;
+      again = false;
       if (current) setLoading(true);
       try {
         const value = await getMyPatientVerificationPin(client, patientId);
@@ -46,14 +56,30 @@ export function ProfilePinCard() {
       } finally {
         inFlight = false;
         if (current) setLoading(false);
-        if (current && again) { again = false; void load(); }
+        if (current && again) {
+          again = false;
+          void load();
+        }
       }
     };
     void load();
-    const cleanup = profile?.identity_id ? subscribeAppChanges(client, { identityId: profile.identity_id }, {
-      onChange: change => { if (change.kind === "profile") void load(); }, onConnected: () => { void load(); },
-    }) : () => {};
-    const appState = AppState.addEventListener("change", state => { if (state === "active") void load(); });
+    const cleanup = profile?.identity_id
+      ? subscribeAppChanges(
+          client,
+          { identityId: profile.identity_id },
+          {
+            onChange: (change) => {
+              if (change.kind === "profile") void load();
+            },
+            onConnected: () => {
+              void load();
+            },
+          }
+        )
+      : () => {};
+    const appState = AppState.addEventListener("change", (state) => {
+      if (state === "active") void load();
+    });
     return () => {
       current = false;
       appState.remove();
@@ -87,7 +113,9 @@ export function ProfilePinCard() {
           <Lock color={colors.patient.primaryDark} size={18} />
         </View>
         <View style={styles.copyCol}>
-          <Text variant="cardHeading" style={styles.rowTitle}>Verification PIN</Text>
+          <Text variant="cardHeading" style={styles.rowTitle}>
+            Verification PIN
+          </Text>
           <Text variant="cardHeading" style={styles.rowSubtitle}>
             Your 4-digit service completion passcode
           </Text>

@@ -1,6 +1,12 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { useRef, type ReactNode } from "react";
-import { type GestureResponderEvent, type StyleProp, StyleSheet, View, type ViewStyle } from "react-native";
+import {
+  type GestureResponderEvent,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { Briefcase, UserRound } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
@@ -101,40 +107,62 @@ export default function DoctorCard({
 
           <View style={styles.doctorInfo}>
             <View style={styles.nameRow}>
-              <Text variant="cardHeading" numberOfLines={1} style={styles.profileName}>
+              <Text
+                variant="cardHeading"
+                numberOfLines={1}
+                style={styles.profileName}
+              >
                 {name}
               </Text>
               {contextLabel ? (
                 <View style={styles.contextBadge}>
-                  <Text variant="caption" style={styles.contextBadgeText}>{contextLabel}</Text>
+                  <Text variant="caption" style={styles.contextBadgeText}>
+                    {contextLabel}
+                  </Text>
                 </View>
               ) : null}
             </View>
 
-            {degree ? <Text variant="label" numberOfLines={1} style={styles.secondaryText}>{degree}</Text> : null}
+            {degree ? (
+              <Text
+                variant="label"
+                numberOfLines={1}
+                style={styles.secondaryText}
+              >
+                {degree}
+              </Text>
+            ) : null}
 
-            <Text variant="label" numberOfLines={1} style={styles.specialtyText}>
+            <Text
+              variant="label"
+              numberOfLines={1}
+              style={styles.specialtyText}
+            >
               {specialty}
             </Text>
           </View>
         </View>
 
-        {(!hideExperience && experience) || (showRating && rating) ? <View style={styles.profileGrid}>
-          {!hideExperience && experience ? (
-            <MetricCell
-              icon={
-                <Briefcase
-                  color={colors.patient.primaryDark}
-                  size={14}
-                  strokeWidth={2}
-                />
-              }
-              label="Experience"
-              value={experience}
-            />
-          ) : null}
-          {showRating && rating ? <MetricCell icon={<StarIcon />} label="Rating" value={rating} /> : null}
-        </View> : null}
+        {(!hideExperience && experience) || (showRating && rating) ? (
+          <View style={styles.profileGrid}>
+            {!hideExperience && experience ? (
+              <MetricCell
+                icon={
+                  <Briefcase
+                    color={colors.patient.primaryDark}
+                    size={14}
+                    strokeWidth={2}
+                  />
+                }
+                label="Experience"
+                value={experience}
+              />
+            ) : null}
+            {showRating && rating ? (
+              <MetricCell icon={<StarIcon />} label="Rating" value={rating} />
+            ) : null}
+          </View>
+        ) : null}
       </Card>
     );
   }
@@ -155,29 +183,77 @@ export default function DoctorCard({
       padding={14}
       style={[styles.flatCard, style]}
     >
-      <View style={[styles.headerRow, variant === "detail" && styles.detailHeaderRow]}>
-        <View style={[styles.avatarSquare, variant === "detail" && styles.detailAvatar]}>
+      <View
+        style={[
+          styles.headerRow,
+          variant === "detail" && styles.detailHeaderRow,
+        ]}
+      >
+        <View
+          style={[
+            styles.avatarSquare,
+            variant === "detail" && styles.detailAvatar,
+          ]}
+        >
           <UserRound color={colors.white} size={26} strokeWidth={1.8} />
         </View>
 
-        <View style={[styles.doctorInfo, variant === "detail" && styles.detailDoctorInfo]}>
+        <View
+          style={[
+            styles.doctorInfo,
+            variant === "detail" && styles.detailDoctorInfo,
+          ]}
+        >
           <Text variant="cardHeading" numberOfLines={1} style={styles.nameLine}>
-            <Text variant="cardHeading" style={styles.nameText}>{name}</Text>
+            <Text variant="cardHeading" style={styles.nameText}>
+              {name}
+            </Text>
             {degree ? (
-              <Text variant="label" style={styles.degreeText}>{`  ${degree}`}</Text>
+              <Text
+                variant="label"
+                style={styles.degreeText}
+              >{`  ${degree}`}</Text>
             ) : null}
           </Text>
 
-          {department ? <Text variant="label" numberOfLines={1} style={styles.departmentText}>{department}</Text> : null}
+          {department ? (
+            <Text
+              variant="label"
+              numberOfLines={1}
+              style={styles.departmentText}
+            >
+              {department}
+            </Text>
+          ) : null}
 
           <View style={styles.specialtyRatingRow}>
-            <Text variant="label" numberOfLines={1} style={[styles.specialtyText, styles.specialtyInRow]}>{specialty}</Text>
-            {showRating && rating ? <Text variant="label" numberOfLines={1} style={styles.ratingText}>{rating}</Text> : null}
+            <Text
+              variant="label"
+              numberOfLines={1}
+              style={[styles.specialtyText, styles.specialtyInRow]}
+            >
+              {specialty}
+            </Text>
+            {showRating && rating ? (
+              <Text variant="label" numberOfLines={1} style={styles.ratingText}>
+                {rating}
+              </Text>
+            ) : null}
           </View>
-          {contextLabel || distanceMeters != null ? <View style={styles.contextDistanceRow}>
-            {contextLabel ? <Text variant="label" style={styles.contextInline}>{contextLabel}</Text> : null}
-            {distanceMeters != null ? <Text variant="label" style={styles.distanceText}>{(distanceMeters / 1000).toFixed(1)} km away</Text> : null}
-          </View> : null}
+          {contextLabel || distanceMeters != null ? (
+            <View style={styles.contextDistanceRow}>
+              {contextLabel ? (
+                <Text variant="label" style={styles.contextInline}>
+                  {contextLabel}
+                </Text>
+              ) : null}
+              {distanceMeters != null ? (
+                <Text variant="label" style={styles.distanceText}>
+                  {(distanceMeters / 1000).toFixed(1)} km away
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -185,12 +261,17 @@ export default function DoctorCard({
         <View style={styles.pillRow}>
           {!hideExperience && experience ? (
             <Pill balanced={Boolean(fee && !hideFee)}>
-              <Text variant="label" style={styles.pillText}>{experience}</Text>
+              <Text variant="label" style={styles.pillText}>
+                {experience}
+              </Text>
             </Pill>
           ) : null}
           {!hideFee && fee ? (
             <Pill balanced={Boolean(experience && !hideExperience)}>
-              <Text variant="label" style={styles.pillText}>{`Consultation Fee ${fee}`}</Text>
+              <Text
+                variant="label"
+                style={styles.pillText}
+              >{`Consultation Fee ${fee}`}</Text>
             </Pill>
           ) : null}
         </View>
@@ -199,14 +280,26 @@ export default function DoctorCard({
   );
 }
 
-function Pill({ children, balanced }: { children: ReactNode; balanced: boolean }) {
-  return <View style={[styles.pill, balanced && styles.balancedPill]}>{children}</View>;
+function Pill({
+  children,
+  balanced,
+}: {
+  children: ReactNode;
+  balanced: boolean;
+}) {
+  return (
+    <View style={[styles.pill, balanced && styles.balancedPill]}>
+      {children}
+    </View>
+  );
 }
 
 function StarIcon() {
   return (
     <View style={styles.starWrap}>
-      <Text variant="inherit" style={styles.starEmoji}>★</Text>
+      <Text variant="inherit" style={styles.starEmoji}>
+        ★
+      </Text>
     </View>
   );
 }
@@ -224,8 +317,14 @@ function MetricCell({
     <View style={styles.profileCell}>
       <View style={styles.profileIconSurface}>{icon}</View>
       <View style={styles.profileCellText}>
-        <Text variant="label" style={styles.profileCellLabel}>{label}</Text>
-        <Text variant="bodyEmphasis" numberOfLines={1} style={styles.profileCellValue}>
+        <Text variant="label" style={styles.profileCellLabel}>
+          {label}
+        </Text>
+        <Text
+          variant="bodyEmphasis"
+          numberOfLines={1}
+          style={styles.profileCellValue}
+        >
           {value}
         </Text>
       </View>
@@ -307,7 +406,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
-  contextDistanceRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
+  contextDistanceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
   contextInline: {
     color: colors.patient.accent,
     fontFamily: fontFamilies.regular,

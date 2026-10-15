@@ -4,9 +4,15 @@ import { Controller, type Control } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SelectDropdown } from "./SelectDropdown";
 import type { ProfileFormValues } from "./ProfileForm";
-import { PROFILE_PLACEHOLDER_COLOR, profileFormStyles } from "./profileFormStyles";
+import {
+  PROFILE_PLACEHOLDER_COLOR,
+  profileFormStyles,
+} from "./profileFormStyles";
 import { Checkbox, Input } from "@startup/mobile-ui";
-import { contactPhoneForInput, normalizeContactPhone } from "@startup/contracts";
+import {
+  contactPhoneForInput,
+  normalizeContactPhone,
+} from "@startup/contracts";
 
 const relations = [
   "Son",
@@ -27,7 +33,9 @@ export function FamilyRelationFields({
 }) {
   return (
     <>
-      <Text variant="label" style={[styles.label, styles.sectionLabel]}>Relation</Text>
+      <Text variant="label" style={[styles.label, styles.sectionLabel]}>
+        Relation
+      </Text>
       <Controller
         control={control}
         name="relation"
@@ -61,7 +69,11 @@ export function FamilyRelationFields({
             accessibilityLabel="Family member phone number"
             keyboardType="phone-pad"
             placeholder="Mobile number"
-            prefix={value.startsWith("+") && !value.startsWith("+91") ? undefined : "+91"}
+            prefix={
+              value.startsWith("+") && !value.startsWith("+91")
+                ? undefined
+                : "+91"
+            }
             maxLength={20}
             value={value}
             onChangeText={(text) => {
@@ -79,8 +91,14 @@ export function FamilyRelationFields({
         control={control}
         name="notify"
         render={({ field: { onChange, value } }) => (
-          <Checkbox theme="patient" checked={value} onCheckedChange={onChange}
-            label="Notify this contact with emergency updates" labelStyle={{ fontSize: 15, lineHeight: 21 }} style={{ marginTop: 14 }} />
+          <Checkbox
+            theme="patient"
+            checked={value}
+            onCheckedChange={onChange}
+            label="Notify this contact with emergency updates"
+            labelStyle={{ fontSize: 15, lineHeight: 21 }}
+            style={{ marginTop: 14 }}
+          />
         )}
       />
     </>

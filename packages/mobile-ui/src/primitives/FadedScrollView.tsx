@@ -41,21 +41,25 @@ export function FadedScrollView({
   const viewportWidthRef = useRef(0);
   const contentWidthRef = useRef(0);
   const leftOpacityRef = useRef<Animated.Value | null>(null);
-  if (leftOpacityRef.current === null) leftOpacityRef.current = new Animated.Value(0);
+  if (leftOpacityRef.current === null)
+    leftOpacityRef.current = new Animated.Value(0);
   const leftOpacity = leftOpacityRef.current;
 
   const rightOpacityRef = useRef<Animated.Value | null>(null);
-  if (rightOpacityRef.current === null) rightOpacityRef.current = new Animated.Value(0);
+  if (rightOpacityRef.current === null)
+    rightOpacityRef.current = new Animated.Value(0);
   const rightOpacity = rightOpacityRef.current;
 
   const viewportHeightRef = useRef(0);
   const contentHeightRef = useRef(0);
   const topOpacityRef = useRef<Animated.Value | null>(null);
-  if (topOpacityRef.current === null) topOpacityRef.current = new Animated.Value(0);
+  if (topOpacityRef.current === null)
+    topOpacityRef.current = new Animated.Value(0);
   const topOpacity = topOpacityRef.current;
 
   const bottomOpacityRef = useRef<Animated.Value | null>(null);
-  if (bottomOpacityRef.current === null) bottomOpacityRef.current = new Animated.Value(0);
+  if (bottomOpacityRef.current === null)
+    bottomOpacityRef.current = new Animated.Value(0);
   const bottomOpacity = bottomOpacityRef.current;
 
   const transparentEdge = toTransparent(edgeColor);
@@ -86,11 +90,17 @@ export function FadedScrollView({
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { x, y } = event.nativeEvent.contentOffset;
     if (horizontal) {
-      const scrollableDistance = Math.max(contentWidthRef.current - viewportWidthRef.current, 0);
+      const scrollableDistance = Math.max(
+        contentWidthRef.current - viewportWidthRef.current,
+        0
+      );
       leftOpacity.setValue(x > 2 ? 1 : 0);
       rightOpacity.setValue(scrollableDistance - x > 2 ? 1 : 0);
     } else {
-      const scrollableDistance = Math.max(contentHeightRef.current - viewportHeightRef.current, 0);
+      const scrollableDistance = Math.max(
+        contentHeightRef.current - viewportHeightRef.current,
+        0
+      );
       topOpacity.setValue(y > 2 ? 1 : 0);
       bottomOpacity.setValue(scrollableDistance - y > 2 ? 1 : 0);
     }
@@ -132,7 +142,10 @@ export function FadedScrollView({
           </Animated.View>
           <Animated.View
             pointerEvents="none"
-            style={[styles.rightEdge, { width: edgeSize, opacity: rightOpacity }]}
+            style={[
+              styles.rightEdge,
+              { width: edgeSize, opacity: rightOpacity },
+            ]}
           >
             <LinearGradient
               colors={[transparentEdge, edgeColor]}
@@ -146,7 +159,10 @@ export function FadedScrollView({
         <>
           <Animated.View
             pointerEvents="none"
-            style={[styles.topEdge, { height: edgeSize, top: topEdgeOffset, opacity: topOpacity }]}
+            style={[
+              styles.topEdge,
+              { height: edgeSize, top: topEdgeOffset, opacity: topOpacity },
+            ]}
           >
             <LinearGradient
               colors={[edgeColor, transparentEdge]}
@@ -155,7 +171,10 @@ export function FadedScrollView({
           </Animated.View>
           <Animated.View
             pointerEvents="none"
-            style={[styles.bottomEdge, { height: edgeSize, opacity: bottomOpacity }]}
+            style={[
+              styles.bottomEdge,
+              { height: edgeSize, opacity: bottomOpacity },
+            ]}
           >
             <LinearGradient
               colors={[transparentEdge, edgeColor]}

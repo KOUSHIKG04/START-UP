@@ -4,12 +4,20 @@ import { Linking, Platform, View } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useFocusEffect } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMyPracticeAppointments, redeemClinicCheckinToken } from "@startup/data-access";
+import {
+  listMyPracticeAppointments,
+  redeemClinicCheckinToken,
+} from "@startup/data-access";
 import { clinicCheckinTokenSchema } from "@startup/contracts";
 import type { ClinicAppointment } from "@startup/contracts";
 import { Button, Input } from "@startup/mobile-ui";
 import { ScanLine, User } from "lucide-react-native";
-import { DoctorScreen, Heading, Label, Panel } from "../../../components/DoctorScreen";
+import {
+  DoctorScreen,
+  Heading,
+  Label,
+  Panel,
+} from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { supabase } from "../../../services/supabase";
 
@@ -21,7 +29,8 @@ export function ScanQrScreen() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   useToastFeedback({ error, success: message });
-  const [patientAppointment, setPatientAppointment] = useState<ClinicAppointment>();
+  const [patientAppointment, setPatientAppointment] =
+    useState<ClinicAppointment>();
   const scanned = useRef(false);
   const redeeming = useRef(false);
   const queryClient = useQueryClient();
@@ -31,28 +40,48 @@ export function ScanQrScreen() {
     enabled: Boolean(supabase),
   });
 
-  useFocusEffect(useCallback(() => {
-    setFocused(true);
-    return () => { setFocused(false); setCamera(false); };
-  }, []));
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => {
+        setFocused(false);
+        setCamera(false);
+      };
+    }, [])
+  );
 
   const redeem = useMutation({
     mutationFn: (token: string) => redeemClinicCheckinToken(supabase!, token),
     retry: false,
     onSuccess: (appointmentId) => {
-      setCamera(false); setValue(""); setError(""); setMessage("Patient checked in and added to the clinic queue.");
+      setCamera(false);
+      setValue("");
+      setError("");
+      setMessage("Patient checked in and added to the clinic queue.");
       // Refresh failures must not turn a completed, single-use check-in into a QR error.
-      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }).catch(() => undefined);
-      router.push({ pathname: "/appointment-details", params: { appointmentId } });
+      void queryClient
+        .invalidateQueries({ queryKey: ["doctor-clinic-appointments"] })
+        .catch(() => undefined);
+      router.push({
+        pathname: "/appointment-details",
+        params: { appointmentId },
+      });
     },
     onError: (cause: unknown) => {
       setCamera(false);
-      const reason = cause && typeof cause === "object" && "message" in cause ? String(cause.message) : "";
-      setError(/check-in token unavailable|invalid check-in token/i.test(reason)
-        ? "This check-in QR is expired, already used, or unavailable for your practice. Ask the patient to refresh it."
-        : "Could not confirm check-in. Check your connection and refresh the appointment before trying again.");
+      const reason =
+        cause && typeof cause === "object" && "message" in cause
+          ? String(cause.message)
+          : "";
+      setError(
+        /check-in token unavailable|invalid check-in token/i.test(reason)
+          ? "This check-in QR is expired, already used, or unavailable for your practice. Ask the patient to refresh it."
+          : "Could not confirm check-in. Check your connection and refresh the appointment before trying again."
+      );
     },
-    onSettled: () => { redeeming.current = false; },
+    onSettled: () => {
+      redeeming.current = false;
+    },
   });
 
   function lookup(input: string) {
@@ -61,63 +90,194 @@ export function ScanQrScreen() {
     const token = clinicCheckinTokenSchema.safeParse(clean);
     if (token.success) {
       redeeming.current = true;
-      setCamera(false); setPatientAppointment(undefined); setError(""); setMessage("");
+      setCamera(false);
+      setPatientAppointment(undefined);
+      setError("");
+      setMessage("");
       redeem.mutate(token.data);
       return;
     }
     let code = clean;
     if (clean.startsWith("{")) {
-      try { const parsed = JSON.parse(clean); code = typeof parsed?.patientId === "string" ? parsed.patientId : ""; }
-      catch { code = ""; }
+      try {
+        const parsed = JSON.parse(clean);
+        code = typeof parsed?.patientId === "string" ? parsed.patientId : "";
+      } catch {
+        code = "";
+      }
     }
-    const match = appointments.data?.find(item => item.patient_public_code.toLowerCase() === code.toLowerCase());
+    const match = appointments.data?.find(
+      (item) => item.patient_public_code.toLowerCase() === code.toLowerCase()
+    );
     setPatientAppointment(match);
     setCamera(false);
     scanned.current = false;
-    setError(match ? "" : "No patient with this ID is in your accessible clinic appointments.");
+    setError(
+      match
+        ? ""
+        : "No patient with this ID is in your accessible clinic appointments."
+    );
     setMessage("");
   }
 
   async function enableCamera() {
     if (redeeming.current) return;
     try {
-      const result = permission?.granted ? permission : await requestPermission();
-      if (result.granted) { scanned.current = false; setCamera(true); setPatientAppointment(undefined); setError(""); }
-      else setError("Camera permission is off. Allow access in settings or enter the patient ID below.");
-    } catch { setError("Camera is unavailable. Enter the patient ID below."); }
+      const result = permission?.granted
+        ? permission
+        : await requestPermission();
+      if (result.granted) {
+        scanned.current = false;
+        setCamera(true);
+        setPatientAppointment(undefined);
+        setError("");
+      } else
+        setError(
+          "Camera permission is off. Allow access in settings or enter the patient ID below."
+        );
+    } catch {
+      setError("Camera is unavailable. Enter the patient ID below.");
+    }
   }
 
-  return <DoctorScreen title="Scan QR code" bottomNav={false}>
-    <View style={{ height: 280, backgroundColor: palette.surface, borderRadius: 18, overflow: "hidden", alignItems: "center", justifyContent: "center", gap: 20 }}>
-      {camera && focused && permission?.granted ? <CameraView style={{ width: "100%", height: "100%" }} facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={({ data }) => {
-          if (!scanned.current) { scanned.current = true; lookup(data); }
-        }} onMountError={() => { setCamera(false); setError("Unable to open the camera. Enter the patient ID below."); }} /> : <>
-        <ScanLine size={64} color={palette.primary} strokeWidth={1.8} />
-        <Label style={{ textAlign: "center", paddingHorizontal: 26 }}>Scan the Patient App check-in QR. A patient ID only looks up their appointment.</Label>
-      </>}
-    </View>
-    <Button theme="doctor" disabled={redeem.isPending} label={camera ? "Stop scanning" : "Open camera"} onPress={() => camera ? setCamera(false) : void enableCamera()} />
-    {permission && !permission.granted && !permission.canAskAgain && Platform.OS !== "web" ? <Button theme="doctor" variant="secondary"
-      label="Open camera settings" onPress={() => void Linking.openSettings().catch(() => setError("Open your device settings and allow camera access."))} /> : null}
-    <Input label="Patient ID" accessibilityLabel="Patient ID" autoCapitalize="characters" placeholder="e.g. PAT-..." value={value} onChangeText={setValue} onSubmitEditing={() => lookup(value)} containerStyle={ui.field} />
-    <Button loading={redeem.isPending} theme="doctor" variant="secondary" label="Look up patient" disabled={redeem.isPending || appointments.isLoading} onPress={() => lookup(value)} />
-    {patientAppointment ? <Panel>
-      <View style={ui.row}>
-        <User size={28} color={palette.primary} />
-        <View>
-          <Heading>{patientAppointment.patient_name}</Heading>
-          <Label muted>{patientAppointment.patient_gender ?? "Gender unavailable"}, {patientAppointment.patient_age_years ?? "age unavailable"} · {patientAppointment.patient_blood_group ?? "Blood group unavailable"}</Label>
-          <Label muted>{patientAppointment.patient_public_code}</Label>
-        </View>
+  return (
+    <DoctorScreen title="Scan QR code" bottomNav={false}>
+      <View
+        style={{
+          height: 280,
+          backgroundColor: palette.surface,
+          borderRadius: 18,
+          overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 20,
+        }}
+      >
+        {camera && focused && permission?.granted ? (
+          <CameraView
+            style={{ width: "100%", height: "100%" }}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={({ data }) => {
+              if (!scanned.current) {
+                scanned.current = true;
+                lookup(data);
+              }
+            }}
+            onMountError={() => {
+              setCamera(false);
+              setError(
+                "Unable to open the camera. Enter the patient ID below."
+              );
+            }}
+          />
+        ) : (
+          <>
+            <ScanLine size={64} color={palette.primary} strokeWidth={1.8} />
+            <Label style={{ textAlign: "center", paddingHorizontal: 26 }}>
+              Scan the Patient App check-in QR. A patient ID only looks up their
+              appointment.
+            </Label>
+          </>
+        )}
       </View>
-      <Button theme="doctor" label={patientAppointment.status === "in_consultation" ? "Open clinical notes" : "View appointment"} onPress={() => router.push(patientAppointment.status === "in_consultation" ? { pathname: "/clinical-notes", params: { appointmentId: patientAppointment.id } } : { pathname: "/appointment-details", params: { appointmentId: patientAppointment.id } })} />
-    </Panel> : null}
-    <Panel>
-      <Heading>Patient lookup</Heading>
-      <Label muted>Patient ID lookup does not check in the patient. Use their appointment QR to confirm arrival.</Label>
-      <Button theme="doctor" variant="ghost" label="Look up next patient" disabled={!appointments.data?.length}
-        onPress={() => { const first = appointments.data?.[0]; if (first) { setValue(first.patient_public_code); lookup(first.patient_public_code); } }} />
-    </Panel>
-  </DoctorScreen>;
+      <Button
+        theme="doctor"
+        disabled={redeem.isPending}
+        label={camera ? "Stop scanning" : "Open camera"}
+        onPress={() => (camera ? setCamera(false) : void enableCamera())}
+      />
+      {permission &&
+      !permission.granted &&
+      !permission.canAskAgain &&
+      Platform.OS !== "web" ? (
+        <Button
+          theme="doctor"
+          variant="secondary"
+          label="Open camera settings"
+          onPress={() =>
+            void Linking.openSettings().catch(() =>
+              setError("Open your device settings and allow camera access.")
+            )
+          }
+        />
+      ) : null}
+      <Input
+        label="Patient ID"
+        accessibilityLabel="Patient ID"
+        autoCapitalize="characters"
+        placeholder="e.g. PAT-..."
+        value={value}
+        onChangeText={setValue}
+        onSubmitEditing={() => lookup(value)}
+        containerStyle={ui.field}
+      />
+      <Button
+        loading={redeem.isPending}
+        theme="doctor"
+        variant="secondary"
+        label="Look up patient"
+        disabled={redeem.isPending || appointments.isLoading}
+        onPress={() => lookup(value)}
+      />
+      {patientAppointment ? (
+        <Panel>
+          <View style={ui.row}>
+            <User size={28} color={palette.primary} />
+            <View>
+              <Heading>{patientAppointment.patient_name}</Heading>
+              <Label muted>
+                {patientAppointment.patient_gender ?? "Gender unavailable"},{" "}
+                {patientAppointment.patient_age_years ?? "age unavailable"} ·{" "}
+                {patientAppointment.patient_blood_group ??
+                  "Blood group unavailable"}
+              </Label>
+              <Label muted>{patientAppointment.patient_public_code}</Label>
+            </View>
+          </View>
+          <Button
+            theme="doctor"
+            label={
+              patientAppointment.status === "in_consultation"
+                ? "Open clinical notes"
+                : "View appointment"
+            }
+            onPress={() =>
+              router.push(
+                patientAppointment.status === "in_consultation"
+                  ? {
+                      pathname: "/clinical-notes",
+                      params: { appointmentId: patientAppointment.id },
+                    }
+                  : {
+                      pathname: "/appointment-details",
+                      params: { appointmentId: patientAppointment.id },
+                    }
+              )
+            }
+          />
+        </Panel>
+      ) : null}
+      <Panel>
+        <Heading>Patient lookup</Heading>
+        <Label muted>
+          Patient ID lookup does not check in the patient. Use their appointment
+          QR to confirm arrival.
+        </Label>
+        <Button
+          theme="doctor"
+          variant="ghost"
+          label="Look up next patient"
+          disabled={!appointments.data?.length}
+          onPress={() => {
+            const first = appointments.data?.[0];
+            if (first) {
+              setValue(first.patient_public_code);
+              lookup(first.patient_public_code);
+            }
+          }}
+        />
+      </Panel>
+    </DoctorScreen>
+  );
 }

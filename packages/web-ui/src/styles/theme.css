@@ -65,9 +65,13 @@
   --sidebar: var(--color-admin-dark-sidebar);
   --sidebar-foreground: var(--color-admin-dark-sidebar-foreground);
   --sidebar-primary: var(--color-admin-dark-sidebar-primary);
-  --sidebar-primary-foreground: var(--color-admin-dark-sidebar-primary-foreground);
+  --sidebar-primary-foreground: var(
+    --color-admin-dark-sidebar-primary-foreground
+  );
   --sidebar-accent: var(--color-admin-dark-sidebar-accent);
-  --sidebar-accent-foreground: var(--color-admin-dark-sidebar-accent-foreground);
+  --sidebar-accent-foreground: var(
+    --color-admin-dark-sidebar-accent-foreground
+  );
   --sidebar-border: var(--color-admin-dark-sidebar-border);
   --sidebar-ring: var(--color-admin-dark-sidebar-ring);
 }

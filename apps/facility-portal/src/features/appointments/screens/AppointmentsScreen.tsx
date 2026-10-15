@@ -4,13 +4,19 @@ import * as React from "react";
 import type { IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 import type { ClinicAppointment } from "@startup/contracts";
-import { changePortalAppointment, redeemPortalCheckinToken } from "../server/actions";
+import {
+  changePortalAppointment,
+  redeemPortalCheckinToken,
+} from "../server/actions";
 import { Search, Calendar, ChevronDown, ScanLine } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
 import { toast } from "@startup/web-ui/components/ui/toast";
 
 import type { AppointmentPeriod } from "../types/appointments";
-import { defaultAppointmentPeriod, appointmentsDateFormatter } from "../utils/appointmentsConstants";
+import {
+  defaultAppointmentPeriod,
+  appointmentsDateFormatter,
+} from "../utils/appointmentsConstants";
 import { AppointmentsSummaryCards } from "../components/AppointmentsSummaryCards";
 import { AppointmentsTable } from "../components/AppointmentsTable";
 import { NewAppointmentDialog } from "../components/NewAppointmentDialog";
@@ -37,7 +43,12 @@ export default function AppointmentsScreen({
     defaultAppointmentPeriod
   );
   React.useEffect(() => {
-    if (loadError) toast.add({ title: "Could not load appointments", description: loadError, type: "error" });
+    if (loadError)
+      toast.add({
+        title: "Could not load appointments",
+        description: loadError,
+        type: "error",
+      });
   }, [loadError]);
   React.useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 30000);
@@ -46,7 +57,7 @@ export default function AppointmentsScreen({
 
   const displayedAppointments = React.useMemo(() => {
     const today = new Date();
-    
+
     return appointments.filter((item) => {
       const start = new Date(item.starts_at);
       const dayOffset = Math.floor(
@@ -60,12 +71,12 @@ export default function AppointmentsScreen({
         (filterPeriod === "Today" && dayOffset === 0) ||
         (filterPeriod === "Tomorrow" && dayOffset === 1) ||
         (filterPeriod === "This Week" && dayOffset >= 0 && dayOffset < 7);
-      
+
       const statusMatch =
         statusFilter === "All" || item.status === statusFilter.toLowerCase();
-      
+
       const needle = search.trim().toLowerCase();
-      
+
       return (
         periodMatch &&
         statusMatch &&
@@ -86,9 +97,13 @@ export default function AppointmentsScreen({
       total: appointments.length,
       confirmed: appointments.filter((item) => item.status === "confirmed")
         .length,
-      pending: appointments.filter((item) => item.status === "pending" &&
-        new Date(item.starts_at).getTime() > now &&
-        (item.request_expires_at === null || new Date(item.request_expires_at).getTime() > now)).length,
+      pending: appointments.filter(
+        (item) =>
+          item.status === "pending" &&
+          new Date(item.starts_at).getTime() > now &&
+          (item.request_expires_at === null ||
+            new Date(item.request_expires_at).getTime() > now)
+      ).length,
       cancelled: appointments.filter((item) => item.status === "cancelled")
         .length,
     }),
@@ -130,10 +145,22 @@ export default function AppointmentsScreen({
           action,
           note,
         });
-        if (result.error) toast.add({ title: "Could not update appointment", description: result.error, type: "error" });
-        else { toast.add({ title: "Appointment updated", type: "success" }); router.refresh(); }
+        if (result.error)
+          toast.add({
+            title: "Could not update appointment",
+            description: result.error,
+            type: "error",
+          });
+        else {
+          toast.add({ title: "Appointment updated", type: "success" });
+          router.refresh();
+        }
       } catch {
-        toast.add({ title: "Could not update appointment", description: "Check your connection and try again.", type: "error" });
+        toast.add({
+          title: "Could not update appointment",
+          description: "Check your connection and try again.",
+          type: "error",
+        });
       }
     });
   }
@@ -154,15 +181,28 @@ export default function AppointmentsScreen({
     startTransition(async () => {
       try {
         const result = await redeemPortalCheckinToken(value);
-        if (result.error) toast.add({ title: "Could not check in patient", description: result.error, type: "error" });
+        if (result.error)
+          toast.add({
+            title: "Could not check in patient",
+            description: result.error,
+            type: "error",
+          });
         else {
-          toast.add({ title: "Patient checked in", description: "The doctor can now call them from the queue.", type: "success" });
+          toast.add({
+            title: "Patient checked in",
+            description: "The doctor can now call them from the queue.",
+            type: "success",
+          });
           setCheckinToken("");
           setShowScanner(false);
           router.refresh();
         }
       } catch {
-        toast.add({ title: "Could not check in patient", description: "Check your connection and try again.", type: "error" });
+        toast.add({
+          title: "Could not check in patient",
+          description: "Check your connection and try again.",
+          type: "error",
+        });
       }
     });
   }
@@ -170,13 +210,20 @@ export default function AppointmentsScreen({
   async function startCamera() {
     if (scanningRef.current) return;
     if (!navigator.mediaDevices?.getUserMedia) {
-      toast.add({ title: "Camera scanning unavailable", description: "Paste the QR value below.", type: "warning" });
+      toast.add({
+        title: "Camera scanning unavailable",
+        description: "Paste the QR value below.",
+        type: "warning",
+      });
       return;
     }
     scanningRef.current = true;
     try {
       const video = videoRef.current;
-      if (!video) { stopCamera(); return; }
+      if (!video) {
+        stopCamera();
+        return;
+      }
       const { BrowserQRCodeReader } = await import("@zxing/browser");
       if (!scanningRef.current) return;
       const reader = new BrowserQRCodeReader();
@@ -194,7 +241,11 @@ export default function AppointmentsScreen({
       else scannerControlsRef.current = controls;
     } catch {
       stopCamera();
-      toast.add({ title: "Camera access unavailable", description: "Paste the QR value below.", type: "warning" });
+      toast.add({
+        title: "Camera access unavailable",
+        description: "Paste the QR value below.",
+        type: "warning",
+      });
     }
   }
 
@@ -209,7 +260,14 @@ export default function AppointmentsScreen({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="button" variant="outline" onClick={() => { stopCamera(); setShowScanner((current) => !current); }}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              stopCamera();
+              setShowScanner((current) => !current);
+            }}
+          >
             <ScanLine className="size-4" /> Scan patient QR
           </Button>
           {/* Search Box */}
@@ -263,25 +321,60 @@ export default function AppointmentsScreen({
             <ChevronDown className="size-3.5 text-[#475569]" />
           </div>
 
-          <NewAppointmentDialog onCreated={() => {
-            setFilterPeriod("All");
-            setStatusFilter("All");
-            setSearch("");
-            setCurrentPage(1);
-          }} />
+          <NewAppointmentDialog
+            onCreated={() => {
+              setFilterPeriod("All");
+              setStatusFilter("All");
+              setSearch("");
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
 
-      {showScanner ? <section aria-label="Patient check-in" className="rounded-lg border border-[#e2e8f0] bg-white p-4">
-        <h2 className="text-[16px] font-semibold text-[#0f172a]">Patient check-in</h2>
-        <p className="mt-1 text-[13px] text-[#475569]">Scan the QR shown in the Patient App for an app-booked clinic visit.</p>
-        <video ref={videoRef} muted playsInline className="mt-3 max-h-64 w-full max-w-sm rounded-lg bg-[#0f172a]" />
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Button type="button" variant="outline" onClick={() => void startCamera()} disabled={pending}>Start camera</Button>
-          <input aria-label="Check-in QR value" value={checkinToken} onChange={(event) => setCheckinToken(event.target.value)} placeholder="Paste QR value if camera is unavailable" className="min-w-64 rounded-lg border border-[#e2e8f0] px-3 py-2 text-[13px]" />
-          <Button type="button" onClick={() => submitCheckin(checkinToken)} disabled={pending || !checkinToken.trim()}>Check in</Button>
-        </div>
-      </section> : null}
+      {showScanner ? (
+        <section
+          aria-label="Patient check-in"
+          className="rounded-lg border border-[#e2e8f0] bg-white p-4"
+        >
+          <h2 className="text-[16px] font-semibold text-[#0f172a]">
+            Patient check-in
+          </h2>
+          <p className="mt-1 text-[13px] text-[#475569]">
+            Scan the QR shown in the Patient App for an app-booked clinic visit.
+          </p>
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            className="mt-3 max-h-64 w-full max-w-sm rounded-lg bg-[#0f172a]"
+          />
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void startCamera()}
+              disabled={pending}
+            >
+              Start camera
+            </Button>
+            <input
+              aria-label="Check-in QR value"
+              value={checkinToken}
+              onChange={(event) => setCheckinToken(event.target.value)}
+              placeholder="Paste QR value if camera is unavailable"
+              className="min-w-64 rounded-lg border border-[#e2e8f0] px-3 py-2 text-[13px]"
+            />
+            <Button
+              type="button"
+              onClick={() => submitCheckin(checkinToken)}
+              disabled={pending || !checkinToken.trim()}
+            >
+              Check in
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {/* Summary Stat Cards Row */}
       <AppointmentsSummaryCards summary={appointmentsSummary} />

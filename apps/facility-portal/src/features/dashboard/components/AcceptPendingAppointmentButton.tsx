@@ -29,10 +29,22 @@ export function AcceptPendingAppointmentButton({
                 expectedVersion,
                 action: "approve",
               });
-              if (result.error) toast.add({ title: "Could not update appointment", description: result.error, type: "error" });
-              else { toast.add({ title: "Appointment accepted", type: "success" }); router.refresh(); }
+              if (result.error)
+                toast.add({
+                  title: "Could not update appointment",
+                  description: result.error,
+                  type: "error",
+                });
+              else {
+                toast.add({ title: "Appointment accepted", type: "success" });
+                router.refresh();
+              }
             } catch {
-              toast.add({ title: "Could not update appointment", description: "Check your connection and try again.", type: "error" });
+              toast.add({
+                title: "Could not update appointment",
+                description: "Check your connection and try again.",
+                type: "error",
+              });
             }
           })
         }

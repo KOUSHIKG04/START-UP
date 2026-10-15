@@ -1,5 +1,4 @@
 export function validateDatabaseUrl(value: string, requireTls = true): URL {
-
   let url: URL;
 
   try {
@@ -8,7 +7,8 @@ export function validateDatabaseUrl(value: string, requireTls = true): URL {
     throw new Error("Database connection URL is invalid");
   }
 
-  if (!["postgres:", "postgresql:"].includes(url.protocol)) throw new Error("Database URL must use PostgreSQL");
+  if (!["postgres:", "postgresql:"].includes(url.protocol))
+    throw new Error("Database URL must use PostgreSQL");
 
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
 
@@ -23,6 +23,6 @@ export function validateDatabaseUrl(value: string, requireTls = true): URL {
       "Remote database URL requires sslmode=verify-full (or verify-ca)"
     );
   }
-  
+
   return url;
 }

@@ -30,7 +30,6 @@ export async function PATCH(request: Request) {
         : 200,
       headers: { "cache-control": "no-store" },
     });
-
   } catch {
     return Response.json(
       { error: "Could not save bed counts. Try again." },
@@ -58,7 +57,6 @@ export async function GET(request: Request) {
       { rows: await listFacilityBedInventory(client, facility.data) },
       { headers: { "cache-control": "no-store" } }
     );
-    
   } catch {
     return Response.json(
       { error: "Could not reload bed counts" },

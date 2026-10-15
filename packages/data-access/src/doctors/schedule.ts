@@ -89,35 +89,38 @@ export async function publishMyDoctorSchedule(
 ) {
   const value = doctorScheduleSettingsSchema.parse(settings);
   // Saving and slot generation share one transaction and one version check.
-  const { data, error } = await client.rpc("publish_doctor_schedule_from_date", {
-    p_practice_id: uuidSchema.parse(practiceId),
-    p_mode: mode,
-    p_settings: {
-      working_days: value.workingDays,
-      online_working_days: value.onlineWorkingDays,
-      home_working_days: value.homeWorkingDays,
-      clinic_start: value.clinicStart,
-      clinic_end: value.clinicEnd,
-      online_start: value.onlineStart,
-      online_end: value.onlineEnd,
-      home_start: value.homeStart,
-      home_end: value.homeEnd,
-      slot_minutes: value.slotMinutes,
-      online_slot_minutes: value.onlineSlotMinutes,
-      home_slot_minutes: value.homeSlotMinutes,
-      online_daily_limit: value.onlineDailyLimit,
-      walkin_daily_limit: value.walkinDailyLimit,
-      auto_accept: value.autoAccept,
-      auto_accept_limit: value.autoAcceptLimit,
-      home_visits: value.homeVisits,
-      home_radius_km: value.homeRadiusKm,
-      online_fee_minor: value.onlineFeeMinor,
-      clinic_fee_minor: value.clinicFeeMinor,
-      home_fee_minor: value.homeFeeMinor,
-    },
-    p_expected_version: expectedVersion,
-    p_effective_from: effectiveFrom ?? null,
-  });
+  const { data, error } = await client.rpc(
+    "publish_doctor_schedule_from_date",
+    {
+      p_practice_id: uuidSchema.parse(practiceId),
+      p_mode: mode,
+      p_settings: {
+        working_days: value.workingDays,
+        online_working_days: value.onlineWorkingDays,
+        home_working_days: value.homeWorkingDays,
+        clinic_start: value.clinicStart,
+        clinic_end: value.clinicEnd,
+        online_start: value.onlineStart,
+        online_end: value.onlineEnd,
+        home_start: value.homeStart,
+        home_end: value.homeEnd,
+        slot_minutes: value.slotMinutes,
+        online_slot_minutes: value.onlineSlotMinutes,
+        home_slot_minutes: value.homeSlotMinutes,
+        online_daily_limit: value.onlineDailyLimit,
+        walkin_daily_limit: value.walkinDailyLimit,
+        auto_accept: value.autoAccept,
+        auto_accept_limit: value.autoAcceptLimit,
+        home_visits: value.homeVisits,
+        home_radius_km: value.homeRadiusKm,
+        online_fee_minor: value.onlineFeeMinor,
+        clinic_fee_minor: value.clinicFeeMinor,
+        home_fee_minor: value.homeFeeMinor,
+      },
+      p_expected_version: expectedVersion,
+      p_effective_from: effectiveFrom ?? null,
+    }
+  );
   if (error) throw Object.assign(new Error(error.message), error);
   return doctorSchedulePublicationSchema.parse(data);
 }

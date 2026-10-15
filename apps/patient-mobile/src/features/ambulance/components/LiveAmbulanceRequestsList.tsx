@@ -23,7 +23,11 @@ export function LiveAmbulanceRequestsList({
   error: unknown;
   onRefresh: () => void;
   activeBookingId?: string;
-  trackingData?: { latitude: number; longitude: number; received_at: string } | null;
+  trackingData?: {
+    latitude: number;
+    longitude: number;
+    received_at: string;
+  } | null;
   pinVisible: boolean;
   isPinLoading: boolean;
   pinData?: string | null;
@@ -32,15 +36,15 @@ export function LiveAmbulanceRequestsList({
   isCancelPending: boolean;
   onCancel: (booking: MyAmbulanceBooking) => void;
 }) {
-  useToastFeedback({ error: error ? "Could not load your ambulance requests." : "" });
+  useToastFeedback({
+    error: error ? "Could not load your ambulance requests." : "",
+  });
   return (
     <>
-      <Text variant="cardHeading" style={styles.title}>My requests</Text>
-      <Button
-        label="Refresh status"
-        variant="outline"
-        onPress={onRefresh}
-      />
+      <Text variant="cardHeading" style={styles.title}>
+        My requests
+      </Text>
+      <Button label="Refresh status" variant="outline" onPress={onRefresh} />
       {isLoading ? <Loader theme="patient" style={{ minHeight: 44 }} /> : null}
       {bookings?.map((booking) => (
         <View key={booking.id} style={styles.card}>
@@ -59,8 +63,7 @@ export function LiveAmbulanceRequestsList({
           {booking.trip_status ? (
             <Text variant="body">Trip: {booking.trip_status}</Text>
           ) : null}
-          {booking.id === activeBookingId &&
-          booking.status === "assigned" ? (
+          {booking.id === activeBookingId && booking.status === "assigned" ? (
             trackingData ? (
               <Text variant="body">
                 Driver location: {trackingData.latitude.toFixed(5)},{" "}
@@ -73,12 +76,15 @@ export function LiveAmbulanceRequestsList({
           ) : null}
           {booking.id === activeBookingId && pinVisible ? (
             <View style={styles.card}>
-              <Text variant="body" style={styles.subtitle}>Your completion PIN</Text>
+              <Text variant="body" style={styles.subtitle}>
+                Your completion PIN
+              </Text>
               {isPinLoading ? (
                 <Loader theme="patient" style={{ minHeight: 36 }} />
               ) : null}
               {pinData ? (
-                <Text variant="body"
+                <Text
+                  variant="body"
                   accessibilityLabel="Four-digit completion PIN"
                   style={styles.pin}
                 >
@@ -93,13 +99,15 @@ export function LiveAmbulanceRequestsList({
           ) : null}
           {booking.status === "searching" ? (
             <View style={styles.options}>
-              <Button loading={isRefreshPending}
+              <Button
+                loading={isRefreshPending}
                 label="Search again"
                 variant="outline"
                 disabled={isRefreshPending}
                 onPress={() => onRefreshDispatch(booking.id)}
               />
-              <Button loading={isCancelPending}
+              <Button
+                loading={isCancelPending}
                 label="Cancel request"
                 variant="outline"
                 disabled={isCancelPending}

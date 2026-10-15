@@ -1,5 +1,12 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { Pressable, ScrollView, StyleSheet, View, Share, Alert } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  Share,
+  Alert,
+} from "react-native";
 import {
   Clock3,
   Info,
@@ -13,7 +20,10 @@ import {
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 import type { TrackingStage } from "../types/ambulance";
-import type { ActiveAmbulanceTracking, MyAmbulanceBooking } from "@startup/contracts";
+import type {
+  ActiveAmbulanceTracking,
+  MyAmbulanceBooking,
+} from "@startup/contracts";
 import { DriverTrackingMap } from "./DriverTrackingMap";
 import { EmergencyModeCard } from "./EmergencyModeCard";
 
@@ -76,7 +86,9 @@ export function Tracking({
         <Text variant="body" style={styles.statusText}>
           {arrived
             ? "Ambulance reached your pickup location"
-            : location ? `Driver location updated ${new Date(location.received_at).toLocaleTimeString()}` : "Driver is on the way • Location pending"}
+            : location
+              ? `Driver location updated ${new Date(location.received_at).toLocaleTimeString()}`
+              : "Driver is on the way • Location pending"}
         </Text>
       </View>
 
@@ -88,7 +100,12 @@ export function Tracking({
 
       <PinRow pin={completionPin} />
 
-      <DriverCard name={booking.driver_name ?? "Driver assignment pending"} vehicle={booking.vehicle_registration} service={booking.capability_code} rating={booking.driver_rating} />
+      <DriverCard
+        name={booking.driver_name ?? "Driver assignment pending"}
+        vehicle={booking.vehicle_registration}
+        service={booking.capability_code}
+        rating={booking.driver_rating}
+      />
 
       <TripCard booking={booking} title="Trip Details" />
 
@@ -128,7 +145,9 @@ function HospitalJourney({
       <View style={styles.reachingHeader}>
         <View style={styles.reachingTitleRow}>
           <View style={styles.liveDot} />
-          <Text variant="cardHeading" style={styles.reachingTitle}>Reaching Hospital</Text>
+          <Text variant="cardHeading" style={styles.reachingTitle}>
+            Reaching Hospital
+          </Text>
         </View>
         <Text variant="cardHeading" style={styles.reachingSubtitle}>
           Patient onboard • Driver is en route to emergency ward
@@ -139,7 +158,9 @@ function HospitalJourney({
         <DriverTrackingMap location={location} style={styles.liveMap} />
         <View style={styles.liveBadge}>
           <View style={styles.liveWhiteDot} />
-          <Text variant="body" style={styles.liveText}>{location ? "LOCATION RECEIVED" : "LOCATION PENDING"}</Text>
+          <Text variant="body" style={styles.liveText}>
+            {location ? "LOCATION RECEIVED" : "LOCATION PENDING"}
+          </Text>
         </View>
       </View>
 
@@ -151,7 +172,12 @@ function HospitalJourney({
 
       <TripCard booking={booking} title="Hospital Destination" />
 
-      <DriverCard name={booking.driver_name ?? "Driver assignment pending"} vehicle={booking.vehicle_registration} service={booking.capability_code} rating={booking.driver_rating} />
+      <DriverCard
+        name={booking.driver_name ?? "Driver assignment pending"}
+        vehicle={booking.vehicle_registration}
+        service={booking.capability_code}
+        rating={booking.driver_rating}
+      />
 
       <TripControls location={location} />
 
@@ -189,17 +215,31 @@ function PinRow({ pin }: { pin: string | null }) {
         </Text>
       </View>
       <View style={styles.otpRow}>
-        {Array.from({ length: 4 }, (_, index) => pin?.[index] ?? "").map((digit, index) => (
-          <View key={index} style={styles.otpCell}>
-            <Text variant="body" style={styles.otpText}>{digit}</Text>
-          </View>
-        ))}
+        {Array.from({ length: 4 }, (_, index) => pin?.[index] ?? "").map(
+          (digit, index) => (
+            <View key={index} style={styles.otpCell}>
+              <Text variant="body" style={styles.otpText}>
+                {digit}
+              </Text>
+            </View>
+          )
+        )}
       </View>
     </Card>
   );
 }
 
-function DriverCard({ name, vehicle, service, rating }: { name: string; vehicle: string | null; service: string; rating: string | null }) {
+function DriverCard({
+  name,
+  vehicle,
+  service,
+  rating,
+}: {
+  name: string;
+  vehicle: string | null;
+  service: string;
+  rating: string | null;
+}) {
   return (
     <Card
       variant="outlined"
@@ -215,10 +255,14 @@ function DriverCard({ name, vehicle, service, rating }: { name: string; vehicle:
       </View>
       <View style={styles.driverCopy}>
         <View style={styles.driverNameRow}>
-          <Text variant="body" style={styles.driverName}>{name}</Text>
+          <Text variant="body" style={styles.driverName}>
+            {name}
+          </Text>
           <View style={styles.ratingBadge}>
             <Star color="#F59E0B" fill="#F59E0B" size={11} />
-            <Text variant="bodyEmphasis" style={styles.driverRating}>{rating ?? "—"}</Text>
+            <Text variant="bodyEmphasis" style={styles.driverRating}>
+              {rating ?? "—"}
+            </Text>
           </View>
         </View>
         <Text variant="body" style={styles.vehicle}>
@@ -226,7 +270,12 @@ function DriverCard({ name, vehicle, service, rating }: { name: string; vehicle:
         </Text>
       </View>
       <Pressable
-        onPress={() => Alert.alert("Driver contact unavailable", "The driver phone number is not available for this booking yet.")}
+        onPress={() =>
+          Alert.alert(
+            "Driver contact unavailable",
+            "The driver phone number is not available for this booking yet."
+          )
+        }
         style={({ pressed }) => [styles.callButton, pressed && styles.pressed]}
         accessibilityRole="button"
         accessibilityLabel="Call driver"
@@ -255,24 +304,38 @@ function TripCard({
       gap={14}
     >
       <View style={styles.tripHeader}>
-        <Text variant="cardHeading" style={styles.tripTitle}>{title}</Text>
+        <Text variant="cardHeading" style={styles.tripTitle}>
+          {title}
+        </Text>
         <Info color={colors.patient.textSecondary} size={16} />
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.stat}>
-          <Text variant="bodyEmphasis" style={styles.statValue}>Pending</Text>
-          <Text variant="label" style={styles.statLabel}>ETA</Text>
+          <Text variant="bodyEmphasis" style={styles.statValue}>
+            Pending
+          </Text>
+          <Text variant="label" style={styles.statLabel}>
+            ETA
+          </Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
-          <Text variant="bodyEmphasis" style={styles.statValue}>Pending</Text>
-          <Text variant="label" style={styles.statLabel}>Distance</Text>
+          <Text variant="bodyEmphasis" style={styles.statValue}>
+            Pending
+          </Text>
+          <Text variant="label" style={styles.statLabel}>
+            Distance
+          </Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
-          <Text variant="bodyEmphasis" style={styles.statValue}>Pending</Text>
-          <Text variant="label" style={styles.statLabel}>Est. Fare</Text>
+          <Text variant="bodyEmphasis" style={styles.statValue}>
+            Pending
+          </Text>
+          <Text variant="label" style={styles.statLabel}>
+            Est. Fare
+          </Text>
         </View>
       </View>
 
@@ -288,9 +351,15 @@ function TripCard({
             <View style={styles.connectorLine} />
           </View>
           <View style={styles.stopTextContent}>
-            <Text variant="label" style={styles.routeLabel}>PICKUP LOCATION</Text>
-            <Text variant="body" style={styles.routeAddress}>{booking.pickup_address ?? "Pickup location pending"}</Text>
-            <Text variant="body" style={styles.routeSubtext}>Confirmed pickup</Text>
+            <Text variant="label" style={styles.routeLabel}>
+              PICKUP LOCATION
+            </Text>
+            <Text variant="body" style={styles.routeAddress}>
+              {booking.pickup_address ?? "Pickup location pending"}
+            </Text>
+            <Text variant="body" style={styles.routeSubtext}>
+              Confirmed pickup
+            </Text>
           </View>
         </View>
 
@@ -302,9 +371,15 @@ function TripCard({
             </View>
           </View>
           <View style={styles.stopTextContent}>
-            <Text variant="label" style={styles.routeLabel}>HOSPITAL DESTINATION</Text>
-            <Text variant="body" style={styles.routeAddress}>{booking.destination_address ?? "Hospital pending"}</Text>
-            <Text variant="body" style={styles.routeSubtext}>Selected destination</Text>
+            <Text variant="label" style={styles.routeLabel}>
+              HOSPITAL DESTINATION
+            </Text>
+            <Text variant="body" style={styles.routeAddress}>
+              {booking.destination_address ?? "Hospital pending"}
+            </Text>
+            <Text variant="body" style={styles.routeSubtext}>
+              Selected destination
+            </Text>
           </View>
         </View>
       </View>
@@ -312,14 +387,22 @@ function TripCard({
       <View style={styles.divider} />
 
       <View style={styles.serviceRow}>
-        <Text variant="label" style={styles.serviceLabel}>Ambulance Service</Text>
-        <Text variant="bodyEmphasis" style={styles.serviceValue}>{booking.capability_code}</Text>
+        <Text variant="label" style={styles.serviceLabel}>
+          Ambulance Service
+        </Text>
+        <Text variant="bodyEmphasis" style={styles.serviceValue}>
+          {booking.capability_code}
+        </Text>
       </View>
     </Card>
   );
 }
 
-function TripControls({ location }: { location: ActiveAmbulanceTracking | null }) {
+function TripControls({
+  location,
+}: {
+  location: ActiveAmbulanceTracking | null;
+}) {
   return (
     <Card
       variant="outlined"
@@ -330,15 +413,25 @@ function TripControls({ location }: { location: ActiveAmbulanceTracking | null }
       padding={16}
       gap={10}
     >
-      <Text variant="cardHeading" style={styles.cardTitle}>Trip Controls</Text>
+      <Text variant="cardHeading" style={styles.cardTitle}>
+        Trip Controls
+      </Text>
       <Button
         label="Share Live Location"
         variant="secondary"
         theme="patient"
         leftIcon={<Share2 color={colors.patient.primaryDark} size={16} />}
         onPress={() => {
-          if (!location) { Alert.alert("Location pending", "A current driver location is not available yet."); return; }
-          void Share.share({ message: `Ambulance location: https://maps.google.com/?q=${location.latitude},${location.longitude}` });
+          if (!location) {
+            Alert.alert(
+              "Location pending",
+              "A current driver location is not available yet."
+            );
+            return;
+          }
+          void Share.share({
+            message: `Ambulance location: https://maps.google.com/?q=${location.latitude},${location.longitude}`,
+          });
         }}
         style={styles.shareButton}
         labelStyle={styles.shareText}
@@ -354,7 +447,9 @@ function SafetyCard() {
         <ShieldCheck color={colors.white} size={20} />
       </View>
       <View style={styles.wellnessCopy}>
-        <Text variant="cardHeading" style={styles.wellnessTitle}>Your safety is our priority</Text>
+        <Text variant="cardHeading" style={styles.wellnessTitle}>
+          Your safety is our priority
+        </Text>
         <Text variant="body" style={styles.infoText}>
           GPS tracked with certified paramedic crew on standby.
         </Text>

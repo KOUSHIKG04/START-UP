@@ -18,16 +18,30 @@ export function AddDoctorCard({
   onViewAll,
   showOuterHeader = true,
 }: AddDoctorCardProps) {
-  const { formData, setFormData, isSubmitted, handleSubmit, busy, error, facilities, facilityId, setFacilityId } =
-    useAddDoctorForm(onSuccess);
+  const {
+    formData,
+    setFormData,
+    isSubmitted,
+    handleSubmit,
+    busy,
+    error,
+    facilities,
+    facilityId,
+    setFacilityId,
+  } = useAddDoctorForm(onSuccess);
   useEffect(() => {
-    if (error) toast.add({ title: "Could not invite doctor", description: error, type: "error" });
+    if (error)
+      toast.add({
+        title: "Could not invite doctor",
+        description: error,
+        type: "error",
+      });
   }, [error]);
 
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs w-full max-w-[480px]">
+    <div className="w-full max-w-[480px] rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs">
       {showOuterHeader && (
-        <div className="flex items-center justify-between pb-4 border-b border-[#e2e8f0] mb-5">
+        <div className="mb-5 flex items-center justify-between border-b border-[#e2e8f0] pb-4">
           <div className="flex items-center gap-2.5">
             <UserCheck className="size-5 text-[#07595d]" />
             <h2 className="text-[18px] font-bold text-[#0f172a]">
@@ -37,7 +51,7 @@ export function AddDoctorCard({
           <button
             type="button"
             onClick={onViewAll}
-            className="text-[13px] font-semibold text-[#07595d] hover:underline cursor-pointer"
+            className="cursor-pointer text-[13px] font-semibold text-[#07595d] hover:underline"
           >
             View All
           </button>
@@ -45,32 +59,57 @@ export function AddDoctorCard({
       )}
 
       {/* Inner Panel (Figma 939:19) */}
-      <div className="bg-[#fafafa] border border-[#e2e8f0] rounded-[12px] p-5 flex flex-col gap-4">
+      <div className="flex flex-col gap-4 rounded-[12px] border border-[#e2e8f0] bg-[#fafafa] p-5">
         <div className="flex items-center justify-between">
           <h3 className="text-[15px] font-bold text-[#0f172a]">
             Add New Doctor
           </h3>
-          <span className="bg-[#e6f5f4] text-[#07595d] text-[11px] font-bold px-2 py-1 rounded-[6px]">
+          <span className="rounded-[6px] bg-[#e6f5f4] px-2 py-1 text-[11px] font-bold text-[#07595d]">
             New Doctor
           </span>
         </div>
 
         {isSubmitted ? (
-          <div className="py-8 flex flex-col items-center justify-center text-center gap-2">
-            <CheckCircle2 className="size-10 text-[#07595d] animate-in zoom-in-75 duration-200" />
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <CheckCircle2 className="animate-in zoom-in-75 size-10 text-[#07595d] duration-200" />
             <p className="text-[15px] font-bold text-[#0f172a]">
               Invitation sent to doctor
             </p>
             <p className="text-[12px] text-[#64748b]">
-              The doctor must accept. Clinzo must verify credentials before practice.
+              The doctor must accept. Clinzo must verify credentials before
+              practice.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            {facilities.length > 1 && <div className="flex flex-col gap-1.5"><label htmlFor="add-doctor-facility" className="text-[13px] font-medium text-[#5c6678]">Hospital / Clinic</label><select id="add-doctor-facility" value={facilityId || facilities[0]?.facilityId} onChange={event=>setFacilityId(event.target.value)} className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px]">{facilities.map(item=><option key={item.facilityId} value={item.facilityId}>{item.facilityName}</option>)}</select></div>}
+            {facilities.length > 1 && (
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="add-doctor-facility"
+                  className="text-[13px] font-medium text-[#5c6678]"
+                >
+                  Hospital / Clinic
+                </label>
+                <select
+                  id="add-doctor-facility"
+                  value={facilityId || facilities[0]?.facilityId}
+                  onChange={(event) => setFacilityId(event.target.value)}
+                  className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px]"
+                >
+                  {facilities.map((item) => (
+                    <option key={item.facilityId} value={item.facilityId}>
+                      {item.facilityName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {/* Doctor Name */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="add-doctor-name" className="text-[13px] font-medium text-[#5c6678]">
+              <label
+                htmlFor="add-doctor-name"
+                className="text-[13px] font-medium text-[#5c6678]"
+              >
                 Doctor Name
               </label>
               <input
@@ -82,13 +121,16 @@ export function AddDoctorCard({
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.name}
-                className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30 transition-colors"
+                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
               />
             </div>
 
             {/* Doctor ID (Clinzo) */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="add-doctor-clinzo-id" className="text-[13px] font-medium text-[#5c6678]">
+              <label
+                htmlFor="add-doctor-clinzo-id"
+                className="text-[13px] font-medium text-[#5c6678]"
+              >
                 Doctor ID (Clinzo) Optional
               </label>
               <input
@@ -99,13 +141,16 @@ export function AddDoctorCard({
                   setFormData({ ...formData, clinzoId: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.clinzoId}
-                className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30 transition-colors"
+                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
               />
             </div>
 
             {/* Specialization */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="add-doctor-specialization" className="text-[13px] font-medium text-[#5c6678]">
+              <label
+                htmlFor="add-doctor-specialization"
+                className="text-[13px] font-medium text-[#5c6678]"
+              >
                 Specialization
               </label>
               <input
@@ -116,13 +161,16 @@ export function AddDoctorCard({
                   setFormData({ ...formData, specialization: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.specialization}
-                className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30 transition-colors"
+                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
               />
             </div>
 
             {/* Phone Number */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="add-doctor-phone" className="text-[13px] font-medium text-[#5c6678]">
+              <label
+                htmlFor="add-doctor-phone"
+                className="text-[13px] font-medium text-[#5c6678]"
+              >
                 Phone Number
               </label>
               <input
@@ -133,7 +181,7 @@ export function AddDoctorCard({
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.phone}
-                className="bg-white border border-[#e3e8f0] rounded-[8px] h-10 px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30 transition-colors"
+                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
               />
             </div>
 
@@ -141,14 +189,14 @@ export function AddDoctorCard({
             <Button
               type="submit"
               disabled={busy || !facilities.length}
-              className="mt-2 bg-[#07595d] hover:bg-[#064e52] text-white font-semibold text-[14px] h-11 rounded-[8px] w-full cursor-pointer shadow-xs transition-colors"
+              className="mt-2 h-11 w-full cursor-pointer rounded-[8px] bg-[#07595d] text-[14px] font-semibold text-white shadow-xs transition-colors hover:bg-[#064e52]"
             >
               {busy ? "Sending…" : "Save Doctor"}
             </Button>
           </form>
         )}
 
-        <p className="text-[12px] text-[#94a3b8] pt-1 border-t border-[#e2e8f0]/60">
+        <p className="border-t border-[#e2e8f0]/60 pt-1 text-[12px] text-[#94a3b8]">
           Required for scheduling and patient records.
         </p>
       </div>

@@ -112,13 +112,19 @@ export default function ClinicLocationScreen() {
   }, []);
 
   const onMapLoaded = useCallback(() => {
-    if (pointRef.current) googleMapRef.current?.setCameraPosition({ coordinates: pointRef.current, zoom: 16, duration: 0 });
+    if (pointRef.current)
+      googleMapRef.current?.setCameraPosition({
+        coordinates: pointRef.current,
+        zoom: 16,
+        duration: 0,
+      });
   }, []);
 
   function moveCamera(next: Point) {
     mapTouched.current = false;
     const camera = { coordinates: next, zoom: 16 };
-    if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
+    if (Platform.OS === "android")
+      googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
     if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
   }
   function chooseSearchResult(result: MapPlace) {
@@ -126,50 +132,95 @@ export default function ClinicLocationScreen() {
     selectedPlace.current = result;
     const next = { latitude: result.latitude, longitude: result.longitude };
     pointRef.current = next;
-    setPoint(next); setSearchResults([]); setSearching(false); setLocating(false);
-    setLookupVersion(version => version + 1);
-    Keyboard.dismiss(); moveCamera(next);
+    setPoint(next);
+    setSearchResults([]);
+    setSearching(false);
+    setLocating(false);
+    setLookupVersion((version) => version + 1);
+    Keyboard.dismiss();
+    moveCamera(next);
   }
   async function searchAddress() {
     if (searching) return;
-    if (search.trim().length < 2) { showToast({ title: "Enter an area or address", type: "info" }); return; }
+    if (search.trim().length < 2) {
+      showToast({ title: "Enter an area or address", type: "info" });
+      return;
+    }
     const request = ++operation.current;
-    Keyboard.dismiss(); setSearching(true); setLocating(false); setSearchResults([]);
+    Keyboard.dismiss();
+    setSearching(true);
+    setLocating(false);
+    setSearchResults([]);
     try {
       if (supabase) {
-        const results = await searchMapPlaces(supabase, { query: search.trim(), ...(pointRef.current ?? {}) });
+        const results = await searchMapPlaces(supabase, {
+          query: search.trim(),
+          ...(pointRef.current ?? {}),
+        });
         if (!mounted.current || request !== operation.current) return;
         if (results.configured) {
           setSearchResults(results.places);
-          if (!results.places.length) showToast({ title: "No places found", message: "Try the locality, city or a more complete address.", type: "info" });
+          if (!results.places.length)
+            showToast({
+              title: "No places found",
+              message: "Try the locality, city or a more complete address.",
+              type: "info",
+            });
           return;
         }
       }
       const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) throw new Error("Allow location access for device search, or choose a point on the map.");
+      if (!permission.granted)
+        throw new Error(
+          "Allow location access for device search, or choose a point on the map."
+        );
       const [found] = await Location.geocodeAsync(search.trim());
       if (!mounted.current || request !== operation.current) return;
       const next = validPoint(found?.latitude, found?.longitude);
-      if (!next) throw new Error("No location found. Try a more complete address.");
-      selectedPlace.current = null; pointRef.current = next; setPoint(next);
-      setLookupVersion(version => version + 1); moveCamera(next);
+      if (!next)
+        throw new Error("No location found. Try a more complete address.");
+      selectedPlace.current = null;
+      pointRef.current = next;
+      setPoint(next);
+      setLookupVersion((version) => version + 1);
+      moveCamera(next);
     } catch (cause) {
-      if (mounted.current && request === operation.current) showToast({ title: "Could not find address", message: cause instanceof Error ? cause.message : "Try again.", type: "error" });
-    } finally { if (mounted.current && request === operation.current) setSearching(false); }
+      if (mounted.current && request === operation.current)
+        showToast({
+          title: "Could not find address",
+          message: cause instanceof Error ? cause.message : "Try again.",
+          type: "error",
+        });
+    } finally {
+      if (mounted.current && request === operation.current) setSearching(false);
+    }
   }
   async function useDeviceLocation() {
     if (locating || searching) return;
     const request = ++operation.current;
-    setLocating(true); setSearchResults([]);
+    setLocating(true);
+    setSearchResults([]);
     try {
       const position = await getDoctorDeviceLocation();
       if (!mounted.current || request !== operation.current) return;
-      const next = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-      selectedPlace.current = null; pointRef.current = next;
-      setDetails(emptyDetails); setAddressLabel(""); setPoint(next);
-      setLookupVersion(version => version + 1); moveCamera(next);
+      const next = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      selectedPlace.current = null;
+      pointRef.current = next;
+      setDetails(emptyDetails);
+      setAddressLabel("");
+      setPoint(next);
+      setLookupVersion((version) => version + 1);
+      moveCamera(next);
     } catch (cause) {
-      if (mounted.current && request === operation.current) showToast({ title: "Could not find your location", message: cause instanceof Error ? cause.message : "Try again.", type: "error" });
+      if (mounted.current && request === operation.current)
+        showToast({
+          title: "Could not find your location",
+          message: cause instanceof Error ? cause.message : "Try again.",
+          type: "error",
+        });
     } finally {
       if (mounted.current && request === operation.current) setLocating(false);
     }
@@ -182,9 +233,21 @@ export default function ClinicLocationScreen() {
   useEffect(() => {
     if (!point) return;
     const found = selectedPlace.current;
-    if (found && found.latitude === point.latitude && found.longitude === point.longitude) {
-      setDetails({ street: found.street, locality: found.locality, city: found.city, state: found.state, pincode: found.pincode });
-      setAddressLabel(found.address); setResolving(false); return;
+    if (
+      found &&
+      found.latitude === point.latitude &&
+      found.longitude === point.longitude
+    ) {
+      setDetails({
+        street: found.street,
+        locality: found.locality,
+        city: found.city,
+        state: found.state,
+        pincode: found.pincode,
+      });
+      setAddressLabel(found.address);
+      setResolving(false);
+      return;
     }
     let active = true;
     setResolving(true);
@@ -192,11 +255,16 @@ export default function ClinicLocationScreen() {
     setAddressLabel("");
     const timer = setTimeout(() => {
       void resolveDoctorAddress(point, () => active)
-        .then(address => {
+        .then((address) => {
           if (!active) return;
           setAddressLabel(address.address);
-          setDetails({ street: address.street, locality: address.locality,
-            city: address.city, state: address.state, pincode: address.pincode });
+          setDetails({
+            street: address.street,
+            locality: address.locality,
+            city: address.city,
+            state: address.state,
+            pincode: address.pincode,
+          });
         })
         .catch((cause: unknown) => {
           if (active) {
@@ -204,7 +272,10 @@ export default function ClinicLocationScreen() {
             setAddressLabel("");
             showToast({
               title: "Could not fill this address",
-              message: cause instanceof Error ? cause.message : "Retry the lookup or enter the address manually.",
+              message:
+                cause instanceof Error
+                  ? cause.message
+                  : "Retry the lookup or enter the address manually.",
               type: "error",
             });
           }
@@ -219,26 +290,51 @@ export default function ClinicLocationScreen() {
     };
   }, [point?.latitude, point?.longitude, lookupVersion]);
 
-  const onMapPoint = useCallback((coordinates: { latitude?: number; longitude?: number }, recenter = false) => {
-    const next = validPoint(coordinates.latitude, coordinates.longitude);
-    if (!next) return;
-    const previous = pointRef.current;
-    if (previous && Math.abs(next.latitude - previous.latitude) < 0.00001 && Math.abs(next.longitude - previous.longitude) < 0.00001) return;
-    operation.current += 1;
-    selectedPlace.current = null; pointRef.current = next;
-    setSearching(false); setLocating(false); setSearchResults([]);
-    setDetails(emptyDetails); setAddressLabel(""); setPoint(next);
-    if (recenter) {
-      mapTouched.current = false;
-      const camera = { coordinates: next, zoom: 16 };
-      if (Platform.OS === "android") googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
-      if (Platform.OS === "ios") appleMapRef.current?.setCameraPosition(camera);
-    }
-  }, []);
-  const onCameraMove = useCallback((event: { coordinates: { latitude?: number; longitude?: number } }) => {
-    if (mapTouched.current) onMapPoint(event.coordinates);
-  }, [onMapPoint]);
-  const onMapClick = useCallback((event: { coordinates: { latitude?: number; longitude?: number } }) => onMapPoint(event.coordinates, true), [onMapPoint]);
+  const onMapPoint = useCallback(
+    (
+      coordinates: { latitude?: number; longitude?: number },
+      recenter = false
+    ) => {
+      const next = validPoint(coordinates.latitude, coordinates.longitude);
+      if (!next) return;
+      const previous = pointRef.current;
+      if (
+        previous &&
+        Math.abs(next.latitude - previous.latitude) < 0.00001 &&
+        Math.abs(next.longitude - previous.longitude) < 0.00001
+      )
+        return;
+      operation.current += 1;
+      selectedPlace.current = null;
+      pointRef.current = next;
+      setSearching(false);
+      setLocating(false);
+      setSearchResults([]);
+      setDetails(emptyDetails);
+      setAddressLabel("");
+      setPoint(next);
+      if (recenter) {
+        mapTouched.current = false;
+        const camera = { coordinates: next, zoom: 16 };
+        if (Platform.OS === "android")
+          googleMapRef.current?.setCameraPosition({ ...camera, duration: 0 });
+        if (Platform.OS === "ios")
+          appleMapRef.current?.setCameraPosition(camera);
+      }
+    },
+    []
+  );
+  const onCameraMove = useCallback(
+    (event: { coordinates: { latitude?: number; longitude?: number } }) => {
+      if (mapTouched.current) onMapPoint(event.coordinates);
+    },
+    [onMapPoint]
+  );
+  const onMapClick = useCallback(
+    (event: { coordinates: { latitude?: number; longitude?: number } }) =>
+      onMapPoint(event.coordinates, true),
+    [onMapPoint]
+  );
 
   function confirm() {
     if (!point || resolving || locating || searching) return;
@@ -265,33 +361,141 @@ export default function ClinicLocationScreen() {
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
-      <Header title="Choose Location" app="doctor" onBackPress={() => router.back()} />
+      <Header
+        title="Choose Location"
+        app="doctor"
+        onBackPress={() => router.back()}
+      />
       <View style={styles.body}>
-        <View style={styles.mapFrame} onTouchStart={() => { mapTouched.current = true; }}>
-          {nativeMaps && Platform.OS === "android" ? <nativeMaps.GoogleMaps.View ref={googleMapRef} style={styles.map} cameraPosition={cameraPosition} onMapLoaded={onMapLoaded} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
-          {nativeMaps && Platform.OS === "ios" ? <nativeMaps.AppleMaps.View ref={appleMapRef} style={styles.map} cameraPosition={cameraPosition} onCameraMove={onCameraMove} onMapClick={onMapClick} /> : null}
-          {nativeMaps ? <View pointerEvents="none" style={styles.pin}><MapPin size={36} fill={colors.white} color={colors.doctor.primary} /></View> : <View style={styles.mapState}><Text style={styles.stateText}>Map selection is unavailable in this build. You can search for a place or use your current location.</Text></View>}
+        <View
+          style={styles.mapFrame}
+          onTouchStart={() => {
+            mapTouched.current = true;
+          }}
+        >
+          {nativeMaps && Platform.OS === "android" ? (
+            <nativeMaps.GoogleMaps.View
+              ref={googleMapRef}
+              style={styles.map}
+              cameraPosition={cameraPosition}
+              onMapLoaded={onMapLoaded}
+              onCameraMove={onCameraMove}
+              onMapClick={onMapClick}
+            />
+          ) : null}
+          {nativeMaps && Platform.OS === "ios" ? (
+            <nativeMaps.AppleMaps.View
+              ref={appleMapRef}
+              style={styles.map}
+              cameraPosition={cameraPosition}
+              onCameraMove={onCameraMove}
+              onMapClick={onMapClick}
+            />
+          ) : null}
+          {nativeMaps ? (
+            <View pointerEvents="none" style={styles.pin}>
+              <MapPin
+                size={36}
+                fill={colors.white}
+                color={colors.doctor.primary}
+              />
+            </View>
+          ) : (
+            <View style={styles.mapState}>
+              <Text style={styles.stateText}>
+                Map selection is unavailable in this build. You can search for a
+                place or use your current location.
+              </Text>
+            </View>
+          )}
         </View>
         <View style={styles.searchOverlay}>
           <View style={styles.searchRow}>
-            <Input accessibilityLabel="Search area or address" placeholder="Search an area or address" value={search}
-              onChangeText={value => { setSearch(value); setSearchResults([]); }} returnKeyType="search" containerStyle={styles.searchInput}
-              onSubmitEditing={() => void searchAddress()} />
-            <Button theme="doctor" label="Search" loading={searching} disabled={searching} onPress={() => void searchAddress()} />
+            <Input
+              accessibilityLabel="Search area or address"
+              placeholder="Search an area or address"
+              value={search}
+              onChangeText={(value) => {
+                setSearch(value);
+                setSearchResults([]);
+              }}
+              returnKeyType="search"
+              containerStyle={styles.searchInput}
+              onSubmitEditing={() => void searchAddress()}
+            />
+            <Button
+              theme="doctor"
+              label="Search"
+              loading={searching}
+              disabled={searching}
+              onPress={() => void searchAddress()}
+            />
           </View>
-          {searchResults.length ? <View style={styles.results}>
-            {searchResults.map(result => <Pressable key={result.id} accessibilityRole="button" onPress={() => chooseSearchResult(result)} style={styles.resultRow}>
-              <MapPin size={18} color={colors.doctor.primary} /><View style={styles.resultCopy}><Text numberOfLines={1} style={styles.resultName}>{result.name}</Text><Text numberOfLines={2} style={styles.resultAddress}>{result.address}</Text></View>
-            </Pressable>)}
-            <Text style={styles.googleAttribution}>Google Maps</Text>
-            {searchResults.flatMap(p => p.attributions).map((a, i) => <Text key={`${a.provider}-${i}`} style={styles.googleAttribution}>{a.provider}</Text>)}
-          </View> : null}
+          {searchResults.length ? (
+            <View style={styles.results}>
+              {searchResults.map((result) => (
+                <Pressable
+                  key={result.id}
+                  accessibilityRole="button"
+                  onPress={() => chooseSearchResult(result)}
+                  style={styles.resultRow}
+                >
+                  <MapPin size={18} color={colors.doctor.primary} />
+                  <View style={styles.resultCopy}>
+                    <Text numberOfLines={1} style={styles.resultName}>
+                      {result.name}
+                    </Text>
+                    <Text numberOfLines={2} style={styles.resultAddress}>
+                      {result.address}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+              <Text style={styles.googleAttribution}>Google Maps</Text>
+              {searchResults
+                .flatMap((p) => p.attributions)
+                .map((a, i) => (
+                  <Text
+                    key={`${a.provider}-${i}`}
+                    style={styles.googleAttribution}
+                  >
+                    {a.provider}
+                  </Text>
+                ))}
+            </View>
+          ) : null}
         </View>
-        <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-          <Button theme="doctor" variant="outline" label="Use Current Location" loading={locating} disabled={locating || searching}
-            leftIcon={<LocateFixed size={19} color={colors.doctor.primary} />} onPress={() => void useDeviceLocation()} />
-          {point ? <View style={styles.place}><MapPin size={20} color={colors.doctor.primary} /><Text style={styles.placeTitle} numberOfLines={2}>{placeLabel || "Selected map point"}</Text></View> : null}
-          <Button theme="doctor" label="Confirm Location" loading={resolving} disabled={!point || locating || searching || resolving} onPress={confirm} style={styles.confirm} />
+        <View
+          style={[
+            styles.bottom,
+            { paddingBottom: Math.max(insets.bottom, 12) },
+          ]}
+        >
+          <Button
+            theme="doctor"
+            variant="outline"
+            label="Use Current Location"
+            loading={locating}
+            disabled={locating || searching}
+            leftIcon={<LocateFixed size={19} color={colors.doctor.primary} />}
+            onPress={() => void useDeviceLocation()}
+          />
+          {point ? (
+            <View style={styles.place}>
+              <MapPin size={20} color={colors.doctor.primary} />
+              <Text style={styles.placeTitle} numberOfLines={2}>
+                {placeLabel || "Selected map point"}
+              </Text>
+            </View>
+          ) : null}
+          <Button
+            theme="doctor"
+            label="Confirm Location"
+            loading={resolving}
+            disabled={!point || locating || searching || resolving}
+            onPress={confirm}
+            style={styles.confirm}
+          />
         </View>
       </View>
     </View>
@@ -302,15 +506,54 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
   body: { flex: 1 },
   searchOverlay: { position: "absolute", top: 16, left: 16, right: 16, gap: 8 },
-  searchRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 10,
+    borderRadius: 14,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
   searchInput: { flex: 1, minWidth: 0 },
-  results: { backgroundColor: colors.white, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.border },
-  resultRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 },
+  results: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  resultRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+  },
   resultCopy: { flex: 1 },
-  resultName: { fontFamily: fontFamilies.medium, fontSize: 14, color: colors.textPrimary },
-  resultAddress: { fontFamily: fontFamilies.regular, fontSize: 12, lineHeight: 17, color: colors.textSecondary },
-  googleAttribution: { fontFamily: fontFamilies.regular, color: "#5E5E5E", fontSize: 12 },
-  pin: { position: "absolute", top: "50%", left: "50%", marginLeft: -18, marginTop: -36 },
+  resultName: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  resultAddress: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.textSecondary,
+  },
+  googleAttribution: {
+    fontFamily: fontFamilies.regular,
+    color: "#5E5E5E",
+    fontSize: 12,
+  },
+  pin: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: -18,
+    marginTop: -36,
+  },
   instruction: {
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -318,7 +561,10 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.medium,
     fontSize: 13,
   },
-  mapFrame: { ...StyleSheet.absoluteFill, backgroundColor: colors.doctor.surface },
+  mapFrame: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: colors.doctor.surface,
+  },
   map: { ...StyleSheet.absoluteFill },
   mapState: {
     flex: 1,
@@ -332,8 +578,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bottom: {
-    position: "absolute", bottom: 12, left: 0, right: 0,
-    marginHorizontal: 16, marginBottom: 8, borderRadius: 16, borderWidth: 1, borderColor: colors.border,
+    position: "absolute",
+    bottom: 12,
+    left: 0,
+    right: 0,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: 18,

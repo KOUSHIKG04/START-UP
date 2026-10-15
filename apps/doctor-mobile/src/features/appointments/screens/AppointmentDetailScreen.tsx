@@ -57,9 +57,18 @@ export function AppointmentDetailScreen() {
     }) => {
       let current = item;
       if (action === "start" && item.queue_state === "waiting") {
-        await transitionClinicAppointment(supabase!, { appointmentId: item.id, expectedVersion: Number(item.row_version), action: "call" });
-        const updated = (await listMyPracticeAppointments(supabase!)).find(entry => entry.id === item.id);
-        if (!updated) throw new Error("Could not load the updated appointment. Refresh and retry.");
+        await transitionClinicAppointment(supabase!, {
+          appointmentId: item.id,
+          expectedVersion: Number(item.row_version),
+          action: "call",
+        });
+        const updated = (await listMyPracticeAppointments(supabase!)).find(
+          (entry) => entry.id === item.id
+        );
+        if (!updated)
+          throw new Error(
+            "Could not load the updated appointment. Refresh and retry."
+          );
         current = updated;
       }
       return transitionClinicAppointment(supabase!, {
@@ -85,7 +94,15 @@ export function AppointmentDetailScreen() {
       });
       void queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
       void queryClient.invalidateQueries({ queryKey: ["clinic-slots"] });
-      if (action === "start") router.push({ pathname: "/clinical-notes", params: { appointmentId: item.id, patientId: item.patient_id, mode: item.visit_mode } });
+      if (action === "start")
+        router.push({
+          pathname: "/clinical-notes",
+          params: {
+            appointmentId: item.id,
+            patientId: item.patient_id,
+            mode: item.visit_mode,
+          },
+        });
     },
     onError: (cause) => {
       const message =
@@ -256,12 +273,14 @@ export function AppointmentDetailScreen() {
                 onPress={() => router.push("/scan-qr")}
               />
             ) : null}
-            {item.status === "confirmed" && item.queue_state === "waiting" && item.can_consult ? (
+            {item.status === "confirmed" &&
+            item.queue_state === "waiting" &&
+            item.can_consult ? (
               <Button
                 loading={
                   transition.isPending &&
                   transition.variables?.item.id === item.id &&
-                    transition.variables.action === "start"
+                  transition.variables.action === "start"
                 }
                 theme="doctor"
                 label="Start consultation"

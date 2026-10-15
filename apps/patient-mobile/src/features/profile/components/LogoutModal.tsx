@@ -46,35 +46,41 @@ export function LogoutModal({
   }
 
   return (
-    <ModalSurface visible={visible} onClose={onClose} contentStyle={styles.modalCard}>
-          <View style={styles.logoutModalHero}>
-            <View style={styles.logoutModalIconWrap}>
-              <LogOut color="#DC2626" size={26} />
-            </View>
-            <Text variant="cardHeading" style={styles.logoutModalTitle}>Log Out</Text>
-            <Text variant="body" style={styles.logoutModalSub}>
-              Are you sure you want to log out of your Clinzo patient account?
-            </Text>
+    <ModalSurface
+      visible={visible}
+      onClose={onClose}
+      contentStyle={styles.modalCard}
+    >
+      <View style={styles.logoutModalHero}>
+        <View style={styles.logoutModalIconWrap}>
+          <LogOut color="#DC2626" size={26} />
+        </View>
+        <Text variant="cardHeading" style={styles.logoutModalTitle}>
+          Log Out
+        </Text>
+        <Text variant="body" style={styles.logoutModalSub}>
+          Are you sure you want to log out of your Clinzo patient account?
+        </Text>
+      </View>
 
-          </View>
-
-          <View style={styles.logoutActions}>
-            <Button
-              label="Cancel"
-              variant="secondary"
-              onPress={onClose}
-              disabled={busy}
-              style={styles.logoutCancelBtn}
-            />
-            <Button loading={busy}
-              label={busy ? "Signing out…" : "Log Out"}
-              variant="primary"
-              onPress={() => void signOut()}
-              disabled={busy}
-              style={styles.logoutConfirmBtn}
-              labelStyle={styles.logoutConfirmLabel}
-            />
-          </View>
+      <View style={styles.logoutActions}>
+        <Button
+          label="Cancel"
+          variant="secondary"
+          onPress={onClose}
+          disabled={busy}
+          style={styles.logoutCancelBtn}
+        />
+        <Button
+          loading={busy}
+          label={busy ? "Signing out…" : "Log Out"}
+          variant="primary"
+          onPress={() => void signOut()}
+          disabled={busy}
+          style={styles.logoutConfirmBtn}
+          labelStyle={styles.logoutConfirmLabel}
+        />
+      </View>
     </ModalSurface>
   );
 }

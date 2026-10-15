@@ -1,6 +1,13 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 import {
   CalendarDays,
   CheckCircle2,
@@ -14,10 +21,7 @@ import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView, Header } from "@startup/mobile-ui";
 import AppointmentDetailsCard from "../components/AppointmentDetailsCard";
 import DoctorCard from "../../doctors/components/DoctorCard";
-import type {
-  Appointment,
-  AppointmentStatus,
-} from "../types/appointment";
+import type { Appointment, AppointmentStatus } from "../types/appointment";
 import { consultationFlows } from "../utils/consultationFlow";
 import type { BookingStatusScreenProps } from "../types/booking-status";
 
@@ -27,7 +31,9 @@ export function BookingStatusScreen({
   onBackPress,
   onContinue,
 }: BookingStatusScreenProps) {
-  const [previewStatus, setPreviewStatus] = useState<AppointmentStatus | null>(null);
+  const [previewStatus, setPreviewStatus] = useState<AppointmentStatus | null>(
+    null
+  );
   const currentStatus = previewStatus ?? status;
   const flow = consultationFlows[appointment.consultationType];
   const isApprovedOnline =
@@ -63,7 +69,13 @@ export function BookingStatusScreen({
           <AppointmentDetailsCard appointment={appointment} />
 
           {currentStatus === "pending" ? (
-            <PendingStatus onPreviewApproval={appointment.backendId ? undefined : () => setPreviewStatus("approved")} />
+            <PendingStatus
+              onPreviewApproval={
+                appointment.backendId
+                  ? undefined
+                  : () => setPreviewStatus("approved")
+              }
+            />
           ) : null}
         </View>
 
@@ -82,13 +94,12 @@ export function BookingStatusScreen({
                   variant="secondary"
                   style={styles.sideButton}
                   labelStyle={styles.sideButtonLabel}
-                /> 
+                />
                 <ApprovedStatus
                   label={flow.confirmationLabel}
                   style={styles.sideButton}
                   labelStyle={styles.sideButtonLabel}
                 />
-               
               </View>
             )
           ) : (
@@ -138,11 +149,17 @@ function PendingStatus({
     <View style={styles.pendingCard}>
       <View style={styles.pendingHeader}>
         <View style={styles.pendingIconContainer}>
-          <Clock3 color={colors.patient.primaryDark} size={20} strokeWidth={2.2} />
+          <Clock3
+            color={colors.patient.primaryDark}
+            size={20}
+            strokeWidth={2.2}
+          />
         </View>
         <View style={styles.statusCopy}>
           <View style={styles.pendingTitleRow}>
-            <Text variant="cardHeading" style={styles.pendingTitle}>Waiting for doctor’s approval</Text>
+            <Text variant="cardHeading" style={styles.pendingTitle}>
+              Waiting for doctor’s approval
+            </Text>
             {/* <View style={styles.pendingTag}>
               <View style={styles.pendingDot} />
               <Text style={styles.pendingTagText}>In Review</Text>
@@ -153,21 +170,23 @@ function PendingStatus({
           </Text>
         </View>
       </View>
-      {onPreviewApproval ? <Button
-        label="Preview approved booking"
-        onPress={onPreviewApproval}
-        variant="outline"
-        theme="patient"
-        style={styles.previewButton}
-        labelStyle={styles.previewButtonLabel}
-        leftIcon={
-          <CheckCircle2
-            color={colors.patient.primaryDark}
-            size={16}
-            strokeWidth={2}
-          />
-        }
-      /> : null}
+      {onPreviewApproval ? (
+        <Button
+          label="Preview approved booking"
+          onPress={onPreviewApproval}
+          variant="outline"
+          theme="patient"
+          style={styles.previewButton}
+          labelStyle={styles.previewButtonLabel}
+          leftIcon={
+            <CheckCircle2
+              color={colors.patient.primaryDark}
+              size={16}
+              strokeWidth={2}
+            />
+          }
+        />
+      ) : null}
     </View>
   );
 }
@@ -206,16 +225,26 @@ function OnlineScheduleCard({ appointment }: { appointment: Appointment }) {
       padding={16}
       style={styles.flatCard}
     >
-      <Text variant="cardHeading" style={styles.onlineDoctorName}>{appointment.doctorName}</Text>
+      <Text variant="cardHeading" style={styles.onlineDoctorName}>
+        {appointment.doctorName}
+      </Text>
       <View style={styles.scheduleRow}>
         <Clock3 color={colors.patient.primaryDark} size={18} />
-        <Text variant="label" style={styles.scheduleLabel}>Time</Text>
-        <Text variant="bodyEmphasis" style={styles.scheduleValue}>{appointment.time}</Text>
+        <Text variant="label" style={styles.scheduleLabel}>
+          Time
+        </Text>
+        <Text variant="bodyEmphasis" style={styles.scheduleValue}>
+          {appointment.time}
+        </Text>
       </View>
       <View style={styles.scheduleRow}>
         <CalendarDays color={colors.patient.primaryDark} size={18} />
-        <Text variant="label" style={styles.scheduleLabel}>Date</Text>
-        <Text variant="bodyEmphasis" style={styles.scheduleValue}>{appointment.date}</Text>
+        <Text variant="label" style={styles.scheduleLabel}>
+          Date
+        </Text>
+        <Text variant="bodyEmphasis" style={styles.scheduleValue}>
+          {appointment.date}
+        </Text>
       </View>
     </Card>
   );
@@ -233,7 +262,9 @@ function OnlineConsultationActions({
       <View style={styles.videoIcon}>
         <Video color={colors.patient.primaryDark} size={19} strokeWidth={2} />
       </View>
-      <Text variant="cardHeading" style={styles.videoTitle}>Video consultation</Text>
+      <Text variant="cardHeading" style={styles.videoTitle}>
+        Video consultation
+      </Text>
       <Pressable
         accessibilityLabel="Open consultation chat"
         accessibilityRole="button"
@@ -272,14 +303,18 @@ function PaymentOptions() {
       padding={14}
       style={styles.flatCard}
     >
-      <Text variant="cardHeading" style={styles.paymentTitle}>Payment</Text>
+      <Text variant="cardHeading" style={styles.paymentTitle}>
+        Payment
+      </Text>
       <View style={styles.paymentRow}>
         <Button
           label="Pay Now"
           theme="patient"
           leftIcon={
             <CreditCard
-              color={payment === "now" ? colors.white : colors.patient.primaryDark}
+              color={
+                payment === "now" ? colors.white : colors.patient.primaryDark
+              }
               size={16}
             />
           }
@@ -293,7 +328,9 @@ function PaymentOptions() {
           theme="patient"
           leftIcon={
             <Clock3
-              color={payment === "later" ? colors.white : colors.patient.primaryDark}
+              color={
+                payment === "later" ? colors.white : colors.patient.primaryDark
+              }
               size={16}
             />
           }

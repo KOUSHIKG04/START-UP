@@ -1,5 +1,11 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { Button, StatusBadge } from "@startup/mobile-ui";
 
@@ -20,7 +26,9 @@ export function AmbulanceBanner({ onBookPress, style }: AmbulanceBannerProps) {
           textStyle={styles.emergencyText}
         />
 
-        <Text variant="cardHeading" style={styles.title}>Book Ambulance Now</Text>
+        <Text variant="cardHeading" style={styles.title}>
+          Book Ambulance Now
+        </Text>
         <Text variant="body" numberOfLines={1} style={styles.description}>
           Real-time tracking • Nearest driver
         </Text>

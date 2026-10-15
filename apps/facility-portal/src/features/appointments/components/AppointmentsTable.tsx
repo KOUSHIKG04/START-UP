@@ -117,24 +117,37 @@ export function AppointmentsTable({
             {pageRows.map((item) => {
               const start = new Date(item.starts_at);
               const end = new Date(item.ends_at);
-              const appointmentTimeFormatter = new Intl.DateTimeFormat("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone: item.timezone,
-              });
-              const expiredPending = item.status === "pending" &&
+              const appointmentTimeFormatter = new Intl.DateTimeFormat(
+                "en-US",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: item.timezone,
+                }
+              );
+              const expiredPending =
+                item.status === "pending" &&
                 (start.getTime() <= now ||
-                  (item.request_expires_at !== null && new Date(item.request_expires_at).getTime() <= now));
+                  (item.request_expires_at !== null &&
+                    new Date(item.request_expires_at).getTime() <= now));
               const row = {
                 id: item.id,
-                queueNo: item.visit_mode === "clinic" ? item.ticket_number?.toString() ?? "—" : "—",
+                queueNo:
+                  item.visit_mode === "clinic"
+                    ? (item.ticket_number?.toString() ?? "—")
+                    : "—",
                 patientId: item.patient_public_code,
                 patientName: item.patient_name,
                 patientAvatar: undefined,
                 doctorName: item.doctor_name,
                 department: item.service_name,
                 time: `${appointmentTimeFormatter.format(start)} - ${appointmentTimeFormatter.format(end)}`,
-                mode: item.visit_mode === "online" ? "Video" : item.visit_mode === "home" ? "Home Visit" : "In-Person",
+                mode:
+                  item.visit_mode === "online"
+                    ? "Video"
+                    : item.visit_mode === "home"
+                      ? "Home Visit"
+                      : "In-Person",
                 status:
                   item.status.charAt(0).toUpperCase() + item.status.slice(1),
               };
@@ -208,7 +221,11 @@ export function AppointmentsTable({
                         Pending
                       </span>
                     )}
-                    {expiredPending && <span className="inline-flex items-center rounded-full bg-[#f1f5f9] px-2.5 py-1 text-[12px] font-medium text-[#334155]">Expired request</span>}
+                    {expiredPending && (
+                      <span className="inline-flex items-center rounded-full bg-[#f1f5f9] px-2.5 py-1 text-[12px] font-medium text-[#334155]">
+                        Expired request
+                      </span>
+                    )}
                     {row.status === "Confirmed" && (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] px-2.5 py-1 text-[12px] font-medium text-blue-600">
                         <span className="size-1.5 rounded-full bg-blue-600" />

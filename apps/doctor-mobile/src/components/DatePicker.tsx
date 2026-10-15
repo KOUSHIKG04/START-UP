@@ -27,8 +27,11 @@ export function DatePicker({
     day: "2-digit",
   }).format(new Date());
   const firstDay = minDate ?? today;
-  const [selectedMonth, setMonth] = useState(value.slice(0, 7) || today.slice(0, 7));
-  const month = selectedMonth < firstDay.slice(0, 7) ? firstDay.slice(0, 7) : selectedMonth;
+  const [selectedMonth, setMonth] = useState(
+    value.slice(0, 7) || today.slice(0, 7)
+  );
+  const month =
+    selectedMonth < firstDay.slice(0, 7) ? firstDay.slice(0, 7) : selectedMonth;
   const scroll = useRef<ScrollView>(null);
   const options = useMemo(() => {
     const [year, m] = today.split("-").map(Number);

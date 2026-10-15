@@ -11,7 +11,6 @@ export async function signIn(
   _previous: LoginState,
   formData: FormData
 ): Promise<LoginState> {
-
   if (!getSupabaseConfig()) {
     return {
       error:
@@ -33,11 +32,10 @@ export async function signIn(
 
   const client = await createClient();
 
-  
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error)
     return { error: "Sign-in failed. Check your credentials and try again." };
-  
+
   const access = await getFacilityAccess();
   redirect(access.approved ? "/dashboard" : "/facility-verification");
 }

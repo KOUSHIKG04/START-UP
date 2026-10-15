@@ -1,5 +1,11 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { StyleSheet, Switch, View, type StyleProp, type ViewStyle } from "react-native";
+import {
+  StyleSheet,
+  Switch,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { Siren } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
@@ -30,7 +36,9 @@ export function EmergencyModeCard({
           <Siren color={emergency ? "#DC2626" : "#087F78"} size={20} />
         </View>
         <View style={styles.emergencyCopy}>
-          <Text variant="cardHeading" style={styles.emergencyTitle}>Emergency Mode</Text>
+          <Text variant="cardHeading" style={styles.emergencyTitle}>
+            Emergency Mode
+          </Text>
           <Text variant="cardHeading" style={styles.emergencySubtitle}>
             {emergency
               ? "Critical priority dispatch enabled"

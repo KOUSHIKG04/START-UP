@@ -23,7 +23,7 @@ export default async function BedManagementPage({
   const client = await createClient();
 
   const { data: claims, error: authError } = await client.auth.getClaims();
-  
+
   if (authError || !claims) redirect("/login");
 
   let facilities: InventoryFacility[] = [];
@@ -48,7 +48,7 @@ export default async function BedManagementPage({
         ? "Your account is not linked to an active facility membership. Ask your administrator to complete access setup."
         : "Bed inventory is unavailable. Check that the portal migrations are applied, then try again.";
   }
-  
+
   if (!loadError && facilities.length === 0)
     loadError =
       "Your account needs an active facility membership before bed inventory is available.";

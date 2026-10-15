@@ -21,7 +21,15 @@ export default async function LoginPage({
         <h1 className="text-2xl font-semibold tracking-tight">
           Reviewer sign in
         </h1>
-        <LoginForm serverError={error === "access" ? "This account does not have company reviewer access." : error === "config" ? "Configure this app’s Supabase URL and publishable key first." : undefined} />
+        <LoginForm
+          serverError={
+            error === "access"
+              ? "This account does not have company reviewer access."
+              : error === "config"
+                ? "Configure this app’s Supabase URL and publishable key first."
+                : undefined
+          }
+        />
       </div>
     </main>
   );

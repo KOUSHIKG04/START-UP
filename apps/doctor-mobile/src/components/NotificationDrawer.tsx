@@ -1,4 +1,9 @@
-import { Loader, useToastFeedback, ModalSurface, Dropdown } from "@startup/mobile-ui";
+import {
+  Loader,
+  useToastFeedback,
+  ModalSurface,
+  Dropdown,
+} from "@startup/mobile-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -68,11 +73,7 @@ function renderIcon(type: NotificationItem["type"]) {
       return <Pill color="#D97706" size={22} strokeWidth={2} />;
     case "queue":
       return (
-        <Stethoscope
-          color={colors.doctor.dark}
-          size={22}
-          strokeWidth={2}
-        />
+        <Stethoscope color={colors.doctor.dark} size={22} strokeWidth={2} />
       );
     default:
       return <Bell color={colors.doctor.accent} size={22} strokeWidth={2} />;
@@ -122,65 +123,107 @@ function NotificationCard({
   const translateX = useRef(new Animated.Value(0)).current;
   const [open, setOpen] = useState(false);
   const openRef = useRef(false);
-  const settle = useCallback((expanded: boolean) => {
-    openRef.current = expanded; setOpen(expanded);
-    Animated.spring(translateX, { toValue: expanded ? -76 : 0, useNativeDriver: true, bounciness: 0 }).start();
-  }, [translateX]);
-  const pan = useMemo(() => PanResponder.create({
-    onMoveShouldSetPanResponder: (_, g) => !deleting && Math.abs(g.dx) > 10 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
-    onPanResponderGrant: () => translateX.stopAnimation(),
-    onPanResponderMove: (_, g) => translateX.setValue(Math.max(-76, Math.min(0, (openRef.current ? -76 : 0) + g.dx))),
-    onPanResponderRelease: (_, g) => settle((openRef.current ? -76 : 0) + g.dx < -32),
-    onPanResponderTerminate: () => settle(openRef.current),
-  }), [deleting, settle, translateX]);
+  const settle = useCallback(
+    (expanded: boolean) => {
+      openRef.current = expanded;
+      setOpen(expanded);
+      Animated.spring(translateX, {
+        toValue: expanded ? -76 : 0,
+        useNativeDriver: true,
+        bounciness: 0,
+      }).start();
+    },
+    [translateX]
+  );
+  const pan = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, g) =>
+          !deleting &&
+          Math.abs(g.dx) > 10 &&
+          Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+        onPanResponderGrant: () => translateX.stopAnimation(),
+        onPanResponderMove: (_, g) =>
+          translateX.setValue(
+            Math.max(-76, Math.min(0, (openRef.current ? -76 : 0) + g.dx))
+          ),
+        onPanResponderRelease: (_, g) =>
+          settle((openRef.current ? -76 : 0) + g.dx < -32),
+        onPanResponderTerminate: () => settle(openRef.current),
+      }),
+    [deleting, settle, translateX]
+  );
   const handlePress = useCallback(() => {
-    if (openRef.current) { settle(false); return; }
+    if (openRef.current) {
+      settle(false);
+      return;
+    }
     onPress(item.id);
   }, [item.id, onPress, settle]);
 
   return (
     <View style={styles.swipeRow}>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Delete notification: ${item.title}`} accessibilityElementsHidden={!open} importantForAccessibility={open ? "yes" : "no-hide-descendants"} disabled={deleting} onPress={() => onDelete(item.id)} style={styles.deleteAction}>
-        {deleting ? <Loader theme="doctor" /> : <Trash2 size={22} color={colors.white} />}
-      </Pressable>
-      <Animated.View {...pan.panHandlers} style={{ transform: [{ translateX }] }}>
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${item.title}. ${item.message}. ${item.read ? "Read" : "Unread"}`}
-      accessibilityActions={[{ name: "delete", label: "Delete notification" }]}
-      onAccessibilityAction={(event) => { if (event.nativeEvent.actionName === "delete" && !deleting) onDelete(item.id); }}
-      style={({ pressed }) => [
-        styles.notificationCard,
-        !item.read ? styles.unreadCard : undefined,
-        pressed ? styles.cardPressed : undefined,
-      ]}
-      onPress={handlePress}
-    >
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: getIconBg(item.type) },
-        ]}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Delete notification: ${item.title}`}
+        accessibilityElementsHidden={!open}
+        importantForAccessibility={open ? "yes" : "no-hide-descendants"}
+        disabled={deleting}
+        onPress={() => onDelete(item.id)}
+        style={styles.deleteAction}
       >
-        {renderIcon(item.type)}
-      </View>
-
-      <View style={styles.textContainer}>
-        <View style={styles.cardHeaderRow}>
-          <Text
-            numberOfLines={1}
+        {deleting ? (
+          <Loader theme="doctor" />
+        ) : (
+          <Trash2 size={22} color={colors.white} />
+        )}
+      </Pressable>
+      <Animated.View
+        {...pan.panHandlers}
+        style={{ transform: [{ translateX }] }}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${item.title}. ${item.message}. ${item.read ? "Read" : "Unread"}`}
+          accessibilityActions={[
+            { name: "delete", label: "Delete notification" },
+          ]}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "delete" && !deleting)
+              onDelete(item.id);
+          }}
+          style={({ pressed }) => [
+            styles.notificationCard,
+            !item.read ? styles.unreadCard : undefined,
+            pressed ? styles.cardPressed : undefined,
+          ]}
+          onPress={handlePress}
+        >
+          <View
             style={[
-              styles.itemTitle,
-              !item.read ? styles.unreadItemTitle : undefined,
+              styles.iconContainer,
+              { backgroundColor: getIconBg(item.type) },
             ]}
           >
-            {item.title}
-          </Text>
-          <Text style={styles.itemTime}>{item.time}</Text>
-        </View>
-        <Text style={styles.itemMessage}>{item.message}</Text>
-      </View>
-    </Pressable>
+            {renderIcon(item.type)}
+          </View>
+
+          <View style={styles.textContainer}>
+            <View style={styles.cardHeaderRow}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.itemTitle,
+                  !item.read ? styles.unreadItemTitle : undefined,
+                ]}
+              >
+                {item.title}
+              </Text>
+              <Text style={styles.itemTime}>{item.time}</Text>
+            </View>
+            <Text style={styles.itemMessage}>{item.message}</Text>
+          </View>
+        </Pressable>
       </Animated.View>
     </View>
   );
@@ -207,11 +250,22 @@ export function NotificationDrawer({
   const removeNotification = useMutation({
     mutationFn: (id: string) => dismissMyNotification(supabase!, id),
     onSuccess: (_, id) => {
-      queryClient.setQueryData<InAppNotification[]>(["my-notifications"], current => current?.filter(item => item.id !== id));
+      queryClient.setQueryData<InAppNotification[]>(
+        ["my-notifications"],
+        (current) => current?.filter((item) => item.id !== id)
+      );
       void queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
     },
   });
-  useToastFeedback({ error: removeNotification.isError ? "Could not delete notification. Try again." : notificationsQuery.isError ? "Could not load notifications. Close and reopen to retry." : markRead.isError ? "Could not mark notifications read. Try again." : "" });
+  useToastFeedback({
+    error: removeNotification.isError
+      ? "Could not delete notification. Try again."
+      : notificationsQuery.isError
+        ? "Could not load notifications. Close and reopen to retry."
+        : markRead.isError
+          ? "Could not mark notifications read. Try again."
+          : "",
+  });
   const notifications: NotificationItem[] = (notificationsQuery.data ?? []).map(
     (item) => {
       const status = item.safe_parameters.status;
@@ -223,24 +277,26 @@ export function NotificationDrawer({
           item.template_key === "appointment.check_in"
             ? "Patient arrived at clinic"
             : item.template_key === "appointment.requested"
-            ? "Appointment requested"
-            : item.template_key === "appointment.auto_confirmed" ||
-                item.template_key === "appointment.approve"
-              ? "Appointment confirmed"
-              : isAppointment
-                ? "Appointment update"
-                : isAmbulance
-                  ? "Ambulance trip update"
-                  : item.template_key.startsWith("verification.")
-                    ? "Verification update"
-                    : "Notification",
+              ? "Appointment requested"
+              : item.template_key === "appointment.auto_confirmed" ||
+                  item.template_key === "appointment.approve"
+                ? "Appointment confirmed"
+                : isAppointment
+                  ? "Appointment update"
+                  : isAmbulance
+                    ? "Ambulance trip update"
+                    : item.template_key.startsWith("verification.")
+                      ? "Verification update"
+                      : "Notification",
         message:
-          item.template_key === "appointment.requested" ? "Open this request to review the patient and accept or reject the appointment."
-          : item.template_key === "appointment.check_in" && typeof item.safe_parameters.booking_code === "string"
-            ? `Booking ${item.safe_parameters.booking_code} - Patient checked in`
-            : typeof status === "string"
-            ? `Status: ${status.replaceAll("_", " ")}`
-            : "You have a new update.",
+          item.template_key === "appointment.requested"
+            ? "Open this request to review the patient and accept or reject the appointment."
+            : item.template_key === "appointment.check_in" &&
+                typeof item.safe_parameters.booking_code === "string"
+              ? `Booking ${item.safe_parameters.booking_code} - Patient checked in`
+              : typeof status === "string"
+                ? `Status: ${status.replaceAll("_", " ")}`
+                : "You have a new update.",
         time: notificationTime(item.created_at),
         type: isAppointment ? ("appointment" as const) : ("general" as const),
         read: item.is_read,
@@ -249,7 +305,14 @@ export function NotificationDrawer({
       };
     }
   );
-  const filteredNotifications = notifications.filter(item => filter === "all" || (filter === "unread" && !item.read) || (filter === "read" && item.read) || (filter === "important" && item.important) || (filter === "emergency" && item.emergency));
+  const filteredNotifications = notifications.filter(
+    (item) =>
+      filter === "all" ||
+      (filter === "unread" && !item.read) ||
+      (filter === "read" && item.read) ||
+      (filter === "important" && item.important) ||
+      (filter === "emergency" && item.emergency)
+  );
   const slideAnimRef = useRef<Animated.Value | null>(null);
   if (slideAnimRef.current === null) {
     slideAnimRef.current = new Animated.Value(SCREEN_WIDTH);
@@ -266,7 +329,10 @@ export function NotificationDrawer({
     // No native animation views exist while the drawer is initially closed.
     if (!visible && !showModal) return;
     // Mount the native drawer before starting its entrance animation.
-    if (visible && !showModal) { setShowModal(true); return; }
+    if (visible && !showModal) {
+      setShowModal(true);
+      return;
+    }
     let active = true;
     let animation: Animated.CompositeAnimation;
     if (visible) {
@@ -333,9 +399,16 @@ export function NotificationDrawer({
       if (item && !item.read) {
         markRead.mutate([id]);
       }
-      const notification=notificationsQuery.data?.find(entry=>entry.id===id);
-      const route=appointmentDetailsRoute(notification?.safe_parameters.appointment_id);
-      if(route){ onClose(); router.push(route); }
+      const notification = notificationsQuery.data?.find(
+        (entry) => entry.id === id
+      );
+      const route = appointmentDetailsRoute(
+        notification?.safe_parameters.appointment_id
+      );
+      if (route) {
+        onClose();
+        router.push(route);
+      }
     },
     [notifications, notificationsQuery.data, markRead, onClose]
   );
@@ -374,31 +447,63 @@ export function NotificationDrawer({
                   }`
                 : "All caught up"}
             </Text>
-            <Dropdown theme="doctor" accessibilityLabel="Filter notifications" value={filter} onValueChange={setFilter}
-              options={[{ label: "All", value: "all" }, { label: "Unread", value: "unread" }, { label: "Read", value: "read" }, { label: "Important", value: "important" }, { label: "Emergency", value: "emergency" }]}
-              leftIcon={<Filter size={17} color={colors.doctor.primary} />} containerStyle={styles.filterContainer} triggerStyle={styles.filterTrigger} valueStyle={styles.filterText} chevronSize={16} menuWidth={180} />
+            <Dropdown
+              theme="doctor"
+              accessibilityLabel="Filter notifications"
+              value={filter}
+              onValueChange={setFilter}
+              options={[
+                { label: "All", value: "all" },
+                { label: "Unread", value: "unread" },
+                { label: "Read", value: "read" },
+                { label: "Important", value: "important" },
+                { label: "Emergency", value: "emergency" },
+              ]}
+              leftIcon={<Filter size={17} color={colors.doctor.primary} />}
+              containerStyle={styles.filterContainer}
+              triggerStyle={styles.filterTrigger}
+              valueStyle={styles.filterText}
+              chevronSize={16}
+              menuWidth={180}
+            />
           </View>
           <View style={styles.hintRow}>
             {notifications.some((n) => !n.read) ? (
-              <Pressable accessibilityLabel="Mark all as read" accessibilityRole="button" onPress={markAllAsRead} hitSlop={8}>
+              <Pressable
+                accessibilityLabel="Mark all as read"
+                accessibilityRole="button"
+                onPress={markAllAsRead}
+                hitSlop={8}
+              >
                 <Text style={styles.markReadText}>Mark all read</Text>
               </Pressable>
             ) : null}
-            <Text style={styles.swipeHint}>Swipe left, then tap trash to delete.</Text>
+            <Text style={styles.swipeHint}>
+              Swipe left, then tap trash to delete.
+            </Text>
           </View>
 
           <ScrollView
             style={styles.list}
             contentContainerStyle={[
               styles.listContent,
-              !notificationsQuery.isLoading && !notificationsQuery.isError && filteredNotifications.length === 0 && styles.emptyList,
+              !notificationsQuery.isLoading &&
+                !notificationsQuery.isError &&
+                filteredNotifications.length === 0 &&
+                styles.emptyList,
               { paddingBottom: Math.max(insets.bottom, 20) + 20 },
             ]}
             showsVerticalScrollIndicator={false}
           >
             {notificationsQuery.isLoading ? <Loader theme="doctor" /> : null}
-            {!notificationsQuery.isLoading && !notificationsQuery.isError && filteredNotifications.length === 0 ? (
-              <Text style={[styles.itemMessage, styles.emptyMessage]}>{filter === "all" ? "No notifications yet." : "No notifications match this filter."}</Text>
+            {!notificationsQuery.isLoading &&
+            !notificationsQuery.isError &&
+            filteredNotifications.length === 0 ? (
+              <Text style={[styles.itemMessage, styles.emptyMessage]}>
+                {filter === "all"
+                  ? "No notifications yet."
+                  : "No notifications match this filter."}
+              </Text>
             ) : null}
             {filteredNotifications.map((item) => (
               <NotificationCard
@@ -406,7 +511,10 @@ export function NotificationDrawer({
                 item={item}
                 onPress={handleCardPress}
                 onDelete={(id) => removeNotification.mutate(id)}
-                deleting={removeNotification.isPending && removeNotification.variables === item.id}
+                deleting={
+                  removeNotification.isPending &&
+                  removeNotification.variables === item.id
+                }
               />
             ))}
           </ScrollView>
@@ -439,13 +547,51 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: "#F8FCFB",
   },
-  hintRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
-  swipeHint: { flex: 1, textAlign: "right", fontFamily: fontFamilies.regular, fontSize: 12, lineHeight: 18, color: colors.textSecondary },
+  hintRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  swipeHint: {
+    flex: 1,
+    textAlign: "right",
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.textSecondary,
+  },
   filterContainer: { width: 160, flexShrink: 0 },
-  filterTrigger: { width: "100%", minHeight: 40, height: 40, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 10 },
-  filterText: { flex: 1, fontSize: 14, lineHeight: 20, includeFontPadding: false },
+  filterTrigger: {
+    width: "100%",
+    minHeight: 40,
+    height: 40,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 10,
+  },
+  filterText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    includeFontPadding: false,
+  },
   swipeRow: { borderRadius: radius.md, overflow: "hidden" },
-  deleteAction: { position: "absolute", right: 0, top: 0, bottom: 0, width: 76, alignItems: "center", justifyContent: "center", backgroundColor: colors.danger },
+  deleteAction: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 76,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.danger,
+  },
   unreadCountText: {
     flex: 1,
     color: colors.textSecondary,

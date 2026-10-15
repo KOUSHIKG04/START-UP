@@ -21,11 +21,7 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
 
   return (
     <View style={styles.screen}>
-      <Header
-        title="Settings"
-        app="patient"
-        onBackPress={onBack}
-      />
+      <Header title="Settings" app="patient" onBackPress={onBack} />
       <FadedScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -46,7 +42,12 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
               <Moon color="#64748B" size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text variant="cardHeading" style={[styles.rowTitle, styles.disabledTitle]}>Dark Mode</Text>
+              <Text
+                variant="cardHeading"
+                style={[styles.rowTitle, styles.disabledTitle]}
+              >
+                Dark Mode
+              </Text>
               <Text variant="cardHeading" style={styles.rowSubtitle}>
                 System default • Dark mode coming soon
               </Text>
@@ -78,13 +79,18 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
             accessibilityRole="button"
             accessibilityLabel="Help and Support"
             onPress={() => setHelpOpen(true)}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.iconCircle}>
               <MessageCircle color={colors.patient.primaryDark} size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text variant="cardHeading" style={styles.rowTitle}>Help and Support</Text>
+              <Text variant="cardHeading" style={styles.rowTitle}>
+                Help and Support
+              </Text>
               <Text variant="cardHeading" style={styles.rowSubtitle}>
                 FAQs, 24/7 helpline & contact care
               </Text>
@@ -107,13 +113,18 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
             accessibilityRole="button"
             accessibilityLabel="Privacy Policy"
             onPress={() => setPrivacyOpen(true)}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.iconCircle}>
               <ShieldCheck color={colors.patient.primaryDark} size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text variant="cardHeading" style={styles.rowTitle}>Privacy Policy</Text>
+              <Text variant="cardHeading" style={styles.rowTitle}>
+                Privacy Policy
+              </Text>
               <Text variant="cardHeading" style={styles.rowSubtitle}>
                 Data protection, HIPAA & security terms
               </Text>
@@ -136,13 +147,18 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
             accessibilityRole="button"
             accessibilityLabel="Log Out"
             onPress={() => setLogoutOpen(true)}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionRow,
+              pressed && styles.pressed,
+            ]}
           >
             <View style={styles.logoutIconCircle}>
               <LogOut color="#DC2626" size={18} />
             </View>
             <View style={styles.copyCol}>
-              <Text variant="cardHeading" style={styles.logoutItemTitle}>Log Out</Text>
+              <Text variant="cardHeading" style={styles.logoutItemTitle}>
+                Log Out
+              </Text>
               <Text variant="cardHeading" style={styles.rowSubtitle}>
                 Sign out of your Clinzo patient account
               </Text>
@@ -153,7 +169,10 @@ export function SettingsView({ onBack }: { onBack: () => void }) {
       </FadedScrollView>
 
       <HelpModal visible={helpOpen} onClose={() => setHelpOpen(false)} />
-      <PrivacyModal visible={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <PrivacyModal
+        visible={privacyOpen}
+        onClose={() => setPrivacyOpen(false)}
+      />
       <LogoutModal visible={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </View>
   );

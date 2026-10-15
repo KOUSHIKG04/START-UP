@@ -8,4 +8,6 @@ export const appointmentPeriods = [
   "This Week",
 ] as const satisfies readonly AppointmentPeriod[];
 export const defaultAppointmentPeriod: AppointmentPeriod = "Today";
-export const appointmentsDateFormatter = { format: (date: Date) => formatDisplayDate(date, "Asia/Kolkata") };
+export const appointmentsDateFormatter = {
+  format: (date: Date) => formatDisplayDate(date, "Asia/Kolkata"),
+};

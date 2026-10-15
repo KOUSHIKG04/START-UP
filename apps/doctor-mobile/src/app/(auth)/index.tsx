@@ -6,7 +6,11 @@ export default function AuthIndex() {
   return (
     <Redirect
       href={
-        !session ? "/welcome" : profile?.doctor ? "/review-status" : "/onboarding"
+        !session
+          ? "/welcome"
+          : profile?.doctor
+            ? "/review-status"
+            : "/onboarding"
       }
     />
   );

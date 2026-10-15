@@ -22,15 +22,27 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-import { PersonalAddressField, emptyPersonalAddress } from "../../features/profile/components/PersonalAddressField";
-import { doctorPersonalAddressInputSchema, type DoctorPersonalAddressInput } from "@startup/contracts";
+import {
+  PersonalAddressField,
+  emptyPersonalAddress,
+} from "../../features/profile/components/PersonalAddressField";
+import {
+  doctorPersonalAddressInputSchema,
+  type DoctorPersonalAddressInput,
+} from "@startup/contracts";
 import { useClinicLocationDraft } from "../../features/locations/clinicLocationDraft";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { File } from "expo-file-system";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
-import { Check, ChevronDown, LockKeyhole, MapPin, X } from "lucide-react-native";
+import {
+  Check,
+  ChevronDown,
+  LockKeyhole,
+  MapPin,
+  X,
+} from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import {
   doctorQualificationSchema,
@@ -101,12 +113,14 @@ function normalizeIndianPhone(value: string) {
 export default function DoctorOnboarding() {
   const { showToast } = useToast();
   const { session } = useMobileSession();
-  const chosenClinic = useClinicLocationDraft(state => state.chosen);
-  const clearChosenClinic = useClinicLocationDraft(state => state.clear);
+  const chosenClinic = useClinicLocationDraft((state) => state.chosen);
+  const clearChosenClinic = useClinicLocationDraft((state) => state.clear);
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("Male");
-  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(["General Physician"]);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([
+    "General Physician",
+  ]);
   const [otherSpecialty, setOtherSpecialty] = useState("");
   const [authority, setAuthority] = useState("");
   const [registration, setRegistration] = useState("");
@@ -123,13 +137,15 @@ export default function DoctorOnboarding() {
   const [clinic, setClinic] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [personalAddress, setPersonalAddress] = useState<DoctorPersonalAddressInput>(emptyPersonalAddress);
+  const [personalAddress, setPersonalAddress] =
+    useState<DoctorPersonalAddressInput>(emptyPersonalAddress);
   const [addressOpen, setAddressOpen] = useState(false);
   const [license, setLicense] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [degree, setDegree] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
-  const [clinicLicense, setClinicLicense] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [clinicLicense, setClinicLicense] =
+    useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [solo, setSolo] = useState(false);
   const [address, setAddress] = useState("");
   const [locality, setLocality] = useState("");
@@ -149,7 +165,9 @@ export default function DoctorOnboarding() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const languageTrigger = useRef<View>(null);
   const specialtyTrigger = useRef<View>(null);
-  const [menuKind, setMenuKind] = useState<"languages" | "specialties">("languages");
+  const [menuKind, setMenuKind] = useState<"languages" | "specialties">(
+    "languages"
+  );
   const [languageAnchor, setLanguageAnchor] = useState<{
     x: number;
     y: number;
@@ -160,24 +178,32 @@ export default function DoctorOnboarding() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useToastFeedback({ error });
-  useFocusEffect(useCallback(() => {
-    if (!chosenClinic) return;
-    setClinicLocation({ latitude: chosenClinic.latitude, longitude: chosenClinic.longitude, accuracy: null });
-    setAddress(current => chosenClinic.street || current);
-    setLocality(current => chosenClinic.locality || current);
-    setPracticeCity(current => chosenClinic.city || current);
-    setPracticeState(current => chosenClinic.state || current);
-    setPincode(current => chosenClinic.pincode || current);
-    setLocationError("");
-    clearChosenClinic();
-    setAddressOpen(true);
-    showToast({ title: "Clinic location selected", type: "success" });
-  }, [chosenClinic, clearChosenClinic, showToast]));
+  useFocusEffect(
+    useCallback(() => {
+      if (!chosenClinic) return;
+      setClinicLocation({
+        latitude: chosenClinic.latitude,
+        longitude: chosenClinic.longitude,
+        accuracy: null,
+      });
+      setAddress((current) => chosenClinic.street || current);
+      setLocality((current) => chosenClinic.locality || current);
+      setPracticeCity((current) => chosenClinic.city || current);
+      setPracticeState((current) => chosenClinic.state || current);
+      setPincode((current) => chosenClinic.pincode || current);
+      setLocationError("");
+      clearChosenClinic();
+      setAddressOpen(true);
+      showToast({ title: "Clinic location selected", type: "success" });
+    }, [chosenClinic, clearChosenClinic, showToast])
+  );
 
   useEffect(() => {
     if (!session?.user) return;
-    setEmail(current => current || session.user.email || "");
-    setPhone(current => current || contactPhoneForInput(session.user.phone || ""));
+    setEmail((current) => current || session.user.email || "");
+    setPhone(
+      (current) => current || contactPhoneForInput(session.user.phone || "")
+    );
   }, [session?.user.id, session?.user.email, session?.user.phone]);
 
   useEffect(() => {
@@ -222,7 +248,9 @@ export default function DoctorOnboarding() {
     };
   }, []);
 
-  async function pickDocument(kind: "license" | "degree" | "clinic operating licence") {
+  async function pickDocument(
+    kind: "license" | "degree" | "clinic operating licence"
+  ) {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ["application/pdf", "image/jpeg", "image/png"],
@@ -312,7 +340,9 @@ export default function DoctorOnboarding() {
     const birthDateIso = parseDisplayDate(dateOfBirth);
     const ageYears = birthDateIso ? ageFromBirthDate(birthDateIso) : null;
     if (ageYears === null || ageYears < 18 || ageYears > 100) {
-      setError("Enter your date of birth as DD-MM-YYYY. Age must be between 18 and 100.");
+      setError(
+        "Enter your date of birth as DD-MM-YYYY. Age must be between 18 and 100."
+      );
       return;
     }
     if (authority.trim().length < 2 || registration.trim().length < 2) {
@@ -325,9 +355,13 @@ export default function DoctorOnboarding() {
       );
       return;
     }
-    const specialtyNames = selectedSpecialties.map(item => item === "Other" ? otherSpecialty.trim() : item);
+    const specialtyNames = selectedSpecialties.map((item) =>
+      item === "Other" ? otherSpecialty.trim() : item
+    );
     if (!doctorSpecialtiesSchema.safeParse(specialtyNames).success) {
-      setError("Select at least one specialty. For Other, enter a specialty name (2–120 characters).");
+      setError(
+        "Select at least one specialty. For Other, enter a specialty name (2–120 characters)."
+      );
       return;
     }
     const startedIso = parseDisplayDate(started);
@@ -389,9 +423,7 @@ export default function DoctorOnboarding() {
       return;
     }
     if (solo && !clinicLocation) {
-      setError(
-        "Choose your clinic location on the map before saving."
-      );
+      setError("Choose your clinic location on the map before saving.");
       return;
     }
     if (!doctorPersonalAddressInputSchema.safeParse(personalAddress).success) {
@@ -408,7 +440,10 @@ export default function DoctorOnboarding() {
         throw userError ?? new Error("Session expired.");
       const licensePath = await uploadDocument(userData.user.id, license);
       const degreePath = await uploadDocument(userData.user.id, degree);
-      const clinicLicensePath = solo && clinicLicense ? await uploadDocument(userData.user.id, clinicLicense) : undefined;
+      const clinicLicensePath =
+        solo && clinicLicense
+          ? await uploadDocument(userData.user.id, clinicLicense)
+          : undefined;
       const details = {
         full_name: name.trim(),
         registration_authority: authority.trim(),
@@ -598,7 +633,12 @@ export default function DoctorOnboarding() {
   }
 
   return (
-    <OnboardingShell onBack={() => router.back()} scroll keepArtFixed bottomArt={false}>
+    <OnboardingShell
+      onBack={() => router.back()}
+      scroll
+      keepArtFixed
+      bottomArt={false}
+    >
       <View style={styles.body}>
         <View style={styles.head}>
           <ProfilePhotoButton
@@ -615,19 +655,28 @@ export default function DoctorOnboarding() {
           </View>
         </View>
         {field("Full Name", name, setName, "Enter your full name")}
-        {field(
-          "Email",
-          email,
-          setEmail,
-          "your@email.com",
-          "email-address"
-        )}
+        {field("Email", email, setEmail, "your@email.com", "email-address")}
         {field("Phone Number", phone, setPhone, "+91 98765 43210", "phone-pad")}
-        <PersonalAddressField value={personalAddress} onChange={setPersonalAddress} clinicAddress={solo ? {
-          ...emptyPersonalAddress, building: address.slice(0, 160), street: address.slice(160, 360), instructions: address.slice(360),
-          locality, city: practiceCity, state: practiceState, pincode,
-          latitude: clinicLocation?.latitude ?? null, longitude: clinicLocation?.longitude ?? null,
-        } : undefined} />
+        <PersonalAddressField
+          value={personalAddress}
+          onChange={setPersonalAddress}
+          clinicAddress={
+            solo
+              ? {
+                  ...emptyPersonalAddress,
+                  building: address.slice(0, 160),
+                  street: address.slice(160, 360),
+                  instructions: address.slice(360),
+                  locality,
+                  city: practiceCity,
+                  state: practiceState,
+                  pincode,
+                  latitude: clinicLocation?.latitude ?? null,
+                  longitude: clinicLocation?.longitude ?? null,
+                }
+              : undefined
+          }
+        />
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             {field("Date of Birth", dateOfBirth, setDateOfBirth, "DD-MM-YYYY")}
@@ -649,24 +698,45 @@ export default function DoctorOnboarding() {
             onPress={() => void pickDocument("degree")}
             style={styles.select}
           >
-            <Text style={[styles.selectText, !degree && styles.placeholder]} numberOfLines={1}>
+            <Text
+              style={[styles.selectText, !degree && styles.placeholder]}
+              numberOfLines={1}
+            >
               {degree?.name ?? "Choose PDF or image (max 10 MB)"}
             </Text>
           </Pressable>
         </View>
         <View style={styles.field}>
           <Text style={styles.label}>Specializations</Text>
-          <Pressable ref={specialtyTrigger} accessibilityRole="button"
+          <Pressable
+            ref={specialtyTrigger}
+            accessibilityRole="button"
             accessibilityLabel={`Specializations: ${selectedSpecialties.join(", ") || "none selected"}`}
-            accessibilityState={{ expanded: languageOpen && menuKind === "specialties" }}
-            onPress={openSpecialtyMenu} style={styles.select}>
-            <Text style={[styles.selectText, !selectedSpecialties.length && styles.placeholder]}>
+            accessibilityState={{
+              expanded: languageOpen && menuKind === "specialties",
+            }}
+            onPress={openSpecialtyMenu}
+            style={styles.select}
+          >
+            <Text
+              style={[
+                styles.selectText,
+                !selectedSpecialties.length && styles.placeholder,
+              ]}
+            >
               {selectedSpecialties.join(", ") || "Select specializations"}
             </Text>
             <ChevronDown size={17} color={colors.patient.primaryDark} />
           </Pressable>
         </View>
-        {selectedSpecialties.includes("Other") ? field("Other specialization", otherSpecialty, setOtherSpecialty, "Enter your specialization") : null}
+        {selectedSpecialties.includes("Other")
+          ? field(
+              "Other specialization",
+              otherSpecialty,
+              setOtherSpecialty,
+              "Enter your specialization"
+            )
+          : null}
         {field(
           "Registration authority",
           authority,
@@ -687,7 +757,10 @@ export default function DoctorOnboarding() {
             onPress={() => void pickDocument("license")}
             style={styles.select}
           >
-            <Text style={[styles.selectText, !license && styles.placeholder]} numberOfLines={1}>
+            <Text
+              style={[styles.selectText, !license && styles.placeholder]}
+              numberOfLines={1}
+            >
               {license?.name ?? "Choose PDF or image (max 10 MB)"}
             </Text>
           </Pressable>
@@ -714,11 +787,18 @@ export default function DoctorOnboarding() {
             ref={languageTrigger}
             accessibilityRole="button"
             accessibilityLabel={`Languages: ${selectedLanguages.join(", ") || "none selected"}`}
-            accessibilityState={{ expanded: languageOpen && menuKind === "languages" }}
+            accessibilityState={{
+              expanded: languageOpen && menuKind === "languages",
+            }}
             onPress={openLanguageMenu}
             style={styles.select}
           >
-            <Text style={[styles.selectText, !selectedLanguages.length && styles.placeholder]}>
+            <Text
+              style={[
+                styles.selectText,
+                !selectedLanguages.length && styles.placeholder,
+              ]}
+            >
               {selectedLanguages.join(", ") || "Select languages"}
             </Text>
             <ChevronDown size={17} color={colors.patient.primaryDark} />
@@ -755,7 +835,10 @@ export default function DoctorOnboarding() {
                 facilities.find((item) => item.id === facilityId)?.name
               }
               triggerStyle={styles.select}
-              valueStyle={[styles.selectText, !facilityId && styles.placeholder]}
+              valueStyle={[
+                styles.selectText,
+                !facilityId && styles.placeholder,
+              ]}
               chevronColor={colors.patient.primaryDark}
               backdropColor="#00000066"
               selectedOptionBackgroundColor="#F3F4F6"
@@ -767,9 +850,12 @@ export default function DoctorOnboarding() {
               </Text>
             ) : null}
             <View style={styles.facilityInfoCard}>
-              <Text style={styles.facilityHintTitle}>Hospital or clinic not listed?</Text>
+              <Text style={styles.facilityHintTitle}>
+                Hospital or clinic not listed?
+              </Text>
               <Text style={styles.facilityHint}>
-                Ask its administrator to register it first. If you operate an independent clinic, select the option below.
+                Ask its administrator to register it first. If you operate an
+                independent clinic, select the option below.
               </Text>
             </View>
           </View>
@@ -786,9 +872,19 @@ export default function DoctorOnboarding() {
         {solo ? (
           <View style={styles.field}>
             <Text style={styles.label}>Clinic operating licence</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Upload clinic operating licence"
-              onPress={() => void pickDocument("clinic operating licence")} style={styles.select}>
-              <Text style={[styles.selectText, !clinicLicense && styles.placeholder]} numberOfLines={1}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Upload clinic operating licence"
+              onPress={() => void pickDocument("clinic operating licence")}
+              style={styles.select}
+            >
+              <Text
+                style={[
+                  styles.selectText,
+                  !clinicLicense && styles.placeholder,
+                ]}
+                numberOfLines={1}
+              >
                 {clinicLicense?.name ?? "Choose PDF or image (max 10 MB)"}
               </Text>
             </Pressable>
@@ -797,10 +893,24 @@ export default function DoctorOnboarding() {
         {solo ? (
           <View style={styles.field}>
             <Text style={styles.label}>Clinic Address</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Add or edit clinic address"
-              onPress={() => { Keyboard.dismiss(); setAddressOpen(true); }} style={styles.select}>
-              <Text numberOfLines={1} style={[styles.selectText, !address && styles.placeholder]}>
-                {address ? [address, locality, practiceCity, pincode].filter(Boolean).join(', ') : 'Add clinic address'}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add or edit clinic address"
+              onPress={() => {
+                Keyboard.dismiss();
+                setAddressOpen(true);
+              }}
+              style={styles.select}
+            >
+              <Text
+                numberOfLines={1}
+                style={[styles.selectText, !address && styles.placeholder]}
+              >
+                {address
+                  ? [address, locality, practiceCity, pincode]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "Add clinic address"}
               </Text>
               <ChevronDown size={17} color={colors.patient.primaryDark} />
             </Pressable>
@@ -814,78 +924,136 @@ export default function DoctorOnboarding() {
         />
         <View style={styles.privacyRow}>
           <LockKeyhole size={16} color={colors.textSecondary} />
-          <Text style={styles.privacy}>Your Information is secure and private</Text>
+          <Text style={styles.privacy}>
+            Your Information is secure and private
+          </Text>
         </View>
       </View>
-      <ModalSurface layout="custom" visible={addressOpen} transparent animationType="slide"
-        statusBarTranslucent navigationBarTranslucent onClose={() => { Keyboard.dismiss(); setAddressOpen(false); }}>
+      <ModalSurface
+        layout="custom"
+        visible={addressOpen}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onClose={() => {
+          Keyboard.dismiss();
+          setAddressOpen(false);
+        }}
+      >
         <View style={styles.addressOverlay}>
-          <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Dismiss clinic address drawer"
-            onPress={() => { Keyboard.dismiss(); setAddressOpen(false); }} />
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.addressContainer}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            accessibilityLabel="Dismiss clinic address drawer"
+            onPress={() => {
+              Keyboard.dismiss();
+              setAddressOpen(false);
+            }}
+          />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.addressContainer}
+          >
             <View style={styles.addressSheet}>
               <View style={styles.drawerHandle} />
               <View style={styles.addressHeader}>
                 <Text style={styles.title}>Clinic Address</Text>
-                <Pressable accessibilityRole="button" accessibilityLabel="Close clinic address drawer" hitSlop={8}
-                  onPress={() => { Keyboard.dismiss(); setAddressOpen(false); }}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Close clinic address drawer"
+                  hitSlop={8}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setAddressOpen(false);
+                  }}
+                >
                   <X size={22} color={colors.textSecondary} />
                 </Pressable>
               </View>
-              <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
-                contentContainerStyle={styles.addressFields} showsVerticalScrollIndicator={false}>
-            {field("Clinic address", address, setAddress, "Street address")}
-            {field(
-              "Area / locality",
-              locality,
-              setLocality,
-              "Area or locality"
-            )}
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                {field("City", practiceCity, setPracticeCity, "City")}
-              </View>
-              <View style={{ flex: 1 }}>
-                {field("State", practiceState, setPracticeState, "State")}
-              </View>
-            </View>
-            {field(
-              "Pincode",
-              pincode,
-              setPincode,
-              "6-digit pincode",
-              "number-pad"
-            )}
-            <View style={styles.field}>
-              <Button theme="doctor" variant="outline" label="Choose location on map" leftIcon={<MapPin size={18} color={colors.patient.primaryDark} />} style={styles.mapButton}
-                onPress={() => {
-                  Keyboard.dismiss();
-                  setAddressOpen(false);
-                  clearChosenClinic();
-                  router.push({ pathname: "/clinic-location", params: clinicLocation ? {
-                    latitude: String(clinicLocation.latitude), longitude: String(clinicLocation.longitude),
-                  } : {} });
-                }} />
-              {locationError ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                  {locationError}{" "}
-                  <Text onPress={() => void Linking.openSettings()}>
-                    Open settings
-                  </Text>
-                </Text>
-              ) : null}
-            </View>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                contentContainerStyle={styles.addressFields}
+                showsVerticalScrollIndicator={false}
+              >
+                {field("Clinic address", address, setAddress, "Street address")}
+                {field(
+                  "Area / locality",
+                  locality,
+                  setLocality,
+                  "Area or locality"
+                )}
+                <View style={styles.row}>
+                  <View style={{ flex: 1 }}>
+                    {field("City", practiceCity, setPracticeCity, "City")}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    {field("State", practiceState, setPracticeState, "State")}
+                  </View>
+                </View>
+                {field(
+                  "Pincode",
+                  pincode,
+                  setPincode,
+                  "6-digit pincode",
+                  "number-pad"
+                )}
+                <View style={styles.field}>
+                  <Button
+                    theme="doctor"
+                    variant="outline"
+                    label="Choose location on map"
+                    leftIcon={
+                      <MapPin size={18} color={colors.patient.primaryDark} />
+                    }
+                    style={styles.mapButton}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      setAddressOpen(false);
+                      clearChosenClinic();
+                      router.push({
+                        pathname: "/clinic-location",
+                        params: clinicLocation
+                          ? {
+                              latitude: String(clinicLocation.latitude),
+                              longitude: String(clinicLocation.longitude),
+                            }
+                          : {},
+                      });
+                    }}
+                  />
+                  {locationError ? (
+                    <Text accessibilityRole="alert" style={styles.error}>
+                      {locationError}{" "}
+                      <Text onPress={() => void Linking.openSettings()}>
+                        Open settings
+                      </Text>
+                    </Text>
+                  ) : null}
+                </View>
 
-                <Button theme="doctor" label="Confirm Address" style={styles.confirmAddress}
+                <Button
+                  theme="doctor"
+                  label="Confirm Address"
+                  style={styles.confirmAddress}
                   onPress={() => {
-                    if (address.trim().length < 5 || locality.trim().length < 2 || practiceCity.trim().length < 2
-                      || practiceState.trim().length < 2 || !/^\d{6}$/.test(pincode.trim()) || !clinicLocation) {
-                      setError('Complete the clinic address and choose its map location before confirming.');
+                    if (
+                      address.trim().length < 5 ||
+                      locality.trim().length < 2 ||
+                      practiceCity.trim().length < 2 ||
+                      practiceState.trim().length < 2 ||
+                      !/^\d{6}$/.test(pincode.trim()) ||
+                      !clinicLocation
+                    ) {
+                      setError(
+                        "Complete the clinic address and choose its map location before confirming."
+                      );
                       return;
                     }
                     Keyboard.dismiss();
                     setAddressOpen(false);
-                  }} />
+                  }}
+                />
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
@@ -920,23 +1088,41 @@ export default function DoctorOnboarding() {
             ]}
           >
             <ScrollView keyboardShouldPersistTaps="handled">
-              {(menuKind === "languages" ? languages : specialties).map((item) => {
-                const checked = (menuKind === "languages" ? selectedLanguages : selectedSpecialties).includes(item);
-                return (
-                  <Pressable
-                    key={item}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked }}
-                    style={[styles.option, styles.languageOption, checked && styles.selectedOption]}
-                    onPress={() => menuKind === "languages" ? toggleLanguage(item) : setSelectedSpecialties(current => current.includes(item) ? current.filter(value => value !== item) : [...current, item])}
-                  >
-                    <Text style={styles.selectText}>{item}</Text>
-                    {checked ? (
-                      <Check size={17} color={colors.patient.primaryDark} />
-                    ) : null}
-                  </Pressable>
-                );
-              })}
+              {(menuKind === "languages" ? languages : specialties).map(
+                (item) => {
+                  const checked = (
+                    menuKind === "languages"
+                      ? selectedLanguages
+                      : selectedSpecialties
+                  ).includes(item);
+                  return (
+                    <Pressable
+                      key={item}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked }}
+                      style={[
+                        styles.option,
+                        styles.languageOption,
+                        checked && styles.selectedOption,
+                      ]}
+                      onPress={() =>
+                        menuKind === "languages"
+                          ? toggleLanguage(item)
+                          : setSelectedSpecialties((current) =>
+                              current.includes(item)
+                                ? current.filter((value) => value !== item)
+                                : [...current, item]
+                            )
+                      }
+                    >
+                      <Text style={styles.selectText}>{item}</Text>
+                      {checked ? (
+                        <Check size={17} color={colors.patient.primaryDark} />
+                      ) : null}
+                    </Pressable>
+                  );
+                }
+              )}
             </ScrollView>
             <Pressable
               accessibilityRole="button"
@@ -1067,22 +1253,91 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedOption: { backgroundColor: "#F3F4F6" },
-  addressOverlay: { flex: 1, backgroundColor: "#00000066", justifyContent: "flex-end" },
+  addressOverlay: {
+    flex: 1,
+    backgroundColor: "#00000066",
+    justifyContent: "flex-end",
+  },
   addressContainer: { width: "100%", maxHeight: "90%" },
-  addressSheet: { flexShrink: 1, backgroundColor: colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: "hidden" },
-  drawerHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "#D1D1D1", alignSelf: "center", marginTop: 12, marginBottom: 20 },
-  addressHeader: { paddingHorizontal: 24, paddingBottom: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  addressSheet: {
+    flexShrink: 1,
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+  },
+  drawerHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#D1D1D1",
+    alignSelf: "center",
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  addressHeader: {
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   addressFields: { paddingHorizontal: 24, paddingBottom: 32, gap: 16 },
   confirmAddress: { height: 54, borderRadius: 12 },
-  locationCard: { height: 54, flexDirection: "row", alignItems: "center", justifyContent: "flex-start", paddingHorizontal: 12, paddingVertical: 0, borderRadius: 12, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.borderDefault, gap: 12 },
+  locationCard: {
+    height: 54,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 0,
+    borderRadius: 12,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    gap: 12,
+  },
   mapButton: { height: 54, borderRadius: 12, borderColor: "#D1D1D1" },
-  facilityInfoCard: { backgroundColor: "#E6F4F0", borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, gap: 6 },
-  facilityHintTitle: { fontFamily: fontFamilies.medium, fontSize: 13, color: colors.textPrimary, textAlign: "center" },
-  facilityHint: { fontFamily: fontFamilies.regular, fontSize: 13, lineHeight: 18, color: colors.textSecondary, textAlign: "center" },
-  locationIcon: { width: 32, height: 32, borderRadius: 10, backgroundColor: "#E6F4F4", alignItems: "center", justifyContent: "center" },
+  facilityInfoCard: {
+    backgroundColor: "#E6F4F0",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 6,
+  },
+  facilityHintTitle: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    color: colors.textPrimary,
+    textAlign: "center",
+  },
+  facilityHint: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.textSecondary,
+    textAlign: "center",
+  },
+  locationIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#E6F4F4",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   locationText: { flex: 1, gap: 2 },
-  locationTitle: { fontFamily: fontFamilies.semibold, fontSize: 14, color: colors.textPrimary },
-  locationSub: { fontFamily: fontFamilies.regular, fontSize: 12, color: "#71818F", lineHeight: 16 },
+  locationTitle: {
+    fontFamily: fontFamilies.semibold,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  locationSub: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 12,
+    color: "#71818F",
+    lineHeight: 16,
+  },
   doneText: {
     fontFamily: fontFamilies.medium,
     fontSize: 15,
@@ -1107,7 +1362,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flexShrink: 1,
   },
-  privacyRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  privacyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
   locationHint: {
     color: "#777",
     fontFamily: fontFamilies.regular,

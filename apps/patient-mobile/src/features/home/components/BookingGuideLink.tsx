@@ -15,7 +15,12 @@ export function BookingGuideLink({ onPress }: { onPress: () => void }) {
         <Text style={styles.questionMark}>?</Text>
       </View>
       <Text style={styles.label}>Learn how to book an appointment</Text>
-      <ChevronRight size={24} color={colors.patient.textSecondary} strokeWidth={2} accessible={false} />
+      <ChevronRight
+        size={24}
+        color={colors.patient.textSecondary}
+        strokeWidth={2}
+        accessible={false}
+      />
     </Pressable>
   );
 }

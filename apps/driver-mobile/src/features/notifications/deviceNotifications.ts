@@ -72,7 +72,10 @@ function openNotification(response: NotificationResponse) {
   else if (route === "/chat") router.push("/chat");
 }
 
-export function useDeviceNotifications(identityId: string | undefined, showToast: (input: ToastInput) => void) {
+export function useDeviceNotifications(
+  identityId: string | undefined,
+  showToast: (input: ToastInput) => void
+) {
   useEffect(() => {
     if (!identityId || !Notifications || Platform.OS === "web") return;
     const tokenListener = Notifications.addPushTokenListener(() => {
@@ -80,10 +83,16 @@ export function useDeviceNotifications(identityId: string | undefined, showToast
     });
     const responseListener =
       Notifications.addNotificationResponseReceivedListener(openNotification);
-    const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
-      const { title, body } = notification.request.content;
-      showToast({ title: title ?? "Notification", message: body ?? undefined, type: title?.toLowerCase().includes("confirmed") ? "success" : "info" });
-    });
+    const foregroundListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        const { title, body } = notification.request.content;
+        showToast({
+          title: title ?? "Notification",
+          message: body ?? undefined,
+          type: title?.toLowerCase().includes("confirmed") ? "success" : "info",
+        });
+      }
+    );
     void register().catch(() => {});
     void Notifications.getLastNotificationResponseAsync()
       .then((response) => {

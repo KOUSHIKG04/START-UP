@@ -51,7 +51,9 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
         {/* <Text style={styles.cardTitle}>OTP verification</Text> */}
         <View style={styles.otpNotice}>
           <Info color={colors.patient.primaryDark} size={20} />
-          <Text variant="body" style={styles.infoText}>Share this OTP when the doctor arrives.</Text>
+          <Text variant="body" style={styles.infoText}>
+            Share this OTP when the doctor arrives.
+          </Text>
         </View>
         <View style={styles.otpRow}>
           {[
@@ -61,7 +63,9 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
             { id: "otp-slot-4", digit: "6" },
           ].map((slot) => (
             <View key={slot.id} style={styles.otpCell}>
-              <Text variant="body" style={styles.otpText}>{slot.digit}</Text>
+              <Text variant="body" style={styles.otpText}>
+                {slot.digit}
+              </Text>
             </View>
           ))}
         </View>

@@ -1,5 +1,11 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from "react-native";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+  type ImageSourcePropType,
+} from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Search } from "lucide-react-native";
 
@@ -35,47 +41,59 @@ export function FindDoctorSearchList({
               accessibilityRole="button"
               accessibilityLabel={`${doctor.name}, Doctor`}
               onPress={() => onSelectDoctor(doctor.name)}
-              style={({ pressed }) => [styles.categoryRow, pressed && styles.categoryRowPressed]}
+              style={({ pressed }) => [
+                styles.categoryRow,
+                pressed && styles.categoryRowPressed,
+              ]}
             >
               <View style={styles.doctorIcon}>
                 <Search color={colors.patient.primaryDark} size={22} />
               </View>
               <View style={styles.categoryRowContent}>
-                <Text variant="cardHeading" style={styles.categoryRowTitle}>{doctor.name}</Text>
-                <Text variant="cardHeading" style={styles.categoryRowSubtitle}>Doctor</Text>
+                <Text variant="cardHeading" style={styles.categoryRowTitle}>
+                  {doctor.name}
+                </Text>
+                <Text variant="cardHeading" style={styles.categoryRowSubtitle}>
+                  Doctor
+                </Text>
               </View>
             </Pressable>
           ))}
           {filteredCategories.map((category) => (
-          <Pressable
-            key={category.key}
-            accessibilityRole="button"
-            accessibilityLabel={category.label.replace("\n", " ")}
-            onPress={() =>
-              onSelectCategory(category.key, category.label.replace("\n", " "))
-            }
-            style={({ pressed }) => [
-              styles.categoryRow,
-              pressed && styles.categoryRowPressed,
-            ]}
-          >
-            <Image
-              source={category.image}
-              style={[
-                styles.categoryRowImage,
-                category.imageScale
-                  ? { transform: [{ scale: category.imageScale }] }
-                  : undefined,
+            <Pressable
+              key={category.key}
+              accessibilityRole="button"
+              accessibilityLabel={category.label.replace("\n", " ")}
+              onPress={() =>
+                onSelectCategory(
+                  category.key,
+                  category.label.replace("\n", " ")
+                )
+              }
+              style={({ pressed }) => [
+                styles.categoryRow,
+                pressed && styles.categoryRowPressed,
               ]}
-              resizeMode="contain"
-            />
-            <View style={styles.categoryRowContent}>
-              <Text variant="cardHeading" style={styles.categoryRowTitle}>
-                {category.label.replace("\n", " ")}
-              </Text>
-              <Text variant="cardHeading" style={styles.categoryRowSubtitle}>Speciality</Text>
-            </View>
-          </Pressable>
+            >
+              <Image
+                source={category.image}
+                style={[
+                  styles.categoryRowImage,
+                  category.imageScale
+                    ? { transform: [{ scale: category.imageScale }] }
+                    : undefined,
+                ]}
+                resizeMode="contain"
+              />
+              <View style={styles.categoryRowContent}>
+                <Text variant="cardHeading" style={styles.categoryRowTitle}>
+                  {category.label.replace("\n", " ")}
+                </Text>
+                <Text variant="cardHeading" style={styles.categoryRowSubtitle}>
+                  Speciality
+                </Text>
+              </View>
+            </Pressable>
           ))}
         </>
       ) : (

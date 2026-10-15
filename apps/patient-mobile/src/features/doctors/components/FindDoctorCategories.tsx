@@ -22,7 +22,9 @@ export function FindDoctorCategories({
   return (
     <>
       <View>
-        <Text variant="cardHeading" style={styles.symptomsTitle}>Most searched symptoms</Text>
+        <Text variant="cardHeading" style={styles.symptomsTitle}>
+          Most searched symptoms
+        </Text>
         <View style={styles.chipList}>
           {symptoms.map((symptom) => {
             const selected = selectedSymptom === symptom;
@@ -46,7 +48,9 @@ export function FindDoctorCategories({
       </View>
 
       <View>
-        <Text variant="sectionHeading" style={styles.sectionTitle}>Browse by categories</Text>
+        <Text variant="sectionHeading" style={styles.sectionTitle}>
+          Browse by categories
+        </Text>
         <View style={styles.categoryGrid}>
           {visibleCategories.map((category) => (
             <Pressable
@@ -74,7 +78,11 @@ export function FindDoctorCategories({
                 ]}
                 resizeMode="contain"
               />
-              <Text variant="label" numberOfLines={2} style={styles.categoryLabel}>
+              <Text
+                variant="label"
+                numberOfLines={2}
+                style={styles.categoryLabel}
+              >
                 {category.label}
               </Text>
             </Pressable>

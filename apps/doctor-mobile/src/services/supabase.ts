@@ -16,21 +16,32 @@ export const devPasswordLoginEnabled =
   process.env.EXPO_PUBLIC_ENABLE_DEV_PASSWORD_LOGIN === "true" &&
   url === "https://enjafragbcrrgaclwopd.supabase.co";
 
-export const supabase = url && key
-  ? createSupabaseClient(url, key, {
-      auth: Platform.OS === "web" ? { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false } : {
-        storage: createSecureSessionStorage(SecureStore),
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-      },
-    })
-  : null;
+export const supabase =
+  url && key
+    ? createSupabaseClient(url, key, {
+        auth:
+          Platform.OS === "web"
+            ? {
+                autoRefreshToken: false,
+                persistSession: false,
+                detectSessionInUrl: false,
+              }
+            : {
+                storage: createSecureSessionStorage(SecureStore),
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: false,
+              },
+      })
+    : null;
 
 export const mobileSession = createMobileSession(supabase);
 
 export function useMobileSession() {
-  return useSyncExternalStore(mobileSession.subscribe, mobileSession.getSnapshot);
+  return useSyncExternalStore(
+    mobileSession.subscribe,
+    mobileSession.getSnapshot
+  );
 }
 
 if (supabase && Platform.OS !== "web") {

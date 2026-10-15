@@ -8,15 +8,24 @@ import { Label } from "@startup/web-ui/components/ui/label";
 import { toast } from "@startup/web-ui/components/ui/toast";
 
 export function LoginForm({ serverError }: { serverError?: string }) {
-  
   const [state, action, pending] = useActionState(signIn, {
     error: null as string | null,
   });
   useEffect(() => {
-    if (state.error) toast.add({ title: "Sign in failed", description: state.error, type: "error" });
+    if (state.error)
+      toast.add({
+        title: "Sign in failed",
+        description: state.error,
+        type: "error",
+      });
   }, [state.error]);
   useEffect(() => {
-    if (serverError) toast.add({ title: "Sign in unavailable", description: serverError, type: "error" });
+    if (serverError)
+      toast.add({
+        title: "Sign in unavailable",
+        description: serverError,
+        type: "error",
+      });
   }, [serverError]);
 
   return (

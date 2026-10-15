@@ -8,7 +8,15 @@ import {
   SidebarTrigger,
 } from "@startup/web-ui/components/ui/sidebar";
 
-export function AdminLayout({ children, facilityName, userName }: { children: React.ReactNode; facilityName: string; userName: string }) {
+export function AdminLayout({
+  children,
+  facilityName,
+  userName,
+}: {
+  children: React.ReactNode;
+  facilityName: string;
+  userName: string;
+}) {
   return (
     <SidebarProvider
       defaultOpen={true}

@@ -5,7 +5,15 @@ import { Input, useToastFeedback } from "@startup/mobile-ui";
 import { useCallback, useEffect, useId, useState } from "react";
 import { router, useFocusEffect, type Href } from "expo-router";
 import { useLocationDraft } from "../../locations/locationDraft";
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useMobileSession } from "../../../services/supabase";
 import { MapPin, X } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
@@ -40,16 +48,25 @@ export function AddressSheet({
   useToastFeedback({ error });
   const [attemptedConfirm, setAttemptedConfirm] = useState(false);
   const mapDraftId = useId();
-  const chosen = useLocationDraft(state => state.chosen);
-  const clearChosen = useLocationDraft(state => state.clear);
-  useFocusEffect(useCallback(() => {
-    if (!chosen || chosen.addressId !== mapDraftId) return;
-    setAddress(current => ({ ...current, line1: chosen.street || chosen.locality || current.line1,
-      line2: chosen.locality || current.line2, city: chosen.city || current.city, state: chosen.state || current.state, pincode: chosen.pincode || current.pincode,
-      latitude: chosen.latitude, longitude: chosen.longitude }));
-    clearChosen();
-    onReopen();
-  }, [chosen, mapDraftId, clearChosen, onReopen]));
+  const chosen = useLocationDraft((state) => state.chosen);
+  const clearChosen = useLocationDraft((state) => state.clear);
+  useFocusEffect(
+    useCallback(() => {
+      if (!chosen || chosen.addressId !== mapDraftId) return;
+      setAddress((current) => ({
+        ...current,
+        line1: chosen.street || chosen.locality || current.line1,
+        line2: chosen.locality || current.line2,
+        city: chosen.city || current.city,
+        state: chosen.state || current.state,
+        pincode: chosen.pincode || current.pincode,
+        latitude: chosen.latitude,
+        longitude: chosen.longitude,
+      }));
+      clearChosen();
+      onReopen();
+    }, [chosen, mapDraftId, clearChosen, onReopen])
+  );
 
   // Only a new confirmed address replaces the draft. Dismissing the drawer
   // must not reset partially entered fields when it is opened again.
@@ -71,7 +88,8 @@ export function AddressSheet({
       state: address.state.trim(),
       pincode: address.pincode.trim(),
       ...(address.latitude !== undefined && address.longitude !== undefined
-        ? { latitude: address.latitude, longitude: address.longitude } : {}),
+        ? { latitude: address.latitude, longitude: address.longitude }
+        : {}),
     };
 
     if (!trimmed.building) {
@@ -110,7 +128,11 @@ export function AddressSheet({
     return (
       <Input
         label={label}
-          invalid={attemptedConfirm && !patientAddressSchema.shape[key].safeParse(address[key].trim()).success}
+        invalid={
+          attemptedConfirm &&
+          !patientAddressSchema.shape[key].safeParse(address[key].trim())
+            .success
+        }
         labelStyle={styles.label}
         containerStyle={styles.field}
         accessibilityLabel={label}
@@ -129,7 +151,8 @@ export function AddressSheet({
   }
 
   return (
-    <ModalSurface layout="custom"
+    <ModalSurface
+      layout="custom"
       visible={visible}
       transparent
       animationType="slide"
@@ -155,7 +178,9 @@ export function AddressSheet({
 
             {/* Header */}
             <View style={styles.header}>
-              <Text variant="cardHeading" style={styles.title}>Add Address</Text>
+              <Text variant="cardHeading" style={styles.title}>
+                Add Address
+              </Text>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Close address sheet"
@@ -202,19 +227,39 @@ export function AddressSheet({
                 )}
               </View>
 
-              <Button theme="patient" label="Choose location on map" variant="outline"
-                leftIcon={<MapPin size={18} color={colors.patient.primaryDark} />}
+              <Button
+                theme="patient"
+                label="Choose location on map"
+                variant="outline"
+                leftIcon={
+                  <MapPin size={18} color={colors.patient.primaryDark} />
+                }
                 onPress={() => {
                   Keyboard.dismiss();
                   onClose();
                   clearChosen();
-                  router.push({ pathname: profile?.patient_profile_complete ? '/pick-location' : '/profile-location', params: {
-                    from: 'profile', id: mapDraftId,
-                    ...(address.latitude !== undefined && address.longitude !== undefined ? {
-                      latitude: String(address.latitude), longitude: String(address.longitude),
-                    } : {}),
-                  } } as Href);
-                }} style={[styles.locationCard, { height: PROFILE_FIELD_HEIGHT, paddingVertical: 0 }]} />
+                  router.push({
+                    pathname: profile?.patient_profile_complete
+                      ? "/pick-location"
+                      : "/profile-location",
+                    params: {
+                      from: "profile",
+                      id: mapDraftId,
+                      ...(address.latitude !== undefined &&
+                      address.longitude !== undefined
+                        ? {
+                            latitude: String(address.latitude),
+                            longitude: String(address.longitude),
+                          }
+                        : {}),
+                    },
+                  } as Href);
+                }}
+                style={[
+                  styles.locationCard,
+                  { height: PROFILE_FIELD_HEIGHT, paddingVertical: 0 },
+                ]}
+              />
               {/* Confirm Address Button */}
               <Pressable
                 accessibilityRole="button"
@@ -222,7 +267,9 @@ export function AddressSheet({
                 onPress={handleConfirm}
                 style={styles.confirmButton}
               >
-                <Text variant="button" style={styles.confirmButtonText}>Confirm Address</Text>
+                <Text variant="button" style={styles.confirmButtonText}>
+                  Confirm Address
+                </Text>
               </Pressable>
             </ScrollView>
           </View>

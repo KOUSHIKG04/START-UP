@@ -2,13 +2,7 @@ import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as Crypto from "expo-crypto";
@@ -70,7 +64,6 @@ export default function DriverDocuments() {
       setError("Could not select the file.");
     }
   }
-
 
   async function submit() {
     if (!supabase || !session) {
@@ -233,7 +226,11 @@ export default function DriverDocuments() {
           "Describe crew qualifications"
         )}
 
-        <Button loading={busy} label="Submit for Verification" variant="primary" labelStyle={styles.buttonText}
+        <Button
+          loading={busy}
+          label="Submit for Verification"
+          variant="primary"
+          labelStyle={styles.buttonText}
           accessibilityRole="button"
           disabled={busy}
           onPress={() => void submit()}
@@ -254,16 +251,17 @@ function field(
   placeholder: string
 ) {
   return (
-    <Input variant="unstyled"
-        label={label}
-        labelStyle={[styles.label, styles.inputLabel]}
-        containerStyle={styles.field}
-        accessibilityLabel={label}
-        value={value}
-        onChangeText={setValue}
-        placeholder={placeholder}
-        style={styles.input}
-      />
+    <Input
+      variant="unstyled"
+      label={label}
+      labelStyle={[styles.label, styles.inputLabel]}
+      containerStyle={styles.field}
+      accessibilityLabel={label}
+      value={value}
+      onChangeText={setValue}
+      placeholder={placeholder}
+      style={styles.input}
+    />
   );
 }
 const styles = StyleSheet.create({

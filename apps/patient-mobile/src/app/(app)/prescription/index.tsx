@@ -6,7 +6,9 @@ import {
 } from "../../../features/appointments/utils/appointmentParams";
 
 export default function PrescriptionRoute() {
-  const params = useLocalSearchParams<AppointmentParams & { appointmentId?: string }>();
+  const params = useLocalSearchParams<
+    AppointmentParams & { appointmentId?: string }
+  >();
   const appointment = appointmentFromParams(params);
   const targetAppointmentId = params.appointmentId || appointment.id;
 

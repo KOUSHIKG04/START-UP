@@ -338,11 +338,11 @@ export function DoctorProfileScreen({
       const feedback = message.includes("Daily booking limit reached")
         ? "This doctor has reached the daily booking limit. Please choose another day."
         : message.includes("already booked this time")
-        ? "You already booked this time. Choose another slot."
-        : message.includes("Slot is full") ||
-            message.includes("Slot no longer available")
-          ? "This slot is no longer available. Choose another time."
-          : "Could not request this appointment. Reopen the slots and try again.";
+          ? "You already booked this time. Choose another slot."
+          : message.includes("Slot is full") ||
+              message.includes("Slot no longer available")
+            ? "This slot is no longer available. Choose another time."
+            : "Could not request this appointment. Reopen the slots and try again.";
       showToast({ title: "Booking failed", message: feedback, type: "error" });
     },
   });
@@ -551,7 +551,11 @@ export function DoctorProfileScreen({
                           ? "Could not load available slots."
                           : null
                       }
-                      busy={Boolean(confirmation) || openingConfirmation || book.isPending}
+                      busy={
+                        Boolean(confirmation) ||
+                        openingConfirmation ||
+                        book.isPending
+                      }
                       openingConfirmation={openingConfirmation}
                       onGoToAbout={() => setActiveTab("about")}
                       onBookAppointment={(selection) => {
@@ -589,7 +593,10 @@ export function DoctorProfileScreen({
         visible={Boolean(confirmation)}
         onShow={() => setOpeningConfirmation(false)}
         onClose={() => {
-          if (!book.isPending) { setOpeningConfirmation(false); setConfirmation(null); }
+          if (!book.isPending) {
+            setOpeningConfirmation(false);
+            setConfirmation(null);
+          }
         }}
       >
         {confirmation ? (
@@ -647,7 +654,10 @@ export function DoctorProfileScreen({
                 variant="outline"
                 label="Cancel"
                 disabled={book.isPending}
-                onPress={() => { setOpeningConfirmation(false); setConfirmation(null); }}
+                onPress={() => {
+                  setOpeningConfirmation(false);
+                  setConfirmation(null);
+                }}
                 style={styles.confirmationButton}
                 labelStyle={styles.confirmationButtonLabel}
               />

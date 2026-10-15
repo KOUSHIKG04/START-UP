@@ -9,7 +9,12 @@ import { logout } from "../server/actions";
 export function LogoutButton() {
   const [state, action, pending] = useActionState(logout, { error: null });
   useEffect(() => {
-    if (state.error) toast.add({ title: "Logout failed", description: state.error, type: "error" });
+    if (state.error)
+      toast.add({
+        title: "Logout failed",
+        description: state.error,
+        type: "error",
+      });
   }, [state]);
 
   return (
@@ -20,7 +25,11 @@ export function LogoutButton() {
         aria-busy={pending}
         className="h-auto gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] font-medium text-[#475569] hover:bg-slate-50 hover:text-[#0f172a]"
       >
-        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <LogOut className="size-4" />}
+        {pending ? (
+          <LoaderCircle className="size-4 animate-spin" />
+        ) : (
+          <LogOut className="size-4" />
+        )}
         <span>{pending ? "Logging out…" : "Logout"}</span>
       </SidebarMenuButton>
     </form>

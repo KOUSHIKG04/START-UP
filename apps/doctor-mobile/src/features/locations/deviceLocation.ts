@@ -3,7 +3,10 @@ import * as Location from "expo-location";
 /** Seeds the map only; the doctor confirms the final pin before saving. */
 export async function getDoctorDeviceLocation(): Promise<Location.LocationObject> {
   const permission = await Location.requestForegroundPermissionsAsync();
-  if (!permission.granted) throw new Error("Allow location access in Android settings or search for an address.");
+  if (!permission.granted)
+    throw new Error(
+      "Allow location access in Android settings or search for an address."
+    );
   if (!(await Location.hasServicesEnabledAsync())) {
     throw new Error("Turn on your phone's Location setting, then try again.");
   }
@@ -23,7 +26,15 @@ export async function getDoctorDeviceLocation(): Promise<Location.LocationObject
         });
       })(),
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error("Your phone has not returned a location yet. Check Location Accuracy in Android settings, or search for an address.")), 20_000);
+        timer = setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Your phone has not returned a location yet. Check Location Accuracy in Android settings, or search for an address."
+              )
+            ),
+          20_000
+        );
       }),
     ]);
   } finally {

@@ -107,10 +107,12 @@ export default {
             ...notificationCopy(delivery),
             data: {
               notificationId: delivery.delivery_id,
-              ...(delivery.template_key.startsWith("appointment.") ? {
-                route: "/appointments",
-                appointmentId: delivery.safe_parameters.appointment_id,
-              } : {}),
+              ...(delivery.template_key.startsWith("appointment.")
+                ? {
+                    route: "/appointments",
+                    appointmentId: delivery.safe_parameters.appointment_id,
+                  }
+                : {}),
             },
             sound: "default",
           }))

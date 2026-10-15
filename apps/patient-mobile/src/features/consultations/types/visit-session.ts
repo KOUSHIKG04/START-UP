@@ -1,4 +1,7 @@
-import type { Appointment, VisitSessionMode } from "../../appointments/types/appointment";
+import type {
+  Appointment,
+  VisitSessionMode,
+} from "../../appointments/types/appointment";
 import type { PatientScreenProps } from "../../../types/screen";
 
 export type CompletionActions = {

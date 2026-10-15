@@ -13,6 +13,18 @@ export default async function AdminRouteLayout({
 }) {
   const access = await requireApprovedFacility();
   const client = await createClient();
-  const { data: { user } } = await client.auth.getUser();
-  return <AdminLayout facilityName={access.facilities[0]?.facilityName ?? "Facility"} userName={user?.email ?? "Facility account"}><LiveFacilityUpdates facilityIds={access.facilities.map(facility => facility.facilityId)} />{children}</AdminLayout>;
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+  return (
+    <AdminLayout
+      facilityName={access.facilities[0]?.facilityName ?? "Facility"}
+      userName={user?.email ?? "Facility account"}
+    >
+      <LiveFacilityUpdates
+        facilityIds={access.facilities.map((facility) => facility.facilityId)}
+      />
+      {children}
+    </AdminLayout>
+  );
 }
