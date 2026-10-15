@@ -5,6 +5,7 @@ export type { Json } from "./supabase.types";
 // existing API's explicit NULL inputs and bigint wire strings in this overlay;
 // supabase.types.ts remains the unmodified hosted schema output.
 type NullableRpcArguments = {
+  record_consultation_intake: "p_diagnosis";
   publish_doctor_schedule_from_date: "p_effective_from";
   set_my_driver_availability: "p_latitude" | "p_longitude";
   list_public_hospitals: "p_latitude" | "p_longitude";
@@ -40,5 +41,19 @@ type WireFunctions = {
   };
 };
 export type Database = Omit<HostedDatabase, "public"> & {
-  public: Omit<HostedDatabase["public"], "Functions"> & { Functions: WireFunctions };
+  public: Omit<HostedDatabase["public"], "Functions"> & { Functions: WireFunctions & {
+    // Local migration; replace with hosted introspection after deployment.
+    book_portal_walk_in_appointment: {
+      Args: {
+        p_practice_id: string;
+        p_window_id: string;
+        p_practice_service_id: string;
+        p_patient_name: string;
+        p_patient_phone: string | null;
+        p_reason: string | null;
+        p_idempotency_key: string;
+      };
+      Returns: string;
+    };
+  } };
 };

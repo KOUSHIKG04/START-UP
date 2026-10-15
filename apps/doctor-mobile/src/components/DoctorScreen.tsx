@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import type { PropsWithChildren, ReactNode } from "react";
+import { useEffect } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -69,12 +70,14 @@ export function IconButton({
 export function DoctorHeader({
   title,
   trailing,
+  onBackPress,
 }: {
   title: string;
   trailing?: ReactNode;
+  onBackPress?: () => void;
 }) {
   return <><StatusBar style="light" /><Header title={title} app="doctor" rightAction={trailing}
-    onBackPress={() => router.canGoBack() ? router.back() : router.replace("/")} /></>;
+    onBackPress={onBackPress ?? (() => router.canGoBack() ? router.back() : router.replace("/"))} /></>;
 }
 
 export function DoctorScreen({
@@ -83,20 +86,27 @@ export function DoctorScreen({
   background = palette.white,
   bottomNav = true,
   contentStyle,
+  onBackPress,
+  scrollResetKey,
 }: PropsWithChildren<{
   title: string;
   background?: string;
   bottomNav?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  onBackPress?: () => void;
+  scrollResetKey?: number;
 }>) {
   const insets = useSafeAreaInsets();
   const { scrollRef, keyboardInset, revealFocusedInput, onScroll } = useKeyboardAwareScroll();
+  useEffect(() => {
+    if (scrollResetKey !== undefined) scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [scrollResetKey, scrollRef]);
   return (
     <KeyboardAvoidingView
       style={[ui.screen, { backgroundColor: background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <DoctorHeader title={title} />
+      <DoctorHeader title={title} onBackPress={onBackPress} />
       <FadedScrollView
         ref={scrollRef}
         edgeColor={background}

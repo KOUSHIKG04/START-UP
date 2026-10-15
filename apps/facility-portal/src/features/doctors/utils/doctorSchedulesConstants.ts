@@ -4,4 +4,5 @@ export const shiftStyles = {
   "on-duty": "bg-[#e6f4f5] text-[#07595d] border-l-4 border-[#07595d]",
   surgery: "bg-[#fee2e2] text-[#b91c1c] border-l-4 border-[#ef4444]",
   "on-call": "bg-[#fef3c7] text-[#92400e] border-l-4 border-[#f59e0b]",
+  "home-visit": "bg-[#ede9fe] text-[#5b21b6] border-l-4 border-[#7c3aed]",
 } as const;

@@ -30,6 +30,20 @@ export async function searchPublicPractices(
   return publicPracticeSchema.array().parse(data);
 }
 
+export async function listPublicDoctorPractices(
+  client: AppSupabaseClient,
+  practiceId: string,
+  serviceMode: "clinic" | "online" | "home",
+  coordinates?: { latitude: number; longitude: number } | null
+) {
+  const { data, error } = await client.rpc("list_public_doctor_practices", {
+    p_practice_id: uuidSchema.parse(practiceId), p_service_mode: serviceMode,
+    p_latitude: coordinates?.latitude, p_longitude: coordinates?.longitude,
+  });
+  if (error) throw error;
+  return publicPracticeSchema.array().parse(data);
+}
+
 export async function getPublicPracticeBio(
   client: AppSupabaseClient,
   practiceId: string,

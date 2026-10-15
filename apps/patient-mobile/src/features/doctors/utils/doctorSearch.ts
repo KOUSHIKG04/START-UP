@@ -1,12 +1,18 @@
 import type { PublicPractice } from "@startup/contracts";
 
-/** Discovery returns one row per published service; a doctor card represents a practice. */
+/** One doctor card per mode; keep all details from the same preferred practice. */
 export function uniqueDoctorPractices(practices: PublicPractice[], mode: "clinic" | "online" | "home"): PublicPractice[] {
   const byPractice = new Map<string, PublicPractice>();
   for (const practice of practices) {
-    const key = mode === "online" ? practice.doctor_id : practice.practice_id;
-    if (!practice.service_code.startsWith(`${mode}-`) || byPractice.has(key)) continue;
-    byPractice.set(key, practice);
+    if (!practice.service_code.startsWith(`${mode}-`)) continue;
+    const previous = byPractice.get(practice.doctor_id);
+    const nextTime = (item: PublicPractice) => item.next_available_at ? Date.parse(item.next_available_at) : Number.MAX_SAFE_INTEGER;
+    const priority = previous ? Number(previous.has_available_slots) - Number(practice.has_available_slots)
+      || nextTime(practice) - nextTime(previous)
+      || (!practice.has_available_slots ? Number(previous.fee_minor !== null) - Number(practice.fee_minor !== null) : 0)
+      || (practice.distance_meters ?? Number.MAX_SAFE_INTEGER) - (previous.distance_meters ?? Number.MAX_SAFE_INTEGER)
+      || practice.practice_id.localeCompare(previous.practice_id) : -1;
+    if (!previous || priority < 0) byPractice.set(practice.doctor_id, practice);
   }
   return [...byPractice.values()];
 }

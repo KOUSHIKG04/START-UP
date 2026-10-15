@@ -64,3 +64,12 @@ export function previewClocks(
     );
   return result;
 }
+
+/** Setup suggestion only; daily-limit edits must never recalculate saved times. */
+export function suggestConsultationDuration(start: string, end: string, dailyLimit: number): number | null {
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(start) || !/^(?:(?:[01]\d|2[0-3]):[0-5]\d|24:00)$/.test(end)) return null;
+  const minutes = (value: string) => Number(value.slice(0, 2)) * 60 + Number(value.slice(3));
+  const available = minutes(end) - minutes(start);
+  if (available < 5 || !Number.isInteger(dailyLimit) || dailyLimit < 1) return null;
+  return Math.min(120, Math.max(5, Math.floor(available / dailyLimit / 5) * 5));
+}

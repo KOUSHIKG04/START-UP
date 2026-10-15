@@ -55,11 +55,12 @@ export function FacilityUnavailableTime({
       type: "error",
     });
   return (
-    <>
+    <section className={`${card} min-w-0 max-w-full`}>
+      <h2 className="text-[15px] font-normal">Unavailable time / Leave</h2>
       <div
         role="group"
         aria-label="Unavailable time service"
-        className="flex gap-2 overflow-x-auto pb-1"
+        className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1"
       >
         {scopes.map(([value, label]) => (
           <label
@@ -80,10 +81,8 @@ export function FacilityUnavailableTime({
         ))}
       </div>
       <p className="text-sm text-[#475569]">This block applies to {scopeLabel.toLowerCase()}.</p>
-      <section className={card}>
-        <h2 className="text-[20px] font-normal">Unavailable time</h2>
         <form
-          className="space-y-4"
+          className="min-w-0 space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
             if (!zone) return;
@@ -136,7 +135,7 @@ export function FacilityUnavailableTime({
           }}
         >
           <UnavailableDatePicker value={date} onChange={setDate} timeZone={zone ?? undefined} disabled={pending} />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
             <ClockTimePicker label="Start time" value={start} onChange={setStart} disabled={pending} />
             <ClockTimePicker label="End time" value={end} onChange={setEnd} disabled={pending} endOfDay />
           </div>
@@ -176,7 +175,7 @@ export function FacilityUnavailableTime({
                   key={item.id}
                   className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e2e8f0] pt-4"
                 >
-                  <div>
+                  <div className="min-w-0 break-words">
                     <p className="text-sm">
                       {formatDisplayDateTime(item.starts_at, zone ?? undefined)}{" "}
                       – {formatDisplayDateTime(item.ends_at, zone ?? undefined)}
@@ -226,7 +225,6 @@ export function FacilityUnavailableTime({
             </button>
           </p>
         ) : null}
-      </section>
-    </>
+    </section>
   );
 }

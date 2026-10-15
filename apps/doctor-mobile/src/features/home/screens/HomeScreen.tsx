@@ -77,6 +77,8 @@ export function HomeScreen() {
   const waiting = todayAppointments.filter(
     (item) => item.queue_state === "waiting" || item.queue_state === "called"
   ).length;
+  const pendingRequests=(appointments.data ?? []).filter(item=>item.status==="pending" && Date.parse(item.request_expires_at ?? item.starts_at)>Date.now() && Date.parse(item.starts_at)>Date.now());
+  const homeAppointments=[...pendingRequests,...todayAppointments.filter(item=>!pendingRequests.some(request=>request.id===item.id))];
   async function changePresence(value: boolean) {
     if (!supabase || presenceBusyRef.current) return;
     presenceBusyRef.current = true;
@@ -164,7 +166,7 @@ export function HomeScreen() {
           ))}
         </View>
         <View style={[ui.between, { marginTop: 12 }]}>
-          <Heading>Today’s Appointment</Heading>
+          <Heading>{pendingRequests.length ? "Appointment requests" : "Today’s Appointment"}</Heading>
           <IconButton
             label="See all appointments"
             onPress={() => router.navigate("/appointments")}
@@ -186,7 +188,7 @@ export function HomeScreen() {
             <Label style={ui.error}>Could not load appointments.</Label>
           </Panel>
         ) : null}
-        {todayAppointments.length === 0 &&
+        {homeAppointments.length === 0 &&
         !appointments.isLoading &&
         !appointments.isError ? (
           <View style={styles.emptyAppointments}>
@@ -195,20 +197,21 @@ export function HomeScreen() {
             </Label>
           </View>
         ) : null}
-        {todayAppointments.slice(0, 2).map((item) => (
+        {homeAppointments.slice(0, 2).map((item) => (
           <PatientCard
             key={item.id}
             appointment={item}
             home
+            actionLabel={item.status==="pending" ? "Review request" : "View appointment"}
             onOpen={() =>
               router.navigate({
-                pathname: "/appointments",
+                pathname: "/appointment-details",
                 params: { appointmentId: item.id },
               })
             }
             onAction={() =>
               router.navigate({
-                pathname: "/appointments",
+                pathname: "/appointment-details",
                 params: { appointmentId: item.id },
               })
             }

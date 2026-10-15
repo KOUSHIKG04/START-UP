@@ -11,6 +11,17 @@ export const clinicBookingSchema = z
   })
   .strict();
 
+export const portalWalkInBookingSchema = z.object({
+  practiceId: uuidSchema,
+  windowId: uuidSchema,
+  practiceServiceId: uuidSchema,
+  patientName: z.string().trim().min(2).max(160),
+  patientPhone: z.string().trim().regex(/^[+0-9() .-]*$/).max(30),
+  reason: z.string().trim().max(1000),
+  idempotencyKey: uuidSchema,
+}).strict();
+export type PortalWalkInBookingInput = z.infer<typeof portalWalkInBookingSchema>;
+
 export const clinicCheckinTokenSchema = z.string().regex(/^[0-9a-f-]{72}$/);
 
 export const publishClinicSessionSchema = z

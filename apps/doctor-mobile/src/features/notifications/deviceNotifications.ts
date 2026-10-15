@@ -10,6 +10,7 @@ import * as SecureStore from "expo-secure-store";
 import type { ToastInput } from "@startup/mobile-ui";
 import { registerMyExpoPushToken, revokeMyExpoPushToken } from "@startup/data-access";
 import { supabase } from "../../services/supabase";
+import { appointmentDetailsRoute } from "../appointments/utils/appointmentNavigation";
 
 const installationKey = "clinzo-doctor-push-installation";
 // Importing the module itself can activate its Android push listener in Expo Go.
@@ -50,7 +51,10 @@ async function register() {
 }
 
 function openNotification(response: NotificationResponse) {
-  const route = response.notification.request.content.data?.route;
+  const data=response.notification.request.content.data;
+  const details=appointmentDetailsRoute(data?.appointmentId ?? data?.appointment_id);
+  if(details){router.push(details);return;}
+  const route = data?.route;
   if (route === "/appointments") router.push("/appointments");
   else if (route === "/home-visit") router.push("/home-visit");
   else if (route === "/chat") router.push("/chat");

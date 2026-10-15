@@ -105,7 +105,13 @@ export default {
           deliveries.map((delivery) => ({
             to: delivery.token,
             ...notificationCopy(delivery),
-            data: { notificationId: delivery.delivery_id },
+            data: {
+              notificationId: delivery.delivery_id,
+              ...(delivery.template_key.startsWith("appointment.") ? {
+                route: "/appointments",
+                appointmentId: delivery.safe_parameters.appointment_id,
+              } : {}),
+            },
             sound: "default",
           }))
         );

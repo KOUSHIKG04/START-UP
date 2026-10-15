@@ -42,6 +42,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     queryKey: ["public-practices", symptom, consultationType, isOnline ? null : coordinates],
     queryFn: () => searchPublicPractices(supabase!, {
       ...resolveDoctorSearch(symptom),
+      serviceMode: consultationType === "Home Visit" ? "home" : "clinic",
       latitude: isOnline ? undefined : coordinates?.latitude,
       longitude: isOnline ? undefined : coordinates?.longitude,
       limit: 50,
@@ -63,8 +64,8 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     if (!isOnline || !onlineQuery.data) return;
     setOnlineRows(previous => {
       if (onlineOffset === 0) return onlineQuery.data;
-      const merged = new Map(previous.map(item => [item.practice_service_id, item]));
-      for (const item of onlineQuery.data) merged.set(item.practice_service_id, item);
+      const merged = new Map(previous.map(item => [item.practice_id, item]));
+      for (const item of onlineQuery.data) merged.set(item.practice_id, item);
       return [...merged.values()];
     });
   }, [isOnline, onlineOffset, onlineQuery.data]);
@@ -78,6 +79,9 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
   }, [isOnline, onlineQuery.refetch, query.refetch]));
   const practices = useMemo(() => uniqueDoctorPractices(rows, consultationType === "Online"
     ? "online" : consultationType === "Home Visit" ? "home" : "clinic").sort((a, b) => {
+    if (filter === "fee" && (a.fee_minor === null || b.fee_minor === null)) {
+      return a.fee_minor === b.fee_minor ? 0 : a.fee_minor === null ? 1 : -1;
+    }
     const difference = filter === "fee" ? Number(a.fee_minor) - Number(b.fee_minor)
       : filter === "rating" ? Number(a.rating ?? -1) - Number(b.rating ?? -1)
       : filter === "experience" ? a.experience_years - b.experience_years
@@ -123,7 +127,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
     <Header title={symptom === "your symptoms" ? "All doctors" : `Specialists for ${symptom}`} app="patient" onBackPress={onBackPress} titleStyle={styles.headerTitle} />
     <View style={styles.topSection}>
       <View style={styles.headingRow}>
-        <View style={styles.headingCopy}><Text variant="cardHeading" style={styles.title}>Doctors available for your care</Text></View>
+        <View style={styles.headingCopy}><Text variant="cardHeading" style={styles.title}>Find a doctor for your care</Text></View>
         <View style={styles.filterActions}>
           <Dropdown accessibilityLabel="Sort doctors" options={isOnline ? filterOptions.filter(option => option.value !== "distance") : filterOptions} value={filter} onValueChange={(value) => { setFilter(value as SortBy); setSortOrder(value === "rating" || value === "experience" ? "desc" : "asc"); if (value === "distance" && !coordinates) void requestLocation(); }} triggerLabel="Filter" chevronSize={12} chevronColor={colors.patient.primaryDark} containerStyle={styles.filterContainer} triggerStyle={styles.filterTrigger} valueStyle={styles.filterValue} menuWidth={176} />
           <Pressable accessibilityLabel={sortOrder === "asc" ? "Sort ascending (tap for descending)" : "Sort descending (tap for ascending)"} accessibilityRole="button" onPress={toggleSortOrder} style={({ pressed }) => [styles.sortOrderButton, pressed && styles.sortOrderButtonPressed]}>
@@ -140,7 +144,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
         <Text variant="body" style={styles.message}>{symptom === "your symptoms" ? "Doctors appear here after their clinic is verified and they publish a service." : "Try another symptom, category, or browse all available doctors."}</Text>
       </View> : null}
       <View style={styles.list}>{practices.map((practice) => <DoctorCard
-        key={practice.practice_service_id}
+        key={practice.doctor_id}
         name={practice.doctor_name}
         qualification={practice.qualification ?? ""}
         specialty={practice.specialties.map((item) => item.name).join(", ") || practice.service_name}
@@ -150,7 +154,7 @@ export function DoctorResultsScreen({ symptom, consultationType, onBackPress }: 
         fee={formatConsultationFee(practice.fee_minor, practice.currency)}
         distanceMeters={isOnline ? null : practice.distance_meters}
         contextLabel={consultationType === "Online" ? "Video consultation" : consultationType === "Home Visit" ? "Home Visit" : "Clinic Visit"}
-        onPress={() => router.push({ pathname: "/doctor-profile", params: { practiceId: practice.practice_id, serviceId: practice.practice_service_id, consultationType } } as unknown as Href)}
+        onPress={() => router.push({ pathname: "/doctor-profile", params: { practiceId: practice.practice_id, serviceId: practice.practice_service_id ?? "", consultationType } } as unknown as Href)}
       />)}</View>
       {isOnline && onlineQuery.data?.length === 50 ? <Button loading={onlineQuery.isFetching} variant="ghost" label="Load more doctors" labelStyle={styles.moreLabel} accessibilityRole="button" accessibilityLabel="Load more online doctors" disabled={onlineQuery.isFetching} onPress={() => setOnlineOffset(value => value + 50)} style={styles.moreButton}><Text variant="label" style={styles.moreLabel}>{onlineQuery.isFetching ? "Loading doctors…" : "Load more doctors"}</Text></Button> : null}
     </FadedScrollView>

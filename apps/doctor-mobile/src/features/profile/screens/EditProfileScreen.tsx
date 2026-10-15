@@ -41,6 +41,8 @@ export function EditProfileScreen() {
   const [languages, setLanguages] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState("");
+  const ownedClinics = profile.data?.facilities.filter(f => f.active && f.facility_kind === "clinic" && f.can_edit_clinic) ?? [];
+  const clinic = ownedClinics.length === 1 ? ownedClinics[0] : undefined;
   useToastFeedback({ error });
 
   useEffect(() => {
@@ -94,7 +96,11 @@ export function EditProfileScreen() {
         {!profile.isLoading && !profile.error && !profile.data ? <Label muted>Complete your doctor profile before editing it.</Label> : null}
         {initialized ? <>
           <Input label="Full name" value={name} onChangeText={setName} />
-          {addressQuery.isError ? <Button theme="doctor" label="Retry loading address" onPress={() => { void addressQuery.refetch(); }} /> : addressInitialized ? <PersonalAddressField value={personalAddress} onChange={setPersonalAddress} /> : <Skeleton theme="doctor" height={54} radius={12} />}
+          {addressQuery.isError ? <Button theme="doctor" label="Retry loading address" onPress={() => { void addressQuery.refetch(); }} /> : addressInitialized ? <PersonalAddressField value={personalAddress} onChange={setPersonalAddress} clinicAddress={clinic ? {
+            ...emptyPersonalAddress, building: clinic.address.slice(0, 160), street: clinic.address.slice(160, 360), instructions: clinic.address.slice(360),
+            locality: clinic.locality ?? "", city: clinic.city ?? "", state: clinic.state ?? "", pincode: clinic.pincode ?? "",
+            latitude: clinic.latitude ?? null, longitude: clinic.longitude ?? null,
+          } : undefined} /> : <Skeleton theme="doctor" height={54} radius={12} />}
           <Input label="About" value={bio} onChangeText={setBio} multiline />
           <Input label="Qualifications" value={qualification} onChangeText={setQualification} placeholder="e.g. MBBS, MD" maxLength={160} />
           <Label muted>Approved qualifications: {profile.data?.qualification ?? "Not verified yet"}</Label>

@@ -38,7 +38,9 @@ import {
   Label,
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { scheduleError } from "../utils/schedule";
+import { DatePicker } from "../../../components/DatePicker";
+import { formatDisplayDate } from "@startup/contracts";
+import { previewTimeBlock, scheduleError, suggestConsultationDuration } from "../utils/schedule";
 import type { Schedule } from "../../../types/doctor";
 import {
   ConsultationChargesPanel,
@@ -240,8 +242,8 @@ export function ScheduleScreen({
             ? (p.home_end ?? "17:00")
             : p.clinic_end
         ).slice(0, 5),
-        duration: mode === "clinic" ? Math.min(p.slot_minutes, 45) : p.slot_minutes,
-        onlineDuration: mode === "online" ? Math.min(p.online_slot_minutes, 45) : p.online_slot_minutes,
+        duration: p.slot_minutes,
+        onlineDuration: p.online_slot_minutes,
         homeDuration: p.home_slot_minutes,
         online: p.online_daily_limit,
         walkIn: p.walkin_daily_limit,
@@ -284,6 +286,14 @@ export function ScheduleScreen({
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [availabilityDuration, setAvailabilityDuration] = useState<number | null>(null);
   const [showAutoBookingHelp, setShowAutoBookingHelp] = useState(false);
+  const [suggestedDuration, setSuggestedDuration] = useState<number | null>(null);
+  const [effectiveDate, setEffectiveDate] = useState("");
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: zone || "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const startsFrom = effectiveDate && effectiveDate >= today ? effectiveDate : today;
+  useEffect(() => { setEffectiveDate(""); setSuggestedDuration(null); }, [selectedPracticeId, mode]);
+  const dailyLimit = mode === "online" ? draft.online : draft.walkIn;
+  const suggestion = suggestConsultationDuration(draft.start, draft.end, dailyLimit);
+  const suggestedTimes = suggestedDuration ? previewTimeBlock(draft.start, draft.end, suggestedDuration) : [];
   const update = (changes: Partial<Schedule>) => {
     dirty.current = true;
     setDraft((current) => ({ ...current, ...changes }));
@@ -354,7 +364,8 @@ export function ScheduleScreen({
             selectedPracticeId,
             mode,
             scheduleSettings(),
-            draftVersion.current
+            draftVersion.current,
+            startsFrom
           )
         : null;
       const settings =
@@ -379,7 +390,7 @@ export function ScheduleScreen({
           : "Schedule saved",
         message: publication
           ? active
-            ? "Schedule published. New slots start from tomorrow."
+            ? `Schedule published from ${formatDisplayDate(startsFrom)} for this practice and visit type. Existing appointments keep their times.`
             : "Future unbooked slots are withdrawn. Existing appointments keep their times."
           : "Publish after your practice is verified.",
         type: "success",
@@ -492,26 +503,28 @@ export function ScheduleScreen({
         <Label muted style={{ fontSize: 12 }}>
           {mode === "home"
             ? "Set your visit duration."
-            : "Set slot duration and daily limit."}
+            : "Duration sets appointment times. The daily limit caps bookings."}
         </Label>
         <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
         {mode === "clinic" ? (
           <ClockDurationPicker
-            label="Clinic slot duration"
+            label="Consultation duration"
             value={draft.duration}
             min={5}
-            max={45}
+            max={120}
             theme="doctor"
+            disabled={busy}
             onChange={(duration) => { update({ duration }); setAvailabilityDuration(duration); }}
           />
         ) : null}
         {mode === "online" ? (
           <ClockDurationPicker
-            label="Online slot duration"
+            label="Consultation duration"
             value={draft.onlineDuration}
             min={5}
-            max={45}
+            max={120}
             theme="doctor"
+            disabled={busy}
             onChange={(onlineDuration) => { update({ onlineDuration }); setAvailabilityDuration(onlineDuration); }}
           />
         ) : null}
@@ -522,24 +535,35 @@ export function ScheduleScreen({
             min={30}
             max={120}
             theme="doctor"
+            disabled={busy}
             onChange={(homeDuration) => { update({ homeDuration }); setAvailabilityDuration(homeDuration); }}
           />
         ) : null}
         {mode !== "home" ? (
           <View style={{ flex: 1, minWidth: 0 }}>
             <NumberSetting
-              title="Daily slot limit"
+              title="Daily booking limit"
               stepper
               disabled={busy}
               value={mode === "online" ? draft.online : draft.walkIn}
               min={0}
               max={100}
-              suffix="slots"
+              suffix="bookings"
               onChange={(value) => update(mode === "online" ? { online: value } : { walkIn: value })}
             />
           </View>
         ) : null}
         </View>
+        {mode !== "home" ? <>
+          <Label muted style={{ fontSize: 12 }}>Changing the daily limit does not change appointment times.</Label>
+          {!saved.data?.published_modes?.includes(mode) ? <>
+          <Label muted style={{ fontSize: 12 }}>Preview a duration based on your hours and daily limit.</Label>
+          <Button
+            theme="doctor" variant="outline" label="Suggest duration"
+            disabled={busy || suggestion === null}
+            onPress={() => setSuggestedDuration(suggestion)}
+          /></> : null}
+        </> : null}
       </ScheduleSection>
       <ScheduleSection title="Auto Accept Bookings">
         <View style={ui.between}>
@@ -611,6 +635,11 @@ export function ScheduleScreen({
                 : "An active clinic or hospital association is required before you can save a schedule."}
         </Label>
       ) : null}
+      {selectedPractice?.verified ? <ScheduleSection title="Apply changes from">
+        <Label muted style={{ fontSize: 12 }}>New appointment times apply from this date. Existing appointments and pending requests keep their times. Daily booking limits apply when saved.</Label>
+        <DatePicker key={`${selectedPracticeId}:${mode}`} value={startsFrom} onChange={setEffectiveDate}
+          timeZone={zone} minDate={today} disabled={busy} label="Start date" />
+      </ScheduleSection> : null}
       <Button
         loading={pendingAction === "save"}
         theme="doctor"
@@ -645,7 +674,8 @@ export function ScheduleScreen({
         <Label muted>
           Choose working days, hours and the slot interval. Publishing creates the
           next 30 days automatically. Auto-accept uses one shared daily limit
-          across all services.
+          across all services. The daily booking limit counts active bookings;
+          patients can choose any available time within your working hours.
         </Label>
         <Button theme="doctor" label="Got it" onPress={() => setShowScheduleHelp(false)} />
       </ModalSurface>
@@ -657,6 +687,19 @@ export function ScheduleScreen({
           are respected.
         </Label>
         <Button theme="doctor" label="Got it" onPress={() => setAvailabilityDuration(null)} />
+      </ModalSurface>
+      <ModalSurface visible={suggestedDuration !== null} onClose={() => setSuggestedDuration(null)}>
+        <Heading style={{ fontSize: 18 }}>Suggested consultation duration</Heading>
+        <Label>{suggestedDuration} minutes per consultation</Label>
+        <Label muted>{suggestedTimes.length} appointment times within your hours, with up to {dailyLimit} bookings per day.</Label>
+        <Label muted>{suggestedTimes.slice(0, 4).join(" · ")}{suggestedTimes.length > 4 ? " …" : ""}</Label>
+        <Label muted>Review this duration before publishing. Later daily-limit changes will not recalculate it.</Label>
+        <Button theme="doctor" label="Use this duration" onPress={() => {
+          if (suggestedDuration === null) return;
+          update(mode === "online" ? { onlineDuration: suggestedDuration } : { duration: suggestedDuration });
+          setSuggestedDuration(null);
+        }} />
+        <Button theme="doctor" variant="outline" label="Keep current duration" onPress={() => setSuggestedDuration(null)} />
       </ModalSurface>
     </DoctorScreen>
   );

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { MapPin, X } from "lucide-react-native";
+import { SquareCheck, MapPin, Square, X } from "lucide-react-native";
 import { Button, Input, ModalSurface, useToast } from "@startup/mobile-ui";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { doctorPersonalAddressInputSchema, type DoctorPersonalAddressInput } from "@startup/contracts";
@@ -14,10 +14,19 @@ export const emptyPersonalAddress: DoctorPersonalAddressInput = {
  latitude: null, longitude: null, use_account_details: true,
 };
 
-/** Profile/contact address only; never reads or writes the clinic location draft. */
-export function PersonalAddressField({ value, onChange }: {
+/** Copies the supplied clinic address only after the doctor opts in. */
+export function PersonalAddressField({ value, onChange, clinicAddress }: {
  value: DoctorPersonalAddressInput; onChange: (value: DoctorPersonalAddressInput) => void;
+ clinicAddress?: DoctorPersonalAddressInput;
 }) {
+ const [sameAsClinic, setSameAsClinic] = useState(false);
+ const previousAddress = useRef(value);
+ const clinicKey = JSON.stringify(clinicAddress);
+ useEffect(() => {
+  if (!sameAsClinic) return;
+  if (!clinicKey) { setSameAsClinic(false); onChange(previousAddress.current); return; }
+  onChange(JSON.parse(clinicKey) as DoctorPersonalAddressInput);
+ }, [sameAsClinic, clinicKey, onChange]);
  const { profile } = useMobileSession();
  const [open, setOpen] = useState(false);
  const waitingForMap = useRef(false);
@@ -37,11 +46,21 @@ export function PersonalAddressField({ value, onChange }: {
  const summary = [value.building, value.street, value.locality, value.city, value.state, value.pincode].filter(Boolean).join(", ");
  return <View style={styles.field}>
   <Text style={styles.label}>Personal Address</Text>
-  <Pressable accessibilityRole="button" accessibilityLabel="Edit personal address" onPress={() => setOpen(true)} style={styles.trigger}>
+  <Pressable accessibilityRole="button" accessibilityLabel="Edit personal address" disabled={sameAsClinic} accessibilityState={{ disabled: sameAsClinic }} onPress={() => setOpen(true)} style={styles.trigger}>
    <Text numberOfLines={1} style={[styles.value, !summary && styles.placeholder]}>{summary || "Enter your personal address"}</Text>
    <MapPin size={18} color={colors.doctor.primary} />
   </Pressable>
-  <Text style={styles.hint}>Your contact address is separate from your consultation location.</Text>
+  {clinicAddress ? <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: sameAsClinic }}
+   onPress={() => {
+    if (sameAsClinic) { setSameAsClinic(false); onChange(previousAddress.current); return; }
+    if (!doctorPersonalAddressInputSchema.safeParse(clinicAddress).success) {
+     showToast({ title: "Complete your clinic address first", message: "Add the clinic address, locality, city, state and pincode, then select this option.", type: "error" }); return;
+    }
+    previousAddress.current = value; setSameAsClinic(true); onChange(clinicAddress);
+   }} style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 48 }}>
+   {sameAsClinic ? <SquareCheck size={22} color={colors.doctor.primary} /> : <Square size={22} color={colors.textSecondary} />}
+   <Text style={[styles.hint, { flex: 1 }]}>Personal address is the same as clinic address</Text>
+  </Pressable> : <Text style={styles.hint}>Your contact address is separate from your consultation location.</Text>}
   <ModalSurface visible={open} onClose={() => { Keyboard.dismiss(); setOpen(false); }} layout="custom" transparent animationType="slide">
    <View style={styles.overlay}>
     <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Close personal address" onPress={() => { Keyboard.dismiss(); setOpen(false); }} />

@@ -1,23 +1,23 @@
 import { useToastFeedback } from "@startup/mobile-ui";
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, type ReactNode } from "react";
+import { BackHandler, StyleSheet, Text, View } from "react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   issueConsultationPrescription,
   recommendConsultationFollowup,
-  recordConsultationDiagnosis,
-  recordConsultationVital,
+  recordConsultationIntake,
+  getDoctorConsultationDraft,
 } from "@startup/data-access";
 import {
-  parseDisplayDate,
   prescriptionMedicineSchema,
 } from "@startup/contracts";
 import type {
   IssuePrescriptionInput,
   RecordVitalInput,
 } from "@startup/contracts";
-import { Button, Input } from "@startup/mobile-ui";
+import { Button, CalendarField, Input, Loader } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
+import { DoctorScreen, Heading, Label } from "../../../components/DoctorScreen";
 
 const vitalUnits: Record<RecordVitalInput["code"], string> = {
   temperature_c: "°C",
@@ -43,15 +43,29 @@ type DraftMedicine = Medicine & { draftId: string };
 type Meal = Medicine["timings"][number]["meal_anchor"];
 const meals: Meal[] = ["breakfast", "lunch", "dinner", "bedtime"];
 
-export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
+type FlowProps = { appointmentId: string; patientName: string; timezone: string; assessmentStep: ReactNode; completing: boolean };
+export function ConsultationForm(props: FlowProps) {
+  const draft = useQuery({ queryKey: ["doctor-consultation-draft", props.appointmentId],
+    queryFn: () => getDoctorConsultationDraft(supabase!, props.appointmentId), staleTime: 0 });
+  if (!draft.data) return <DoctorScreen title="Consultation" bottomNav={false}>
+    {draft.isError ? <><Label>Could not load the consultation.</Label><Button theme="doctor" label="Retry" onPress={() => void draft.refetch()} /></> : <Loader theme="doctor" />}
+  </DoctorScreen>;
+  return <ConsultationWizard key={props.appointmentId} {...props} initial={draft.data} />;
+}
+
+function ConsultationWizard({ appointmentId, patientName, timezone, assessmentStep, completing, initial }: FlowProps & { initial: Awaited<ReturnType<typeof getDoctorConsultationDraft>> }) {
   const queryClient = useQueryClient();
+  const [step, setStep] = useState(initial.followup ? 3 : initial.prescription_issued ? 2 : initial.vitals.length || initial.diagnosis ? 1 : 0);
+  const [intakeSaved, setIntakeSaved] = useState(initial.vitals.length > 0 || Boolean(initial.diagnosis));
+  const [prescriptionIssued, setPrescriptionIssued] = useState(initial.prescription_issued);
+  const [followupSaved, setFollowupSaved] = useState(Boolean(initial.followup));
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   useToastFeedback({ error, success: message });
   const [vitalValues, setVitalValues] = useState<
     Partial<Record<RecordVitalInput["code"], string>>
-  >({});
-  const [diagnosis, setDiagnosis] = useState("");
+  >(Object.fromEntries(initial.vitals.map(vital => [vital.code, String(vital.value)])));
+  const [diagnosis, setDiagnosis] = useState(initial.diagnosis ?? "");
   const [medicineName, setMedicineName] = useState("");
   const [strength, setStrength] = useState("");
   const [form, setForm] = useState("");
@@ -65,50 +79,25 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
   const [mealRelation, setMealRelation] =
     useState<Medicine["timings"][number]["meal_relation"]>("after");
   const [items, setItems] = useState<DraftMedicine[]>([]);
-  const [followupDate, setFollowupDate] = useState("");
-  const [followupReason, setFollowupReason] = useState("");
-  const timezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
+  const [followupDate, setFollowupDate] = useState(initial.followup?.date ?? "");
+  const [followupReason, setFollowupReason] = useState(initial.followup?.reason ?? "");
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const tomorrow = new Date(Date.parse(`${today}T12:00:00Z`) + 86400000).toISOString().slice(0, 10);
 
   const vital = useMutation({
-    mutationFn: (code: RecordVitalInput["code"]) =>
-      recordConsultationVital(supabase!, {
+    mutationFn: () => recordConsultationIntake(supabase!, {
         appointmentId,
-        code,
-        value: Number(vitalValues[code]),
-        unit: vitalUnits[code],
-      }),
-    onSuccess: (_result: unknown, code: RecordVitalInput["code"]) => {
-      setVitalValues((current) => ({ ...current, [code]: "" }));
-      setError("");
-      setMessage(`${vitalLabels[code]} saved.`);
-      void queryClient.invalidateQueries({
-        queryKey: ["doctor-clinic-appointments"],
-      });
-    },
-    onError: () =>
-      setError("Could not save this vital. Check the value and try again."),
-  });
-
-  const diagnosisMutation = useMutation({
-    mutationFn: () =>
-      recordConsultationDiagnosis(supabase!, {
-        appointmentId,
-        description: diagnosis,
-        isPrimary: true,
+        vitals: (Object.keys(vitalUnits) as RecordVitalInput["code"][]).filter(code => vitalValues[code]?.trim())
+          .map(code => ({ code, value: Number(vitalValues[code]), unit: vitalUnits[code] })),
+        diagnosis: diagnosis.trim() || null,
       }),
     onSuccess: () => {
-      setDiagnosis("");
+      setIntakeSaved(true); setStep(1);
       setError("");
-      setMessage("Primary diagnosis saved.");
-      void queryClient.invalidateQueries({
-        queryKey: ["doctor-clinic-appointments"],
-      });
+      void queryClient.invalidateQueries({ queryKey: ["doctor-consultation-draft", appointmentId] });
     },
     onError: () =>
-      setError(
-        "Could not save the diagnosis. A primary diagnosis may already exist."
-      ),
+      setError("Could not save the vitals and diagnosis. Check the entered values and retry."),
   });
 
   const prescription = useMutation({
@@ -119,11 +108,11 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         timezone,
       }),
     onSuccess: () => {
-      setItems([]);
+      setPrescriptionIssued(true); setStep(2);
       setError("");
       setMessage("Prescription signed and saved.");
       void queryClient.invalidateQueries({
-        queryKey: ["doctor-clinic-appointments"],
+        queryKey: ["doctor-consultation-draft", appointmentId],
       });
     },
     onError: () =>
@@ -136,17 +125,16 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
     mutationFn: () =>
       recommendConsultationFollowup(supabase!, {
         appointmentId,
-        date: parseDisplayDate(followupDate) ?? followupDate,
+        date: followupDate,
         timezone,
         reason: followupReason,
       }),
     onSuccess: () => {
-      setFollowupDate("");
-      setFollowupReason("");
+      setFollowupSaved(true); setStep(3);
       setError("");
       setMessage("Follow-up recommendation saved. It is not a booking.");
       void queryClient.invalidateQueries({
-        queryKey: ["doctor-clinic-appointments"],
+        queryKey: ["doctor-consultation-draft", appointmentId],
       });
     },
     onError: () =>
@@ -154,6 +142,17 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         "Could not save the follow-up. Check the future date and try again."
       ),
   });
+
+  const busy = vital.isPending || prescription.isPending || followup.isPending || completing;
+  const back = () => { if (!busy) { setError(""); setMessage(""); setStep(current => Math.max(0, current - 1)); } };
+  useEffect(() => {
+    if (step === 0 && !busy) return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!busy && step > 0) setStep(current => Math.max(0, current - 1));
+      return true;
+    });
+    return () => subscription.remove();
+  }, [step, busy]);
 
   function addMedicine() {
     const parsed = prescriptionMedicineSchema.safeParse({
@@ -164,8 +163,8 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       instructions,
       dose_quantity: Number(doseQuantity),
       dose_unit: doseUnit,
-      starts_on: parseDisplayDate(startsOn) ?? startsOn,
-      ends_on: parseDisplayDate(endsOn) ?? endsOn,
+      starts_on: startsOn,
+      ends_on: endsOn,
       timings: selectedMeals.map((meal_anchor) => ({
         meal_anchor,
         meal_relation: mealRelation,
@@ -192,14 +191,17 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
   }
 
   return (
+    <DoctorScreen title={["Record vitals", "Prescription", "Follow-up", "Sign assessment"][step]} bottomNav={false}
+      onBackPress={busy ? () => undefined : step > 0 ? back : undefined} scrollResetKey={step}>
+    <Heading>{patientName}</Heading>
     <View style={styles.group}>
-      <Text style={styles.heading}>Consultation details</Text>
-      <Text>Record vitals and diagnosis before signing the assessment.</Text>
+      {step === 0 ? <>
       {(Object.keys(vitalUnits) as RecordVitalInput["code"][]).map((code) => (
         <View key={code} style={styles.vitalRow}>
           <View style={styles.vitalInput}>
             <Input
               label={`${vitalLabels[code]} (${vitalUnits[code]})`}
+              disabled={busy || intakeSaved}
               value={vitalValues[code] ?? ""}
               onChangeText={(value) =>
                 setVitalValues((current) => ({ ...current, [code]: value }))
@@ -207,34 +209,28 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
               keyboardType="decimal-pad"
             />
           </View>
-          <Button
-            loading={vital.isPending && vital.variables === code}
-            label="Save"
-            variant="outline"
-            disabled={
-              vital.isPending ||
-              !Number.isFinite(Number(vitalValues[code])) ||
-              Number(vitalValues[code]) <= 0
-            }
-            onPress={() => vital.mutate(code)}
-          />
         </View>
       ))}
       <Input
         label="Primary diagnosis"
+        disabled={busy || intakeSaved}
         value={diagnosis}
         onChangeText={setDiagnosis}
         multiline
       />
       <Button
-        loading={diagnosisMutation.isPending}
-        label="Save primary diagnosis"
-        variant="outline"
-        disabled={diagnosisMutation.isPending || diagnosis.trim().length < 2}
-        onPress={() => diagnosisMutation.mutate()}
+        theme="doctor"
+        loading={vital.isPending}
+        label={intakeSaved ? "Continue" : "Save and continue"}
+        disabled={busy}
+        onPress={() => {
+          if (intakeSaved) { setStep(1); return; }
+          if (!diagnosis.trim() && !Object.values(vitalValues).some(value => value?.trim())) { setStep(1); return; }
+          vital.mutate();
+        }}
       />
-
-      <Text style={styles.heading}>Prescription</Text>
+      </> : null}
+      {step === 1 && !prescriptionIssued ? <>
       <Input
         label="Medicine name"
         value={medicineName}
@@ -256,15 +252,23 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
         keyboardType="decimal-pad"
       />
       <Input label="Dose unit" value={doseUnit} onChangeText={setDoseUnit} />
-      <Input
-        label="Start date (DD-MM-YYYY)"
+      <CalendarField theme="doctor"
+        label="Start date"
         value={startsOn}
-        onChangeText={setStartsOn}
+        minDate={today}
+        disabled={prescription.isPending}
+        onChange={(day) => {
+          setStartsOn(day);
+          if (endsOn && endsOn < day) setEndsOn("");
+        }}
       />
-      <Input
-        label="End date (DD-MM-YYYY)"
+      <CalendarField theme="doctor"
+        label="End date"
         value={endsOn}
-        onChangeText={setEndsOn}
+        minDate={startsOn || today}
+        maxDate={startsOn ? new Date(Date.parse(`${startsOn}T12:00:00Z`) + 365 * 86400000).toISOString().slice(0, 10) : undefined}
+        disabled={prescription.isPending}
+        onChange={setEndsOn}
       />
       <Text>Daily times</Text>
       <View style={styles.wrap}>
@@ -321,41 +325,50 @@ export function ConsultationForm({ appointmentId }: { appointmentId: string }) {
       ))}
       <Button
         loading={prescription.isPending}
-        label={`Sign prescription (${items.length} ${items.length === 1 ? "medicine" : "medicines"})`}
+        theme="doctor"
+        label="Sign prescription and continue"
         disabled={prescription.isPending || items.length === 0}
         onPress={() => prescription.mutate()}
       />
-
-      <Text style={styles.heading}>Follow-up</Text>
-      <Input
-        label="Suggested date (DD-MM-YYYY)"
+      {!items.length ? <Button theme="doctor" variant="outline" label="Continue without prescription" disabled={busy || Boolean(medicineName.trim())}
+        onPress={() => { setError(""); setStep(2); }} /> : null}
+      </> : null}
+      {step === 1 && prescriptionIssued ? <><Label>Prescription signed and saved.</Label><Button theme="doctor" label="Continue" onPress={() => setStep(2)} /></> : null}
+      {step === 2 ? <>
+      <CalendarField theme="doctor"
+        label="Follow-up date"
         value={followupDate}
-        onChangeText={setFollowupDate}
+        minDate={tomorrow}
+        disabled={busy || followupSaved}
+        onChange={setFollowupDate}
       />
       <Input
         label="Reason"
         value={followupReason}
+        disabled={busy || followupSaved}
         onChangeText={setFollowupReason}
         multiline
       />
       <Button
         loading={followup.isPending}
-        label="Recommend follow-up"
-        variant="outline"
+        theme="doctor"
+        label={followupSaved ? "Continue" : "Save and continue"}
         disabled={
           followup.isPending ||
-          !followupDate ||
-          followupReason.trim().length < 2
+          (!followupSaved && (!followupDate || followupReason.trim().length < 2))
         }
         onPress={() => {
-          if (!parseDisplayDate(followupDate)) {
-            setError("Enter the follow-up date as DD-MM-YYYY.");
-            return;
-          }
+          if (followupSaved) { setStep(3); return; }
           followup.mutate();
         }}
       />
+      {!followupSaved ? <Button theme="doctor" variant="outline" label="No follow-up needed" disabled={busy || Boolean(followupDate || followupReason.trim())}
+        onPress={() => { setError(""); setStep(3); }} /> : null}
+      </> : null}
+      {step === 3 ? assessmentStep : null}
+      {step > 0 ? <Button theme="doctor" variant="outline" label="Back" disabled={busy} onPress={back} /> : null}
     </View>
+    </DoctorScreen>
   );
 }
 

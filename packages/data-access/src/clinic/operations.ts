@@ -1,5 +1,6 @@
 import {
   clinicBookingSchema,
+  portalWalkInBookingSchema,
   clinicTransitionSchema,
   publishClinicSessionSchema,
   publishDoctorServiceSessionSchema,
@@ -18,6 +19,7 @@ import {
 } from "@startup/contracts";
 import type {
   ClinicBookingInput,
+  PortalWalkInBookingInput,
   ClinicTransitionInput,
   PublishClinicSessionInput,
   PublishDoctorServiceSessionInput,
@@ -190,7 +192,7 @@ export async function listPracticeClinicSlots(
   limit = 100,
   serviceMode?: "clinic" | "online" | "home"
 ) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > (serviceMode ? 3000 : 100))
+  if (!Number.isInteger(limit) || limit < 1 || limit > (serviceMode ? 10000 : 100))
     throw new Error("Invalid slot limit");
   const args = {
     p_practice_id: uuidSchema.parse(practiceId),
@@ -214,6 +216,24 @@ export async function bookClinicAppointment(
     p_window_id: request.windowId,
     p_practice_service_id: request.practiceServiceId,
     p_reason: request.reason,
+    p_idempotency_key: request.idempotencyKey,
+  });
+  if (error) throw error;
+  return uuidSchema.parse(data);
+}
+
+export async function bookPortalWalkInAppointment(
+  client: AppSupabaseClient,
+  input: PortalWalkInBookingInput
+) {
+  const request = portalWalkInBookingSchema.parse(input);
+  const { data, error } = await client.rpc("book_portal_walk_in_appointment", {
+    p_practice_id: request.practiceId,
+    p_window_id: request.windowId,
+    p_practice_service_id: request.practiceServiceId,
+    p_patient_name: request.patientName,
+    p_patient_phone: request.patientPhone || null,
+    p_reason: request.reason || null,
     p_idempotency_key: request.idempotencyKey,
   });
   if (error) throw error;

@@ -3,11 +3,8 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
-import {
-  scheduleTabs,
-} from "../utils/doctorSchedulesConstants";
 import { formatDisplayDate, type FacilityDoctorRosterItem } from "@startup/contracts";
-import { facilitySchedule, type PracticeSession } from "../utils/facilitySchedule";
+import { facilityDayKey, facilitySchedule, type PracticeSession } from "../utils/facilitySchedule";
 import { Bell, Calendar } from "lucide-react";
 import { DoctorSchedulesStats } from "../components/DoctorSchedulesStats";
 import { DoctorShiftGantt } from "../components/DoctorShiftGantt";
@@ -17,10 +14,9 @@ export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: 
   React.useEffect(() => {
     if (loadError) toast.add({ title: "Could not load doctor schedules", description: loadError, type: "error" });
   }, [loadError]);
-  const [activeTab, setActiveTab] =
-    React.useState<(typeof scheduleTabs)[number]>("Today");
+  const [selectedDay, setSelectedDay] = React.useState(() => facilityDayKey(new Date()));
   const router = useRouter();
-  const schedule = facilitySchedule(doctors, sessions);
+  const schedule = facilitySchedule(doctors, sessions, new Date(), selectedDay);
 
   return (
     <div className="flex flex-col gap-6 pb-12">
@@ -62,10 +58,10 @@ export default function DoctorSchedulesScreen({ doctors, sessions, loadError }: 
       <DoctorSchedulesStats scheduleSummary={schedule.summary} />
 
       {/* Doctor Shift Schedule Gantt Card */}
-      <DoctorShiftGantt activeTab={activeTab} onTabChange={setActiveTab} departments={schedule.departments} />
+      <DoctorShiftGantt selectedDay={selectedDay} onDayChange={setSelectedDay} nextScheduledDay={schedule.nextScheduledDay} departments={schedule.departments} />
 
-      {/* Today's Doctor Assignments */}
-      <DoctorAssignmentsTable assignments={schedule.assignments} />
+      {/* Assignments for the selected date */}
+      <DoctorAssignmentsTable assignments={schedule.assignments} selectedDay={selectedDay} />
     </div>
   );
 }

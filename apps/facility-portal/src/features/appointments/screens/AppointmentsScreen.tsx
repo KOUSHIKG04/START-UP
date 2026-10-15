@@ -5,7 +5,7 @@ import type { IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 import type { ClinicAppointment } from "@startup/contracts";
 import { changePortalAppointment, redeemPortalCheckinToken } from "../server/actions";
-import { Search, Calendar, ChevronDown, Plus, ScanLine } from "lucide-react";
+import { Search, Calendar, ChevronDown, ScanLine } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
 import { toast } from "@startup/web-ui/components/ui/toast";
 
@@ -13,6 +13,7 @@ import type { AppointmentPeriod } from "../types/appointments";
 import { defaultAppointmentPeriod, appointmentsDateFormatter } from "../utils/appointmentsConstants";
 import { AppointmentsSummaryCards } from "../components/AppointmentsSummaryCards";
 import { AppointmentsTable } from "../components/AppointmentsTable";
+import { NewAppointmentDialog } from "../components/NewAppointmentDialog";
 
 export default function AppointmentsScreen({
   appointments,
@@ -262,11 +263,12 @@ export default function AppointmentsScreen({
             <ChevronDown className="size-3.5 text-[#475569]" />
           </div>
 
-          {/* New Appointment Button */}
-          <Button className="flex items-center gap-1.5 rounded-lg bg-[#07595d] px-4 py-2 text-[13px] font-bold text-white shadow-xs transition-colors hover:bg-[#064e52]">
-            <Plus className="size-4 stroke-[2.5]" />
-            <span>New Appointment</span>
-          </Button>
+          <NewAppointmentDialog onCreated={() => {
+            setFilterPeriod("All");
+            setStatusFilter("All");
+            setSearch("");
+            setCurrentPage(1);
+          }} />
         </div>
       </div>
 

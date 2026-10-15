@@ -39,6 +39,7 @@ import {
   formatSavedLocation,
 } from "../../features/locations/locationDisplay";
 import { canGeocodeAddress } from "../../features/locations/geocoding";
+import { getDoctorDeviceLocation } from "../../features/locations/deviceLocation";
 
 type Place = { latitude: number; longitude: number; addressLabel: string; mapPlace?: MapPlace };
 
@@ -156,18 +157,7 @@ export default function SelectLocationScreen() {
     setBusy(true);
     setPendingAction("current");
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) {
-        showToast({
-          title: "Location permission needed",
-          message: "Allow location access or add an address manually.",
-          type: "info",
-        });
-        return;
-      }
-      const point = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      const point = await getDoctorDeviceLocation();
       router.push({
         pathname: "/pick-location",
         params: {
@@ -175,10 +165,10 @@ export default function SelectLocationScreen() {
           longitude: String(point.coords.longitude),
         },
       });
-    } catch {
+    } catch (cause) {
       showToast({
         title: "Could not use current location",
-        message: "Try again or add an address.",
+        message: cause instanceof Error ? cause.message : "Try again or add an address.",
         type: "error",
       });
     } finally {

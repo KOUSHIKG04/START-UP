@@ -31,6 +31,8 @@ import {
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Header } from "@startup/mobile-ui";
 import { supabase } from "../services/supabase";
+import { router } from "expo-router";
+import { appointmentDetailsRoute } from "../features/appointments/utils/appointmentNavigation";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -233,7 +235,8 @@ export function NotificationDrawer({
                     ? "Verification update"
                     : "Notification",
         message:
-          item.template_key === "appointment.check_in" && typeof item.safe_parameters.booking_code === "string"
+          item.template_key === "appointment.requested" ? "Open this request to review the patient and accept or reject the appointment."
+          : item.template_key === "appointment.check_in" && typeof item.safe_parameters.booking_code === "string"
             ? `Booking ${item.safe_parameters.booking_code} - Patient checked in`
             : typeof status === "string"
             ? `Status: ${status.replaceAll("_", " ")}`
@@ -330,8 +333,11 @@ export function NotificationDrawer({
       if (item && !item.read) {
         markRead.mutate([id]);
       }
+      const notification=notificationsQuery.data?.find(entry=>entry.id===id);
+      const route=appointmentDetailsRoute(notification?.safe_parameters.appointment_id);
+      if(route){ onClose(); router.push(route); }
     },
-    [notifications, markRead]
+    [notifications, notificationsQuery.data, markRead, onClose]
   );
 
   if (!showModal) return null;

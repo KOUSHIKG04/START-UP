@@ -3,7 +3,7 @@ export {
   type AppSupabaseClient,
 } from "./client/createSupabaseClient";
 export { listPublicPractices } from "./doctors/queries";
-export { searchPublicPractices, getPublicPracticeBio } from "./doctors/queries";
+export { searchPublicPractices, getPublicPracticeBio, listPublicDoctorPractices } from "./doctors/queries";
 export * from "./doctors/operations";
 export * from "./doctors/schedule";
 export * from "./doctors/onboarding";

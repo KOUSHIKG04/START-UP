@@ -1,20 +1,24 @@
 import * as React from "react";
 import {
-  scheduleTabs,
   scheduleTimeLabels,
   shiftStyles,
 } from "../utils/doctorSchedulesConstants";
+import { facilityDayKey } from "../utils/facilitySchedule";
 import type { DeptSchedule } from "../types/doctorSchedules";
 
 export function DoctorShiftGantt({
-  activeTab,
-  onTabChange,
+  selectedDay,
+  onDayChange,
+  nextScheduledDay,
   departments,
 }: {
-  activeTab: (typeof scheduleTabs)[number];
-  onTabChange: (tab: (typeof scheduleTabs)[number]) => void;
+  selectedDay: string;
+  onDayChange: (day: string) => void;
+  nextScheduledDay: string | null;
   departments: DeptSchedule[];
 }) {
+  const today = facilityDayKey(new Date());
+  const tomorrow = new Date(Date.parse(`${today}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e2e8f0]">
@@ -28,16 +32,15 @@ export function DoctorShiftGantt({
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          {/* Filter Pills */}
+          {/* Date selection */}
           <div className="flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-lg border border-[#e2e8f0]">
-            {scheduleTabs
-              .filter((tab) => tab === "Today")
-              .map((tab) => (
+            {([['Today', today], ['Tomorrow', tomorrow]] as const).map(([tab, day]) => (
                 <button
                   key={tab}
-                  onClick={() => onTabChange(tab)}
+                  type="button"
+                  onClick={() => onDayChange(day)}
                   className={`px-3 py-1 rounded-md text-[12px] font-semibold transition-colors cursor-pointer ${
-                    activeTab === tab
+                    selectedDay === day
                       ? "bg-[#0f172a] text-white shadow-xs"
                       : "text-[#64748b] hover:text-[#0f172a]"
                   }`}
@@ -46,6 +49,9 @@ export function DoctorShiftGantt({
                 </button>
               ))}
           </div>
+          <input type="date" aria-label="Schedule date" value={selectedDay} min={today}
+            onChange={event => { if (event.target.value) onDayChange(event.target.value); }}
+            className="h-9 rounded-lg border border-[#e2e8f0] bg-white px-2 text-sm text-[#0f172a]" />
 
           {/* Legend */}
           <div className="flex items-center gap-3 text-[12px] text-[#475569]">
@@ -57,6 +63,9 @@ export function DoctorShiftGantt({
             </span>
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-[#f59e0b]" /> On Call
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-[#7c3aed]" /> Home Visit
             </span>
           </div>
         </div>
@@ -112,7 +121,11 @@ export function DoctorShiftGantt({
                 </div>
               </div>
             ))}
-            {departments.length === 0 && <p className="px-4 py-5 text-[13px] text-[#64748b]">No published doctor shifts today.</p>}
+            {departments.length === 0 && <div className="px-4 py-5 text-[13px] text-[#64748b]">
+              <p>No published doctor shifts for {selectedDay}.</p>
+              {nextScheduledDay && selectedDay < nextScheduledDay ? <button type="button" onClick={() => onDayChange(nextScheduledDay)} className="mt-2 font-medium text-[#008577] underline">View next scheduled day: {nextScheduledDay}</button> : null}
+              {!nextScheduledDay ? <p className="mt-2">Publishing starts today in the doctor’s booking timezone. Check the selected working days, remaining hours and daily slot limit if no future shifts appear.</p> : null}
+            </div>}
           </div>
         </div>
       </div>

@@ -25,6 +25,7 @@ import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Header, Input, useToast } from "@startup/mobile-ui";
 import { useClinicLocationDraft } from "../../features/locations/clinicLocationDraft";
 import { resolveDoctorAddress } from "../../features/locations/resolveAddress";
+import { getDoctorDeviceLocation } from "../../features/locations/deviceLocation";
 
 type Point = { latitude: number; longitude: number };
 type PlaceDetails = {
@@ -160,14 +161,8 @@ export default function ClinicLocationScreen() {
     if (locating || searching) return;
     const request = ++operation.current;
     setLocating(true); setSearchResults([]);
-    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) throw new Error("Allow location access or search for an address.");
-      const position = await Promise.race([
-        Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
-        new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("Location is taking too long. Search for an address or try outside.")), 15000); }),
-      ]);
+      const position = await getDoctorDeviceLocation();
       if (!mounted.current || request !== operation.current) return;
       const next = { latitude: position.coords.latitude, longitude: position.coords.longitude };
       selectedPlace.current = null; pointRef.current = next;
@@ -176,7 +171,6 @@ export default function ClinicLocationScreen() {
     } catch (cause) {
       if (mounted.current && request === operation.current) showToast({ title: "Could not find your location", message: cause instanceof Error ? cause.message : "Try again.", type: "error" });
     } finally {
-      if (timer) clearTimeout(timer);
       if (mounted.current && request === operation.current) setLocating(false);
     }
   }

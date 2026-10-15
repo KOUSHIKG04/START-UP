@@ -54,12 +54,13 @@ BEGIN
       RAISE EXCEPTION 'Service filtering happened after the result limit'; END IF;
   END LOOP;
   denied:=false;
-  BEGIN PERFORM public.publish_doctor_schedule_from_date(practice,'clinic',settings,version,(now() AT TIME ZONE zone)::date);
+  BEGIN PERFORM public.publish_doctor_schedule_from_date(practice,'clinic',settings,version,(now() AT TIME ZONE zone)::date-1);
   EXCEPTION WHEN SQLSTATE '22023' THEN denied:=true; END;
-  IF NOT denied THEN RAISE EXCEPTION 'Schedule edit for today was allowed'; END IF;
+  IF NOT denied THEN RAISE EXCEPTION 'Schedule edit for yesterday was allowed'; END IF;
   -- An existing current-day session must survive every later publication.
   EXECUTE 'RESET ROLE';
-  INSERT INTO clinzo.doctor_booking_day(doctor_id,local_date,timezone) VALUES(doctor_id,(now() AT TIME ZONE zone)::date,zone) RETURNING id INTO today_day;
+  INSERT INTO clinzo.doctor_booking_day(doctor_id,local_date,timezone) VALUES(doctor_id,(now() AT TIME ZONE zone)::date,zone) ON CONFLICT DO NOTHING RETURNING id INTO today_day;
+  IF today_day IS NULL THEN SELECT b.id INTO today_day FROM clinzo.doctor_booking_day b WHERE b.doctor_id=(SELECT p.doctor_id FROM clinzo.doctor_facility p WHERE p.id=practice) AND b.local_date=(now() AT TIME ZONE zone)::date; END IF;
   INSERT INTO clinzo.session(doctor_facility_id,doctor_id,booking_day_id,starts_at,ends_at,timezone,hard_capacity,state)
     VALUES(practice,doctor_id,today_day,((now() AT TIME ZONE zone)::date+time '07:00') AT TIME ZONE zone,
       ((now() AT TIME ZONE zone)::date+time '07:15') AT TIME ZONE zone,zone,1,'published') RETURNING id INTO today_sid;

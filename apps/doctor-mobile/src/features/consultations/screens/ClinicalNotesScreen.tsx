@@ -71,36 +71,27 @@ export function ClinicalNotesScreen() {
   const [confirm, setConfirm] = useState(false);
 
   if (isLiveAppointment && liveAppointment) {
+    if (liveAppointment.status === "in_consultation" && liveAppointment.can_consult) {
+      return <ConsultationForm appointmentId={liveAppointment.id} patientName={liveAppointment.patient_name}
+        timezone={liveAppointment.timezone} completing={completeMutation.isPending} assessmentStep={<>
+          <Input label="Assessment" value={assessment} onChangeText={setAssessment} multiline maxLength={10000}
+            disabled={completeMutation.isPending} />
+          <Button loading={completeMutation.isPending} theme="doctor" label="Sign and complete"
+            disabled={completeMutation.isPending || !assessment.trim()} onPress={() => completeMutation.mutate()} />
+          {completeMessage ? <Label style={completeMessage.startsWith("Could") ? ui.error : ui.success}>{completeMessage}</Label> : null}
+        </>} />;
+    }
     return (
       <DoctorScreen
         title={liveAppointment.patient_name}
       >
-        {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
-          <ConsultationForm appointmentId={liveAppointment.id} />
-        ) : null}
-        {liveAppointment.status === "in_consultation" && liveAppointment.can_consult ? (
-          <View style={{ marginTop: 16, gap: 10 }}>
-            <Input
-              label="Signed assessment note"
-              value={assessment}
-              onChangeText={setAssessment}
-              multiline
-              placeholder="Enter clinical assessment before completing..."
-            />
-            <Button loading={completeMutation.isPending}
-              theme="doctor"
-              label="Sign assessment and complete consultation"
-              disabled={completeMutation.isPending || !assessment.trim()}
-              onPress={() => completeMutation.mutate()}
-            />
-          </View>
-        ) : liveAppointment.status === "completed" ? (
+        {liveAppointment.status === "completed" ? (
           <Panel style={{ marginTop: 16 }}>
             <Label style={ui.success}>
               This consultation has been completed and signed.
             </Label>
           </Panel>
-        ) : null}
+        ) : <Label>Start this consultation from the appointment page.</Label>}
         {completeMessage ? (
           <Label
             style={completeMessage.startsWith("Could") ? ui.error : ui.success}

@@ -17,8 +17,14 @@ import {
 } from "@startup/mobile-ui";
 import { months } from "../utils/doctorProfileConstants";
 import type { BookSlotsProps } from "../types/doctor-profile";
+import { formatConsultationFee } from "../utils/doctorDisplay";
 
-function localDateKey(value: Date): string {
+function localDateKey(value: Date, timeZone?: string): string {
+  if (timeZone) {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(value);
+    const part = (type: string) => parts.find(item => item.type === type)?.value;
+    return `${part("year")}-${part("month")}-${part("day")}`;
+  }
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
 }
 
@@ -32,12 +38,14 @@ export function BookSlots({
   loading,
   error,
   busy,
+  openingConfirmation,
+  timeZone,
 }: BookSlotsProps) {
   useToastFeedback({ error: error ?? "" });
   const { showToast } = useToast();
   const noSlotsNotice = useRef("");
-  const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [requestedMonthOffset, setSelectedMonthOffset] = useState<number | null>(null);
+  const [requestedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [patientId, setPatientId] = useState(patientOptions[0]?.id ?? "");
@@ -50,7 +58,17 @@ export function BookSlots({
     setPatientId(patientOptions.find((option) => option.verified)?.id ?? "");
   }, [patientOptions, selectedPatientIsVerified]);
 
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => timeZone ? new Date(`${localDateKey(new Date(), timeZone)}T12:00:00`) : new Date(), [timeZone]);
+  const availableDates = useMemo(() => new Set(slots.map(slot => localDateKey(new Date(slot.starts_at), timeZone))), [slots, timeZone]);
+  const sortedDates = [...availableDates].sort();
+  const [firstYear, firstMonth] = (sortedDates[0] ?? localDateKey(today)).split("-").map(Number);
+  const selectedMonthOffset = requestedMonthOffset ?? (firstYear - today.getFullYear()) * 12 + firstMonth - 1 - today.getMonth();
+  const selectedMonth = new Date(today.getFullYear(), today.getMonth() + selectedMonthOffset, 1);
+  const monthPrefix = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, "0")}-`;
+  // Derive a valid date from the latest response on every render, including
+  // after publication, cancellation, or a cached empty response is refreshed.
+  const selectedDate = requestedDate && requestedDate.startsWith(monthPrefix) && availableDates.has(requestedDate)
+    ? requestedDate : sortedDates.find(date => date.startsWith(monthPrefix)) ?? null;
   const monthOptions = useMemo(
     () =>
       Array.from({ length: 12 }, (_, offset) => {
@@ -89,14 +107,14 @@ export function BookSlots({
           key,
           dayNumber: date.getDate(),
           day: date.toLocaleDateString("en-US", { weekday: "short" }),
-          closed: key < todayKey,
+          closed: key < todayKey || (!loading && !error && !availableDates.has(key)),
         };
       }
     );
-  }, [today, selectedMonthOffset]);
+  }, [today, selectedMonthOffset, loading, error, availableDates]);
 
   const dateSlots = slots.filter(
-    (slot) => localDateKey(new Date(slot.starts_at)) === selectedDate
+    (slot) => localDateKey(new Date(slot.starts_at), timeZone) === selectedDate
   );
   const selectedSlot = dateSlots.find(
     (slot) => slot.window_id === selectedTime
@@ -127,18 +145,20 @@ export function BookSlots({
       });
       datesScrollRef.current?.scrollTo({
         x:
-          selectedMonthOffset === 0
-            ? Math.max(0, (today.getDate() - 1) * 62 - 110)
+          selectedDate
+            ? Math.max(0, (Number(selectedDate.slice(-2)) - 1) * 62 - 110)
             : 0,
         animated: false,
       });
     }, 120);
     return () => clearTimeout(timer);
-  }, [selectedMonthOffset, today]);
+  }, [selectedMonthOffset, selectedDate]);
 
   const handleSelectMonth = (index: number) => {
     setSelectedMonthOffset(index);
-    setSelectedDate(null);
+    const month = new Date(today.getFullYear(), today.getMonth() + index, 1);
+    const prefix = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-`;
+    setSelectedDate([...availableDates].sort().find(date => date.startsWith(prefix)) ?? null);
     setSelectedTime(null);
   };
 
@@ -148,7 +168,7 @@ export function BookSlots({
     if (
       !loading &&
       !error &&
-      !slots.some((slot) => localDateKey(new Date(slot.starts_at)) === key)
+      !slots.some((slot) => localDateKey(new Date(slot.starts_at), timeZone) === key)
     ) {
       showToast({
         title: "No times on this date",
@@ -264,16 +284,17 @@ export function BookSlots({
             {dateSlots.length > 0 ? (
               <Text variant="body" style={styles.availability}>
                 {dateSlots.length} slots available
-                {selectedDate ? ` · ${formatDisplayDate(selectedDate)}` : ""}
               </Text>
             ) : null}
           </View>
           {selectedDate && !loading && !error && dateSlots.length === 0 ? <Text variant="body" style={styles.availability}>Not available on this date. Choose another date.</Text> : null}
+          {!selectedDate && !loading && !error ? <Text variant="body" style={styles.availability}>No appointment times in this month. Choose another month or check back later.</Text> : null}
           <View style={styles.slotGrid}>
             {dateSlots.map((slot) => {
               const time = new Date(slot.starts_at).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                timeZone,
               });
               const selected = selectedTime === slot.window_id;
               return (
@@ -329,11 +350,13 @@ export function BookSlots({
         {loading ? <Loader theme="patient" style={styles.loading} /> : null}
       </Card>
 
+      {selectedSlot ? <Text variant="bodyEmphasis">Consultation fee: {formatConsultationFee(selectedSlot.fee_minor, selectedSlot.currency)}</Text> : null}
       <View style={styles.actions}>
         <Button
           label="About Doctor"
           variant="outline"
           theme="patient"
+          disabled={busy}
           onPress={onGoToAbout}
           style={styles.actionButton}
           labelStyle={styles.actionLabel}
@@ -345,8 +368,11 @@ export function BookSlots({
           //   />
           // }
         />
-        <Button loading={busy}
+        <Button
+          loading={openingConfirmation}
           label="Book Appointment"
+          theme="patient"
+          variant="primary"
           disabled={
             busy ||
             !selectedSlot ||
@@ -354,7 +380,7 @@ export function BookSlots({
             consultationType === "Home Visit"
           }
           onPress={() => {
-            if (!selectedSlot) return;
+            if (busy || !selectedSlot) return;
             onBookAppointment({
               date: formatDisplayDate(selectedSlot.starts_at),
               time: selectedSlot.window_id,
@@ -524,7 +550,8 @@ const styles = StyleSheet.create({
   loading: { minHeight: 32 },
   actionLabel: {
     fontFamily: fontFamilies.semibold,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
+    lineHeight: 18,
   },
 });

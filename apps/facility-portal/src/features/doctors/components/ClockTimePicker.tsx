@@ -9,7 +9,7 @@ const radius = 98;
 const pad = (n: number) => String(n).padStart(2, "0");
 function display(value: string) {
   if (!value) return "Select time";
-  if (value === "24:00") return "12:00 AM (next day)";
+  if (value === "24:00") return "12:00 AM";
   const [h, m] = value.split(":").map(Number);
   return `${h % 12 || 12}:${pad(m)} ${h >= 12 ? "PM" : "AM"}`;
 }
@@ -37,7 +37,7 @@ export function ClockTimePicker({ label, value, onChange, disabled = false, endO
     else setMinute(current => (current + delta + 60) % 60);
   };
   const choice = "min-h-11 rounded-lg px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008577]";
-  return <div className="space-y-2">
+  return <div className="w-full min-w-0 space-y-2">
     <label htmlFor={id} className="text-sm font-medium">{label}</label>
     <button id={id} type="button" disabled={disabled} aria-label={`${label}, ${display(value)}`} aria-haspopup="dialog"
       className="flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 text-left text-sm disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008577]"
@@ -45,7 +45,7 @@ export function ClockTimePicker({ label, value, onChange, disabled = false, endO
         const [h, m] = (value || "09:00").split(":").map(Number);
         setHour(h % 12 || 12); setMinute(m); setPeriod(h >= 12 && h < 24 ? "PM" : "AM"); setPart("hour"); setOpen(true);
       }}>
-      <span>{display(value)}</span><Clock3 size={18} className="shrink-0 text-[#008577]" />
+      <span className="min-w-0 truncate">{display(value)}</span><Clock3 size={18} className="shrink-0 text-[#008577]" />
     </button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-white text-[#0f172a] sm:max-w-sm">
@@ -94,7 +94,6 @@ export function ClockTimePicker({ label, value, onChange, disabled = false, endO
           </svg>
         </div>
         <p className="text-center text-xs text-[#475569]">Drag the clock hand or use the arrow keys for precise minutes.</p>
-        {endOfDay ? <Button type="button" variant="outline" onClick={() => {onChange("24:00");setOpen(false);}}>Midnight (end of day)</Button> : null}
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button type="button" onClick={() => {

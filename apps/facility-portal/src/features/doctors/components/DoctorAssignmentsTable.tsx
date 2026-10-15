@@ -5,17 +5,17 @@ import {
   AvatarFallback,
 } from "@startup/web-ui/components/ui/avatar";
 
-type Assignment = { id: string; practiceId: string; name: string; department: string; shiftTime: string; status: "On Duty" | "On Call" | "In Surgery"; contact: string };
+type Assignment = { id: string; practiceId: string; name: string; department: string; shiftTime: string; status: "On Duty" | "On Call" | "Home Visit" | "In Surgery"; contact: string };
 
-export function DoctorAssignmentsTable({ assignments }: { assignments: Assignment[] }) {
+export function DoctorAssignmentsTable({ assignments, selectedDay }: { assignments: Assignment[]; selectedDay: string }) {
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-[16px] p-6 shadow-xs">
       <div className="pb-4 border-b border-[#e2e8f0]">
         <h2 className="text-[18px] font-bold text-[#0f172a]">
-          Today&apos;s Doctor Assignments
+          Doctor Assignments · {selectedDay}
         </h2>
         <p className="text-[13px] text-[#475569] mt-0.5">
-          Current active shifts and operational status
+          Published shifts and operational status for the selected date
         </p>
       </div>
 
@@ -76,6 +76,11 @@ export function DoctorAssignmentsTable({ assignments }: { assignments: Assignmen
                       On Call
                     </span>
                   )}
+                  {doc.status === "Home Visit" && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-semibold bg-[#ede9fe] text-[#5b21b6]">
+                      Home Visit
+                    </span>
+                  )}
                 </td>
 
                 {/* Contact */}
@@ -89,7 +94,7 @@ export function DoctorAssignmentsTable({ assignments }: { assignments: Assignmen
                 </td>
               </tr>
             ))}
-            {assignments.length === 0 && <tr><td colSpan={6} className="px-3 py-5 text-[#64748b]">No published doctor assignments today.</td></tr>}
+            {assignments.length === 0 && <tr><td colSpan={6} className="px-3 py-5 text-[#64748b]">No published doctor assignments for {selectedDay}.</td></tr>}
           </tbody>
         </table>
       </div>

@@ -24,9 +24,9 @@ export function settingsDraft(
     autoAcceptLimit: saved.auto_accept_limit,
     homeVisits: saved.home_visits,
     homeRadiusKm: saved.home_radius_km,
-    onlineFeeMinor: saved.online_fee_minor,
+    onlineFeeMinor: saved.online_fee_minor ?? 0,
     clinicFeeMinor: saved.clinic_fee_minor,
-    homeFeeMinor: saved.home_fee_minor,
+    homeFeeMinor: saved.home_fee_minor ?? 0,
   };
 }
 export const initialSettings: DoctorScheduleSettings = {
@@ -40,17 +40,17 @@ export const initialSettings: DoctorScheduleSettings = {
   homeStart: "16:00",
   homeEnd: "17:00",
   slotMinutes: 15,
-  onlineSlotMinutes: 30,
+  onlineSlotMinutes: 15,
   homeSlotMinutes: 60,
-  onlineDailyLimit: 0,
-  walkinDailyLimit: 0,
+  onlineDailyLimit: 8,
+  walkinDailyLimit: 12,
   autoAccept: false,
   autoAcceptLimit: 0,
   homeVisits: false,
   homeRadiusKm: null,
-  onlineFeeMinor: null,
+  onlineFeeMinor: 0,
   clinicFeeMinor: 0,
-  homeFeeMinor: null,
+  homeFeeMinor: 0,
 };
 export const card =
   "rounded-2xl border border-[#e2e8f0] bg-white p-6 space-y-5";

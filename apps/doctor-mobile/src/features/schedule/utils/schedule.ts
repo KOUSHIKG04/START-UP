@@ -26,7 +26,6 @@ export function scheduleError(schedule: Schedule, mode: "clinic" | "online" | "h
   if (endMinutes(schedule.end) <= minutes(schedule.start))
     return "End time must be after start time.";
   const duration = mode === "online" ? schedule.onlineDuration : mode === "home" ? schedule.homeDuration : schedule.duration;
-  if (mode !== "home" && duration > 45) return "Choose a slot duration of up to 45 minutes.";
   if (endMinutes(schedule.end) - minutes(schedule.start) < duration)
     return "Working hours must fit at least one appointment slot.";
   if (
@@ -45,6 +44,13 @@ export function scheduleError(schedule: Schedule, mode: "clinic" | "online" | "h
 }
 export function previewSlots(schedule: Schedule): string[] {
   return previewTimeBlock(schedule.start, schedule.end, schedule.duration);
+}
+
+/** A setup suggestion only; changing a booking cap never changes the interval. */
+export function suggestConsultationDuration(start: string, end: string, dailyLimit: number): number | null {
+  const available = endMinutes(end) - minutes(start);
+  if (!Number.isFinite(available) || available < 5 || !Number.isInteger(dailyLimit) || dailyLimit < 1) return null;
+  return Math.min(120, Math.max(5, Math.floor(available / dailyLimit / 5) * 5));
 }
 
 export function previewTimeBlock(start: string, end: string, duration: number): string[] {

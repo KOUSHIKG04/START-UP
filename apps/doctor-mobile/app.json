@@ -27,6 +27,8 @@
       "expo-router",
       "expo-maps",
       "expo-notifications",
+      ["@react-native-community/datetimepicker", { "android": { "datePicker": { "colorAccent": { "light": "#008877" }, "colorControlActivated": { "light": "#008877" } } } }],
+      ["@react-native-community/datetimepicker", { "android": { "datePicker": { "colorAccent": { "light": "#008577" }, "colorControlActivated": { "light": "#008577" } } } }],
       ["expo-image-picker", { "photosPermission": "Allow Clinzo Doctor to select a profile photo." }],
       [
         "expo-location",

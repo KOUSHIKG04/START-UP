@@ -23,6 +23,7 @@ export function ScanQrScreen() {
   useToastFeedback({ error, success: message });
   const [patientAppointment, setPatientAppointment] = useState<ClinicAppointment>();
   const scanned = useRef(false);
+  const redeeming = useRef(false);
   const queryClient = useQueryClient();
   const appointments = useQuery({
     queryKey: ["doctor-clinic-appointments", "all"],
@@ -37,22 +38,33 @@ export function ScanQrScreen() {
 
   const redeem = useMutation({
     mutationFn: (token: string) => redeemClinicCheckinToken(supabase!, token),
-    onSuccess: async (appointmentId) => {
+    retry: false,
+    onSuccess: (appointmentId) => {
       setCamera(false); setValue(""); setError(""); setMessage("Patient checked in and added to the clinic queue.");
-      await queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] });
-      if (supabase) setPatientAppointment((await listMyPracticeAppointments(supabase)).find(item => item.id === appointmentId));
+      // Refresh failures must not turn a completed, single-use check-in into a QR error.
+      void queryClient.invalidateQueries({ queryKey: ["doctor-clinic-appointments"] }).catch(() => undefined);
+      router.push({ pathname: "/appointment-details", params: { appointmentId } });
     },
-    onError: () => {
-      scanned.current = false;
+    onError: (cause: unknown) => {
       setCamera(false);
-      setError("This check-in QR is invalid, expired, used, or belongs to another practice. Ask the patient to refresh it.");
+      const reason = cause && typeof cause === "object" && "message" in cause ? String(cause.message) : "";
+      setError(/check-in token unavailable|invalid check-in token/i.test(reason)
+        ? "This check-in QR is expired, already used, or unavailable for your practice. Ask the patient to refresh it."
+        : "Could not confirm check-in. Check your connection and refresh the appointment before trying again.");
     },
+    onSettled: () => { redeeming.current = false; },
   });
 
   function lookup(input: string) {
+    if (redeeming.current) return;
     const clean = input.trim();
     const token = clinicCheckinTokenSchema.safeParse(clean);
-    if (token.success) { setError(""); setMessage(""); redeem.mutate(token.data); return; }
+    if (token.success) {
+      redeeming.current = true;
+      setCamera(false); setPatientAppointment(undefined); setError(""); setMessage("");
+      redeem.mutate(token.data);
+      return;
+    }
     let code = clean;
     if (clean.startsWith("{")) {
       try { const parsed = JSON.parse(clean); code = typeof parsed?.patientId === "string" ? parsed.patientId : ""; }
@@ -67,6 +79,7 @@ export function ScanQrScreen() {
   }
 
   async function enableCamera() {
+    if (redeeming.current) return;
     try {
       const result = permission?.granted ? permission : await requestPermission();
       if (result.granted) { scanned.current = false; setCamera(true); setPatientAppointment(undefined); setError(""); }
@@ -84,7 +97,7 @@ export function ScanQrScreen() {
         <Label style={{ textAlign: "center", paddingHorizontal: 26 }}>Scan the Patient App check-in QR. A patient ID only looks up their appointment.</Label>
       </>}
     </View>
-    <Button theme="doctor" label={camera ? "Stop scanning" : "Open camera"} onPress={() => camera ? setCamera(false) : void enableCamera()} />
+    <Button theme="doctor" disabled={redeem.isPending} label={camera ? "Stop scanning" : "Open camera"} onPress={() => camera ? setCamera(false) : void enableCamera()} />
     {permission && !permission.granted && !permission.canAskAgain && Platform.OS !== "web" ? <Button theme="doctor" variant="secondary"
       label="Open camera settings" onPress={() => void Linking.openSettings().catch(() => setError("Open your device settings and allow camera access."))} /> : null}
     <Input label="Patient ID" accessibilityLabel="Patient ID" autoCapitalize="characters" placeholder="e.g. PAT-..." value={value} onChangeText={setValue} onSubmitEditing={() => lookup(value)} containerStyle={ui.field} />
@@ -98,7 +111,7 @@ export function ScanQrScreen() {
           <Label muted>{patientAppointment.patient_public_code}</Label>
         </View>
       </View>
-      <Button theme="doctor" label={patientAppointment.status === "in_consultation" ? "Open clinical notes" : "View appointment"} onPress={() => router.push(patientAppointment.status === "in_consultation" ? { pathname: "/clinical-notes", params: { appointmentId: patientAppointment.id } } : { pathname: "/appointments", params: { appointmentId: patientAppointment.id } })} />
+      <Button theme="doctor" label={patientAppointment.status === "in_consultation" ? "Open clinical notes" : "View appointment"} onPress={() => router.push(patientAppointment.status === "in_consultation" ? { pathname: "/clinical-notes", params: { appointmentId: patientAppointment.id } } : { pathname: "/appointment-details", params: { appointmentId: patientAppointment.id } })} />
     </Panel> : null}
     <Panel>
       <Heading>Patient lookup</Heading>

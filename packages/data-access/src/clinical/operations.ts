@@ -5,14 +5,32 @@ import {
   recordVitalSchema,
   recommendFollowupSchema,
   uuidSchema,
+  consultationIntakeSchema,
+  doctorConsultationDraftSchema,
 } from "@startup/contracts";
 import type {
   IssuePrescriptionInput,
   RecordDiagnosisInput,
   RecordVitalInput,
   RecommendFollowupInput,
+  ConsultationIntakeInput,
 } from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
+
+export async function recordConsultationIntake(client: AppSupabaseClient, input: ConsultationIntakeInput) {
+  const request = consultationIntakeSchema.parse(input);
+  const { data, error } = await client.rpc("record_consultation_intake", {
+    p_appointment_id: request.appointmentId, p_vitals: request.vitals, p_diagnosis: request.diagnosis,
+  });
+  if (error) throw error;
+  return uuidSchema.parse(data);
+}
+
+export async function getDoctorConsultationDraft(client: AppSupabaseClient, appointmentId: string) {
+  const { data, error } = await client.rpc("get_doctor_consultation_draft", { p_appointment_id: uuidSchema.parse(appointmentId) });
+  if (error) throw error;
+  return doctorConsultationDraftSchema.parse(data);
+}
 
 export async function listMyClinicalRecords(client: AppSupabaseClient) {
   const { data, error } = await client.rpc("list_my_clinical_records");

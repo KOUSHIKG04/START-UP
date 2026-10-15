@@ -79,3 +79,19 @@ apps/facility-portal/src/features/doctors/tests/*
 
 !packages/database/tests/driver-saved-locations.cli-smoke.sql
 !packages/database/tests/active-consultation-chat.cli-smoke.sql
+!packages/database/tests/solo-clinic-verification.cli-smoke.sql
+!packages/database/tests/verified-directory.cli-smoke.sql
+!packages/database/tests/same-day-schedule.cli-smoke.sql
+!packages/database/tests/appointment-decisions.cli-smoke.sql
+!packages/database/tests/daily-booking-capacity.cli-smoke.sql
+!apps/doctor-mobile/tests/
+apps/doctor-mobile/tests/*
+!apps/doctor-mobile/tests/appointment-review.test.cjs
+!apps/doctor-mobile/tests/qr-scan.test.cjs
+!apps/doctor-mobile/tests/schedule-duration.test.cjs
+!packages/database/tests/schedule-duration.cli-smoke.sql
+!packages/database/tests/consultation-intake.cli-smoke.sql
+!apps/doctor-mobile/tests/consultation-flow.test.cjs
+!apps/patient-mobile/tests/
+apps/patient-mobile/tests/*
+!apps/patient-mobile/tests/verified-directory.test.cjs

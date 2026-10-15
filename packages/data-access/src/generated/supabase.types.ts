@@ -153,6 +153,10 @@ export type Database = {
         Args: { p_case_id: string }
         Returns: Json
       }
+      get_doctor_consultation_draft: {
+        Args: { p_appointment_id: string }
+        Returns: Json
+      }
       get_my_active_ambulance_tracking: {
         Args: { p_booking_id: string }
         Returns: Json
@@ -280,6 +284,15 @@ export type Database = {
         }
         Returns: Json
       }
+      list_public_doctor_practices: {
+        Args: {
+          p_latitude?: number
+          p_longitude?: number
+          p_practice_id: string
+          p_service_mode?: string
+        }
+        Returns: Json
+      }
       list_public_hospitals: {
         Args: { p_latitude?: number; p_limit?: number; p_longitude?: number }
         Returns: Json
@@ -381,6 +394,10 @@ export type Database = {
           p_description: string
           p_is_primary?: boolean
         }
+        Returns: string
+      }
+      record_consultation_intake: {
+        Args: { p_appointment_id: string; p_diagnosis?: string; p_vitals: Json }
         Returns: string
       }
       record_consultation_vital: {

@@ -48,13 +48,15 @@ export type AboutDoctorProps = {
 };
 
 export type BookSlotsProps = {
+  timeZone?: string;
   address?: string;
   consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
   onGoToAbout: () => void;
-  slots: { window_id: string; starts_at: string }[];
+  slots: { window_id: string; starts_at: string; fee_minor: string; currency: string }[];
   patientOptions: { id: string; label: string; verified: boolean }[];
   loading?: boolean;
   error?: string | null;
   busy?: boolean;
+  openingConfirmation?: boolean;
 };

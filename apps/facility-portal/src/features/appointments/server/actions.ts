@@ -4,14 +4,75 @@ import { revalidatePath } from "next/cache";
 import {
   clinicCheckinTokenSchema,
   clinicTransitionSchema,
+  portalWalkInBookingSchema,
   setClinicAutoConfirmLimitSchema,
+  uuidSchema,
 } from "@startup/contracts";
 import {
+  bookPortalWalkInAppointment,
+  listMyPractices,
+  listPracticeClinicSlots,
   redeemClinicCheckinToken,
   setClinicAutoConfirmLimit,
   transitionClinicAppointment,
 } from "@startup/data-access";
 import { createClient } from "@/lib/supabase/server";
+import { requireApprovedFacility } from "@/server/auth/facilityAccess";
+
+export async function loadPortalWalkInPractices() {
+  await requireApprovedFacility();
+  const client = await createClient();
+  return (await listMyPractices(client))
+    .filter((practice) => practice.verified)
+    .map((practice) => ({
+      practiceId: practice.practice_id,
+      doctorName: practice.doctor_name,
+      facilityName: practice.facility_name,
+    }));
+}
+
+export async function loadPortalWalkInSlots(practiceId: string) {
+  const parsed = uuidSchema.safeParse(practiceId);
+  if (!parsed.success) return [];
+  await requireApprovedFacility();
+  const client = await createClient();
+  const practices = await listMyPractices(client);
+  if (!practices.some((practice) => practice.practice_id === parsed.data && practice.verified))
+    return [];
+  return (await listPracticeClinicSlots(client, parsed.data, undefined, 100, "clinic"))
+    .map((slot) => ({
+      windowId: slot.window_id,
+      practiceServiceId: slot.practice_service_id,
+      startsAt: slot.starts_at,
+      endsAt: slot.ends_at,
+      timezone: slot.timezone,
+      feeMinor: slot.fee_minor,
+      currency: slot.currency,
+    }));
+}
+
+export async function createPortalWalkInAppointment(input: unknown): Promise<{ error: string | null }> {
+  const parsed = portalWalkInBookingSchema.safeParse(input);
+  if (!parsed.success) return { error: "Enter a patient name and choose an available clinic slot." };
+  await requireApprovedFacility();
+  const client = await createClient();
+  const { data: claims, error: authError } = await client.auth.getClaims();
+  if (authError || !claims) return { error: "Your session expired. Sign in again." };
+  try {
+    await bookPortalWalkInAppointment(client, parsed.data);
+    revalidatePath("/appointments");
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    return { error: null };
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? String(error.code) : null;
+    if (code === "23514") return { error: "That slot is full. Choose another time." };
+    if (code === "22023") return { error: "That slot is no longer available. Refresh the times and try again." };
+    if (code === "42501") return { error: "You do not have access to book this doctor." };
+    return { error: "Could not create the appointment. Check your connection and try again." };
+  }
+}
 
 export async function changePortalAppointment(
   input: unknown

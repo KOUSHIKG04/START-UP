@@ -14,7 +14,7 @@ const center = size / 2;
 const pad = (n: number) => String(n).padStart(2, "0");
 function display(value: string) {
   if (!value) return "Select time";
-  if (value === "24:00") return "12:00 AM (next day)";
+  if (value === "24:00") return "12:00 AM";
   const [h, m] = value.split(":").map(Number);
   return `${h % 12 || 12}:${pad(m)} ${h >= 12 ? "PM" : "AM"}`;
 }
@@ -105,7 +105,6 @@ export function ClockTimePicker({ label, value, onChange, disabled = false, endO
               </View>
             </View>
             <Text variant="inherit" style={{textAlign:"center",fontSize:12,fontFamily:fontFamilies.regular,color:colors.textMuted}}>Choose {part === "hour" ? "an hour" : "a minute"} on the clock</Text>
-            {endOfDay ? <Button theme={theme} variant="outline" label="Midnight (end of day)" onPress={() => {onChange("24:00");close();}} /> : null}
             <View style={styles.row}>
               <Button theme={theme} variant="outline" label="Cancel" style={styles.flex} onPress={close} />
               <Button theme={theme} label="Set time" style={styles.flex} onPress={() => {

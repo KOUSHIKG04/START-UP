@@ -623,7 +623,11 @@ export default function DoctorOnboarding() {
           "email-address"
         )}
         {field("Phone Number", phone, setPhone, "+91 98765 43210", "phone-pad")}
-        <PersonalAddressField value={personalAddress} onChange={setPersonalAddress} />
+        <PersonalAddressField value={personalAddress} onChange={setPersonalAddress} clinicAddress={solo ? {
+          ...emptyPersonalAddress, building: address.slice(0, 160), street: address.slice(160, 360), instructions: address.slice(360),
+          locality, city: practiceCity, state: practiceState, pincode,
+          latitude: clinicLocation?.latitude ?? null, longitude: clinicLocation?.longitude ?? null,
+        } : undefined} />
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             {field("Date of Birth", dateOfBirth, setDateOfBirth, "DD-MM-YYYY")}
