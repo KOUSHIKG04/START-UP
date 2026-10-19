@@ -1,21 +1,10 @@
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import { type PropsWithChildren } from "react";
-import { StyleSheet, type ViewProps } from "react-native";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-  type Edge,
-} from "react-native-safe-area-context";
+import { StyleSheet } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@startup/design-tokens";
 import { cn } from "cn";
-
-export type ScreenProps = PropsWithChildren<
-  ViewProps & {
-    /** Edges to apply safe area padding. Defaults to ['top'] */
-    edges?: readonly Edge[];
-    className?: string;
-  }
->;
+import type { ScreenProps } from "../types/screen";
+export type { ScreenProps } from "../types/screen";
 
 export function Screen({
   children,

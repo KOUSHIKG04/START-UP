@@ -1,17 +1,13 @@
+import {
+  medicineCardItems1,
+  medicineCardItems2,
+} from "../utils/medicineCardConstants";
+import type { MedicineCardProps } from "../types/medicine-card";
+export type { MedicineCardProps } from "../types/medicine-card";
 import { View } from "react-native";
 import { Button } from "@startup/mobile-ui";
 import { Heading, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import type { Medicine } from "../../../types/doctor";
-
-export type MedicineCardProps = {
-  medicine: Medicine;
-  readOnly?: boolean;
-  onEdit: (medicine: Medicine) => void;
-  onRemove: (medicineId: string) => void;
-  onUpdateTiming: (medicineId: string, timing: Medicine["timing"]) => void;
-  onUpdateDose: (medicineId: string, mealIndex: number) => void;
-};
 
 export function MedicineCard({
   medicine,
@@ -28,7 +24,7 @@ export function MedicineCard({
           {medicine.name}
         </Heading>
         <View style={{ ...ui.row, gap: 4 }}>
-          {(["Before food", "After food"] as const).map((timing) => (
+          {medicineCardItems1.map((timing) => (
             <Button
               key={timing}
               variant="ghost"
@@ -56,7 +52,7 @@ export function MedicineCard({
           borderRadius: 12,
         }}
       >
-        {["Breakfast", "Lunch", "Dinner"].map((meal, index) => (
+        {medicineCardItems2.map((meal, index) => (
           <View key={meal} style={{ flex: 1, gap: 10, alignItems: "center" }}>
             <Label muted style={{ fontSize: 12 }}>
               {meal}

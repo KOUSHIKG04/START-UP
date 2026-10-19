@@ -1,26 +1,11 @@
 import { AppTextInput } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import { forwardRef, type ReactNode } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  View,
-  type StyleProp,
-  type TextInputProps,
-  type ViewStyle,
-} from "react-native";
+import { forwardRef } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
 import { Search } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-
-export type SearchInputProps = Omit<TextInputProps, "style"> & {
-  disabled?: boolean;
-  containerStyle?: StyleProp<ViewStyle>;
-  inputStyle?: TextInputProps["style"];
-  iconColor?: string;
-  iconSize?: number;
-  showIcon?: boolean;
-  rightAccessory?: ReactNode;
-};
+import type { SearchInputProps } from "../types/searchInput";
+export type { SearchInputProps } from "../types/searchInput";
 
 export const SearchInput = forwardRef<TextInput, SearchInputProps>(
   function SearchInput(

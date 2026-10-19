@@ -1,7 +1,7 @@
 import { listFacilityBedInventory } from "@startup/data-access";
 import { uuidSchema } from "@startup/contracts";
 import { createClient } from "@/lib/supabase/server";
-import { saveBedInventory } from "@/features/facilities/server/actions";
+import { saveBedInventory } from "@/features/facilities/server";
 
 export async function PATCH(request: Request) {
   const origin = request.headers.get("origin");

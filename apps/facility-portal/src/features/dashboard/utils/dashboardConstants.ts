@@ -22,9 +22,9 @@ export const wards: Pick<
   },
   {
     icon: KeyRound,
-    iconBg: "bg-[#07595d]/10",
-    iconColor: "text-[#07595d]",
-    progressColor: "bg-[#07595d]",
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
+    progressColor: "bg-primary",
   },
   {
     icon: Users,
@@ -40,9 +40,9 @@ export const wards: Pick<
   },
   {
     icon: Activity,
-    iconBg: "bg-slate-500/10",
-    iconColor: "text-slate-600",
-    progressColor: "bg-slate-500",
+    iconBg: "bg-muted/10",
+    iconColor: "text-muted-foreground",
+    progressColor: "bg-muted",
   },
   {
     icon: Ambulance,

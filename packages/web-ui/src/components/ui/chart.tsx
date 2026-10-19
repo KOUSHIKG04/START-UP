@@ -90,28 +90,36 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+  const selectorId = id.replace(
+    /[^a-zA-Z0-9_-]/g,
+    (character) => `\\${character.codePointAt(0)!.toString(16)} `
+  );
+  const css = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
+${prefix} [data-chart=${selectorId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
+    if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
+      throw new Error("Chart color keys must be valid CSS variable names.");
+    }
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color;
+    if (color && /[;{}<>\\]|\/\*/.test(color)) {
+      throw new Error(
+        "Chart colors must be CSS color values, not declarations."
+      );
+    }
     return color ? `  --color-${key}: ${color};` : null;
   })
   .join("\n")}
 }
 `
-          )
-          .join("\n"),
-      }}
-    />
-  );
+    )
+    .join("\n");
+
+  return <style>{css}</style>;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;

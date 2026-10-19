@@ -1,4 +1,4 @@
-import { useRef, type Ref } from "react";
+import { useRef } from "react";
 import {
   Animated,
   ScrollView,
@@ -7,20 +7,11 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  type ScrollViewProps,
-  type StyleProp,
-  type ViewStyle,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@startup/design-tokens";
-
-export type FadedScrollViewProps = ScrollViewProps & {
-  containerStyle?: StyleProp<ViewStyle>;
-  edgeColor?: string;
-  edgeSize?: number;
-  topEdgeOffset?: number;
-  ref?: Ref<ScrollView>;
-};
+import type { FadedScrollViewProps } from "../types/fadedScrollView";
+export type { FadedScrollViewProps } from "../types/fadedScrollView";
 
 export const DEFAULT_FADED_EDGE_COLOR = colors.ui.fade;
 

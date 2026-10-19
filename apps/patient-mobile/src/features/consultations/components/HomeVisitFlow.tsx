@@ -1,16 +1,13 @@
+import type { HomeVisitFlowProps } from "../types/visit-session";
+export type { HomeVisitFlowProps } from "../types/visit-session";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
-import { CarFront, Info } from "lucide-react-native";
+import { Info } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
 import AppointmentDetailsCard from "../../appointments/components/AppointmentDetailsCard";
-import type { Appointment } from "../../appointments/types/appointment";
-import { ScheduleSummary } from "./ScheduleSummary";
 
-export interface HomeVisitFlowProps {
-  appointment: Appointment;
-  onComplete: () => void;
-}
+import { ScheduleSummary } from "./ScheduleSummary";
 
 export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
   return (

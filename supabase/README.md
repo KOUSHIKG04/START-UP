@@ -1,124 +1,122 @@
 # Shared Supabase backend
 
-Patient, Doctor, Driver and Web Admin share one Supabase project per environment.
-Supabase Auth, PostgreSQL, RPC, RLS, Realtime, Storage and Edge Functions form the
-backend. There is no separately deployed Bun API.
+Patient, Doctor, Driver, Facility Portal and Company Admin use the same Supabase
+project within an environment. Supabase provides Auth, PostgreSQL, RPCs, RLS,
+Realtime, Storage and Edge Functions. There is no separate deployed Bun API.
 
-| Location                          | Responsibility                                       |
-| --------------------------------- | ---------------------------------------------------- |
-| packages/database/src/schema      | Server-only Drizzle models                           |
-| packages/data-access              | Shared typed Supabase client and reusable operations |
-| supabase/migrations               | Reviewed SQL: tables, constraints, RPC and policies  |
-| supabase/functions                | Trusted integration handlers deployed to Supabase    |
-| supabase/config.toml              | Local CLI configuration; not hosted credentials      |
-| packages/database/tooling/seed.ts | Explicit synthetic development fixture               |
+## Ownership
 
-## Current implementation
+| Location                   | Responsibility                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| `migrations/`              | Ordered SQL history for tables, constraints, RPCs, triggers, policies and grants |
+| `migrations/meta/`         | Existing Drizzle generation snapshots/journal; not a second deployment history   |
+| `functions/<name>/`        | Implemented integration handlers and their local helpers                         |
+| `tests/smoke/`             | Transactional SQL smoke checks used by the guarded disposable runner             |
+| `seed.sql`                 | Main manual SQL demo fixture; automatic seeding remains disabled                 |
+| `fixtures/`                | Preserved alternative SQL fixtures, excluded from automatic seeding              |
+| `config.toml`              | Local CLI settings; hosted settings are managed separately                       |
+| `../packages/database/`    | Optional Drizzle models, trusted tooling and model/integration tests             |
+| `../packages/data-access/` | App-facing Supabase operations, client factories and wire types                  |
+| `../packages/contracts/`   | Client-safe domain schemas and inferred types                                    |
 
-The three baseline migrations are on the linked development project. The separate
-disposable project has all 30 migrations through
-`20260924112821_patient_sos_booking.sql`, and its rollback smoke fixtures pass.
-Review the post-baseline migration set for the intended development environment
-before pushing it to the linked project.
+Read the root [working rules](../AGENTS.md) and
+[package ownership guide](../packages/ARCHITECTURE.md) before changing boundaries.
 
-The private `clinzo` schema has guarded public RPCs for phone onboarding, doctor
-discovery, clinic booking/check-in/queue/consultation, scoped inventory, ambulance
-booking/dispatch/trips/location, and patient completion PIN. The patient, doctor,
-driver and web apps use corresponding shared contracts and data-access adapters;
-some older screens still use demo data. The patient app's authenticated SOS RPC
-is applied only to the disposable project, and in-app SOS dispatch is disabled by default. Guest
-SOS is unimplemented. Realtime delivery, notification handlers, storage policies,
-external messaging/maps and payments are not ready. The four named Edge Function
-folders are placeholders and remain disabled until implemented. See
-[PROJECT_CONTEXT.md](../PROJECT_CONTEXT.md) for precise status and open decisions.
+## Why the database package remains
 
-## What verification means
+`packages/database` is tooling for this same PostgreSQL database, not another
+database or API service. Its Drizzle models support table SQL generation, model
+checks and the optional synthetic fixture. Apps use Supabase through
+`packages/data-access`; they must not import the trusted database client/models.
 
-- **Phone account:** enable Phone on the hosted project's Auth Providers page and
-  configure an SMS provider. `sendPhoneOtp` requests an Auth code;
-  `verifyPhoneOtp` returns a session. The backend requires a confirmed phone on
-  `auth.users` before onboarding. The separate four-digit patient PIN does not
-  sign anyone in.
-- **Doctor/driver credentials:** onboarding creates `pending` records. An actual
-  human reviews documents outside these apps; only a trusted database operator
-  can record that decision with `clinzo.record_manual_credential_review`. The
-  future reviewer app needs its own scoped authorization before it can do this.
-- **Backend implementation:** local typechecks are preliminary. The disposable
-  clinic, inventory and ambulance/SOS rollback smoke fixtures passed through the 30th
-  migration. Real-device
-  multi-account journeys are not yet verified.
+Supabase CLI owns the applied migration history. For table changes, maintain the
+existing Drizzle model owner and review generated SQL before applying it. Models
+are not automatically synchronized with later SQL-only changes or a hosted
+project; check for drift before generating new table SQL. RPCs, triggers and
+policies remain versioned SQL. Do not use Drizzle push/migrate as a second runner.
 
-The earlier auth draft is outside the migration folder and must not be deployed.
-See [UI/database validation](../plans/ui-db-validation/README.md) and
-[PROJECT_CONTEXT.md](../PROJECT_CONTEXT.md) for confirmed scope and open decisions.
+The unused `schemas/*.sql` placeholders were removed. `schema_paths = []` remains
+unchanged; this repository has not switched to Supabase declarative schemas.
 
-## Create and connect a hosted development project (no local Docker required)
+## Local implementation and deployment
 
-1. Create `clinzo-dev` at https://supabase.com/dashboard, choose your region and
-   save the database password privately. Use a separate project for production.
-2. From C:\startup, install dependencies and sign in:
+The structural cleanup verified 134 local SQL migrations through
+`20261015160452_consultation_intake_flow.sql`, preserving their bytes and metadata.
+That is a local inventory, not evidence that every migration is applied anywhere.
+Use the intended environment's migration list and review pending changes before
+promotion. Older dated audit/test notes may describe a different deployment state.
+
+Five functions have local implementations: `send-notification`,
+`online-video-token`, `ambulance-hospitals`, `search-map-places` and
+`resolve-map-address`. See [function ownership](functions/README.md). Source
+presence does not prove deployment, configured provider secrets or device behavior.
+
+## Development workflow
+
+From the repository root, use the existing commands:
 
 ```powershell
-pnpm install
-pnpm supabase login
-pnpm supabase link --project-ref YOUR_PROJECT_REF
 pnpm supabase migration list --linked
 pnpm db:check
 ```
 
-3. Review the migration list and dry run. After the pending files pass on a
-   disposable Supabase database, apply them to the linked development project:
+Table generation remains `pnpm db:generate`; custom SQL changes start with
+`pnpm supabase migration new descriptive_name`. Review the resulting SQL and
+verify it against an explicitly disposable target before a deliberate promotion
+with `pnpm db:migrate`. Never rename, reorder or rewrite existing migration files
+as folder cleanup. Keep `migrations/meta` intact.
+
+Optional local development uses Docker and `pnpm supabase start`. Hosted CLI
+commands do not require a running local stack. The checked-in `config.toml`
+controls local services; it does not establish hosted Auth redirects, provider
+configuration, migration status or function deployment.
+
+## Tests and fixtures
+
+Read [tests/README.md](tests/README.md). SQL smoke checks are now in
+`supabase/tests/smoke`; model and Bun integration tests remain in
+`packages/database/tests`. The existing
+`packages/database/tooling/verify-disposable.ps1` runner keeps its explicit
+target guard and opt-in migration behavior; only its smoke-file locations changed.
+
+Automatic seeding remains disabled (`enabled = false`, `sql_paths = []`).
+`seed.sql` is the main manual SQL fixture. The differing former
+`seed_demo_data.sql` fixture is preserved byte-for-byte as
+`fixtures/demo-alternative.sql`; it was not merged or executed. See
+[fixture notes](fixtures/README.md) before selecting a fixture.
+
+## Generated types and application configuration
+
+Each app uses its environment's project URL and publishable key: Expo reads
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; web reads
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Provider
+secrets, service-role credentials and direct database URLs stay out of app bundles.
+
+After an intentional schema deployment, generate wire types with:
 
 ```powershell
-pnpm db:migrate
+pnpm supabase gen types typescript --linked --schema public
 ```
 
-`db:migrate` runs `supabase db push --linked`. Supabase CLI owns the single applied
-migration history. `db:check` only previews pending files; it does not execute or
-prove the SQL. If this database previously used the removed custom Drizzle runner,
-reconcile applied versions before pushing; do not blindly replay its migrations.
-The linked project has only the three initial migrations. Every later migration
-is pending there. All 30 passed on the disposable project. Cross-client device behavior
-remains unverified before running `db:migrate` on the linked project.
-Without local Docker, use the guarded hosted-disposable workflow in
-[packages/database/README.md](../packages/database/README.md#hosted-verification-without-docker).
-Its `-UseCli` mode requires no database password and never relinks this checkout.
+Save successful TypeScript output to
+`packages/data-access/src/generated/supabase.types.ts`. The separate
+`database.types.ts` file is a handwritten compatibility overlay importing that
+output; do not overwrite it. Review both the generated diff and app typechecks.
+This cleanup does not regenerate types or query a hosted database.
 
-4. Set the same project URL and publishable key in each app's local environment:
-   web uses NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-   Expo uses EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
-   These values are passed to the shared client factory. Never use a secret key
-   or a database connection URL in client apps.
-5. Generate types after migration using `pnpm supabase gen types typescript --linked
---schema public` and save its output to
-   `packages/data-access/src/generated/database.types.ts`. Its current contents
-   are an explicitly handwritten bootstrap contract, not a generated DB snapshot.
+## Upcoming integrations
 
-## Daily development
+Payments, optional reservation orchestration and automatic dispatch orchestration
+are documented in [functions/README.md](functions/README.md). Their empty handlers
+were removed; their existing local configuration entries remain disabled.
+Create code with its first working implementation instead of reserving folders.
+Payment models already belong to `packages/database/src/schema/payments.ts`;
+shared payment contracts and operations belong to their corresponding packages.
 
-- Table change: edit Drizzle models, run `pnpm db:generate`, review the SQL.
-- RPC/policy change: run `pnpm supabase migration new descriptive_name`, edit SQL.
-- Apply either through Supabase CLI only. Do not use drizzle-kit push/migrate.
-- `migrations/meta` tracks Drizzle generation snapshots, not applied migrations.
-- The empty `schemas/` files are historical placeholders, not a second schema source.
-- Deploy only implemented Edge Functions by name, never all placeholder folders.
+Structural checks do not replace hosted migration, SQL/RLS, provider, browser or
+multi-device verification. No migrations, seeds or function deployments run as
+part of this cleanup.
 
-Supabase Edge Functions use its Deno-compatible runtime. Atomic booking and queue
-changes belong in authorized transactional PostgreSQL RPC functions. Edge handlers
-verify callers, validate input and call those RPCs when an integration is needed.
-Payment webhooks additionally verify the provider signature and process idempotently.
-
-## Next implementation slice
-
-Review promotion to the intended development project, configure SMS delivery, provision an authorized
-portal member and test cross-app clinic and ambulance journeys on devices.
-Guest SOS, automatic dispatch escalation, background driver location and
-notifications need separate implementation and verification.
-
-Optional local Supabase development uses Docker with `pnpm supabase start`.
-Hosted login/link/db push do not require running that local stack. `config.toml`
-auth redirects and exposed schemas configure local development; configure the
-hosted Auth redirect allowlist separately when enabling actual app login flows.
-
-References: https://supabase.com/docs/guides/local-development/database-migrations
-and https://supabase.com/docs/guides/functions.
+References: [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations),
+[database testing](https://supabase.com/docs/guides/database/testing), and
+[generated types](https://supabase.com/docs/guides/api/rest/generating-types).

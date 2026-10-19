@@ -13,17 +13,8 @@ import { fontFamilies } from "@startup/design-tokens";
 import { AppText as Text } from "./AppText";
 import { Button } from "./Button";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { AppTheme } from "../utils/appTheme";
-
-export type ClockDurationPickerProps = {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (minutes: number) => void;
-  disabled?: boolean;
-  theme?: AppTheme;
-};
+import type { ClockDurationPickerProps } from "../types/clockDurationPicker";
+export type { ClockDurationPickerProps } from "../types/clockDurationPicker";
 
 export function ClockDurationPicker({
   label,

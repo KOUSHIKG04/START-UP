@@ -1,73 +1,38 @@
+import { quickReplies } from "../utils/chatConstants";
+import { ChatHeader } from "../components/ChatHeader";
+import { DriverMessageBubble } from "../components/DriverMessageBubble";
+import { styles } from "../components/TripChat.styles";
+import { useDriverChat } from "../hooks/useDriverChat";
+
+import type { DriverMessage } from "../types/chat-screen";
+export type { DriverMessage } from "../types/chat-screen";
 import { Input } from "@startup/mobile-ui";
-import { memo, useCallback, useRef, useState } from "react";
+import { useCallback } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   View,
 } from "react-native";
 import { router } from "expo-router";
-import { CheckCheck, Send } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { fontFamilies } from "@startup/design-tokens";
+import { Send } from "lucide-react-native";
+
 import { Copy, PageHeader } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
-import { useDriver } from "../../../stores/driver";
-
-interface DriverMessage {
-  id: string;
-  incoming: boolean;
-  text: string;
-  time: string;
-}
-
-const DriverMessageBubble = memo(function DriverMessageBubble({
-  message,
-}: {
-  message: DriverMessage;
-}) {
-  return (
-    <View
-      style={[
-        styles.bubble,
-        message.incoming ? styles.incoming : styles.outgoing,
-      ]}
-    >
-      <Copy>{message.text}</Copy>
-      <View style={styles.time}>
-        <Copy style={ui.caption}>{message.time}</Copy>
-        {!message.incoming && <CheckCheck size={14} color={palette.primary} />}
-      </View>
-    </View>
-  );
-});
-
-const ChatHeader = memo(function ChatHeader() {
-  return (
-    <Copy style={[ui.caption, { textAlign: "center", marginBottom: 4 }]}>
-      TODAY · EMERGENCY REQUEST
-    </Copy>
-  );
-});
 
 export function ChatScreen() {
-  const messages = useDriver((s) => s.messages);
-  const send = useDriver((s) => s.send);
-  const stage = useDriver((s) => s.stage);
-  const active = ["pickup", "arrived", "progress"].includes(stage);
-  const [draft, setDraft] = useState("");
-  const flatListRef = useRef<FlatList<DriverMessage>>(null);
-  const insets = useSafeAreaInsets();
-  const submit = (text: string) => {
-    if (text.trim() && active) {
-      send(text);
-      setDraft("");
-    }
-  };
-
+  const {
+    messages,
+    send,
+    active,
+    draft,
+    setDraft,
+    flatListRef,
+    insets,
+    submit,
+  } = useDriverChat();
   const renderItem = useCallback(
     ({ item }: { item: DriverMessage }) => (
       <DriverMessageBubble message={item} />
@@ -105,20 +70,18 @@ export function ChatScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.quick}
             >
-              {["On my way", "Arriving in 5 mins", "At pickup location"].map(
-                (text) => (
-                  <Pressable
-                    accessibilityRole="button"
-                    key={text}
-                    onPress={() => submit(text)}
-                    style={styles.chip}
-                  >
-                    <Copy style={{ color: palette.primary, fontSize: 12 }}>
-                      {text}
-                    </Copy>
-                  </Pressable>
-                )
-              )}
+              {quickReplies.map((text) => (
+                <Pressable
+                  accessibilityRole="button"
+                  key={text}
+                  onPress={() => submit(text)}
+                  style={styles.chip}
+                >
+                  <Copy style={{ color: palette.primary, fontSize: 12 }}>
+                    {text}
+                  </Copy>
+                </Pressable>
+              ))}
             </ScrollView>
             <View style={ui.row}>
               <Input
@@ -151,54 +114,3 @@ export function ChatScreen() {
     </KeyboardAvoidingView>
   );
 }
-const styles = StyleSheet.create({
-  messages: { padding: 16, gap: 16 },
-  bubble: { maxWidth: "82%", borderRadius: 12, padding: 12, gap: 4 },
-  incoming: {
-    alignSelf: "flex-start",
-    backgroundColor: palette.soft,
-    borderBottomLeftRadius: 3,
-  },
-  outgoing: {
-    alignSelf: "flex-end",
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderBottomRightRadius: 3,
-  },
-  time: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    gap: 5,
-  },
-  composer: { padding: 16, gap: 12 },
-  quick: { gap: 8 },
-  chip: {
-    minHeight: 44,
-    paddingHorizontal: 12,
-    justifyContent: "center",
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: palette.border,
-  },
-  input: {
-    flex: 1,
-    minHeight: 48,
-    maxHeight: 120,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderRadius: 24,
-    fontFamily: fontFamilies.regular,
-    color: palette.ink,
-  },
-  send: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: palette.green,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

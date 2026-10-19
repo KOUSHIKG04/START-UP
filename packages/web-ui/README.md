@@ -15,14 +15,28 @@ mode needs separately defined design tokens before a theme switch is introduced.
 Fonts remain configured by the consuming Next.js app. Existing radius and spacing
 utilities are unchanged.
 
-## When initializing shadcn
+## Component ownership
 
-Shadcn is not installed by this theme integration. Keep this adapter when running
-initialization; remove generated preset color definitions that would override it.
-Preserve generated non-color setup (such as required animation imports) as needed.
+Shadcn primitives live in `src/components/ui`. Keep related compound components
+together. Preserve this theme adapter when adding components; remove generated
+preset color definitions that would override it. Preserve required non-color
+setup, such as animation imports, as needed.
 Do not point the CLI CSS output at `packages/design-tokens/theme.css`: that package
 owns the platform palette and must not be rewritten by a component preset.
 
 Add components under `src/components/ui` after configuring both workspaces.
 Inspect new component styles against this theme before use. Chart colors and
 dark-mode colors should be defined in the design system when those features ship.
+
+Custom compositions live in `src/components`. `DataTable` mounts
+`hooks/use-data-table.ts` once for its controlled/uncontrolled sorting and
+pagination. Custom table/list contracts live in `src/types`, with their existing
+component exports retained. Generic helpers stay in `src/lib` and the mobile
+viewport hook stays in `src/hooks`.
+
+Run `pnpm --filter @startup/web-ui test` and
+`pnpm --filter @startup/web-ui typecheck` from the repository root. Hook tests
+exercise state ownership and callback arguments; they do not replace browser
+layout or accessibility checks. See the
+[shared package ownership guide](../ARCHITECTURE.md) for future payment boundaries;
+backend operations and payment workflow decisions stay outside this UI package.

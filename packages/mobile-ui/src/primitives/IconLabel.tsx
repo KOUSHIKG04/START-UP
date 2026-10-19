@@ -1,40 +1,9 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
-import { type AppTheme } from "../utils/appTheme";
-
-export type IconLabelIconProps = {
-  color: string;
-  size: number;
-};
-
-export type IconLabelProps = Omit<PressableProps, "children"> & {
-  icon: ReactNode | ((props: IconLabelIconProps) => ReactNode);
-  label: string;
-  theme?: AppTheme;
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  iconColor?: string;
-  iconSize?: number;
-  surfaceSize?: number;
-  surfaceRadius?: number;
-  labelWidth?: number;
-  gap?: number;
-  iconContainerStyle?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
-  labelNumberOfLines?: number;
-};
+import type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
+export type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
 
 export function IconLabel({
   icon,

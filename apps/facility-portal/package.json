@@ -9,6 +9,7 @@
     "lint": "node scripts/check-architecture.mjs && eslint .",
     "check:architecture": "node scripts/check-architecture.mjs",
     "test:architecture": "node --test scripts/check-architecture.test.mjs",
+    "test": "node --test scripts/check-architecture.test.mjs tests/unit/*.test.cjs tests/unit/*.test.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"

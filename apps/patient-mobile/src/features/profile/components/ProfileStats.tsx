@@ -1,9 +1,10 @@
+import type { ProfileStatsProps } from "../types/profile";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Card, useReadableTypography } from "@startup/mobile-ui";
 
-export function ProfileStats({ age, blood }: { age: string; blood: string }) {
+export function ProfileStats({ age, blood }: ProfileStatsProps) {
   return (
     <View style={styles.stats}>
       <ProfileStat label="Age" value={age} />

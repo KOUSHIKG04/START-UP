@@ -1,19 +1,15 @@
+import type { BloodGroupSelectorProps } from "../types/form-fields";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { PROFILE_FIELD_HEIGHT } from "./profileFormStyles";
+import { PROFILE_FIELD_HEIGHT } from "./ProfileFields.styles";
 
 export function BloodGroupSelector({
   bloodGroups,
   value,
   onChange,
   invalid = false,
-}: {
-  bloodGroups: readonly string[];
-  value: string;
-  onChange: (group: string) => void;
-  invalid?: boolean;
-}) {
+}: BloodGroupSelectorProps) {
   return (
     <View style={styles.bloodGrid}>
       {bloodGroups.map((item) => (

@@ -18,10 +18,8 @@ import {
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
 import { mobileSession, useMobileSession } from "../services/supabase";
-import {
-  signOutWithPushCleanup,
-  useDeviceNotifications,
-} from "../features/notifications/deviceNotifications";
+import { signOutWithPushCleanup } from "../features/notifications/services/deviceNotifications";
+import { useDeviceNotifications } from "../features/notifications/hooks/useDeviceNotifications";
 
 void SplashScreen.preventAutoHideAsync();
 

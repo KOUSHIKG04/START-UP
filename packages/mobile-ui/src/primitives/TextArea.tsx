@@ -1,12 +1,7 @@
 import { StyleSheet } from "react-native";
-import { Input, type InputProps } from "./Input";
-
-export type TextAreaProps = Omit<
-  InputProps,
-  "multiline" | "numberOfLines" | "textAlignVertical"
-> & {
-  numberOfLines?: number;
-};
+import { Input } from "./Input";
+import type { TextAreaProps } from "../types/textArea";
+export type { TextAreaProps } from "../types/textArea";
 
 export function TextArea({
   numberOfLines = 5,

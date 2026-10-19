@@ -1,6 +1,6 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card, CardSeparator, Chip } from "@startup/mobile-ui";
 import type { AboutDoctorProps } from "../types/doctor-profile";

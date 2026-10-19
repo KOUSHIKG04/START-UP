@@ -1,7 +1,7 @@
 import type { DoctorCardProps } from "../components/DoctorCard";
 import type { ConsultationType } from "../../appointments/types/appointment";
 import type { PatientScreenProps } from "../../../types/screen";
-import type { ProfileTab } from "../utils/doctorProfileConstants";
+import type { ProfileTab } from "./booking-calendar";
 
 export type BookingSelection = {
   date: string;

@@ -1,9 +1,7 @@
+import type { AppointmentParams } from "../types/appointment-params";
+export type { AppointmentParams } from "../types/appointment-params";
 import type { Appointment } from "../types/appointment";
-import { parseConsultationType } from "./consultationFlow";
-
-export type AppointmentParams = Partial<
-  Record<keyof Appointment, string | string[]>
->;
+import { parseConsultationType } from "./consultation";
 
 function first(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;

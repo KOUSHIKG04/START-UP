@@ -1,28 +1,8 @@
 "use client";
+import type { DoctorTableProps } from "../types/doctorTable";
 
-import * as React from "react";
 import { DataTable } from "@startup/web-ui/components/data-table";
 import { doctorColumns } from "./doctorColumns";
-import type { DoctorRecord } from "../types/doctorManagement";
-import type {
-  PaginationState,
-  SortingState,
-  OnChangeFn,
-} from "@tanstack/react-table";
-
-export interface DoctorTableProps {
-  data: DoctorRecord[];
-  isLoading?: boolean;
-  pageCount?: number;
-  rowCount?: number;
-  pagination?: PaginationState;
-  onPaginationChange?: OnChangeFn<PaginationState>;
-  manualPagination?: boolean;
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
-  emptyMessage?: string;
-  onRowClick?: (doctor: DoctorRecord) => void;
-}
 
 export function DoctorTable({
   data,

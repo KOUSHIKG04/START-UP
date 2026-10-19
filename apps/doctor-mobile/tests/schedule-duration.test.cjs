@@ -1,3 +1,30 @@
+function load(file, mocks) {
+  const exports = {};
+  const absolute = path.resolve(__dirname, file);
+  vm.runInNewContext(
+    ts.transpileModule(fs.readFileSync(path.resolve(__dirname, file), "utf8"), {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        jsx: ts.JsxEmit.ReactJSX,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }).outputText,
+    {
+      exports,
+      require: (name) => {
+        if (Object.hasOwn(mocks, name)) return mocks[name];
+        if (!name.startsWith(".")) return undefined;
+        const target = path.resolve(path.dirname(absolute), name);
+        const resolved = [target, target + ".ts", target + ".tsx"].find(
+          (file) => fs.existsSync(file) && fs.statSync(file).isFile()
+        );
+        if (!resolved) throw new Error("Unmocked import: " + name);
+        return load(path.relative(__dirname, resolved), mocks);
+      },
+    }
+  );
+  return exports;
+}
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs"),
@@ -156,7 +183,7 @@ function scheduleView({ published = false } = {}) {
       supabase: {},
       useMobileSession: () => ({ profile: { doctor: { id: "doctor" } } }),
     },
-    "../../practices/selectedPractice": {
+    "../../practices/services/selectedPractice": {
       selectedPracticeQueryKey: () => ["selected-practice"],
     },
     "../../../components/DoctorScreen": {
@@ -174,24 +201,9 @@ function scheduleView({ published = false } = {}) {
       ConsultationChargesPanel: "Charges",
     },
   };
-  const exports = {};
-  vm.runInNewContext(
-    ts.transpileModule(
-      fs.readFileSync(
-        path.resolve(
-          __dirname,
-          "../src/features/schedule/screens/ScheduleScreen.tsx"
-        ),
-        "utf8"
-      ),
-      {
-        compilerOptions: {
-          module: ts.ModuleKind.CommonJS,
-          jsx: ts.JsxEmit.ReactJSX,
-        },
-      }
-    ).outputText,
-    { exports, require: (name) => mocks[name] }
+  const exports = load(
+    "../src/features/schedule/screens/ScheduleScreen.tsx",
+    mocks
   );
   function render() {
     cursor = 0;

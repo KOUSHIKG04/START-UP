@@ -1,3 +1,4 @@
+import type { LocationFieldsProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Input, Loader } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -11,14 +12,7 @@ export function LocationFields({
   onChange,
   onFocus,
   onCurrentLocationPress,
-}: {
-  destination: string;
-  pickupAddress: string;
-  locating?: boolean;
-  onChange: (value: string) => void;
-  onFocus: () => void;
-  onCurrentLocationPress: () => void;
-}) {
+}: LocationFieldsProps) {
   return (
     <View style={styles.locations}>
       <Pressable

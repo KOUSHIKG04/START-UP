@@ -1,5 +1,4 @@
 "use server";
-
 import type { BedInventoryProjection } from "@startup/contracts";
 import { updateBedInventorySchema } from "@startup/contracts";
 import { updateFacilityBedInventory } from "@startup/data-access";

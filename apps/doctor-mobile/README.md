@@ -76,7 +76,7 @@ confirm persistence. Check Hospital Settings / Manage Schedule to confirm the
 approved practice is unchanged. Edit Clinic now shows every address field on
 its page. The Settings entry is a Profile row.
 
-Database regression: `packages/database/tests/doctor-personal-locations.cli-smoke.sql`
+Database regression: `supabase/tests/smoke/doctor-personal-locations.cli-smoke.sql`
 uses rollback-only fixtures for CRUD, selected-address fallback, and doctor isolation.
 
 ### Personal address vs. practice address

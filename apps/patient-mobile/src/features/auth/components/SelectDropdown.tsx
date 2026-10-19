@@ -1,8 +1,9 @@
+import type { SelectDropdownProps } from "../types/form-fields";
 import { StyleSheet } from "react-native";
-import type { ReactNode } from "react";
+
 import { Dropdown } from "@startup/mobile-ui";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { profileFormStyles } from "./profileFormStyles";
+import { profileFormStyles } from "./ProfileFields.styles";
 
 export function SelectDropdown({
   label,
@@ -10,13 +11,7 @@ export function SelectDropdown({
   options,
   onChange,
   leftIcon,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (val: string) => void;
-  leftIcon?: ReactNode;
-}) {
+}: SelectDropdownProps) {
   return (
     <Dropdown
       accessibilityLabel={`${label}: ${value}`}

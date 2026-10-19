@@ -1,3 +1,4 @@
+import type { BookingCardProps } from "../types/booking-card";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,17 +20,12 @@ import {
   CardHeader,
   CardSeparator,
 } from "@startup/mobile-ui";
-import type { Appointment } from "../types/appointment";
 
 export default function BookingCard({
   appointment,
   onPress,
   statusLabel,
-}: {
-  appointment: Appointment;
-  onPress?: () => void;
-  statusLabel?: string;
-}) {
+}: BookingCardProps) {
   return (
     <Card
       accessibilityRole={onPress ? "button" : undefined}

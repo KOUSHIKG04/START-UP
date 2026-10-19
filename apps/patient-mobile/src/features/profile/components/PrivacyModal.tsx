@@ -1,3 +1,4 @@
+import type { PrivacyModalProps } from "../types/profile";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { CheckCircle2, ShieldCheck, X } from "lucide-react-native";
@@ -5,13 +6,7 @@ import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, ModalSurface } from "@startup/mobile-ui";
 import { privacyHighlights } from "../utils/profileConstants";
 
-export function PrivacyModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+export function PrivacyModal({ visible, onClose }: PrivacyModalProps) {
   return (
     <ModalSurface
       visible={visible}

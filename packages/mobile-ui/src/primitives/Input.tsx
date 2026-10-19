@@ -1,33 +1,10 @@
 import { AppText as Text, AppTextInput } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
-import type { Ref } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  View,
-  type StyleProp,
-  type TextInputProps,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-
-export type InputProps = TextInputProps & {
-  ref?: Ref<TextInput>;
-  /** Preserve embedded/search/OTP styling without adding a form-field wrapper. */
-  variant?: "outlined" | "unstyled";
-  label?: string;
-  /** Non-editable leading text, such as a phone country code. */
-  prefix?: string;
-  error?: string;
-  /** Show an error outline while messages are handled by a toast. */
-  invalid?: boolean;
-  disabled?: boolean;
-  containerStyle?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
-  errorStyle?: StyleProp<TextStyle>;
-};
+import type { InputProps } from "../types/input";
+export type { InputProps } from "../types/input";
 
 export function Input({
   ref,

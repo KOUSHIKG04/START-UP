@@ -1,22 +1,16 @@
+import type { HomeSearchResultsProps } from "../types/home";
+import type { SearchResultItem } from "../types/home-search-results";
+export type { SearchResultItem } from "../types/home-search-results";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Search } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 
-interface SearchResultItem {
-  title: string;
-  type: string;
-}
-
 export function HomeSearchResults({
   liveResults,
   searchQuery,
   onSelectItem,
-}: {
-  liveResults: SearchResultItem[];
-  searchQuery: string;
-  onSelectItem: (item: string) => void;
-}) {
+}: HomeSearchResultsProps) {
   return (
     <View style={styles.liveResultsContainer}>
       {liveResults.length > 0 ? (

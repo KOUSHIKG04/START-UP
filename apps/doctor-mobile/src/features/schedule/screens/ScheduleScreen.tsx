@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect } from "expo-router";
-import { Pressable, Switch, View } from "react-native";
+import { autoBookingHelpItems } from "../utils/scheduleConstants";
+import type { ScheduleScreenProps } from "../types/schedule-screen";
+import { Switch, View } from "react-native";
 import {
   Button,
   ClockDurationPicker,
@@ -8,29 +8,10 @@ import {
   Loader,
   ModalSurface,
   Skeleton,
-  useToast,
-  useToastFeedback,
 } from "@startup/mobile-ui";
-import { Calendar, Check, Minus, Plus } from "lucide-react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getMySchedulePreferences,
-  getMyDoctorProfile,
-  listMyDoctorFacilityRequests,
-  listMyPractices,
-  publishMyDoctorSchedule,
-  saveMySchedulePreferences,
-} from "@startup/data-access";
-import type {
-  ClinicPractice,
-  DoctorSchedulePreferences,
-} from "@startup/contracts";
-import { supabase, useMobileSession } from "../../../services/supabase";
-import {
-  getSelectedPracticeId,
-  selectedPracticeQueryKey,
-  setSelectedPracticeId,
-} from "../../practices/selectedPractice";
+import { Calendar, Check } from "lucide-react-native";
+import type { ClinicPractice } from "@startup/contracts";
+
 import {
   Choice,
   DoctorScreen,
@@ -39,475 +20,45 @@ import {
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { DatePicker } from "../../../components/DatePicker";
-import { formatDisplayDate } from "@startup/contracts";
-import {
-  previewTimeBlock,
-  scheduleError,
-  suggestConsultationDuration,
-} from "../utils/schedule";
-import type { Schedule } from "../../../types/doctor";
-import {
-  ConsultationChargesPanel,
-  ScheduleSection,
-  WorkingDaysPanel,
-  ClinicHoursPanel,
-} from "../components/ScheduleOperationsPanels";
+import { ConsultationChargesPanel } from "../components/ConsultationChargesPanel";
+import { ScheduleSection } from "../components/ScheduleSection";
+import { WorkingDaysPanel } from "../components/WorkingDaysPanel";
+import { ClinicHoursPanel } from "../components/ClinicHoursPanel";
+import { NumberSetting } from "../components/NumberSetting";
+import { useScheduleEditor } from "../hooks/useScheduleEditor";
 
-function NumberSetting({
-  title,
-  value,
-  min,
-  max,
-  suffix,
-  onChange,
-  stepper = false,
-  disabled = false,
-}: {
-  title: string;
-  value: number;
-  min: number;
-  max: number;
-  suffix: string;
-  onChange: (value: number) => void;
-  stepper?: boolean;
-  disabled?: boolean;
-}) {
-  const [text, setText] = useState(String(value));
-  useEffect(() => setText(String(value)), [value]);
-  const parsed = /^\d+$/.test(text) ? Number(text) : NaN;
-  const current =
-    Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : value;
-  const commit = (next: number) => {
-    const bounded = Math.max(min, Math.min(max, next));
-    setText(String(bounded));
-    onChange(bounded);
-  };
-  return (
-    <View style={{ gap: 6 }}>
-      <View style={ui.between}>
-        <Label
-          style={{ fontSize: 13, lineHeight: 20, includeFontPadding: false }}
-        >
-          {title}
-        </Label>
-        {!stepper ? (
-          <Label muted style={{ fontSize: 12 }}>
-            {min}–{max} {suffix}
-          </Label>
-        ) : null}
-      </View>
-      {stepper ? (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: palette.border,
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Decrease ${title}`}
-            accessibilityState={{ disabled: disabled || current <= min }}
-            disabled={disabled || current <= min}
-            onPress={() => commit(current - 1)}
-            style={({ pressed }) => ({
-              width: 44,
-              height: 46,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRightWidth: 1,
-              borderColor: palette.border,
-              opacity: disabled || current <= min ? 0.3 : 1,
-              backgroundColor: pressed ? palette.subtle : palette.surface,
-            })}
-          >
-            <Minus size={20} color={palette.primary} />
-          </Pressable>
-          <Input
-            variant="unstyled"
-            accessibilityLabel={`${title} in ${suffix}`}
-            value={text}
-            disabled={disabled}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              height: 46,
-              paddingHorizontal: 0,
-              paddingVertical: 0,
-              textAlign: "center",
-              textAlignVertical: "center",
-              fontSize: 16,
-              color: palette.header,
-            }}
-            onChangeText={(next) => {
-              if (!/^\d{0,3}$/.test(next)) return;
-              setText(next);
-              const number = Number(next);
-              if (next !== "" && number >= min && number <= max)
-                onChange(number);
-            }}
-            onBlur={() => commit(Number.isFinite(parsed) ? parsed : value)}
-            selectTextOnFocus
-            keyboardType="number-pad"
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Increase ${title}`}
-            accessibilityState={{ disabled: disabled || current >= max }}
-            disabled={disabled || current >= max}
-            onPress={() => commit(current + 1)}
-            style={({ pressed }) => ({
-              width: 44,
-              height: 46,
-              alignItems: "center",
-              justifyContent: "center",
-              borderLeftWidth: 1,
-              borderColor: palette.border,
-              opacity: disabled || current >= max ? 0.3 : 1,
-              backgroundColor: pressed ? palette.subtle : palette.surface,
-            })}
-          >
-            <Plus size={20} color={palette.primary} />
-          </Pressable>
-        </View>
-      ) : (
-        <Input
-          accessibilityLabel={`${title} in ${suffix}`}
-          value={text}
-          onChangeText={(next) => {
-            if (/^\d{0,3}$/.test(next)) {
-              setText(next);
-              if (next !== "") onChange(Number(next));
-            }
-          }}
-          onBlur={() => setText(String(value))}
-          selectTextOnFocus
-          keyboardType="number-pad"
-        />
-      )}
-    </View>
-  );
-}
-function initialSchedule(mode: "clinic" | "online" | "home"): Schedule {
-  return {
-    days: [],
-    start: mode === "online" ? "13:00" : mode === "home" ? "16:00" : "09:00",
-    end: mode === "online" ? "15:00" : "17:00",
-    duration: 15,
-    onlineDuration: 15,
-    homeDuration: 60,
-    online: 8,
-    walkIn: 12,
-    autoAccept: false,
-    autoLimit: 1,
-    homeVisits: false,
-    homeRadius: "",
-    onlineFee: "0",
-    clinicFee: "0",
-    homeFee: "0",
-  };
-}
-
-export function ScheduleScreen({
-  mode,
-}: {
-  mode: "clinic" | "online" | "home";
-}) {
-  const queryClient = useQueryClient();
-  const [showScheduleHelp, setShowScheduleHelp] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      setShowScheduleHelp(true);
-      void queryClient.invalidateQueries({ queryKey: ["my-doctor-schedule"] });
-      return () => setShowScheduleHelp(false);
-    }, [queryClient, mode])
-  );
-  const { showToast } = useToast();
-  const { profile } = useMobileSession();
-  const doctorId = profile?.doctor?.id;
-  const doctorProfile = useQuery({
-    queryKey: ["my-doctor-profile"],
-    queryFn: () => getMyDoctorProfile(supabase!),
-    enabled: Boolean(supabase),
-  });
-  const zone = doctorProfile.data?.booking_timezone;
-  const practices = useQuery({
-    queryKey: ["my-practices"],
-    queryFn: () => listMyPractices(supabase!),
-    enabled: Boolean(supabase),
-  });
-  const preferredPractice = useQuery({
-    queryKey: selectedPracticeQueryKey(doctorId),
-    queryFn: () => getSelectedPracticeId(doctorId!),
-    enabled: Boolean(doctorId),
-  });
-  const [practiceId, setPracticeId] = useState<string | null>(null);
-  const availablePractices = practices.data as ClinicPractice[] | undefined;
-  const selectedPracticeId =
-    availablePractices?.find((item) => item.practice_id === practiceId)
-      ?.practice_id ??
-    availablePractices?.find(
-      (item) => item.practice_id === preferredPractice.data
-    )?.practice_id ??
-    availablePractices?.[0]?.practice_id ??
-    null;
-  const selectedPractice = availablePractices?.find(
-    (item) => item.practice_id === selectedPracticeId
-  );
-  const associationRequests = useQuery({
-    queryKey: ["my-doctor-facility-requests"],
-    queryFn: () => listMyDoctorFacilityRequests(supabase!),
-    enabled: Boolean(supabase && availablePractices && !selectedPracticeId),
-  });
-  const requests = associationRequests.data as
-    Awaited<ReturnType<typeof listMyDoctorFacilityRequests>> | undefined;
-  const pendingAssociation = requests?.find(
-    (item) => item.status === "pending"
-  );
-  const rejectedAssociation = requests?.find(
-    (item) => item.status === "rejected"
-  );
-  const saved = useQuery({
-    queryKey: ["my-doctor-schedule", selectedPracticeId],
-    queryFn: () => getMySchedulePreferences(supabase!, selectedPracticeId!),
-    enabled: Boolean(supabase && selectedPracticeId),
-  });
-  useToastFeedback({
-    error: practices.isError
-      ? "Could not load your clinics."
-      : saved.isError
-        ? "Could not load saved schedule."
-        : "",
-  });
-  const [draft, setDraft] = useState<Schedule>(() => initialSchedule(mode));
-  const dirty = useRef(false);
-  const draftVersion = useRef(0);
-  const draftPractice = useRef<string | null>(null);
-  const applySchedule = useCallback(
-    (p: DoctorSchedulePreferences) => {
-      dirty.current = false;
-      draftVersion.current = Number(p.row_version);
-      draftPractice.current = p.practice_id;
-      setDraft({
-        days: (mode === "online"
-          ? (p.online_working_days ?? p.working_days)
-          : mode === "home"
-            ? (p.home_working_days ?? p.working_days)
-            : p.working_days
-        ).map((day) => day - 1),
-        start: (mode === "online"
-          ? (p.online_start ?? "13:00")
-          : mode === "home"
-            ? (p.home_start ?? "16:00")
-            : p.clinic_start
-        ).slice(0, 5),
-        end: (mode === "online"
-          ? (p.online_end ?? "15:00")
-          : mode === "home"
-            ? (p.home_end ?? "17:00")
-            : p.clinic_end
-        ).slice(0, 5),
-        duration: p.slot_minutes,
-        onlineDuration: p.online_slot_minutes,
-        homeDuration: p.home_slot_minutes,
-        online: p.online_daily_limit,
-        walkIn: p.walkin_daily_limit,
-        autoAccept: p.auto_accept,
-        autoLimit: p.auto_accept_limit,
-        homeVisits: p.home_visits,
-        homeRadius: p.home_radius_km === null ? "" : String(p.home_radius_km),
-        onlineFee: String((p.online_fee_minor ?? 0) / 100),
-        clinicFee: String(p.clinic_fee_minor / 100),
-        homeFee: String((p.home_fee_minor ?? 0) / 100),
-      });
-    },
-    [mode]
-  );
-  useEffect(() => {
-    if (
-      saved.data &&
-      (!dirty.current || draftPractice.current !== selectedPracticeId)
-    )
-      applySchedule(saved.data);
-    else if (
-      !saved.isLoading &&
-      !saved.isError &&
-      draftPractice.current !== selectedPracticeId
-    ) {
-      dirty.current = false;
-      draftVersion.current = 0;
-      draftPractice.current = selectedPracticeId;
-      setDraft(initialSchedule(mode));
-    }
-  }, [
-    saved.data,
-    saved.isLoading,
-    saved.isError,
+export function ScheduleScreen({ mode }: ScheduleScreenProps) {
+  const {
+    selectPractice,
+    showScheduleHelp,
+    setShowScheduleHelp,
+    doctorProfile,
+    zone,
+    practices,
     selectedPracticeId,
-    applySchedule,
-    mode,
-  ]);
-  const [busy, setBusy] = useState(false);
-  const [pendingAction, setPendingAction] = useState<string | null>(null);
-  const [availabilityDuration, setAvailabilityDuration] = useState<
-    number | null
-  >(null);
-  const [showAutoBookingHelp, setShowAutoBookingHelp] = useState(false);
-  const [suggestedDuration, setSuggestedDuration] = useState<number | null>(
-    null
-  );
-  const [effectiveDate, setEffectiveDate] = useState("");
-  const today = new Intl.DateTimeFormat("en-CA", {
-    timeZone: zone || "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  const startsFrom =
-    effectiveDate && effectiveDate >= today ? effectiveDate : today;
-  useEffect(() => {
-    setEffectiveDate("");
-    setSuggestedDuration(null);
-  }, [selectedPracticeId, mode]);
-  const dailyLimit = mode === "online" ? draft.online : draft.walkIn;
-  const suggestion = suggestConsultationDuration(
-    draft.start,
-    draft.end,
-    dailyLimit
-  );
-  const suggestedTimes = suggestedDuration
-    ? previewTimeBlock(draft.start, draft.end, suggestedDuration)
-    : [];
-  const update = (changes: Partial<Schedule>) => {
-    dirty.current = true;
-    setDraft((current) => ({ ...current, ...changes }));
-  };
-  const scheduleSettings = () => ({
-    workingDays:
-      mode === "clinic"
-        ? draft.days.map((day) => day + 1)
-        : (saved.data?.working_days ?? [1, 2, 3, 4, 5]),
-    onlineWorkingDays:
-      mode === "online"
-        ? draft.days.map((day) => day + 1)
-        : (saved.data?.online_working_days ?? [1, 2, 3, 4, 5]),
-    homeWorkingDays:
-      mode === "home"
-        ? draft.days.map((day) => day + 1)
-        : (saved.data?.home_working_days ?? [1, 2, 3, 4, 5]),
-    clinicStart:
-      mode === "clinic"
-        ? draft.start
-        : (saved.data?.clinic_start.slice(0, 5) ?? "09:00"),
-    clinicEnd:
-      mode === "clinic"
-        ? draft.end
-        : (saved.data?.clinic_end.slice(0, 5) ?? "17:00"),
-    onlineStart:
-      mode === "online"
-        ? draft.start
-        : (saved.data?.online_start?.slice(0, 5) ?? "13:00"),
-    onlineEnd:
-      mode === "online"
-        ? draft.end
-        : (saved.data?.online_end?.slice(0, 5) ?? "15:00"),
-    homeStart:
-      mode === "home"
-        ? draft.start
-        : (saved.data?.home_start?.slice(0, 5) ?? "16:00"),
-    homeEnd:
-      mode === "home"
-        ? draft.end
-        : (saved.data?.home_end?.slice(0, 5) ?? "17:00"),
-    slotMinutes: draft.duration,
-    onlineSlotMinutes: draft.onlineDuration,
-    homeSlotMinutes: draft.homeDuration,
-    onlineDailyLimit: draft.online,
-    walkinDailyLimit: draft.walkIn,
-    autoAccept: draft.autoAccept,
-    autoAcceptLimit: draft.autoAccept ? draft.autoLimit : 0,
-    homeVisits: draft.homeVisits,
-    homeRadiusKm: draft.homeRadius ? Number(draft.homeRadius) : null,
-    onlineFeeMinor: Math.round(Number(draft.onlineFee) * 100),
-    clinicFeeMinor: Math.round(Number(draft.clinicFee) * 100),
-    homeFeeMinor: Math.round(Number(draft.homeFee) * 100),
-  });
-  async function save() {
-    const problem = scheduleError(draft, mode);
-    if (problem) {
-      showToast({ title: "Schedule error", message: problem, type: "error" });
-      return;
-    }
-    if (!supabase || !selectedPracticeId || busy) return;
-    setBusy(true);
-    setPendingAction("save");
-    try {
-      const publication = selectedPractice?.verified
-        ? await publishMyDoctorSchedule(
-            supabase,
-            selectedPracticeId,
-            mode,
-            scheduleSettings(),
-            draftVersion.current,
-            startsFrom
-          )
-        : null;
-      const settings =
-        publication?.settings ??
-        (await saveMySchedulePreferences(
-          supabase,
-          selectedPracticeId,
-          scheduleSettings(),
-          draftVersion.current
-        ));
-      applySchedule(settings);
-      queryClient.setQueryData(
-        ["my-doctor-schedule", selectedPracticeId],
-        settings
-      );
-      const active = publication?.settings.published_modes?.includes(mode);
-      showToast({
-        title: publication
-          ? active
-            ? "Schedule published"
-            : "Schedule paused"
-          : "Schedule saved",
-        message: publication
-          ? active
-            ? `Schedule published from ${formatDisplayDate(startsFrom)} for this practice and visit type. Existing appointments keep their times.`
-            : "Future unbooked slots are withdrawn. Existing appointments keep their times."
-          : "Publish after your practice is verified.",
-        type: "success",
-      });
-    } catch (cause) {
-      if (
-        typeof cause === "object" &&
-        cause !== null &&
-        "code" in cause &&
-        cause.code === "PT409"
-      ) {
-        const latest = await saved.refetch();
-        if (latest.data) applySchedule(latest.data);
-        showToast({
-          title: "Schedule changed",
-          message:
-            "Another app updated this schedule. Review the latest settings and publish again.",
-          type: "error",
-        });
-      } else
-        showToast({
-          title: "Could not publish schedule",
-          message: cause instanceof Error ? cause.message : "Try again.",
-          type: "error",
-        });
-    } finally {
-      setBusy(false);
-      setPendingAction(null);
-    }
-  }
+    selectedPractice,
+    associationRequests,
+    pendingAssociation,
+    rejectedAssociation,
+    saved,
+    draft,
+    busy,
+    pendingAction,
+    availabilityDuration,
+    setAvailabilityDuration,
+    showAutoBookingHelp,
+    setShowAutoBookingHelp,
+    suggestedDuration,
+    setSuggestedDuration,
+    setEffectiveDate,
+    today,
+    startsFrom,
+    dailyLimit,
+    suggestion,
+    suggestedTimes,
+    update,
+    save,
+  } = useScheduleEditor({ mode });
   return (
     <DoctorScreen
       title={
@@ -534,23 +85,7 @@ export function ScheduleScreen({
                   key={practice.practice_id}
                   label={practice.facility_name}
                   selected={selectedPracticeId === practice.practice_id}
-                  onPress={() => {
-                    setPracticeId(practice.practice_id);
-                    if (doctorId && practice.is_clinician && practice.verified)
-                      void setSelectedPracticeId(doctorId, practice.practice_id)
-                        .then(() =>
-                          queryClient.setQueryData(
-                            selectedPracticeQueryKey(doctorId),
-                            practice.practice_id
-                          )
-                        )
-                        .catch(() =>
-                          showToast({
-                            title: "Could not remember practice",
-                            type: "error",
-                          })
-                        );
-                  }}
+                  onPress={() => selectPractice(practice)}
                 />
               )
             )}
@@ -802,10 +337,7 @@ export function ScheduleScreen({
           Up to {draft.autoLimit} bookings per day are auto-accepted across
           Clinic, Online and Home visits combined.
         </Label>
-        {[
-          "Bookings are accepted instantly under the limit.",
-          "Bookings beyond the limit need manual approval.",
-        ].map((text) => (
+        {autoBookingHelpItems.map((text) => (
           <View key={text} style={ui.row}>
             <Check size={14} color={palette.primary} />
             <Label muted style={{ flex: 1 }}>

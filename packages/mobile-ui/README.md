@@ -38,14 +38,43 @@ inside components. Caller styles remain the final override.
 
 - `primitives/`: Button, Input, TextArea, SearchInput, Chip, Card, Dropdown,
   Accordion, TimeSlot, UploadInput, StatusBadge, IconLabel and FadedScrollView.
-- `components/`: Header, BottomNavBar and SOSButton compositions.
+- `components/`: Header, SectionHeader, NotificationDrawer, BottomNavBar and
+  SOSButton compositions.
 - `layout/`: Screen.
 - `theme/`: MobileThemeProvider and useMobileTheme.
-- `utils/`: geometry, fonts and compatibility helpers.
+- `types/`: public component props and shared UI contracts. Component modules
+  retain their existing type exports for compatibility.
+- `hooks/`: reusable UI lifecycle/state coordination.
+- `utils/`: calendar, clock, dropdown, preview and keyboard geometry helpers,
+  component configuration, fonts and compatibility helpers.
 
 Import supported APIs from `@startup/mobile-ui`. Use props/callbacks to connect
 components to app features. Add a shared component when it has a reusable UI
 contract; keep one-screen compositions in the feature that owns them.
+
+`SectionHeader` accepts a title, optional action text/callback, visibility and style
+overrides. It inherits the app palette or accepts an explicit `theme`.
+
+`NotificationDrawer` accepts presentation-ready `NotificationItem` data, loading
+and deletion state, and callbacks for reading, pressing and deleting notifications.
+It owns filtering, swipe actions, safe areas and the drawer animation. Its optional
+`onVisibilityChange` includes the closing animation so app queries can stay enabled
+until the drawer is hidden. Notification fetching, cache updates, copy mapping and
+navigation stay in each app's notification feature hook; feature adapters compose
+the drawer. The shared UI has no backend or router imports. Notification and
+section-header types live in `src/types` and retain their public package exports.
+
+```tsx
+<NotificationDrawer
+  visible={visible}
+  onClose={close}
+  notifications={items}
+  loading={loading}
+  onMarkAllRead={markAllRead}
+  onNotificationPress={openNotification}
+  onDelete={deleteNotification}
+/>
+```
 
 `Input` derives its accessible name from `label` unless `accessibilityLabel` is
 provided. BottomNavBar exposes tab roles and selected state. Custom icon-only
@@ -71,3 +100,10 @@ They check theme inheritance/overrides, accessibility props and disabled behavio
 They do not replace native layout, gesture, font-loading or screen-reader checks
 on a physical device. Keep the three app TypeScript checks in the verification
 sequence when changing public component props.
+
+See the [shared package ownership guide](../ARCHITECTURE.md) before extending this
+package. `FloatingVideo` owns preview gestures without moving call/chat state or
+backend operations into shared UI. Keep private render helpers local when they do
+not have a separate responsibility. Upcoming payment UI follows the same
+presentation-only boundary; payment SDKs, queries and provider secrets have other
+owners described in that guide.

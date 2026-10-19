@@ -1,4 +1,8 @@
 "use client";
+import { clockTimePickerOptions } from "../utils/clockTimePickerConstants";
+
+import type { ClockTimePickerProps } from "../types/clockTimePicker";
+
 import { useId, useState } from "react";
 import { Clock3 } from "lucide-react";
 import {
@@ -24,13 +28,7 @@ export function ClockTimePicker({
   onChange,
   disabled = false,
   endOfDay = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  endOfDay?: boolean;
-}) {
+}: ClockTimePickerProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [hour, setHour] = useState(9);
@@ -107,7 +105,7 @@ export function ClockTimePicker({
               {pad(minute)}
             </button>
             <div className="grid gap-1">
-              {(["AM", "PM"] as const).map((item) => (
+              {clockTimePickerOptions.map((item) => (
                 <button
                   type="button"
                   key={item}

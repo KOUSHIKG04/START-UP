@@ -6,6 +6,7 @@ const fs = require("node:fs"),
   ts = require("typescript");
 function load(file, mocks) {
   const exports = {};
+  const absolute = path.resolve(__dirname, file);
   vm.runInNewContext(
     ts.transpileModule(fs.readFileSync(path.resolve(__dirname, file), "utf8"), {
       compilerOptions: {
@@ -14,7 +15,19 @@ function load(file, mocks) {
         target: ts.ScriptTarget.ES2022,
       },
     }).outputText,
-    { exports, require: (name) => mocks[name] }
+    {
+      exports,
+      require: (name) => {
+        if (Object.hasOwn(mocks, name)) return mocks[name];
+        if (!name.startsWith(".")) return undefined;
+        const target = path.resolve(path.dirname(absolute), name);
+        const resolved = [target, target + ".ts", target + ".tsx"].find(
+          (file) => fs.existsSync(file) && fs.statSync(file).isFile()
+        );
+        if (!resolved) throw new Error("Unmocked import: " + name);
+        return load(path.relative(__dirname, resolved), mocks);
+      },
+    }
   );
   return exports;
 }

@@ -58,7 +58,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/driver.test.mjs"
+    "test": "node --experimental-strip-types --test tests/driver.test.mjs tests/*.test.cjs"
   },
   "private": true
 }

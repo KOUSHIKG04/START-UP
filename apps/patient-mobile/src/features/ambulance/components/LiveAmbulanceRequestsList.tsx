@@ -1,7 +1,7 @@
+import type { LiveAmbulanceRequestsListProps } from "../types/live-ambulance-requests-list";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Button, Loader, useToastFeedback } from "@startup/mobile-ui";
-import type { MyAmbulanceBooking } from "@startup/contracts";
 
 export function LiveAmbulanceRequestsList({
   bookings,
@@ -17,25 +17,7 @@ export function LiveAmbulanceRequestsList({
   onRefreshDispatch,
   isCancelPending,
   onCancel,
-}: {
-  bookings?: MyAmbulanceBooking[];
-  isLoading: boolean;
-  error: unknown;
-  onRefresh: () => void;
-  activeBookingId?: string;
-  trackingData?: {
-    latitude: number;
-    longitude: number;
-    received_at: string;
-  } | null;
-  pinVisible: boolean;
-  isPinLoading: boolean;
-  pinData?: string | null;
-  isRefreshPending: boolean;
-  onRefreshDispatch: (bookingId: string) => void;
-  isCancelPending: boolean;
-  onCancel: (booking: MyAmbulanceBooking) => void;
-}) {
+}: LiveAmbulanceRequestsListProps) {
   useToastFeedback({
     error: error ? "Could not load your ambulance requests." : "",
   });

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun test tests/schema.test.ts",
+    "test": "bun test tests/schema.test.ts tests/backend-structure.test.ts",
     "test:database": "bun test tests/integration.test.ts tests/clinic.integration.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:seed": "bun tooling/seed.ts",

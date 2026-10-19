@@ -1,17 +1,14 @@
+import type { ClinicVisitFlowProps } from "../types/visit-session";
+export type { ClinicVisitFlowProps } from "../types/visit-session";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { MapPin, QrCode } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
-import type { Appointment } from "../../appointments/types/appointment";
+
 import { QueueStatus } from "./QueueStatus";
 import { ScheduleSummary } from "./ScheduleSummary";
-
-export interface ClinicVisitFlowProps {
-  appointment: Appointment;
-  onComplete: () => void;
-}
 
 export function ClinicVisitFlow({
   appointment,

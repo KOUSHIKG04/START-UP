@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "bun test tests/validation.test.ts"
+    "test": "bun test tests/validation.test.ts tests/notification-time.test.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"

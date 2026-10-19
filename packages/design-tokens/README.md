@@ -2,6 +2,13 @@
 
 Shared TypeScript tokens, generated Tailwind CSS v4 theme variables, and Albert Sans font assets.
 
+Keep the existing category files in `src`, font assets in `assets/fonts`, CSS
+generator in `scripts` and tests in `tests`. The package has no app hooks or domain
+operations. New payment or status presentation should reuse semantic tokens;
+introduce a token only with a real consuming component. See the
+[shared package ownership guide](../ARCHITECTURE.md). Folder cleanup must not
+regenerate CSS or change token values as a side effect.
+
 ## Public exports
 
 The root exports `colors`, palette shortcuts (`patientColors`, `doctorColors`, `driverColors`, `adminColors`, `sosColors`), `gradients` and gradient shortcuts, `spacing`, `radius`, `shadows`, `typography`, and `fontFamilies`. `tokens` (also the default export) groups the original six token categories.

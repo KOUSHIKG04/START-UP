@@ -1,96 +1,23 @@
+import { OPTION_HEIGHT } from "../utils/dropdownConstants";
+import { calculateMenuPosition } from "../utils/dropdownPosition";
+import type { TriggerPosition } from "../types/dropdown";
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
-import { memo, useCallback, useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
-  ScrollView,
   StyleSheet,
   View,
   useWindowDimensions,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
 } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { type AppTheme } from "../utils/appTheme";
 import { ModalSurface } from "./ModalSurface";
+import type { DropdownOption, DropdownProps } from "../types/dropdown";
 
-export type DropdownOption = {
-  label: string;
-  value: string;
-  disabled?: boolean;
-};
-
-export type DropdownProps = {
-  options: readonly DropdownOption[];
-  value?: string;
-  onValueChange: (value: string) => void;
-  label?: string;
-  placeholder?: string;
-  triggerLabel?: string;
-  prefix?: string;
-  theme?: AppTheme;
-  disabled?: boolean;
-  error?: string;
-  maxVisibleOptions?: number;
-  containerStyle?: StyleProp<ViewStyle>;
-  triggerStyle?: StyleProp<ViewStyle>;
-  valueStyle?: StyleProp<TextStyle>;
-  accessibilityLabel?: string;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
-  chevronSize?: number;
-  chevronColor?: string;
-  menuWidth?: number;
-  menuStyle?: StyleProp<ViewStyle>;
-  backdropColor?: string;
-  selectedOptionBackgroundColor?: string;
-};
-
-type TriggerPosition = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
-
-const OPTION_HEIGHT = 44;
-const MENU_GAP = 4;
-
-function calculateMenuPosition({
-  triggerPosition,
-  menuHeight,
-  menuWidth,
-  windowWidth,
-  windowHeight,
-}: {
-  triggerPosition?: TriggerPosition;
-  menuHeight: number;
-  menuWidth?: number;
-  windowWidth: number;
-  windowHeight: number;
-}) {
-  if (!triggerPosition) return { menuTop: 0, menuLeft: 12, targetWidth: 160 };
-
-  const shouldOpenAbove =
-    triggerPosition.y + triggerPosition.height + MENU_GAP + menuHeight >
-    windowHeight;
-  const menuTop = shouldOpenAbove
-    ? Math.max(MENU_GAP, triggerPosition.y - menuHeight - MENU_GAP)
-    : triggerPosition.y + triggerPosition.height + MENU_GAP;
-  const targetWidth = menuWidth ?? Math.max(triggerPosition.width, 160);
-  const idealLeft =
-    triggerPosition.x + triggerPosition.width / 2 > windowWidth / 2
-      ? triggerPosition.x + triggerPosition.width - targetWidth
-      : triggerPosition.x;
-  const maxLeft = Math.max(12, windowWidth - targetWidth - 12);
-  const menuLeft = Math.max(12, Math.min(idealLeft, maxLeft));
-
-  return { menuTop, menuLeft, targetWidth };
-}
+export type { DropdownOption, DropdownProps } from "../types/dropdown";
 
 const DropdownOptionRow = memo(function DropdownOptionRow({
   option,

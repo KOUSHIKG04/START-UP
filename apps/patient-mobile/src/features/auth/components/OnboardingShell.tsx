@@ -1,5 +1,7 @@
+import type { OnboardingShellProps } from "../types/onboarding-shell";
+import { city } from "../utils/onboardingConstants";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Keyboard,
@@ -8,17 +10,14 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowLeft, ChevronLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
 import { FadedScrollView } from "@startup/mobile-ui";
-import { keyboardScrollAdjustment } from "./keyboardScroll";
-
-const city = require("../../../../assets/images/onboarding/city.png");
+import { keyboardScrollAdjustment } from "../utils/keyboardScroll";
 
 export function OnboardingShell({
   children,
@@ -28,15 +27,7 @@ export function OnboardingShell({
   keepArtFixed = false,
   showArt = true,
   centerContent = false,
-}: {
-  children: ReactNode;
-  onBack?: () => void;
-  bottomArt?: boolean;
-  scroll?: boolean;
-  keepArtFixed?: boolean;
-  showArt?: boolean;
-  centerContent?: boolean;
-}) {
+}: OnboardingShellProps) {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const focusFrame = useRef<number | null>(null);

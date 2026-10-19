@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start -p 3001",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "node scripts/check-architecture.mjs && eslint .",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "test:architecture": "node --test ../facility-portal/scripts/check-architecture.test.mjs tests/unit/feature-structure.test.mjs",
+    "test": "node --test tests/unit/*.test.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:ui": "node scripts/run-e2e.mjs --ui"
   },

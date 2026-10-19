@@ -81,6 +81,7 @@ export {
   type ClockTimePickerProps,
 } from "./primitives/ClockTimePicker";
 export { Calendar, type CalendarProps } from "./primitives/Calendar";
+export { DatePicker, type DatePickerProps } from "./primitives/DatePicker";
 export {
   CalendarField,
   type CalendarFieldProps,
@@ -102,6 +103,7 @@ export { albertSansFonts } from "./utils/fonts";
 export {
   MobileThemeProvider,
   useMobileTheme,
+  useMobileThemeName,
 } from "./theme/MobileThemeProvider";
 
 export * from "./primitives/Checkbox";

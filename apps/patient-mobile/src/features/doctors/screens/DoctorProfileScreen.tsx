@@ -1,31 +1,9 @@
+import type { DoctorProfileScreenProps } from "../types/doctor-profile-screen";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
-import { router, useFocusEffect, type Href } from "expo-router";
+import { Alert, Pressable, View } from "react-native";
+import { router, type Href } from "expo-router";
 import * as Crypto from "expo-crypto";
-import * as Haptics from "expo-haptics";
-import * as Location from "expo-location";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  bookClinicAppointment,
-  getMyPatientProfileDetail,
-  getPublicPracticeBio,
-  listClinicAppointments,
-  listMyFamilyProfiles,
-  listMyPatientLocations,
-  listPracticeClinicSlots,
-  listPublicDoctorPractices,
-} from "@startup/data-access";
-import { colors, fontFamilies, spacing } from "@startup/design-tokens";
-import {
-  Button,
-  ModalSurface,
-  FadedScrollView,
-  Header,
-  Skeleton,
-  useToast,
-  useToastFeedback,
-} from "@startup/mobile-ui";
+import { FadedScrollView, Header, Skeleton } from "@startup/mobile-ui";
 import DoctorCard from "../components/DoctorCard";
 import {
   AboutDoctor,
@@ -34,319 +12,52 @@ import {
   OnlineConsultation,
   ProfileTabs,
 } from "../components/index";
-import type { ProfileTab } from "../utils/doctorProfileConstants";
-import { consultationFlows } from "../../appointments/utils/consultationFlow";
-import type { ConsultationType } from "../../appointments/types/appointment";
-import { supabase, useMobileSession } from "../../../services/supabase";
+import { consultationFlows } from "../../appointments/utils/consultationConstants";
 import {
   formatConsultationFee,
   practiceAvailabilityLabel,
 } from "../utils/doctorDisplay";
-import { formatSavedLocation } from "../../locations/locationDisplay";
-import type { SavedPatientLocation } from "@startup/contracts";
+import { useDoctorBooking } from "../hooks/useDoctorBooking";
+import { styles } from "../components/DoctorProfile.styles";
+import { BookingConfirmationDialog } from "../components/BookingConfirmationDialog";
 
 export function DoctorProfileScreen({
   practiceId: initialPracticeId,
   serviceId,
   consultationType,
-}: {
-  practiceId: string;
-  serviceId: string;
-  consultationType: string;
-}) {
-  const [selectedPracticeId, setSelectedPracticeId] =
-    useState(initialPracticeId);
-  const { profile } = useMobileSession();
-  const queryClient = useQueryClient();
-  const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<ProfileTab>("about");
-  const [overrideConsultationType, setOverrideConsultationType] =
-    useState<ConsultationType | null>(null);
-  const selectedConsultationType =
-    overrideConsultationType ?? (consultationType as ConsultationType);
-  const isOnline = selectedConsultationType === "Online";
-  const serviceMode = isOnline
-    ? "online"
-    : selectedConsultationType === "Home Visit"
-      ? "home"
-      : "clinic";
-  const [addressDraft, setAddressDraft] = useState("");
-  const [homeAddress, setHomeAddress] = useState("");
-  const [idempotencyKey, setIdempotencyKey] = useState(() =>
-    Crypto.randomUUID()
-  );
-  const [confirmation, setConfirmation] = useState<{
-    patientId: string;
-    windowId: string;
-    reason: string;
-    practiceId: string;
-    mode: string;
-    doctor: string;
-    facility: string;
-    address: string;
-    startsAt: string;
-    timezone: string;
-    fee: string;
-  } | null>(null);
-  const [openingConfirmation, setOpeningConfirmation] = useState(false);
-  const [coordinates, setCoordinates] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const savedLocations = useQuery({
-    queryKey: ["my-patient-locations", profile?.patient_id],
-    queryFn: () => listMyPatientLocations(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id && !isOnline),
-  });
-  const selectedLocation = savedLocations.data?.find(
-    (item: SavedPatientLocation) => item.selected
-  );
-  useEffect(() => {
-    if (isOnline) return;
-    if (savedLocations.isLoading) return;
-    if (
-      selectedLocation?.latitude != null &&
-      selectedLocation.longitude != null
-    ) {
-      if (
-        coordinates?.latitude !== selectedLocation.latitude ||
-        coordinates?.longitude !== selectedLocation.longitude
-      ) {
-        setCoordinates({
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-        });
-      }
-      return;
-    }
-    if (coordinates) return;
-    let active = true;
-    void (async () => {
-      try {
-        const permission = await Location.requestForegroundPermissionsAsync();
-        if (!permission.granted) return;
-        const position = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        if (active)
-          setCoordinates({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-      } catch {
-        /* Doctor details remain available when location cannot be read. */
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [
-    coordinates,
+}: DoctorProfileScreenProps) {
+  const {
+    setSelectedPracticeId,
+    profile,
+    activeTab,
+    setActiveTab,
+    setOverrideConsultationType,
+    selectedConsultationType,
     isOnline,
-    savedLocations.isLoading,
-    selectedLocation?.latitude,
-    selectedLocation?.longitude,
-  ]);
-  const practiceQuery = useQuery({
-    queryKey: [
-      "public-practice",
-      initialPracticeId,
-      serviceMode,
-      isOnline ? null : coordinates?.latitude,
-      isOnline ? null : coordinates?.longitude,
-    ],
-    queryFn: () =>
-      listPublicDoctorPractices(
-        supabase!,
-        initialPracticeId,
-        serviceMode,
-        isOnline ? null : coordinates
-      ),
-    enabled: Boolean(supabase && initialPracticeId),
+    serviceMode,
+    addressDraft,
+    setAddressDraft,
+    homeAddress,
+    setIdempotencyKey,
+    confirmation,
+    setConfirmation,
+    openingConfirmation,
+    setOpeningConfirmation,
+    selectedLocation,
+    practiceQuery,
+    locations,
+    practiceId,
+    slotsQuery,
+    familyQuery,
+    slots,
+    practice,
+    bioQuery,
+    book,
+  } = useDoctorBooking({
+    practiceId: initialPracticeId,
+    serviceId,
+    consultationType,
   });
-  const locations = practiceQuery.data ?? [];
-  const practiceId =
-    locations.find((item) => item.practice_id === selectedPracticeId)
-      ?.practice_id ??
-    locations[0]?.practice_id ??
-    initialPracticeId;
-  useToastFeedback({
-    error: practiceQuery.isError ? "Could not load this doctor." : "",
-  });
-  const servicePrefix =
-    selectedConsultationType === "Online"
-      ? "online-"
-      : selectedConsultationType === "Home Visit"
-        ? "home-"
-        : "clinic-";
-  const matchingServices =
-    practiceQuery.data?.filter(
-      (item) =>
-        item.practice_id === practiceId &&
-        item.service_code.startsWith(servicePrefix)
-    ) ?? [];
-  const slotsQuery = useQuery({
-    queryKey: ["clinic-slots", practiceId, serviceMode],
-    // Up to 288 five-minute options per day across a rolling 30-day horizon.
-    queryFn: () =>
-      listPracticeClinicSlots(
-        supabase!,
-        practiceId,
-        undefined,
-        10000,
-        serviceMode
-      ),
-    enabled: Boolean(supabase && practiceId),
-  });
-  useFocusEffect(
-    useCallback(() => {
-      void queryClient.invalidateQueries({
-        queryKey: ["public-practice", initialPracticeId],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["practice-bio", practiceId],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["clinic-slots", practiceId],
-      });
-    }, [practiceId, initialPracticeId, queryClient])
-  );
-  const familyQuery = useQuery({
-    queryKey: ["my-family-profiles"],
-    queryFn: () => listMyFamilyProfiles(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  const patientDetail = useQuery({
-    queryKey: ["my-patient-profile-detail"],
-    queryFn: () => getMyPatientProfileDetail(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  useEffect(() => {
-    if (selectedLocation) {
-      const formatted = formatSavedLocation(selectedLocation);
-      setAddressDraft(formatted);
-      setHomeAddress(formatted);
-      return;
-    }
-    const address = patientDetail.data?.address;
-    if (!address) return;
-    const formatted = [
-      address.building,
-      address.line1,
-      address.line2,
-      address.city,
-      address.state,
-      address.pincode,
-    ]
-      .filter(Boolean)
-      .join(", ");
-    setAddressDraft(formatted);
-    setHomeAddress(formatted);
-  }, [patientDetail.data?.address, selectedLocation]);
-  const slots =
-    slotsQuery.data?.filter(
-      (item) =>
-        item.practice_id === practiceId && item.service_mode === serviceMode
-    ) ?? [];
-  const displayedServiceId =
-    slots[0]?.practice_service_id ??
-    matchingServices.find((item) => item.practice_service_id === serviceId)
-      ?.practice_service_id ??
-    matchingServices[0]?.practice_service_id;
-  const practice =
-    matchingServices.find(
-      (item) => item.practice_service_id === displayedServiceId
-    ) ?? matchingServices[0];
-  const bioQuery = useQuery({
-    queryKey: ["practice-bio", practiceId, displayedServiceId],
-    queryFn: () =>
-      getPublicPracticeBio(supabase!, practiceId, displayedServiceId!),
-    enabled: Boolean(supabase && practiceId && displayedServiceId),
-  });
-  const book = useMutation({
-    mutationFn: ({
-      patientId,
-      windowId,
-      reason,
-    }: {
-      patientId: string;
-      windowId: string;
-      reason: string;
-    }) => {
-      if (!profile?.patient_id) throw new Error("Patient profile is missing.");
-      const selectedSlot = slots.find((slot) => slot.window_id === windowId);
-      if (!selectedSlot || selectedConsultationType === "Home Visit")
-        throw new Error("This visit type has no published slots.");
-      return bookClinicAppointment(supabase!, {
-        patientId,
-        windowId,
-        practiceServiceId: selectedSlot.practice_service_id,
-        reason,
-        idempotencyKey,
-      });
-    },
-    onSuccess: (appointmentId) => {
-      setOpeningConfirmation(false);
-      setConfirmation(null);
-      void Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success
-      ).catch(() => {});
-      void listClinicAppointments(supabase!)
-        .then((appointments) => {
-          queryClient.setQueryData(
-            ["patient-clinic-appointments"],
-            appointments
-          );
-          const booked = appointments.find((item) => item.id === appointmentId);
-          if (booked?.status === "confirmed") {
-            showToast({
-              title: "Appointment confirmed",
-              message: `Your ${booked.visit_mode === "online" ? "online consultation" : "clinic visit"} at ${booked.facility_name} is confirmed.`,
-              type: "success",
-            });
-          }
-          if (booked?.status === "pending") {
-            showToast({
-              title: "Appointment requested",
-              message: "Waiting for the doctor to accept it.",
-              type: "info",
-            });
-          }
-        })
-        .catch(() =>
-          showToast({
-            title: "Appointment booked",
-            message: "Open Appointments to check its current status.",
-            type: "info",
-          })
-        );
-      setIdempotencyKey(Crypto.randomUUID());
-      void queryClient.invalidateQueries({ queryKey: ["clinic-slots"] });
-      void queryClient.invalidateQueries({
-        queryKey: ["patient-clinic-appointments"],
-      });
-      router.push("/appointments" as Href);
-    },
-    onError: (cause) => {
-      const message =
-        cause &&
-        typeof cause === "object" &&
-        "message" in cause &&
-        typeof cause.message === "string"
-          ? cause.message
-          : "";
-      const feedback = message.includes("Daily booking limit reached")
-        ? "This doctor has reached the daily booking limit. Please choose another day."
-        : message.includes("already booked this time")
-          ? "You already booked this time. Choose another slot."
-          : message.includes("Slot is full") ||
-              message.includes("Slot no longer available")
-            ? "This slot is no longer available. Choose another time."
-            : "Could not request this appointment. Reopen the slots and try again.";
-      showToast({ title: "Booking failed", message: feedback, type: "error" });
-    },
-  });
-
   return (
     <View style={styles.screen}>
       <Header
@@ -589,153 +300,15 @@ export function DoctorProfileScreen({
           </>
         ) : null}
       </FadedScrollView>
-      <ModalSurface
-        visible={Boolean(confirmation)}
-        onShow={() => setOpeningConfirmation(false)}
-        onClose={() => {
-          if (!book.isPending) {
-            setOpeningConfirmation(false);
-            setConfirmation(null);
-          }
-        }}
-      >
-        {confirmation ? (
-          <>
-            <Text variant="sectionHeading">Confirm appointment</Text>
-            <Text variant="bodyEmphasis">{confirmation.doctor}</Text>
-            <Text variant="body">
-              {confirmation.facility}
-              {confirmation.mode === "online"
-                ? " · Online consultation"
-                : `\n${confirmation.address}`}
-            </Text>
-            <Text variant="body">
-              {new Date(confirmation.startsAt).toLocaleString("en-IN", {
-                timeZone: confirmation.timezone,
-              })}
-            </Text>
-            <Text variant="bodyEmphasis">{confirmation.fee}</Text>
-            <Text variant="label" style={styles.message}>
-              Your booking may be confirmed automatically or sent to the doctor
-              for approval.
-            </Text>
-            {book.isError ? (
-              <Text variant="label" accessibilityRole="alert">
-                Booking could not be completed. Review availability and try
-                again.
-              </Text>
-            ) : null}
-            <View style={styles.confirmationActions}>
-              <Button
-                theme="patient"
-                variant="primary"
-                label="Confirm booking"
-                loading={book.isPending}
-                disabled={
-                  book.isPending ||
-                  confirmation.practiceId !== practiceId ||
-                  confirmation.mode !== serviceMode ||
-                  !slots.some(
-                    (slot) => slot.window_id === confirmation.windowId
-                  )
-                }
-                onPress={() =>
-                  book.mutate({
-                    patientId: confirmation.patientId,
-                    windowId: confirmation.windowId,
-                    reason: confirmation.reason,
-                  })
-                }
-                style={styles.confirmationButton}
-                labelStyle={styles.confirmationButtonLabel}
-              />
-              <Button
-                theme="patient"
-                variant="outline"
-                label="Cancel"
-                disabled={book.isPending}
-                onPress={() => {
-                  setOpeningConfirmation(false);
-                  setConfirmation(null);
-                }}
-                style={styles.confirmationButton}
-                labelStyle={styles.confirmationButtonLabel}
-              />
-            </View>
-          </>
-        ) : null}
-      </ModalSurface>
+      <BookingConfirmationDialog
+        confirmation={confirmation}
+        setOpeningConfirmation={setOpeningConfirmation}
+        setConfirmation={setConfirmation}
+        book={book}
+        practiceId={practiceId}
+        serviceMode={serviceMode}
+        slots={slots}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.patient.background },
-  headerTitle: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: "600",
-    lineHeight: 28,
-  },
-  onlineHeaderTitle: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: "600",
-    lineHeight: 22,
-  },
-  content: {
-    gap: 14,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: 126,
-  },
-  tabSection: {
-    marginHorizontal: -spacing.lg,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 14,
-    gap: 14,
-    overflow: "hidden",
-  },
-  page: {},
-  message: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
-  },
-  locations: { gap: 10 },
-  confirmationActions: { gap: 10 },
-  confirmationButton: {
-    width: "100%",
-    minHeight: 48,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-  },
-  confirmationButtonLabel: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 18,
-  },
-  location: {
-    gap: 6,
-    padding: 14,
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.patient.surfaceBorder,
-    borderRadius: 12,
-    backgroundColor: colors.white,
-  },
-  selectedLocation: {
-    borderColor: colors.patient.primaryDark,
-    backgroundColor: colors.patient.surface,
-  },
-  profileSkeleton: {
-    minHeight: 120,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: "#E6F4F3",
-  },
-});

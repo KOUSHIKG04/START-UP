@@ -1,26 +1,10 @@
 import { AppText as Text } from "./AppText";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Check } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { AppTheme } from "../utils/appTheme";
-
-export type CheckboxProps = {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  label: string;
-  disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
-  theme?: AppTheme;
-  labelStyle?: StyleProp<TextStyle>;
-};
+import type { CheckboxProps } from "../types/checkbox";
+export type { CheckboxProps } from "../types/checkbox";
 
 export function Checkbox({
   checked,

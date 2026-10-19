@@ -1,10 +1,5 @@
-import type { Href } from "expo-router";
-
-export type SearchItem = {
-  id: string;
-  title: string;
-  type: "Speciality" | "Symptom" | "Doctor";
-};
+import type { SearchItem } from "../types/home";
+export type { SearchItem } from "../types/home";
 
 export const DEFAULT_SEARCH_CITY = "Bangalore";
 
@@ -35,28 +30,3 @@ export const SEARCH_DIRECTORY: readonly SearchItem[] = [
   { id: "sym6", title: "Skin rash", type: "Symptom" },
   { id: "sym8", title: "Breathing issue", type: "Symptom" },
 ] as const;
-
-export function filterSearchDirectory(query: string): SearchItem[] {
-  const trimmed = query.trim().toLowerCase();
-  if (!trimmed) return [];
-  return SEARCH_DIRECTORY.filter(
-    (item) =>
-      item.title.toLowerCase().includes(trimmed) ||
-      item.type.toLowerCase().includes(trimmed)
-  );
-}
-
-export function findSearchItem(query: string): SearchItem | undefined {
-  const trimmed = query.trim().toLowerCase();
-  return SEARCH_DIRECTORY.find((item) => item.title.toLowerCase() === trimmed);
-}
-
-export function getDoctorResultsSearchRoute(
-  title: string,
-  consultationType: string = "Clinic Visit"
-) {
-  return {
-    pathname: "/doctor-results",
-    params: { symptom: title, consultationType },
-  } as unknown as Href;
-}

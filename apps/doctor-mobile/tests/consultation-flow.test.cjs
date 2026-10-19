@@ -7,6 +7,7 @@ const fs = require("node:fs"),
 const { z } = require("zod");
 function load(file, mocks) {
   const exports = {};
+  const absolute = path.resolve(__dirname, file);
   vm.runInNewContext(
     ts.transpileModule(fs.readFileSync(path.resolve(__dirname, file), "utf8"), {
       compilerOptions: {
@@ -15,7 +16,19 @@ function load(file, mocks) {
         target: ts.ScriptTarget.ES2022,
       },
     }).outputText,
-    { exports, require: (name) => mocks[name] }
+    {
+      exports,
+      require: (name) => {
+        if (Object.hasOwn(mocks, name)) return mocks[name];
+        if (!name.startsWith(".")) return undefined;
+        const target = path.resolve(path.dirname(absolute), name);
+        const resolved = [target, target + ".ts", target + ".tsx"].find(
+          (file) => fs.existsSync(file) && fs.statSync(file).isFile()
+        );
+        if (!resolved) throw new Error("Unmocked import: " + name);
+        return load(path.relative(__dirname, resolved), mocks);
+      },
+    }
   );
   return exports;
 }
@@ -98,7 +111,7 @@ function flow({
       },
       "@startup/mobile-ui": {
         Button: "Button",
-        CalendarField: "Calendar",
+        DatePicker: "Calendar",
         Input: "Input",
         useToastFeedback: () => {},
       },
@@ -124,7 +137,11 @@ function flow({
       if (Array.isArray(node)) return node.forEach(walk);
       if (!node || typeof node !== "object") return;
       nodes.push(node);
-      walk(node.props?.children);
+      walk(
+        typeof node.type === "function"
+          ? node.type(node.props)
+          : node.props?.children
+      );
     }
     walk(entry.type(entry.props));
     return nodes;
@@ -269,7 +286,7 @@ test("reopened consultation resumes after an issued prescription without signing
 
 test("shared calendar keeps local days and generates a complete leap-month grid", () => {
   const { parseCalendarDay, formatCalendarDay, calendarMonthDays } = load(
-    "../../../packages/mobile-ui/src/primitives/calendarDays.ts",
+    "../../../packages/mobile-ui/src/utils/calendarDays.ts",
     {}
   );
   assert.equal(formatCalendarDay(parseCalendarDay("2028-02-29")), "2028-02-29");

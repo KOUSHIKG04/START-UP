@@ -1,35 +1,20 @@
+import { useFamilyMembers } from "../hooks/useFamilyMembers";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
-import { useCallback } from "react";
-import { setStatusBarStyle } from "expo-status-bar";
+
 import { Pressable, StyleSheet, View } from "react-native";
-import { router, useFocusEffect } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+
 import { Plus, UserRound, Users } from "lucide-react-native";
-import { listMyFamilyProfiles } from "@startup/data-access";
+
 import { colors, fontFamilies } from "@startup/design-tokens";
 import {
   onboardingButtonStyles,
   OnboardingShell,
 } from "../components/OnboardingShell";
-import { supabase, useMobileSession } from "../../../services/supabase";
 
 export default function AddFamilyScreen() {
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, [])
-  );
-  const { profile } = useMobileSession();
-
-  const familyQuery = useQuery({
-    queryKey: ["my-family-profiles", profile?.patient_id],
-    queryFn: () => listMyFamilyProfiles(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-
-  const familyMembers = familyQuery.data ?? [];
-
+  const { familyMembers } = useFamilyMembers();
   return (
     <OnboardingShell
       onBack={() =>

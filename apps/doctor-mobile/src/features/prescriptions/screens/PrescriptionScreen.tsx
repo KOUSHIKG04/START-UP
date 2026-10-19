@@ -1,8 +1,9 @@
-import { useToastFeedback } from "@startup/mobile-ui";
-import { useState } from "react";
+import { emptyMedicine } from "../utils/medicineDraft";
+import { usePrescriptionEditor } from "../hooks/usePrescriptionEditor";
+
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
-import { parseDisplayDate } from "@startup/contracts";
+
 import { Plus } from "lucide-react-native";
 import {
   DoctorScreen,
@@ -12,101 +13,31 @@ import {
   Panel,
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { useVisit } from "../../consultations/utils/consultation";
-import { useDoctorStore } from "../../../stores/useDoctorStore";
-import { createConsultation } from "../../../data/demo";
-import type { Medicine } from "../../../types/doctor";
+
 import { MedicineCard } from "../components/MedicineCard";
 import { MedicineEditor } from "../components/MedicineEditor";
 
-const emptyMedicine = (): Medicine => ({
-  id: `medicine-${Date.now()}`,
-  name: "",
-  timing: "After food",
-  meals: [0, 0, 0],
-  days: "5",
-});
-
 export function PrescriptionScreen() {
-  const { patient, appointment } = useVisit();
-  const visits = useDoctorStore((s) => s.consultations);
-  const update = useDoctorStore((s) => s.updateConsultation);
-  const [editing, setEditing] = useState<Medicine | null>(null);
-  const [error, setError] = useState("");
-  useToastFeedback({ error });
-  const [confirm, setConfirm] = useState(false);
-  if (!patient || !appointment) return <MissingPatient />;
-  const visit = visits[appointment.id] ?? createConsultation(patient.id);
-  const readOnly = visit.signed || visit.completed;
-
-  const changeMedicines = (medicines: Medicine[]) => {
-    if (!readOnly) update(appointment.id, patient.id, { medicines });
-  };
-
-  const handleUpdateTiming = (
-    medicineId: string,
-    timing: Medicine["timing"]
-  ) => {
-    changeMedicines(
-      visit.medicines.map((m) => (m.id === medicineId ? { ...m, timing } : m))
-    );
-  };
-
-  const handleUpdateDose = (medicineId: string, mealIndex: number) => {
-    changeMedicines(
-      visit.medicines.map((m) => {
-        if (m.id !== medicineId) return m;
-        const meals = [...m.meals] as Medicine["meals"];
-        meals[mealIndex] = (meals[mealIndex] + 1) % 3;
-        return { ...m, meals };
-      })
-    );
-  };
-
-  const handleRemove = (medicineId: string) => {
-    changeMedicines(visit.medicines.filter((m) => m.id !== medicineId));
-  };
-
-  const handleStartEdit = (medicine: Medicine) => {
-    setEditing({ ...medicine, meals: [...medicine.meals] });
-    setError("");
-  };
-
-  const saveMedicine = () => {
-    if (!editing) return;
-    if (
-      !editing.name.trim() ||
-      !/^[1-9]\d{0,2}$/.test(editing.days) ||
-      editing.meals.every((value) => value === 0)
-    ) {
-      setError(
-        "Enter a medicine name, at least one dose, and a duration from 1 to 999 days."
-      );
-      return;
-    }
-    const next = { ...editing, name: editing.name.trim() };
-    changeMedicines(
-      visit.medicines.some((m) => m.id === next.id)
-        ? visit.medicines.map((m) => (m.id === next.id ? next : m))
-        : [...visit.medicines, next]
-    );
-    setEditing(null);
-    setError("");
-  };
-
-  const sign = () => {
-    if (!visit.medicines.length) {
-      setError("Add at least one medicine before signing.");
-      return;
-    }
-    if (!parseDisplayDate(visit.followUp)) {
-      setError("Enter a valid follow-up date as DD-MM-YYYY.");
-      return;
-    }
-    setError("");
-    setConfirm(true);
-  };
-
+  const editor = usePrescriptionEditor();
+  if (!editor) return <MissingPatient />;
+  const {
+    patient,
+    appointment,
+    update,
+    editing,
+    setEditing,
+    setError,
+    confirm,
+    setConfirm,
+    visit,
+    readOnly,
+    handleStartEdit,
+    handleRemove,
+    handleUpdateTiming,
+    handleUpdateDose,
+    saveMedicine,
+    sign,
+  } = editor;
   return (
     <DoctorScreen title="Write prescription">
       {visit.signed && (

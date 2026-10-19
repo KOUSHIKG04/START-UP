@@ -1,4 +1,5 @@
 "use client";
+import type { AddDoctorCardProps } from "../types/addDoctorCard";
 
 import { useEffect } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
@@ -6,12 +7,6 @@ import { useAddDoctorForm } from "../hooks/useAddDoctorForm";
 import { addDoctorPlaceholders } from "../utils/addDoctorConstants";
 import { UserCheck, CheckCircle2 } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
-
-interface AddDoctorCardProps {
-  onSuccess?: () => void;
-  onViewAll?: () => void;
-  showOuterHeader?: boolean;
-}
 
 export function AddDoctorCard({
   onSuccess,
@@ -39,19 +34,19 @@ export function AddDoctorCard({
   }, [error]);
 
   return (
-    <div className="w-full max-w-[480px] rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs">
+    <div className="border-border bg-card w-full max-w-120 rounded-lg border p-6 shadow-xs">
       {showOuterHeader && (
-        <div className="mb-5 flex items-center justify-between border-b border-[#e2e8f0] pb-4">
+        <div className="border-border mb-5 flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-2.5">
-            <UserCheck className="size-5 text-[#07595d]" />
-            <h2 className="text-[18px] font-bold text-[#0f172a]">
+            <UserCheck className="text-primary size-5" />
+            <h2 className="text-foreground text-lg font-bold">
               Add new Doctor
             </h2>
           </div>
           <button
             type="button"
             onClick={onViewAll}
-            className="cursor-pointer text-[13px] font-semibold text-[#07595d] hover:underline"
+            className="text-primary cursor-pointer text-sm font-semibold hover:underline"
           >
             View All
           </button>
@@ -59,23 +54,21 @@ export function AddDoctorCard({
       )}
 
       {/* Inner Panel (Figma 939:19) */}
-      <div className="flex flex-col gap-4 rounded-[12px] border border-[#e2e8f0] bg-[#fafafa] p-5">
+      <div className="border-border bg-muted flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-[15px] font-bold text-[#0f172a]">
-            Add New Doctor
-          </h3>
-          <span className="rounded-[6px] bg-[#e6f5f4] px-2 py-1 text-[11px] font-bold text-[#07595d]">
+          <h3 className="text-foreground text-sm font-bold">Add New Doctor</h3>
+          <span className="bg-muted text-primary rounded-md px-2 py-1 text-xs font-bold">
             New Doctor
           </span>
         </div>
 
         {isSubmitted ? (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-            <CheckCircle2 className="animate-in zoom-in-75 size-10 text-[#07595d] duration-200" />
-            <p className="text-[15px] font-bold text-[#0f172a]">
+            <CheckCircle2 className="animate-in zoom-in-75 text-primary size-10 duration-200" />
+            <p className="text-foreground text-sm font-bold">
               Invitation sent to doctor
             </p>
-            <p className="text-[12px] text-[#64748b]">
+            <p className="text-muted-foreground text-xs">
               The doctor must accept. Clinzo must verify credentials before
               practice.
             </p>
@@ -86,7 +79,7 @@ export function AddDoctorCard({
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="add-doctor-facility"
-                  className="text-[13px] font-medium text-[#5c6678]"
+                  className="text-muted-foreground text-sm font-medium"
                 >
                   Hospital / Clinic
                 </label>
@@ -94,7 +87,7 @@ export function AddDoctorCard({
                   id="add-doctor-facility"
                   value={facilityId || facilities[0]?.facilityId}
                   onChange={(event) => setFacilityId(event.target.value)}
-                  className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px]"
+                  className="border-border bg-card h-10 rounded-md border px-3.5 text-sm"
                 >
                   {facilities.map((item) => (
                     <option key={item.facilityId} value={item.facilityId}>
@@ -108,7 +101,7 @@ export function AddDoctorCard({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="add-doctor-name"
-                className="text-[13px] font-medium text-[#5c6678]"
+                className="text-muted-foreground text-sm font-medium"
               >
                 Doctor Name
               </label>
@@ -121,7 +114,7 @@ export function AddDoctorCard({
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.name}
-                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
+                className="border-border bg-card text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background focus:border-primary focus:ring-primary/30 h-10 rounded-md border px-3.5 text-sm transition-colors outline-none focus:ring-1 focus-visible:ring-2 focus-visible:ring-offset-2"
               />
             </div>
 
@@ -129,7 +122,7 @@ export function AddDoctorCard({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="add-doctor-clinzo-id"
-                className="text-[13px] font-medium text-[#5c6678]"
+                className="text-muted-foreground text-sm font-medium"
               >
                 Doctor ID (Clinzo) Optional
               </label>
@@ -141,7 +134,7 @@ export function AddDoctorCard({
                   setFormData({ ...formData, clinzoId: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.clinzoId}
-                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
+                className="border-border bg-card text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background focus:border-primary focus:ring-primary/30 h-10 rounded-md border px-3.5 text-sm transition-colors outline-none focus:ring-1 focus-visible:ring-2 focus-visible:ring-offset-2"
               />
             </div>
 
@@ -149,7 +142,7 @@ export function AddDoctorCard({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="add-doctor-specialization"
-                className="text-[13px] font-medium text-[#5c6678]"
+                className="text-muted-foreground text-sm font-medium"
               >
                 Specialization
               </label>
@@ -161,7 +154,7 @@ export function AddDoctorCard({
                   setFormData({ ...formData, specialization: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.specialization}
-                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
+                className="border-border bg-card text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background focus:border-primary focus:ring-primary/30 h-10 rounded-md border px-3.5 text-sm transition-colors outline-none focus:ring-1 focus-visible:ring-2 focus-visible:ring-offset-2"
               />
             </div>
 
@@ -169,7 +162,7 @@ export function AddDoctorCard({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="add-doctor-phone"
-                className="text-[13px] font-medium text-[#5c6678]"
+                className="text-muted-foreground text-sm font-medium"
               >
                 Phone Number
               </label>
@@ -181,7 +174,7 @@ export function AddDoctorCard({
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 placeholder={addDoctorPlaceholders.phone}
-                className="h-10 rounded-[8px] border border-[#e3e8f0] bg-white px-3.5 text-[14px] text-[#0f172a] placeholder-[#94a3b8] transition-colors outline-none focus:border-[#07595d] focus:ring-1 focus:ring-[#07595d]/30"
+                className="border-border bg-card text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background focus:border-primary focus:ring-primary/30 h-10 rounded-md border px-3.5 text-sm transition-colors outline-none focus:ring-1 focus-visible:ring-2 focus-visible:ring-offset-2"
               />
             </div>
 
@@ -189,14 +182,14 @@ export function AddDoctorCard({
             <Button
               type="submit"
               disabled={busy || !facilities.length}
-              className="mt-2 h-11 w-full cursor-pointer rounded-[8px] bg-[#07595d] text-[14px] font-semibold text-white shadow-xs transition-colors hover:bg-[#064e52]"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 h-11 w-full cursor-pointer rounded-md text-sm font-semibold shadow-xs transition-colors"
             >
               {busy ? "Sending…" : "Save Doctor"}
             </Button>
           </form>
         )}
 
-        <p className="border-t border-[#e2e8f0]/60 pt-1 text-[12px] text-[#94a3b8]">
+        <p className="border-border/60 text-muted-foreground border-t pt-1 text-xs">
           Required for scheduling and patient records.
         </p>
       </div>

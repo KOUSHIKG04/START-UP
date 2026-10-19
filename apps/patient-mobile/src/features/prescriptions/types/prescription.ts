@@ -6,3 +6,10 @@ export type PrescriptionScreenProps = PatientScreenProps & {
   appointmentId?: string;
   onViewMedicines?: () => void;
 };
+
+export type PrescriptionMedicine = {
+  id: number;
+  name: string;
+  dose: string;
+  schedule: { breakfast: number; lunch: number; dinner: number };
+};

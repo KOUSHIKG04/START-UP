@@ -1,6 +1,6 @@
-import type { ImageSourcePropType } from "react-native";
-import type { Href } from "expo-router";
-import type { ConsultationType } from "../../appointments/types/appointment";
+import type { DoctorCategory } from "../types/find-doctor";
+export type { DoctorCategory } from "../types/find-doctor";
+
 import { SEARCH_HEIGHT } from "../../../utils/headerConstants";
 
 export const EXPANDED_HEADER_HEIGHT = 147;
@@ -20,23 +20,6 @@ export const symptoms = [
   "Skin rash",
   "Breathing issue",
 ] as const;
-
-export function getDoctorResultsRoute(
-  symptom: string,
-  consultationType: ConsultationType
-) {
-  return {
-    pathname: "/doctor-results",
-    params: { symptom, consultationType },
-  } as unknown as Href;
-}
-
-export type DoctorCategory = {
-  key: string;
-  label: string;
-  image: ImageSourcePropType;
-  imageScale?: number;
-};
 
 export const categories: readonly DoctorCategory[] = [
   {

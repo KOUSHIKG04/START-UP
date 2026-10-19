@@ -1,3 +1,4 @@
+import type { PickupMapProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
@@ -11,16 +12,12 @@ export function PickupMap({
   onConfirm,
   address,
   onAddressChange,
-}: {
-  destination: string;
-  onConfirm: () => void;
-  address: string;
-  onAddressChange: (value: string) => void;
-}) {
+}: PickupMapProps) {
   return (
     <View style={styles.flex1}>
       <View style={styles.pickupMapFrame}>
         <Image
+          alt="Illustrative pickup area map; this is not your GPS location"
           source={pickupMapImage}
           resizeMode="stretch"
           style={styles.pickupMapImage}

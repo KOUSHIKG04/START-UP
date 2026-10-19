@@ -1,21 +1,17 @@
 "use client";
+import { useBedManagementScreen } from "../hooks/useBedManagementScreen";
 
-import { useEffect } from "react";
-import { toast } from "@startup/web-ui/components/ui/toast";
-import { useBedManagement } from "../hooks/useBedManagement";
-import type { BedInventoryProjection } from "@startup/contracts";
+import type { BedManagementScreenProps } from "../types/bedManagementScreen";
+
 import { BedCountStepper } from "../components/BedCountStepper";
 import { InitialBedCountsForm } from "../components/InitialBedCountsForm";
-import { bedManagementDateFormatter } from "../utils/bedManagementDate";
+
 import { Search, Bell, Calendar, Bed, Check, User, Wrench } from "lucide-react";
 
 export default function BedManagementScreen({
   inventory,
   loadError,
-}: {
-  inventory: BedInventoryProjection[];
-  loadError?: string;
-}) {
+}: BedManagementScreenProps) {
   const {
     viewMode,
     setViewMode,
@@ -29,53 +25,44 @@ export default function BedManagementScreen({
     occPercent,
     totalMaintenance,
     pendingIds,
-  } = useBedManagement(inventory);
-  useEffect(() => {
-    if (loadError)
-      toast.add({
-        title: "Could not load bed inventory",
-        description: loadError,
-        type: "error",
-      });
-  }, [loadError]);
-  const bedManagementDateLabel = bedManagementDateFormatter.format(new Date());
-
+    bedManagementDateLabel,
+  } = useBedManagementScreen({ inventory, loadError });
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* TopBar (Figma 832:56) */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-[#0f172a]">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Bed Management
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Search Box */}
-          <div className="flex w-56 items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
-            <Search className="size-4 shrink-0 text-[#94a3b8]" />
+          <div className="border-border bg-card flex w-56 items-center gap-2 rounded-lg border px-3 py-2 shadow-xs">
+            <Search className="text-muted-foreground size-4 shrink-0" />
             <input
               type="text"
               aria-label="Search patient, doctor..."
               placeholder="Search patient, doctor..."
-              className="w-full bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none"
+              className="text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background w-full bg-transparent text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             />
           </div>
 
           {/* Bell button */}
           <button
             aria-label="Notifications"
-            className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#475569] shadow-xs transition-colors hover:bg-slate-50"
+            className="border-border bg-card text-muted-foreground hover:bg-muted flex size-9 cursor-pointer items-center justify-center rounded-lg border shadow-xs transition-colors"
           >
             <Bell className="size-4" />
           </button>
 
           {/* Date Badge */}
-          <div className="flex items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
-            <Calendar className="size-4 shrink-0 text-[#475569]" />
+          <div className="border-border bg-card flex items-center gap-2 rounded-lg border px-3 py-2 shadow-xs">
+            <Calendar className="text-muted-foreground size-4 shrink-0" />
             <span
               suppressHydrationWarning
-              className="text-[13px] font-semibold whitespace-nowrap text-[#475569]"
+              className="text-muted-foreground text-sm font-semibold whitespace-nowrap"
             >
               {bedManagementDateLabel}
             </span>
@@ -84,7 +71,7 @@ export default function BedManagementScreen({
       </div>
 
       {!loadError && inventory.length === 0 && (
-        <p className="text-[13px] text-[#475569]">
+        <p className="text-muted-foreground text-sm">
           This facility does not offer patient beds.
         </p>
       )}
@@ -92,76 +79,78 @@ export default function BedManagementScreen({
       {/* 4 Stat Cards Row (Figma 832:71) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Beds */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+        <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[13px] font-medium text-[#475569]">
+              <p className="text-muted-foreground text-sm font-medium">
                 Total Beds
               </p>
-              <h3 className="mt-2 text-[28px] leading-none font-bold text-[#0f172a]">
+              <h3 className="text-foreground mt-2 text-3xl leading-none font-bold">
                 {totalBeds}
               </h3>
             </div>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f1f5f9] text-slate-600">
+            <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
               <Bed className="size-5" />
             </div>
           </div>
         </div>
 
         {/* Available */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+        <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[13px] font-medium text-[#475569]">
+              <p className="text-muted-foreground text-sm font-medium">
                 Available
               </p>
               <div className="mt-2 flex items-baseline gap-2">
-                <h3 className="text-[28px] leading-none font-bold text-[#10b981]">
+                <h3 className="text-primary text-3xl leading-none font-bold">
                   {totalAvailable}
                 </h3>
-                <span className="text-[12px] font-semibold text-[#10b981]">
+                <span className="text-primary text-xs font-semibold">
                   {availPercent}% available
                 </span>
               </div>
             </div>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#ecfdf5] text-[#10b981]">
-              <Check className="size-5 stroke-[2.5]" />
+            <div className="bg-muted text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
+              <Check className="size-5 stroke-2" />
             </div>
           </div>
         </div>
 
         {/* Occupied */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+        <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[13px] font-medium text-[#475569]">Occupied</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Occupied
+              </p>
               <div className="mt-2 flex items-baseline gap-2">
-                <h3 className="text-[28px] leading-none font-bold text-[#3b82f6]">
+                <h3 className="text-primary text-3xl leading-none font-bold">
                   {totalOccupied}
                 </h3>
-                <span className="text-[12px] font-semibold text-[#3b82f6]">
+                <span className="text-primary text-xs font-semibold">
                   {occPercent}% occupied
                 </span>
               </div>
             </div>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#3b82f6]">
+            <div className="bg-muted text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
               <User className="size-5" />
             </div>
           </div>
         </div>
 
         {/* Under Maintenance */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+        <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[13px] font-medium text-[#475569]">
+              <p className="text-muted-foreground text-sm font-medium">
                 Under Maintenance
               </p>
               <div className="mt-2 flex items-baseline gap-2">
-                <h3 className="text-[28px] leading-none font-bold text-[#f59e0b]">
+                <h3 className="text-muted-foreground text-3xl leading-none font-bold">
                   {totalMaintenance}
                 </h3>
-                <span className="text-[12px] font-semibold text-[#f59e0b]">
+                <span className="text-muted-foreground text-xs font-semibold">
                   {totalBeds > 0
                     ? ((totalMaintenance / totalBeds) * 100).toFixed(1)
                     : "0"}
@@ -169,7 +158,7 @@ export default function BedManagementScreen({
                 </span>
               </div>
             </div>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#fffbeb] text-[#f59e0b]">
+            <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
               <Wrench className="size-5" />
             </div>
           </div>
@@ -177,36 +166,36 @@ export default function BedManagementScreen({
       </div>
 
       {/* Bed Availability by Department (Figma 832:86) */}
-      <div className="rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs">
+      <div className="border-border bg-card rounded-lg border p-6 shadow-xs">
         {/* Header & Toggle */}
-        <div className="flex flex-col justify-between gap-4 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-center">
+        <div className="border-border flex flex-col justify-between gap-4 border-b pb-5 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-[18px] font-bold text-[#0f172a]">
+            <h2 className="text-foreground text-lg font-bold">
               Bed Availability by Department
             </h2>
-            <p className="mt-0.5 text-[13px] text-[#475569]">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               Overall occupancy rate across departments
             </p>
           </div>
 
           {/* % Percentage / Count Switch */}
-          <div className="inline-flex items-center self-start rounded-lg border border-[#e2e8f0] bg-[#f1f5f9] p-1 sm:self-auto">
+          <div className="border-border bg-muted inline-flex items-center self-start rounded-lg border p-1 sm:self-auto">
             <button
               onClick={() => setViewMode("percent")}
-              className={`cursor-pointer rounded-md px-3 py-1 text-[12px] font-semibold transition-colors ${
+              className={`cursor-pointer rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 viewMode === "percent"
-                  ? "bg-white text-[#0f172a] shadow-xs"
-                  : "text-[#64748b] hover:text-[#0f172a]"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               % Percentage
             </button>
             <button
               onClick={() => setViewMode("count")}
-              className={`cursor-pointer rounded-md px-3 py-1 text-[12px] font-semibold transition-colors ${
+              className={`cursor-pointer rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 viewMode === "count"
-                  ? "bg-white text-[#0f172a] shadow-xs"
-                  : "text-[#64748b] hover:text-[#0f172a]"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Count
@@ -216,9 +205,9 @@ export default function BedManagementScreen({
 
         {/* Departments Table */}
         <div className="mt-2 overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse text-left text-[14px]">
+          <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-[#e2e8f0] text-[12px] font-bold text-[#64748b]">
+              <tr className="border-border text-muted-foreground border-b text-xs font-bold">
                 <th className="px-3 py-3">Department</th>
                 <th className="px-3 py-3 text-center">Total Beds</th>
                 <th className="px-3 py-3 text-center">Available</th>
@@ -226,7 +215,7 @@ export default function BedManagementScreen({
                 <th className="px-3 py-3">Occupancy Rate</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e2e8f0]">
+            <tbody className="divide-border divide-y">
               {departments.map((dept) => {
                 const occupancyPct =
                   dept.total > 0
@@ -236,11 +225,11 @@ export default function BedManagementScreen({
                 return (
                   <tr
                     key={`${dept.facilityId}:${dept.id}`}
-                    className="transition-colors hover:bg-slate-50/70"
+                    className="hover:bg-muted/70 transition-colors"
                   >
                     {/* Department name with dot */}
                     <td className="px-3 py-3.5">
-                      <div className="flex items-center gap-2.5 font-semibold text-[#0f172a]">
+                      <div className="text-foreground flex items-center gap-2.5 font-semibold">
                         <span
                           className={`size-2.5 rounded-full ${dept.dotColor} shrink-0`}
                         />
@@ -258,7 +247,7 @@ export default function BedManagementScreen({
                     ) : (
                       <>
                         {/* Total Beds */}
-                        <td className="px-3 py-3.5 text-center font-medium text-[#0f172a]">
+                        <td className="text-foreground px-3 py-3.5 text-center font-medium">
                           {dept.total}
                         </td>
 
@@ -289,13 +278,13 @@ export default function BedManagementScreen({
                         {/* Occupancy Rate Bar & Label */}
                         <td className="px-3 py-3.5">
                           <div className="flex max-w-[280px] items-center gap-4">
-                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#f1f5f9]">
+                            <div className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
                               <div
                                 className={`h-full rounded-full transition-all duration-300 ${dept.barColor}`}
                                 style={{ width: `${occupancyPct}%` }}
                               />
                             </div>
-                            <span className="w-12 text-right text-[13px] font-bold text-[#0f172a]">
+                            <span className="text-foreground w-12 text-right text-sm font-bold">
                               {viewMode === "percent"
                                 ? `${occupancyPct}%`
                                 : `${dept.occupied}/${dept.total}`}

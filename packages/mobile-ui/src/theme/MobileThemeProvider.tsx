@@ -17,7 +17,11 @@ export function MobileThemeProvider({
 }
 
 /** Explicit component overrides take precedence over the nearest provider. */
-export function useMobileTheme(override?: AppTheme) {
+export function useMobileThemeName(override?: AppTheme): AppTheme {
   const inherited = useContext(ThemeContext);
-  return appThemeColors[override ?? inherited];
+  return override ?? inherited;
+}
+
+export function useMobileTheme(override?: AppTheme) {
+  return appThemeColors[useMobileThemeName(override)];
 }

@@ -13,20 +13,20 @@ Each implemented feature exposes its supported entry points through `index.ts`.
 | `src/app`                    | Next.js routes, layouts, metadata, loading and error boundaries                 |
 | `src/app/(admin)`            | Thin route adapters and one shared admin layout                                 |
 | `src/app/(auth)`             | Login, signup and facility-verification route adapters, outside the admin shell |
-| `src/features/dashboard`     | Existing dashboard screen and future dashboard operations                       |
-| `src/features/auth`          | Login screen, form component and login constants                                |
+| `src/features/dashboard`     | Dashboard composition, appointment acceptance and live update coordination      |
+| `src/features/auth`          | Login/signup UI, action state, logout and server auth actions                   |
 | `src/features/doctors`       | Doctor directory, schedules, add-doctor UI, feature hooks, types and constants  |
 | `src/features/appointments`  | Appointment screen, record types, demo rows and filter/summary constants        |
-| `src/features/dispatch`      | Future ambulance dispatch operations                                            |
 | `src/features/facilities`    | Bed management screen, allocation hook, types and constants                     |
-| `src/features/staff`         | Future staff membership and permissions UI                                      |
 | `src/components/admin`       | Shared admin layout, sidebar and reusable navigation components                 |
 | `src/components/admin/utils` | Shell-owned navigation, brand and demo-user constants                           |
-| `src/server/auth`            | Future additional server-side identity checks                                   |
+| `src/server/auth`            | Approved-facility access checks                                                 |
 | `src/lib/supabase`           | Request-scoped server client, cookie proxy and public config                    |
-| `src/server/observability`   | Future server logging and instrumentation                                       |
-| `src/lib`                    | Small cross-feature helpers and future browser client configuration             |
-| `src/providers`              | Client providers, added only when an integration needs them                     |
+| `src/lib`                    | Small cross-feature helpers and browser/server client configuration             |
+| `src/providers`              | Existing query provider                                                         |
+
+Dispatch, staff administration and additional observability remain future work.
+Their obsolete empty scaffolds have been removed; add folders with implementation.
 
 Route groups do not add URL segments. The admin routes require an authenticated
 account with a company-verified facility. Accounts without approval go to
@@ -63,16 +63,19 @@ features/appointments/
   hooks/
   types/appointments.ts
   utils/appointmentsConstants.ts
-  tests/
 ```
+
+Regression tests live under `tests/unit`; the architecture checker and shared test
+tools live under `scripts`. Do not add test files to runtime feature folders.
 
 Keep `page.tsx` thin: parse route/search parameters, invoke an authorized query
 when needed, and compose the feature screen. Server Components are the default;
 use `"use client"` only for interactive components. Add route loading/error states
 when asynchronous operations exist and their screen requirements are known.
 
-Keep server queries and mutations in the feature's `server` directory. Before
-implementing these modules, install and use `server-only` guards. Actions must
+Keep server queries and mutations in the feature's `server` directory. Server-only
+query entry points use `server-only` guards; action files retain `"use server"`.
+Actions must
 validate inputs and check authorization themselves. Do not export server modules
 through a barrel also consumed by Client Components. Use Server Actions for web
 mutations and Route Handlers only when an HTTP interface is needed.
@@ -94,8 +97,14 @@ mutations and Route Handlers only when an HTTP interface is needed.
   operations that receive an app-configured client. It must not own Next.js cookie
   handling, React hooks, providers, or server credentials.
 - Shared packages never import applications. Keep platform-specific session/client
-  setup in the app. The contracts and data-access packages are currently empty and
-  are not dependencies of web until integration begins.
+  setup in the app. Contracts and data-access already provide the shared facility,
+  appointment, doctor, schedule, verification and notification operations.
+
+Routes can import an explicit feature `server.ts` entry for server operations.
+The facilities entry exposes `saveBedInventory` to its HTTP adapter without adding
+server code to the client-consumed feature index. The admin route passes the auth
+logout component through a slot into the shell; shared sidebar/layout components
+do not import an app feature.
 
 The architecture check runs before ESLint and checks both relative and `@/` imports.
 It rejects duplicate route URLs, feature-to-feature dependencies, shared-to-feature
@@ -117,8 +126,10 @@ leave a thin route adapter. Keep generic primitives in `@startup/web-ui`.
 
 ## Backend integration contract
 
-The shared backend scaffold lives at the repository root in `supabase/`.
-Initialize and configure it in a separate backend integration change.
+The shared backend lives at the repository root in `supabase/`. Existing auth,
+verification, bed inventory, appointment, directory and scheduling integrations
+use the contracts and data-access packages. New integrations follow these rules;
+the presence of source code does not establish deployment or browser verification.
 
 1. Model organizations, facilities and staff memberships before connecting admin
    data. A future route such as `/facilities/[facilityId]/appointments` selects a
@@ -152,6 +163,7 @@ Run from the monorepo root using its pnpm toolchain:
 pnpm --filter facility-portal lint
 pnpm --filter facility-portal check:architecture
 pnpm --filter facility-portal test:architecture
+pnpm --filter facility-portal test
 pnpm --filter facility-portal typecheck
 pnpm --filter facility-portal build
 ```
@@ -160,5 +172,18 @@ Typechecking first generates current Next.js route types. A production build can
 require network access for the existing Google fonts. Architecture regression tests
 use Node's built-in test runner. Add backend workflow tests when integrating data, including
 unauthenticated access, denied facility access and failed mutations. Database
-policies and transaction constraints require integration tests in
-`supabase/tests/database` before backend rollout.
+policies and transaction constraints require backend integration verification.
+Existing rollback checks live in `supabase/tests/smoke`; actual pgTAP tests belong
+in `supabase/tests/database` when implemented.
+
+## Feature ownership review
+
+See [FEATURE_STRUCTURE.md](FEATURE_STRUCTURE.md) for the complete source review.
+Workflow hooks own existing form state, queries, actions and effects. Schedule
+controls have individual component owners; `FacilityDoctorScheduleEditor` retains
+its practice/type key. The facility verification hook mounts once and passes the
+address section its existing draft and callbacks. Map library loading stays a
+singleton browser service; map listeners and cleanup stay in the map hook.
+`doctorApi` is a feature client service, while query/cache behavior stays in hooks.
+Pure schedule-draft conversion and bed-row color helpers are separate from static
+configuration. Named contracts live in feature types; public exports stay deliberate.

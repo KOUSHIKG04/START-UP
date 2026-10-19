@@ -36,8 +36,8 @@ import {
   distanceToSavedLocation,
   formatGeocodedAddress,
   formatSavedLocation,
-} from "../../features/locations/locationDisplay";
-import { canGeocodeAddress } from "../../features/locations/geocoding";
+} from "../../features/locations/utils/locationDisplay";
+import { canGeocodeAddress } from "../../features/locations/services/geocoding";
 
 type Place = {
   latitude: number;

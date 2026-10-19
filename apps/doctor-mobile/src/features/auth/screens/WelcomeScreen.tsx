@@ -1,10 +1,8 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import {
-  OnboardingButton,
-  OnboardingShell,
-} from "../components/OnboardingShell";
+import { OnboardingShell } from "../components/OnboardingShell";
+import { OnboardingButton } from "../components/OnboardingButton";
 
 export default function WelcomeScreen() {
   return (

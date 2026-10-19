@@ -1,17 +1,14 @@
+import type { Props } from "../types/driver-tracking-map";
+export type { Props } from "../types/driver-tracking-map";
 import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
-import { Image, Platform, type ImageStyle } from "react-native";
+import { Image, Platform } from "react-native";
 import type {
   AppleMaps as AppleMapsType,
   GoogleMaps as GoogleMapsType,
 } from "expo-maps";
-import type { ActiveAmbulanceTracking } from "@startup/contracts";
-import { trackingMapImage } from "../utils/ambulanceConstants";
 
-type Props = {
-  location: ActiveAmbulanceTracking | null;
-  style: ImageStyle;
-};
+import { trackingMapImage } from "../utils/ambulanceConstants";
 
 export function DriverTrackingMap({ location, style }: Props) {
   const googleMapRef = useRef<GoogleMapsType.MapView>(null);
@@ -86,7 +83,7 @@ export function DriverTrackingMap({ location, style }: Props) {
       source={trackingMapImage}
       resizeMode="cover"
       style={style}
-      accessibilityLabel="Illustrative map preview; live map unavailable"
+      alt="Illustrative map preview; live map unavailable"
     />
   );
 }

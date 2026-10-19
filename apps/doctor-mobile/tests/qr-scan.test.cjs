@@ -107,25 +107,35 @@ function scanner({ failure, refreshFails = false, waitForRedemption } = {}) {
     "../../../components/theme": { palette: {}, ui: {} },
     "../../../services/supabase": { supabase: {} },
   };
-  const exports = {};
-  const source = fs.readFileSync(
-    path.resolve(
-      __dirname,
-      "../src/features/patients/screens/ScanQrScreen.tsx"
-    ),
-    "utf8"
-  );
-  vm.runInNewContext(
-    ts.transpileModule(source, {
-      compilerOptions: {
-        module: ts.ModuleKind.CommonJS,
-        jsx: ts.JsxEmit.ReactJSX,
-      },
-    }).outputText,
-    {
-      exports,
-      require: (name) => mocks[name],
-    }
+  function load(file) {
+    const absolute = path.resolve(file),
+      exports = {};
+    vm.runInNewContext(
+      ts.transpileModule(fs.readFileSync(absolute, "utf8"), {
+        compilerOptions: {
+          module: ts.ModuleKind.CommonJS,
+          jsx: ts.JsxEmit.ReactJSX,
+        },
+      }).outputText,
+      {
+        exports,
+        require(name) {
+          if (Object.hasOwn(mocks, name)) return mocks[name];
+          if (!name.startsWith("."))
+            throw new Error("Unmocked import: " + name);
+          const target = path.resolve(path.dirname(absolute), name);
+          const resolved = [target, target + ".ts", target + ".tsx"].find(
+            (file) => fs.existsSync(file) && fs.statSync(file).isFile()
+          );
+          if (!resolved) throw new Error("Unresolved import: " + name);
+          return load(resolved);
+        },
+      }
+    );
+    return exports;
+  }
+  const exports = load(
+    path.resolve(__dirname, "../src/features/patients/screens/ScanQrScreen.tsx")
   );
   const render = () => {
     cursor = 0;

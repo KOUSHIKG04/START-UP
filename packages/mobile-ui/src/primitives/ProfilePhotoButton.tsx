@@ -1,16 +1,15 @@
+import type { ProfilePhotoButtonProps } from "../types/profilePhotoButton";
 import {
   ActivityIndicator,
   Image,
   Pressable,
   StyleSheet,
   View,
-  type ImageSourcePropType,
 } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { Plus } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { AppTheme } from "../utils/appTheme";
 
 export function ProfilePhotoButton({
   source,
@@ -20,15 +19,7 @@ export function ProfilePhotoButton({
   disabled = false,
   loading = false,
   accessibilityLabel = "Choose profile photo",
-}: {
-  source?: ImageSourcePropType;
-  onPress?: () => void;
-  theme?: AppTheme;
-  size?: number;
-  disabled?: boolean;
-  loading?: boolean;
-  accessibilityLabel?: string;
-}) {
+}: ProfilePhotoButtonProps) {
   const palette = useMobileTheme(theme);
   const badgeSize = Math.round(size * 0.38);
   return (
@@ -61,6 +52,7 @@ export function ProfilePhotoButton({
           </View>
         ) : source ? (
           <Image
+            alt=""
             source={source}
             style={{ width: size, height: size }}
             resizeMode="cover"

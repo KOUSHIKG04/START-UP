@@ -1,16 +1,14 @@
-import { AppText as Text } from "@startup/mobile-ui";
+import { ProfileAction } from "../components/ProfileAction";
+import { ContactDetail } from "../components/ContactDetail";
+import { styles } from "../components/ProfileScreen.styles";
+import { usePatientProfile } from "../hooks/usePatientProfile";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState, type ReactNode } from "react";
-import { BackHandler, Pressable, StyleSheet, View } from "react-native";
+
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import {
-  getMyPatientProfileDetail,
-  listClinicAppointments,
-  listMyFamilyProfiles,
-  listMyNotifications,
-} from "@startup/data-access";
+
 import {
   Bell,
   CalendarDays,
@@ -22,10 +20,9 @@ import {
   Plus,
   UserRound,
   Users,
-  ChevronRight,
   Settings as SettingsIcon,
 } from "lucide-react-native";
-import { colors, fontFamilies, gradients } from "@startup/design-tokens";
+import { colors, gradients } from "@startup/design-tokens";
 import { StatusBar } from "expo-status-bar";
 import {
   Accordion,
@@ -34,87 +31,29 @@ import {
   Skeleton,
   FadedScrollView,
   Header,
-  useToastFeedback,
-  useToast,
 } from "@startup/mobile-ui";
-import { NotificationDrawer } from "../../../components/NotificationDrawer";
+import { NotificationDrawer } from "../../notifications/components/NotificationDrawer";
 import {
   ProfileIdentity,
   ProfileStats,
   SettingsView,
 } from "../components/index";
-import { supabase, useMobileSession } from "../../../services/supabase";
+
 import type { ProfileScreenProps } from "../types/profile";
 
 export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
-  const { showToast } = useToast();
-  const { profile } = useMobileSession();
-  const detail = useQuery({
-    queryKey: ["my-patient-profile-detail", profile?.patient_id],
-    queryFn: () => getMyPatientProfileDetail(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  const profilePhoto = useQuery({
-    queryKey: ["my-patient-profile-photo", detail.data?.profile_photo_path],
-    queryFn: async () => {
-      const { data, error } = await supabase!.storage
-        .from("patient-profile-photos")
-        .createSignedUrl(detail.data!.profile_photo_path!, 3600);
-      if (error) throw error;
-      return data.signedUrl;
-    },
-    enabled: Boolean(supabase && detail.data?.profile_photo_path),
-    staleTime: 30 * 60 * 1000,
-  });
-  const family = useQuery({
-    queryKey: ["my-family-profiles", profile?.patient_id],
-    queryFn: () => listMyFamilyProfiles(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  useToastFeedback({
-    error: family.isError ? "Family profiles are unavailable right now." : "",
-  });
-  const bookings = useQuery({
-    queryKey: ["patient-clinic-appointments"],
-    queryFn: () => listClinicAppointments(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  const notifications = useQuery({
-    queryKey: ["my-notifications"],
-    queryFn: () => listMyNotifications(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  const unreadCount =
-    notifications.data?.filter((item) => !item.is_read).length ?? 0;
-  useToastFeedback({
-    error: detail.isError
-      ? "Could not load your profile. Use Retry profile to try again."
-      : bookings.isError
-        ? "Your bookings are unavailable right now."
-        : "",
-  });
-  const name =
-    detail.data?.full_name ?? profile?.display_name ?? "Your profile";
-  const [currentView, setCurrentView] = useState<"profile" | "settings">(
-    "profile"
-  );
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  // Hardware back button handling
-  useEffect(() => {
-    const onHardwareBack = () => {
-      if (currentView === "settings") {
-        setCurrentView("profile");
-        return true;
-      }
-      return false;
-    };
-    const sub = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onHardwareBack
-    );
-    return () => sub.remove();
-  }, [currentView]);
-
+  const {
+    showToast,
+    detail,
+    profilePhoto,
+    family,
+    unreadCount,
+    name,
+    currentView,
+    setCurrentView,
+    notificationsOpen,
+    setNotificationsOpen,
+  } = usePatientProfile({ onBackPress });
   return (
     <View style={styles.screen}>
       <View
@@ -398,306 +337,3 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
     </View>
   );
 }
-
-function ContactDetail({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <View style={styles.contactRow}>
-      <View style={styles.contactIcon}>{icon}</View>
-      <View style={styles.copyCol}>
-        <Text variant="label" style={styles.contactLabel}>
-          {label}
-        </Text>
-        <Text variant="body" style={styles.contactValue} selectable>
-          {value}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function ProfileAction({
-  icon,
-  title,
-  count,
-  neutralCount = false,
-  trailingIcon,
-  onPress,
-}: {
-  icon: ReactNode;
-  title: string;
-  count?: string;
-  neutralCount?: boolean;
-  trailingIcon?: ReactNode;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={onPress}
-      style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
-    >
-      <View style={styles.actionIcon}>{icon}</View>
-      <View style={styles.copyCol}>
-        <Text variant="body" style={styles.actionTitle}>
-          {title}
-        </Text>
-      </View>
-      {count ? (
-        <View
-          style={[styles.countBadge, neutralCount && styles.familyCountBadge]}
-        >
-          <Text
-            variant="label"
-            style={[styles.countLabel, neutralCount && styles.familyCountLabel]}
-          >
-            {count}
-          </Text>
-        </View>
-      ) : null}
-      <View style={styles.trailingIcon}>
-        {trailingIcon ?? (
-          <ChevronRight size={19} color={colors.patient.primaryDark} />
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.white },
-  settingsOverlay: { backgroundColor: colors.white, zIndex: 2 },
-  content: {
-    width: "100%",
-    maxWidth: 560,
-    alignSelf: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 110,
-    gap: 14,
-  },
-  summaryGradient: {
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-    overflow: "hidden",
-  },
-  personalTitle: {
-    fontFamily: fontFamilies.medium,
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 21,
-    color: colors.patient.text,
-  },
-  identitySection: {
-    gap: 0,
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 32,
-  },
-  headerSettings: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 4,
-    marginTop: 4,
-  },
-  headerSettingsCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerSettingsPressed: { opacity: 0.75, transform: [{ scale: 0.95 }] },
-  identityLoading: { flexDirection: "row", alignItems: "center", gap: 16 },
-  identityLoadingCopy: { flex: 1, gap: 12 },
-  editButton: {
-    alignSelf: "flex-end",
-    borderRadius: 10,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-    marginTop: 18,
-  },
-  editLabel: {
-    fontSize: 14,
-    lineHeight: 19,
-    fontFamily: fontFamilies.semibold,
-    color: colors.patient.primaryDark,
-  },
-  section: { gap: 14 },
-  sectionHeading: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  sectionTitle: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 19,
-    lineHeight: 25,
-    color: colors.patient.text,
-    flexShrink: 1,
-  },
-  addButton: {
-    minHeight: 44,
-    paddingHorizontal: 8,
-    marginTop: 14,
-    alignSelf: "flex-start",
-  },
-  addLabel: { fontFamily: fontFamilies.semibold, fontSize: 15 },
-  details: { gap: 18 },
-  detailsAccordion: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-    elevation: 0,
-    shadowOpacity: 0,
-    boxShadow: "none",
-    overflow: "hidden",
-  },
-  detailsHeader: {
-    borderRadius: 16,
-    minHeight: 57,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: colors.white,
-  },
-  detailsBody: { padding: 18 },
-  detailLoading: { gap: 18, paddingVertical: 8 },
-  contactRow: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
-  contactIcon: { width: 24, paddingTop: 3, alignItems: "center" },
-  copyCol: { flex: 1, gap: 5 },
-  contactLabel: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  contactValue: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.medium,
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  flatCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    boxShadow: "none",
-    elevation: 0,
-    shadowOpacity: 0,
-    overflow: "hidden",
-  },
-  familyRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
-  dividedFamilyRow: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    marginTop: 18,
-    paddingTop: 18,
-  },
-  familyAvatar: {
-    width: 42,
-    height: 42,
-    backgroundColor: colors.patient.surface,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  memberName: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 16,
-    lineHeight: 21,
-    color: colors.patient.text,
-  },
-  memberMeta: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.patient.textSecondary,
-  },
-  verification: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.patient.textSecondary,
-  },
-  verified: { color: colors.patient.primaryDark },
-  emptyFamily: { flexDirection: "row", alignItems: "center", gap: 14 },
-  emptyCopy: {
-    flex: 1,
-    fontFamily: fontFamilies.regular,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.patient.textSecondary,
-  },
-  actionRow: {
-    borderRadius: 16,
-    overflow: "hidden",
-    minHeight: 57,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  trailingIcon: { transform: [{ translateX: -1 }] },
-  familyPlus: { transform: [{ translateX: -3 }] },
-  actionIcon: {
-    width: 34,
-    height: 34,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionTitle: {
-    fontFamily: fontFamilies.medium,
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 21,
-    color: colors.patient.text,
-  },
-  actionDescription: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    lineHeight: 18,
-    color: colors.patient.textSecondary,
-  },
-  actionDivider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: 16,
-  },
-  familyCountBadge: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minWidth: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  familyCountLabel: { color: colors.patient.text },
-  countBadge: {
-    backgroundColor: colors.patient.surface,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  countLabel: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.patient.primaryDark,
-  },
-  pressed: { backgroundColor: "#0C243408" },
-});

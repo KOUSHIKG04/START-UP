@@ -1,15 +1,10 @@
+import type { SectionTitleProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
-import type { ReactNode } from "react";
-import { StyleSheet, type StyleProp, type TextStyle } from "react-native";
+
+import { StyleSheet } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
-export function SectionTitle({
-  children,
-  style,
-}: {
-  children: ReactNode;
-  style?: StyleProp<TextStyle>;
-}) {
+export function SectionTitle({ children, style }: SectionTitleProps) {
   return (
     <Text variant="sectionHeading" style={[styles.sectionTitle, style]}>
       {children}

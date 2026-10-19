@@ -1,36 +1,17 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import { useRef, type ReactNode } from "react";
+import { useRef } from "react";
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  type PressableProps,
-  type StyleProp,
   type TextStyle,
   type ViewStyle,
 } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { appThemeColors, type AppTheme } from "../utils/appTheme";
-
-export type ButtonVariant =
-  "primary" | "secondary" | "outline" | "ghost" | "danger";
-
-export type ButtonProps = Omit<
-  PressableProps,
-  "children" | "style" | "disabled"
-> & {
-  label?: string;
-  children?: ReactNode;
-  variant?: ButtonVariant;
-  theme?: AppTheme;
-  disabled?: boolean;
-  loading?: boolean;
-  style?: PressableProps["style"];
-  labelStyle?: StyleProp<TextStyle>;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
-};
+import type { ButtonVariant, ButtonProps } from "../types/button";
+export type { ButtonVariant, ButtonProps } from "../types/button";
 
 type ButtonPalette = {
   container: ViewStyle;

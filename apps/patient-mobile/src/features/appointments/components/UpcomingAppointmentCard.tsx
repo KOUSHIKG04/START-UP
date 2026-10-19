@@ -1,5 +1,9 @@
+import type { AppointmentDetailProps } from "../types/upcoming-appointment-card";
+export type { AppointmentDetailProps } from "../types/upcoming-appointment-card";
+import type { UpcomingAppointmentCardProps } from "../types/upcoming-appointment";
+export type { UpcomingAppointmentCardProps } from "../types/upcoming-appointment";
 import { AppText as Text } from "@startup/mobile-ui";
-import type { ReactNode } from "react";
+
 import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -19,20 +23,9 @@ import {
   CardHeader,
   CardSeparator,
   CardTitle,
+  SectionHeader,
 } from "@startup/mobile-ui";
-import SectionHeader from "../../../components/SectionHeader";
 import { router } from "expo-router";
-
-export type UpcomingAppointmentCardProps = {
-  showHeader?: boolean;
-  doctorName: string;
-  specialization?: string;
-  date: string;
-  time: string;
-  onCardPress?: () => void;
-  onReschedulePress?: () => void;
-  onViewProfilePress?: () => void;
-};
 
 export default function UpcomingAppointmentCard({
   showHeader = true,
@@ -141,12 +134,6 @@ export default function UpcomingAppointmentCard({
     </View>
   );
 }
-
-type AppointmentDetailProps = {
-  icon: ReactNode;
-  label: string;
-  value: string;
-};
 
 function AppointmentDetail({ icon, label, value }: AppointmentDetailProps) {
   return (

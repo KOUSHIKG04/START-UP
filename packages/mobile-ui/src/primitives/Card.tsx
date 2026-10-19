@@ -1,38 +1,27 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type PressableProps,
-  type TextProps,
-  type ViewProps,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
-import { type AppTheme } from "../utils/appTheme";
-
-export type CardVariant = "elevated" | "outlined" | "soft" | "plain";
-export type CardOrientation = "vertical" | "horizontal";
-
-export type CardProps = Omit<
-  PressableProps,
-  "children" | "disabled" | "style"
-> & {
-  children: ReactNode;
-  variant?: CardVariant;
-  orientation?: CardOrientation;
-  theme?: AppTheme;
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
-  padding?: number;
-  gap?: number;
-  disabled?: boolean;
-  style?: PressableProps["style"];
-};
+import type {
+  CardVariant,
+  CardOrientation,
+  CardProps,
+  CardSectionProps,
+  CardActionProps,
+  CardTitleProps,
+  CardDescriptionProps,
+  CardSeparatorProps,
+} from "../types/card";
+export type {
+  CardVariant,
+  CardOrientation,
+  CardProps,
+  CardSectionProps,
+  CardActionProps,
+  CardTitleProps,
+  CardDescriptionProps,
+  CardSeparatorProps,
+} from "../types/card";
 
 export function Card({
   children,
@@ -86,10 +75,6 @@ export function Card({
   );
 }
 
-export type CardSectionProps = ViewProps & {
-  gap?: number;
-};
-
 export function CardHeader({ gap = 12, style, ...props }: CardSectionProps) {
   return <View {...props} style={[styles.header, { gap }, style]} />;
 }
@@ -102,16 +87,9 @@ export function CardFooter({ gap = 12, style, ...props }: CardSectionProps) {
   return <View {...props} style={[styles.footer, { gap }, style]} />;
 }
 
-export type CardActionProps = ViewProps;
-
 export function CardAction({ style, ...props }: CardActionProps) {
   return <View {...props} style={[styles.action, style]} />;
 }
-
-export type CardTitleProps = TextProps & {
-  theme?: AppTheme;
-  tone?: "default" | "brand";
-};
 
 export function CardTitle({
   theme,
@@ -134,8 +112,6 @@ export function CardTitle({
   );
 }
 
-export type CardDescriptionProps = TextProps;
-
 export function CardDescription({ style, ...props }: CardDescriptionProps) {
   const theme = useMobileTheme();
   return (
@@ -146,10 +122,6 @@ export function CardDescription({ style, ...props }: CardDescriptionProps) {
     />
   );
 }
-
-export type CardSeparatorProps = ViewProps & {
-  color?: string;
-};
 
 export function CardSeparator({
   color = colors.borderDefault,

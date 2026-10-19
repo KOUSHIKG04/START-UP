@@ -1,20 +1,10 @@
 "use client";
-
+import type { VirtualListProps } from "../types/virtualList";
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "cn";
 
-export interface VirtualListProps<T> {
-  items: T[];
-  estimateSize?: number;
-  overscan?: number;
-  height?: number | string;
-  className?: string;
-  renderItem: (item: T, index: number) => React.ReactNode;
-  emptyState?: React.ReactNode;
-  emptyMessage?: string;
-  getItemKey?: (index: number) => React.Key;
-}
+export type { VirtualListProps } from "../types/virtualList";
 
 export function VirtualList<T>({
   items,
@@ -40,7 +30,7 @@ export function VirtualList<T>({
   if (items.length === 0) {
     if (emptyState) return <>{emptyState}</>;
     return (
-      <div className="flex h-36 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white p-6 text-[13px] text-[#64748b]">
+      <div className="border-border bg-card text-muted-foreground flex h-36 items-center justify-center rounded-xl border p-6 text-sm">
         {emptyMessage}
       </div>
     );
@@ -50,7 +40,7 @@ export function VirtualList<T>({
     <div
       ref={parentRef}
       className={cn(
-        "relative w-full overflow-auto rounded-xl border border-[#e2e8f0] bg-white shadow-2xs",
+        "border-border bg-card relative w-full overflow-auto rounded-xl border shadow-2xs",
         className
       )}
       style={{ height }}

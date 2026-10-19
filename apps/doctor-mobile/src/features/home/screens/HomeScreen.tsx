@@ -1,25 +1,14 @@
-import { useTimeGreeting } from "@startup/mobile-ui";
-import { useRef, useState } from "react";
+import { useDoctorHome } from "../hooks/useDoctorHome";
+
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { Bell, MapPin, ArrowRight, ChevronDown } from "lucide-react-native";
 import { router } from "expo-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getMyDoctorPresence,
-  getMyDoctorProfile,
-  listMyPracticeAppointments,
-  listMyDoctorLocations,
-  setMyDoctorPresence,
-} from "@startup/data-access";
-import {
-  FadedScrollView,
-  Skeleton,
-  useToastFeedback,
-} from "@startup/mobile-ui";
+
+import { FadedScrollView, Skeleton } from "@startup/mobile-ui";
 import { fontFamilies, shadows } from "@startup/design-tokens";
 import { StatusBar } from "expo-status-bar";
-import { NotificationDrawer } from "../../../components/NotificationDrawer";
+import { NotificationDrawer } from "../../notifications/components/NotificationDrawer";
 import { PatientCard } from "../../patients/components/PatientCard";
 import {
   Choice,
@@ -29,83 +18,26 @@ import {
   Panel,
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { supabase, useMobileSession } from "../../../services/supabase";
-import { locationHeadline } from "../../locations/locationDisplay";
+
+import { locationHeadline } from "../../locations/utils/locationDisplay";
 
 export function HomeScreen() {
-  const greeting = useTimeGreeting();
-  const insets = useSafeAreaInsets();
-  const { profile } = useMobileSession();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [presenceError, setPresenceError] = useState("");
-  const presenceBusyRef = useRef(false);
-  const client = useQueryClient();
-  const locations = useQuery({
-    queryKey: ["my-doctor-locations", profile?.doctor?.id],
-    queryFn: () => listMyDoctorLocations(supabase!),
-    enabled: Boolean(supabase && profile?.doctor?.id),
-  });
-  const selectedLocation = locations.data?.find((item) => item.selected);
-  useToastFeedback({
-    error: locations.isError
-      ? "Could not load saved locations. Tap the location to retry."
-      : "",
-  });
-  const doctorProfile = useQuery({
-    queryKey: ["my-doctor-profile", profile?.doctor?.id],
-    queryFn: () => getMyDoctorProfile(supabase!),
-    enabled: Boolean(supabase && profile?.doctor?.id),
-  });
-  const appointments = useQuery({
-    queryKey: ["doctor-clinic-appointments", "all"],
-    queryFn: () => listMyPracticeAppointments(supabase!),
-    enabled: Boolean(supabase),
-  });
-  const presence = useQuery({
-    queryKey: ["my-doctor-presence"],
-    queryFn: () => getMyDoctorPresence(supabase!),
-    enabled: Boolean(supabase && profile?.doctor?.id),
-  });
-
-  const today = new Date().toDateString();
-  const todayAppointments =
-    appointments.data?.filter(
-      (item) =>
-        new Date(item.starts_at).toDateString() === today &&
-        !["cancelled", "rejected"].includes(item.status)
-    ) ?? [];
-  const waiting = todayAppointments.filter(
-    (item) => item.queue_state === "waiting" || item.queue_state === "called"
-  ).length;
-  const pendingRequests = (appointments.data ?? []).filter(
-    (item) =>
-      item.status === "pending" &&
-      Date.parse(item.request_expires_at ?? item.starts_at) > Date.now() &&
-      Date.parse(item.starts_at) > Date.now()
-  );
-  const homeAppointments = [
-    ...pendingRequests,
-    ...todayAppointments.filter(
-      (item) => !pendingRequests.some((request) => request.id === item.id)
-    ),
-  ];
-  async function changePresence(value: boolean) {
-    if (!supabase || presenceBusyRef.current) return;
-    presenceBusyRef.current = true;
-    setPresenceError("");
-    try {
-      await setMyDoctorPresence(supabase, value);
-      await client.invalidateQueries({ queryKey: ["my-doctor-presence"] });
-    } catch (cause) {
-      setPresenceError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not update your presence."
-      );
-    } finally {
-      presenceBusyRef.current = false;
-    }
-  }
+  const {
+    greeting,
+    insets,
+    showNotifications,
+    setShowNotifications,
+    presenceError,
+    selectedLocation,
+    doctorProfile,
+    appointments,
+    presence,
+    todayAppointments,
+    waiting,
+    pendingRequests,
+    homeAppointments,
+    changePresence,
+  } = useDoctorHome();
   return (
     <View style={ui.screen}>
       <StatusBar style="light" />

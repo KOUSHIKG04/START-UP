@@ -68,15 +68,15 @@ if ($UseCli) {
       @{ Name = "Facility association"; File = "facility-association.cli-smoke.sql"; Result = "facility_association_smoke_passed" }
       @{ Name = "Company verification"; File = "company-verification.cli-smoke.sql"; Result = "company_verification_smoke_passed" }
       @{ Name = "Solo clinic licence"; File = "solo-clinic-licence.cli-smoke.sql"; Result = "solo_clinic_licence_smoke_passed" }
-      @{ Name = "General Physician discovery"; File = "../tooling/general-physician-discovery.cli-smoke.sql"; Result = "general_physician_discovery_smoke_passed" }
-      @{ Name = "Specialty discovery"; File = "../tooling/specialty-discovery.cli-smoke.sql"; Result = "specialty_discovery_smoke_passed" }
+      @{ Name = "General Physician discovery"; File = "general-physician-discovery.cli-smoke.sql"; Result = "general_physician_discovery_smoke_passed" }
+      @{ Name = "Specialty discovery"; File = "specialty-discovery.cli-smoke.sql"; Result = "specialty_discovery_smoke_passed" }
       @{ Name = "Facility bed declaration"; File = "facility-bed-declaration.cli-smoke.sql"; Result = "facility_bed_declaration_smoke_passed" }
-      @{ Name = "Online consultation"; File = "../tooling/online-consultation.cli-smoke.sql"; Result = "online_consultation_smoke_passed" }
+      @{ Name = "Online consultation"; File = "online-consultation.cli-smoke.sql"; Result = "online_consultation_smoke_passed" }
       @{ Name = "Profile photos"; File = "profile-photos.cli-smoke.sql"; Result = "profile_photos_smoke_passed" }
       @{ Name = "Onboarding SOS"; File = "onboarding-sos.cli-smoke.sql"; Result = "onboarding_sos_smoke_passed" }
     )
     foreach ($smoke in $smokeTests) {
-      $smokeSql = Join-Path $repoRoot "packages/database/tests/$($smoke.File)"
+      $smokeSql = Join-Path $repoRoot "supabase/tests/smoke/$($smoke.File)"
       # This CLI requires --linked together with --project-ref; the explicit ref
       # overrides the linked default. The guard above rejects that default ref.
       $queryOutput = & $supabaseCli db query --linked --project-ref $testRef --file $smokeSql --output-format json --agent no

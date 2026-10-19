@@ -1,0 +1,15 @@
+export const documentNames: Record<string, string> = {
+  medical_registration: "Medical registration certificate",
+  medical_degree: "Medical degree certificate",
+  clinic_operating_licence: "Clinic operating licence",
+  registration_certificate: "Registration certificate",
+  operating_licence: "Operating licence",
+  aadhaar: "Aadhaar",
+  pan: "PAN",
+  driving_licence: "Driving licence",
+  vehicle_rc: "Vehicle registration certificate",
+  insurance: "Insurance",
+  fitness: "Fitness certificate",
+  ambulance_image: "Ambulance image",
+  equipment_images: "Equipment images",
+};

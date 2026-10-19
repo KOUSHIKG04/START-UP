@@ -1,98 +1,92 @@
-import * as React from "react";
-import { CalendarDays, Check, Clock, XCircle } from "lucide-react";
+import type { AppointmentsSummaryCardsProps } from "../types/appointmentsSummaryCards";
 
-export interface AppointmentsSummaryData {
-  total: number;
-  confirmed: number;
-  pending: number;
-  cancelled: number;
-}
+import { CalendarDays, Check, Clock, XCircle } from "lucide-react";
 
 export function AppointmentsSummaryCards({
   summary,
-}: {
-  summary: AppointmentsSummaryData;
-}) {
+}: AppointmentsSummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Total Appointments */}
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+      <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[13px] font-medium text-[#475569]">
+            <p className="text-muted-foreground text-sm font-medium">
               Total Appointments
             </p>
-            <h3 className="mt-2 text-[28px] leading-none font-bold text-[#0f172a]">
+            <h3 className="text-foreground mt-2 text-3xl leading-none font-bold">
               {summary.total}
             </h3>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-blue-600">
+          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg text-blue-600">
             <CalendarDays className="size-5" />
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[12px] text-[#475569]">
+        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
           <span className="size-2 shrink-0 rounded-full bg-blue-600" />
           <span>Today&apos;s total schedule</span>
         </div>
       </div>
 
       {/* Confirmed Today */}
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+      <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[13px] font-medium text-[#475569]">
+            <p className="text-muted-foreground text-sm font-medium">
               Confirmed Today
             </p>
-            <h3 className="mt-2 text-[28px] leading-none font-bold text-[#0f172a]">
+            <h3 className="text-foreground mt-2 text-3xl leading-none font-bold">
               {summary.confirmed}
             </h3>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f0fdf4] text-emerald-600">
-            <Check className="size-5 stroke-[2.5]" />
+          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg text-emerald-600">
+            <Check className="size-5 stroke-2" />
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[12px] text-[#475569]">
-          <span className="size-2 shrink-0 rounded-full bg-[#22c55e]" />
+        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <span className="bg-primary size-2 shrink-0 rounded-full" />
           <span>Ready for consultation</span>
         </div>
       </div>
 
       {/* Pending Requests */}
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+      <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[13px] font-medium text-[#475569]">
+            <p className="text-muted-foreground text-sm font-medium">
               Pending Requests
             </p>
-            <h3 className="mt-2 text-[28px] leading-none font-bold text-[#0f172a]">
+            <h3 className="text-foreground mt-2 text-3xl leading-none font-bold">
               {summary.pending}
             </h3>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#fff7ed] text-orange-500">
+          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg text-orange-500">
             <Clock className="size-5" />
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[12px] text-[#475569]">
-          <span className="size-2 shrink-0 rounded-full bg-[#f97316]" />
+        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <span className="bg-primary size-2 shrink-0 rounded-full" />
           <span>Awaiting administrative approval</span>
         </div>
       </div>
 
       {/* Cancelled */}
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-2xs">
+      <div className="border-border bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[13px] font-medium text-[#475569]">Cancelled</p>
-            <h3 className="mt-2 text-[28px] leading-none font-bold text-[#0f172a]">
+            <p className="text-muted-foreground text-sm font-medium">
+              Cancelled
+            </p>
+            <h3 className="text-foreground mt-2 text-3xl leading-none font-bold">
               {summary.cancelled}
             </h3>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#fef2f2] text-red-500">
+          <div className="bg-destructive/10 flex size-10 shrink-0 items-center justify-center rounded-lg text-red-500">
             <XCircle className="size-5" />
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[12px] text-[#475569]">
-          <span className="size-2 shrink-0 rounded-full bg-[#ef4444]" />
+        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <span className="bg-destructive size-2 shrink-0 rounded-full" />
           <span>Rescheduled or revoked</span>
         </div>
       </div>

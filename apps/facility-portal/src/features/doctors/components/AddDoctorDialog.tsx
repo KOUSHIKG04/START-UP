@@ -1,4 +1,5 @@
 "use client";
+import type { AddDoctorDialogProps } from "../types/addDoctorDialog";
 
 import {
   Dialog,
@@ -6,11 +7,6 @@ import {
   DialogTitle,
 } from "@startup/web-ui/components/ui/dialog";
 import { AddDoctorCard } from "./AddDoctorCard";
-
-interface AddDoctorDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
 
 export function AddDoctorDialog({ open, onOpenChange }: AddDoctorDialogProps) {
   return (

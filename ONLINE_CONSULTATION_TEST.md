@@ -42,7 +42,7 @@ The database migration and rollback test can be rerun only against the disposabl
 cd C:\startup
 $env:TEST_PROJECT_REF = 'enjafragbcrrgaclwopd'
 & .\packages\database\tooling\verify-disposable.ps1 -UseCli
-& .\node_modules\.bin\supabase.ps1 db query --linked --project-ref enjafragbcrrgaclwopd --file packages/database/tooling/online-consultation.cli-smoke.sql --output-format json --agent no
+& .\node_modules\.bin\supabase.ps1 db query --linked --project-ref enjafragbcrrgaclwopd --file supabase/tests/smoke/online-consultation.cli-smoke.sql --output-format json --agent no
 ```
 
 The SQL smoke test creates temporary fixture users/appointments/messages in a transaction and rolls them back. It does not verify media transport; that requires the two-device test above.

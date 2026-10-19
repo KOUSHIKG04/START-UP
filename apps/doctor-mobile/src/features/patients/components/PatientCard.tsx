@@ -1,8 +1,9 @@
+import type { PatientCardProps } from "../types/patient-card";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight, User } from "lucide-react-native";
 import { Button } from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
-import type { ClinicAppointment } from "@startup/contracts";
+
 import { Heading, Label } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 
@@ -12,13 +13,7 @@ export function PatientCard({
   onOpen,
   onAction,
   actionLabel,
-}: {
-  appointment: ClinicAppointment;
-  home?: boolean;
-  onOpen: () => void;
-  onAction?: () => void;
-  actionLabel?: string;
-}) {
+}: PatientCardProps) {
   const completed = appointment.status === "completed";
   const expiredRequest =
     appointment.status === "pending" &&

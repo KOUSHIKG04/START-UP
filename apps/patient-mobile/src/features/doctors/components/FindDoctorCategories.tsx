@@ -1,52 +1,21 @@
+import type { FindDoctorCategoriesProps } from "../types/find-doctor-categories";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { Button, Chip } from "@startup/mobile-ui";
-import { categories, symptoms } from "../utils/findDoctorConstants";
+import { Button } from "@startup/mobile-ui";
+import { categories } from "../utils/findDoctorConstants";
 
 export function FindDoctorCategories({
-  selectedSymptom,
-  onSelectSymptom,
   onSelectCategory,
-}: {
-  selectedSymptom?: string;
-  onSelectSymptom: (symptom: string) => void;
-  onSelectCategory: (categoryKey: string, categoryLabel: string) => void;
-}) {
+}: FindDoctorCategoriesProps) {
   const [showAllCategories, setShowAllCategories] = useState(false);
   const visibleCategories = showAllCategories
     ? categories
-    : categories.slice(0, 8);
+    : categories.slice(0, 9);
 
   return (
     <>
-      <View>
-        <Text variant="cardHeading" style={styles.symptomsTitle}>
-          Most searched symptoms
-        </Text>
-        <View style={styles.chipList}>
-          {symptoms.map((symptom) => {
-            const selected = selectedSymptom === symptom;
-            return (
-              <Chip
-                key={symptom}
-                label={symptom}
-                onPress={() => onSelectSymptom(symptom)}
-                style={[
-                  styles.chip,
-                  selected ? styles.selectedChip : undefined,
-                ]}
-                labelStyle={[
-                  styles.chipLabel,
-                  selected ? styles.selectedChipLabel : undefined,
-                ]}
-              />
-            );
-          })}
-        </View>
-      </View>
-
       <View>
         <Text variant="sectionHeading" style={styles.sectionTitle}>
           Browse by categories
@@ -69,6 +38,7 @@ export function FindDoctorCategories({
               ]}
             >
               <Image
+                alt=""
                 source={category.image}
                 style={[
                   styles.categoryImage,
@@ -104,62 +74,38 @@ export function FindDoctorCategories({
 }
 
 const styles = StyleSheet.create({
-  symptomsTitle: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 16,
-    color: colors.patient.text,
-    marginBottom: 12,
-  },
   sectionTitle: {
     fontFamily: fontFamilies.bold,
     fontSize: 16,
     color: colors.patient.text,
     marginBottom: 16,
   },
-  chipList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    backgroundColor: "#F3F4F6",
-    borderColor: "transparent",
-  },
-  selectedChip: {
-    backgroundColor: "#E6F4F5",
-    borderColor: colors.patient.primary,
-  },
-  chipLabel: {
-    color: colors.patient.text,
-    fontSize: 13,
-  },
-  selectedChipLabel: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.bold,
-  },
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    columnGap: 12,
+    rowGap: 18,
   },
   categoryItem: {
-    width: "22%",
+    width: "30%",
+    minHeight: 106,
     alignItems: "center",
-    marginBottom: 12,
+    justifyContent: "flex-start",
   },
   categoryItemPressed: {
     opacity: 0.7,
   },
   categoryImage: {
-    width: 52,
-    height: 52,
+    width: 64,
+    height: 64,
     borderRadius: 16,
     marginBottom: 6,
   },
   categoryLabel: {
     fontFamily: fontFamilies.medium,
-    fontSize: 11,
+    fontSize: 13,
+    lineHeight: 18,
     color: colors.patient.text,
     textAlign: "center",
   },

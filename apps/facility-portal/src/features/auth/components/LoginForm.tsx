@@ -1,6 +1,6 @@
 "use client";
+import { useLogin } from "../hooks/useLogin";
 
-import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { cn } from "cn";
@@ -8,26 +8,14 @@ import { Button } from "@startup/web-ui/components/ui/button";
 import { Card, CardContent } from "@startup/web-ui/components/ui/card";
 import { Input } from "@startup/web-ui/components/ui/input";
 import { Label } from "@startup/web-ui/components/ui/label";
-import { toast } from "@startup/web-ui/components/ui/toast";
+
 import { loginContent } from "../utils/loginConstants";
-import { signIn, type LoginState } from "../server/actions";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, action] = useActionState<LoginState, FormData>(signIn, {
-    error: null,
-  });
-  useEffect(() => {
-    if (state.error)
-      toast.add({
-        title: "Sign in failed",
-        description: state.error,
-        type: "error",
-      });
-  }, [state.error]);
-
+  const { action } = useLogin();
   return (
     <div className={cn("w-full", className)} {...props}>
       <Card>

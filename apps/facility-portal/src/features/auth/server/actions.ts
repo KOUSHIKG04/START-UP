@@ -1,11 +1,10 @@
 "use server";
+import type { LoginState } from "../types/actions";
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { getFacilityAccess } from "@/server/auth/facilityAccess";
-
-export type LoginState = { error: string | null };
 
 export async function signIn(
   _previous: LoginState,

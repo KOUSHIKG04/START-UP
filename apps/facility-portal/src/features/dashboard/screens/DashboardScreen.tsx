@@ -1,13 +1,9 @@
-import type { ReactNode } from "react";
+import type { DashboardScreenProps } from "../types/dashboardScreen";
+
 import Link from "next/link";
 import { AcceptPendingAppointmentButton } from "../components/AcceptPendingAppointmentButton";
 import { DashboardErrorToast } from "../components/DashboardErrorToast";
-import {
-  formatDisplayDate,
-  formatDisplayDateTime,
-  type BedInventoryProjection,
-  type ClinicAppointment,
-} from "@startup/contracts";
+import { formatDisplayDate, formatDisplayDateTime } from "@startup/contracts";
 import {
   Search,
   Calendar,
@@ -27,20 +23,7 @@ export default function DashboardScreen({
   weeklyDoctors,
   loadError,
   acceptAppointment,
-}: {
-  doctorAction: ReactNode;
-  doctorRequests?: ReactNode;
-  inventory: BedInventoryProjection[];
-  appointments: ClinicAppointment[];
-  weeklyDoctors: {
-    id: string;
-    name: string;
-    speciality: string;
-    days: boolean[];
-  }[];
-  loadError?: string;
-  acceptAppointment: (input: unknown) => Promise<{ error: string | null }>;
-}) {
+}: DashboardScreenProps) {
   const wards = inventory
     .filter((item) => item.configured)
     .map((item, index) => {
@@ -81,27 +64,27 @@ export default function DashboardScreen({
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-[#0f172a]">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Hospital Dashboard
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex w-64 items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
-            <Search className="size-4 shrink-0 text-[#94a3b8]" />
+          <div className="border-border bg-card flex w-64 items-center gap-2 rounded-lg border px-3 py-2 shadow-xs">
+            <Search className="text-muted-foreground size-4 shrink-0" />
             <input
               type="text"
               aria-label="Search patient, doctor..."
               placeholder="Search patient, doctor..."
-              className="w-full bg-transparent text-[13px] text-[#0f172a] placeholder-[#94a3b8] outline-none"
+              className="text-foreground placeholder-muted-foreground focus-visible:ring-primary focus-visible:ring-offset-background w-full bg-transparent text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             />
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
-            <Calendar className="size-4 shrink-0 text-[#475569]" />
+          <div className="border-border bg-card flex items-center gap-2 rounded-lg border px-3 py-2 shadow-xs">
+            <Calendar className="text-muted-foreground size-4 shrink-0" />
             <span
               suppressHydrationWarning
-              className="text-[13px] font-semibold whitespace-nowrap text-[#475569]"
+              className="text-muted-foreground text-sm font-semibold whitespace-nowrap"
             >
               {formatDisplayDate(new Date(), "Asia/Kolkata")}
             </span>
@@ -109,18 +92,18 @@ export default function DashboardScreen({
         </div>
       </div>
 
-      <div className="rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs">
+      <div className="border-border bg-card rounded-lg border p-6 shadow-xs">
         <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-[18px] font-bold text-[#0f172a]">
+            <h2 className="text-foreground text-lg font-bold">
               Bed Availability by Type
             </h2>
-            <p className="mt-0.5 text-[13px] text-[#475569]">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               Availability &amp; occupancy metrics across specialized wards
             </p>
           </div>
-          <div className="inline-flex items-center self-start rounded-lg bg-[#e6f4f5] px-3 py-1.5 sm:self-auto">
-            <span className="text-[11px] font-semibold tracking-wide text-[#07595d] uppercase">
+          <div className="bg-muted inline-flex items-center self-start rounded-lg px-3 py-1.5 sm:self-auto">
+            <span className="text-primary text-xs font-semibold tracking-wide uppercase">
               TOTAL CAPACITY: {capacity} BEDS
             </span>
           </div>
@@ -132,14 +115,14 @@ export default function DashboardScreen({
             return (
               <div
                 key={ward.name}
-                className="flex flex-col justify-between gap-3 rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-2xs transition-colors hover:border-slate-300"
+                className="border-border bg-card hover:border-border flex flex-col justify-between gap-3 rounded-xl border p-4 shadow-2xs transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-[15px] leading-tight font-semibold text-[#0f172a]">
+                    <h3 className="text-foreground text-sm leading-tight font-semibold">
                       {ward.name}
                     </h3>
-                    <span className="text-[11px] text-[#94a3b8]">
+                    <span className="text-muted-foreground text-xs">
                       Total: {ward.total}
                     </span>
                   </div>
@@ -151,25 +134,25 @@ export default function DashboardScreen({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-[#475569]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
                       Available{" "}
-                      <strong className="font-bold text-[#0f172a]">
+                      <strong className="text-foreground font-bold">
                         {ward.available}
                       </strong>{" "}
                       • Occupied{" "}
-                      <strong className="font-bold text-[#0f172a]">
+                      <strong className="text-foreground font-bold">
                         {ward.occupied}
                       </strong>
                     </span>
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${ward.iconBg} ${ward.iconColor}`}
+                      className={`rounded px-1.5 py-0.5 text-xs font-bold ${ward.iconBg} ${ward.iconColor}`}
                     >
                       {ward.percent}%
                     </span>
                   </div>
 
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
+                  <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                     <div
                       className={`h-full rounded-full ${ward.progressColor}`}
                       style={{ width: `${ward.percent}%` }}
@@ -180,7 +163,7 @@ export default function DashboardScreen({
             );
           })}
           {!loadError && wards.length === 0 && (
-            <p className="text-[13px] text-[#475569]">
+            <p className="text-muted-foreground text-sm">
               {inventory.length === 0
                 ? "This facility does not offer patient beds."
                 : "Set initial counts in Bed Management before availability is shown."}
@@ -192,18 +175,18 @@ export default function DashboardScreen({
       <div>{doctorAction}</div>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-        <div className="flex min-h-[420px] flex-col justify-between rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs lg:col-span-8">
+        <div className="border-border bg-card flex min-h-[420px] flex-col justify-between rounded-lg border p-6 shadow-xs lg:col-span-8">
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <CalendarDays className="size-5 text-[#07595d]" />
-                <h3 className="text-[18px] font-bold text-[#0f172a]">
+                <CalendarDays className="text-primary size-5" />
+                <h3 className="text-foreground text-lg font-bold">
                   Doctor Weekly Schedule
                 </h3>
               </div>
               <Link
                 href="/doctor-schedules"
-                className="cursor-pointer text-[13px] font-semibold text-[#07595d] hover:underline"
+                className="text-primary cursor-pointer text-sm font-semibold hover:underline"
               >
                 View All
               </Link>
@@ -211,7 +194,7 @@ export default function DashboardScreen({
 
             <div className="overflow-x-auto">
               <div className="min-w-[540px]">
-                <div className="mb-1 flex items-center rounded-md bg-[#f8fafc] px-4 py-2 text-[11px] font-bold text-[#475569]">
+                <div className="bg-background text-muted-foreground mb-1 flex items-center rounded-md px-4 py-2 text-xs font-bold">
                   <div className="w-[180px] shrink-0">Doctor / Speciality</div>
                   <div className="flex flex-1 justify-between px-4 text-center">
                     {scheduleDays.map((day) => (
@@ -223,17 +206,17 @@ export default function DashboardScreen({
                   <div className="w-8 shrink-0" />
                 </div>
 
-                <div className="divide-y divide-[#e2e8f0]">
+                <div className="divide-border divide-y">
                   {weeklyDoctors.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center px-4 py-3 transition-colors hover:bg-slate-50"
+                      className="hover:bg-muted flex items-center px-4 py-3 transition-colors"
                     >
                       <div className="w-[180px] shrink-0 leading-tight">
-                        <p className="text-[14px] font-semibold text-[#0f172a]">
+                        <p className="text-foreground text-sm font-semibold">
                           {doc.name}
                         </p>
-                        <p className="text-[12px] text-[#475569]">
+                        <p className="text-muted-foreground text-xs">
                           {doc.speciality}
                         </p>
                       </div>
@@ -246,7 +229,7 @@ export default function DashboardScreen({
                           >
                             <span
                               className={`size-2 rounded-full ${
-                                isAvail ? "bg-[#22c55e]" : "bg-[#ef4444]"
+                                isAvail ? "bg-primary" : "bg-destructive"
                               }`}
                             />
                           </div>
@@ -254,12 +237,12 @@ export default function DashboardScreen({
                       </div>
 
                       <div className="flex w-8 shrink-0 justify-end">
-                        <ChevronRight className="size-4 text-[#94a3b8]" />
+                        <ChevronRight className="text-muted-foreground size-4" />
                       </div>
                     </div>
                   ))}
                   {weeklyDoctors.length === 0 && (
-                    <p className="px-4 py-5 text-[13px] text-[#64748b]">
+                    <p className="text-muted-foreground px-4 py-5 text-sm">
                       No doctors are associated with this facility yet.
                     </p>
                   )}
@@ -269,18 +252,18 @@ export default function DashboardScreen({
           </div>
         </div>
 
-        <div className="flex min-h-[420px] flex-col justify-between rounded-[16px] border border-[#e2e8f0] bg-white p-6 shadow-xs lg:col-span-4">
+        <div className="border-border bg-card flex min-h-[420px] flex-col justify-between rounded-lg border p-6 shadow-xs lg:col-span-4">
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Clock className="size-5 text-[#07595d]" />
-                <h3 className="text-[18px] font-bold text-[#0f172a]">
+                <Clock className="text-primary size-5" />
+                <h3 className="text-foreground text-lg font-bold">
                   Pending Requests
                 </h3>
               </div>
               <Link
                 href="/appointments"
-                className="cursor-pointer text-[13px] font-semibold text-[#07595d] hover:underline"
+                className="text-primary cursor-pointer text-sm font-semibold hover:underline"
               >
                 View All
               </Link>
@@ -291,23 +274,23 @@ export default function DashboardScreen({
               {pendingRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-2xs transition-colors hover:border-slate-300"
+                  className="border-border bg-card hover:border-border rounded-xl border p-4 shadow-2xs transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h4 className="text-[14px] font-bold text-[#0f172a]">
+                      <h4 className="text-foreground text-sm font-bold">
                         {request.patient_name}
                       </h4>
-                      <p className="text-[12px] text-[#475569]">
+                      <p className="text-muted-foreground text-xs">
                         {request.service_name}
                       </p>
                     </div>
-                    <span className="rounded-md bg-[#eff6ff] px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-[#3b82f6]">
+                    <span className="bg-muted text-primary rounded-md px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
                       {formatDisplayDateTime(request.starts_at, "Asia/Kolkata")}
                     </span>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-[11px] text-[#94a3b8]">
+                    <span className="text-muted-foreground text-xs">
                       {request.public_code}
                     </span>
                     <AcceptPendingAppointmentButton
@@ -319,7 +302,7 @@ export default function DashboardScreen({
                 </div>
               ))}
               {pendingRequests.length === 0 && (
-                <p className="text-[13px] text-[#475569]">
+                <p className="text-muted-foreground text-sm">
                   No pending appointment requests.
                 </p>
               )}

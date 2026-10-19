@@ -1,36 +1,25 @@
+import type { FamilyRelationFieldsProps } from "../types/family-relation-fields";
+import { relations } from "../utils/profileFormConstants";
 import { AppText as Text } from "@startup/mobile-ui";
-import { Pressable, StyleSheet, View } from "react-native";
-import { Controller, type Control } from "react-hook-form";
+import { StyleSheet } from "react-native";
+import { Controller } from "react-hook-form";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { SelectDropdown } from "./SelectDropdown";
-import type { ProfileFormValues } from "./ProfileForm";
+
 import {
   PROFILE_PLACEHOLDER_COLOR,
   profileFormStyles,
-} from "./profileFormStyles";
+} from "./ProfileFields.styles";
 import { Checkbox, Input } from "@startup/mobile-ui";
 import {
   contactPhoneForInput,
   normalizeContactPhone,
 } from "@startup/contracts";
 
-const relations = [
-  "Son",
-  "Daughter",
-  "Spouse",
-  "Father",
-  "Mother",
-  "Sibling",
-  "Other",
-];
-
 export function FamilyRelationFields({
   control,
   onClearError,
-}: {
-  control: Control<ProfileFormValues>;
-  onClearError: () => void;
-}) {
+}: FamilyRelationFieldsProps) {
   return (
     <>
       <Text variant="label" style={[styles.label, styles.sectionLabel]}>

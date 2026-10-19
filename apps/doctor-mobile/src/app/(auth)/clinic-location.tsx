@@ -23,9 +23,9 @@ import { supabase } from "../../services/supabase";
 import { LocateFixed, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Header, Input, useToast } from "@startup/mobile-ui";
-import { useClinicLocationDraft } from "../../features/locations/clinicLocationDraft";
-import { resolveDoctorAddress } from "../../features/locations/resolveAddress";
-import { getDoctorDeviceLocation } from "../../features/locations/deviceLocation";
+import { useClinicLocationDraft } from "../../features/locations/stores/clinicLocationDraft";
+import { resolveDoctorAddress } from "../../features/locations/services/resolveAddress";
+import { getDoctorDeviceLocation } from "../../features/locations/services/deviceLocation";
 
 type Point = { latitude: number; longitude: number };
 type PlaceDetails = {

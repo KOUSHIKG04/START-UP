@@ -1,5 +1,6 @@
+import type { SuggestionsProps } from "../types/suggestions";
 import { AppText as Text } from "@startup/mobile-ui";
-import type { AmbulanceHospital } from "@startup/contracts";
+
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Clock3, Heart, MapPin } from "lucide-react-native";
@@ -10,12 +11,7 @@ export function Suggestions({
   onSelect,
   onClose,
   hospitals,
-}: {
-  query?: string;
-  onSelect: (hospital: AmbulanceHospital) => void;
-  onClose?: () => void;
-  hospitals: AmbulanceHospital[];
-}) {
+}: SuggestionsProps) {
   const [favorite, setFavorite] = useState<string>("");
 
   const filtered = hospitals.filter((hospital) => {

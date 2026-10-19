@@ -1,3 +1,4 @@
+import type { HelpModalProps } from "../types/help-modal";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight, HelpCircle, Mail, Phone, X } from "lucide-react-native";
@@ -5,13 +6,7 @@ import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, ModalSurface } from "@startup/mobile-ui";
 import { supportContacts } from "../utils/profileConstants";
 
-export function HelpModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+export function HelpModal({ visible, onClose }: HelpModalProps) {
   return (
     <ModalSurface
       visible={visible}

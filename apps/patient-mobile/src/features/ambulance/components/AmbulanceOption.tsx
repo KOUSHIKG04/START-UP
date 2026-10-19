@@ -1,3 +1,4 @@
+import type { AmbulanceOptionProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Activity, HeartPulse, Siren } from "lucide-react-native";
@@ -21,11 +22,7 @@ export function AmbulanceOption({
   item,
   selected,
   onPress,
-}: {
-  item: AmbulanceType;
-  selected: boolean;
-  onPress: () => void;
-}) {
+}: AmbulanceOptionProps) {
   return (
     <Pressable
       onPress={onPress}

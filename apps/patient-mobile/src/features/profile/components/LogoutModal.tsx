@@ -1,3 +1,4 @@
+import type { LogoutModalProps } from "../types/logout-modal";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { useState } from "react";
@@ -7,15 +8,9 @@ import { LogOut } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, ModalSurface } from "@startup/mobile-ui";
 import { mobileSession, supabase } from "../../../services/supabase";
-import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
+import { signOutWithPushCleanup } from "../../notifications/services/deviceNotifications";
 
-export function LogoutModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+export function LogoutModal({ visible, onClose }: LogoutModalProps) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

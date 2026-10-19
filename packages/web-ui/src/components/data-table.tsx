@@ -1,17 +1,7 @@
 "use client";
-
-import * as React from "react";
-import {
-  type ColumnDef,
-  type SortingState,
-  type PaginationState,
-  type OnChangeFn,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { useDataTable } from "../hooks/use-data-table";
+import type { DataTableProps } from "../types/dataTable";
+import { flexRender } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -33,29 +23,7 @@ import {
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 
-export interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  isLoading?: boolean;
-  loadingRowCount?: number;
-  emptyState?: React.ReactNode;
-  emptyMessage?: string;
-  className?: string;
-  // Controlled pagination
-  pageCount?: number;
-  rowCount?: number;
-  pagination?: PaginationState;
-  onPaginationChange?: OnChangeFn<PaginationState>;
-  manualPagination?: boolean;
-  // Controlled sorting
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
-  manualSorting?: boolean;
-  // Row click
-  onRowClick?: (row: TData) => void;
-  // Header / Footer slot
-  hidePagination?: boolean;
-}
+export type { DataTableProps } from "../types/dataTable";
 
 export function DataTable<TData, TValue>({
   columns,
@@ -76,60 +44,28 @@ export function DataTable<TData, TValue>({
   onRowClick,
   hidePagination = false,
 }: DataTableProps<TData, TValue>) {
-  const [internalSorting, setInternalSorting] = React.useState<SortingState>(
-    []
-  );
-  const [internalPagination, setInternalPagination] =
-    React.useState<PaginationState>({
-      pageIndex: 0,
-      pageSize: 10,
-    });
-
-  const isSortingControlled =
-    sorting !== undefined && onSortingChange !== undefined;
-  const activeSorting = isSortingControlled ? sorting : internalSorting;
-  const activeSetSorting = isSortingControlled
-    ? onSortingChange
-    : setInternalSorting;
-
-  const isPaginationControlled =
-    pagination !== undefined && onPaginationChange !== undefined;
-  const activePagination = isPaginationControlled
-    ? pagination
-    : internalPagination;
-  const activeSetPagination = isPaginationControlled
-    ? onPaginationChange
-    : setInternalPagination;
-
-  const table = useReactTable({
-    data,
+  const table = useDataTable({
     columns,
+    data,
     pageCount,
     rowCount,
-    state: {
-      sorting: activeSorting,
-      pagination: activePagination,
-    },
+    pagination,
+    onPaginationChange,
     manualPagination,
+    sorting,
+    onSortingChange,
     manualSorting,
-    onSortingChange: activeSetSorting,
-    onPaginationChange: activeSetPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: manualPagination
-      ? undefined
-      : getPaginationRowModel(),
-    getSortedRowModel: manualSorting ? undefined : getSortedRowModel(),
   });
 
   return (
     <div className={cn("w-full space-y-3", className)}>
-      <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-2xs">
-        <Table className="w-full text-[13px]">
-          <TableHeader className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+      <div className="border-border bg-card overflow-hidden rounded-xl border shadow-2xs">
+        <Table className="w-full text-sm">
+          <TableHeader className="border-border bg-background border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className="border-[#e2e8f0] hover:bg-transparent"
+                className="border-border hover:bg-transparent"
               >
                 {headerGroup.headers.map((header) => {
                   const canSort = header.column.getCanSort();
@@ -138,13 +74,13 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className="px-4 py-3 text-[11px] font-bold tracking-wider text-[#64748b] uppercase"
+                      className="text-muted-foreground px-4 py-3 text-xs font-bold tracking-wider uppercase"
                     >
                       {header.isPlaceholder ? null : canSort ? (
                         <button
                           type="button"
                           onClick={header.column.getToggleSortingHandler()}
-                          className="-ml-1 flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 transition-colors select-none hover:text-[#0f172a]"
+                          className="hover:text-foreground -ml-1 flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 transition-colors select-none"
                         >
                           <span>
                             {flexRender(
@@ -153,9 +89,9 @@ export function DataTable<TData, TValue>({
                             )}
                           </span>
                           {isSorted === "asc" ? (
-                            <ArrowUp className="size-3 text-[#07595d]" />
+                            <ArrowUp className="text-primary size-3" />
                           ) : isSorted === "desc" ? (
-                            <ArrowDown className="size-3 text-[#07595d]" />
+                            <ArrowDown className="text-primary size-3" />
                           ) : (
                             <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
                           )}
@@ -173,7 +109,7 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
 
-          <TableBody className="divide-y divide-[#e2e8f0]">
+          <TableBody className="divide-border divide-y">
             {isLoading ? (
               Array.from({ length: loadingRowCount }).map((_, rIdx) => (
                 <TableRow
@@ -185,7 +121,7 @@ export function DataTable<TData, TValue>({
                       key={`skeleton-cell-${cIdx}`}
                       className="px-4 py-3.5"
                     >
-                      <Skeleton className="h-4 w-[75%] rounded bg-slate-100" />
+                      <Skeleton className="bg-muted h-4 w-[75%] rounded" />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -209,15 +145,15 @@ export function DataTable<TData, TValue>({
                       : undefined
                   }
                   className={cn(
-                    "border-[#e2e8f0] transition-colors hover:bg-slate-50/70",
+                    "border-border hover:bg-muted/70 transition-colors",
                     onRowClick &&
-                      "cursor-pointer focus-visible:ring-1 focus-visible:ring-[#07595d] focus-visible:outline-none"
+                      "focus-visible:ring-primary focus-visible:ring-primary focus-visible:ring-offset-background cursor-pointer focus-visible:ring-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="px-4 py-3 align-middle text-[#0f172a]"
+                      className="text-foreground px-4 py-3 align-middle"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -231,13 +167,13 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-36 py-8 text-center text-[#64748b]"
+                  className="text-muted-foreground h-36 py-8 text-center"
                 >
                   {emptyState ? (
                     emptyState
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-1.5">
-                      <p className="text-[13px] font-medium text-[#475569]">
+                      <p className="text-muted-foreground text-sm font-medium">
                         {emptyMessage}
                       </p>
                     </div>
@@ -251,7 +187,7 @@ export function DataTable<TData, TValue>({
 
       {/* Pagination Controls */}
       {!hidePagination && (
-        <div className="flex flex-col items-center justify-between gap-3 px-1 py-1 text-[12px] text-[#64748b] sm:flex-row">
+        <div className="text-muted-foreground flex flex-col items-center justify-between gap-3 px-1 py-1 text-xs sm:flex-row">
           <div className="flex items-center gap-2">
             {(() => {
               const totalEntries = manualPagination
@@ -272,15 +208,15 @@ export function DataTable<TData, TValue>({
               return (
                 <span>
                   Showing{" "}
-                  <span className="font-semibold text-[#0f172a]">
+                  <span className="text-foreground font-semibold">
                     {startEntry}
                   </span>{" "}
                   to{" "}
-                  <span className="font-semibold text-[#0f172a]">
+                  <span className="text-foreground font-semibold">
                     {endEntry}
                   </span>{" "}
                   of{" "}
-                  <span className="font-semibold text-[#0f172a]">
+                  <span className="text-foreground font-semibold">
                     {totalEntries}
                   </span>{" "}
                   entries
@@ -295,7 +231,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
-              className="h-8 w-8 border-[#e2e8f0] p-0 text-[#475569] hover:bg-slate-50 disabled:opacity-40"
+              className="border-border text-muted-foreground hover:bg-muted h-8 w-8 p-0 disabled:opacity-40"
               title="First page"
             >
               <ChevronsLeft className="size-3.5" />
@@ -305,13 +241,13 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="h-8 border-[#e2e8f0] px-2.5 text-[12px] text-[#475569] hover:bg-slate-50 disabled:opacity-40"
+              className="border-border text-muted-foreground hover:bg-muted h-8 px-2.5 text-xs disabled:opacity-40"
             >
               <ChevronLeft className="mr-1 size-3.5" />
               Previous
             </Button>
 
-            <span className="px-2 font-medium text-[#0f172a]">
+            <span className="text-foreground px-2 font-medium">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount() || 1}
             </span>
@@ -321,7 +257,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="h-8 border-[#e2e8f0] px-2.5 text-[12px] text-[#475569] hover:bg-slate-50 disabled:opacity-40"
+              className="border-border text-muted-foreground hover:bg-muted h-8 px-2.5 text-xs disabled:opacity-40"
             >
               Next
               <ChevronRight className="ml-1 size-3.5" />
@@ -331,7 +267,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              className="h-8 w-8 border-[#e2e8f0] p-0 text-[#475569] hover:bg-slate-50 disabled:opacity-40"
+              className="border-border text-muted-foreground hover:bg-muted h-8 w-8 p-0 disabled:opacity-40"
               title="Last page"
             >
               <ChevronsRight className="size-3.5" />

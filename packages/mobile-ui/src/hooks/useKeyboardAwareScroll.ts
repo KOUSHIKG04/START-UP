@@ -1,3 +1,6 @@
+import { keyboardScrollAdjustment } from "../utils/keyboardScroll";
+export { keyboardScrollAdjustment } from "../utils/keyboardScroll";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
@@ -6,26 +9,6 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
-
-export function keyboardScrollAdjustment({
-  inputTop,
-  inputHeight,
-  viewportTop,
-  viewportHeight,
-  keyboardTop,
-  gap = 24,
-}: {
-  inputTop: number;
-  inputHeight: number;
-  viewportTop: number;
-  viewportHeight: number;
-  keyboardTop: number;
-  gap?: number;
-}) {
-  const visibleBottom = Math.min(viewportTop + viewportHeight, keyboardTop);
-  const overlap = inputTop + inputHeight + gap - visibleBottom;
-  return overlap > 0 ? overlap : Math.min(0, inputTop - viewportTop - gap);
-}
 
 /** Measures the actual scroll viewport, covering both resize and overlay keyboards. */
 export function useKeyboardAwareScroll() {

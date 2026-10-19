@@ -1,64 +1,26 @@
-import { useEffect, useState } from "react";
+import { useLiveDoctorProfile } from "../hooks/useLiveDoctorProfile";
+
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { formatDisplayDate } from "@startup/contracts";
-import {
-  getMyDoctorProfile,
-  updateMyDoctorProfile,
-} from "@startup/data-access";
-import {
-  Button,
-  Input,
-  SafeAreaView,
-  Skeleton,
-  useToast,
-  useToastFeedback,
-} from "@startup/mobile-ui";
-import { supabase } from "../../../services/supabase";
-import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
+
+import { Button, Input, SafeAreaView, Skeleton } from "@startup/mobile-ui";
+
+import { signOutWithPushCleanup } from "../../notifications/services/deviceNotifications";
 
 export function LiveDoctorProfileScreen() {
-  const client = useQueryClient();
-  const { showToast } = useToast();
-  const profile = useQuery({
-    queryKey: ["my-doctor-profile"],
-    queryFn: () => getMyDoctorProfile(supabase!),
-    enabled: !!supabase,
-  });
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [languages, setLanguages] = useState("");
-  useToastFeedback({ error: profile.error?.message });
-  const [editing, setEditing] = useState(false);
-  useEffect(() => {
-    if (!profile.data) return;
-    setName(profile.data.full_name);
-    setBio(profile.data.bio ?? "");
-    setLanguages(profile.data.languages.join(", "));
-  }, [profile.data]);
-  const save = useMutation({
-    mutationFn: () =>
-      updateMyDoctorProfile(supabase!, {
-        fullName: name,
-        bio,
-        languages: languages
-          .split(",")
-          .map((item) => item.trim().toLowerCase())
-          .filter(Boolean),
-      }),
-    onSuccess: async () => {
-      showToast({ title: "Profile saved", type: "success" });
-      setEditing(false);
-      await client.invalidateQueries({ queryKey: ["my-doctor-profile"] });
-    },
-    onError: (error) => {
-      showToast({
-        title: "Could not save profile",
-        message: error.message,
-        type: "error",
-      });
-    },
-  });
+  const {
+    profile,
+    name,
+    setName,
+    bio,
+    setBio,
+    languages,
+    setLanguages,
+    editing,
+    setEditing,
+    save,
+  } = useLiveDoctorProfile();
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>

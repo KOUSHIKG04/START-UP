@@ -1,20 +1,10 @@
-import {
-  Text,
-  TextInput,
-  type TextProps,
-  type TextInputProps,
-} from "react-native";
+import { Text, TextInput, type TextInputProps } from "react-native";
 import type { Ref as ReactRef } from "react";
-import {
-  mobileTypography,
-  type MobileTypographyRole,
-} from "@startup/design-tokens";
+import { mobileTypography } from "@startup/design-tokens";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
+import type { AppTextProps } from "../types/appText";
+export type { AppTextProps } from "../types/appText";
 
-export type AppTextProps = TextProps & {
-  variant?: MobileTypographyRole | "inherit";
-  ref?: ReactRef<Text>;
-};
 export function AppText({ variant = "body", style, ...props }: AppTextProps) {
   const readable = useReadableTypography();
   return (

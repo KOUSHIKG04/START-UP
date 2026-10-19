@@ -1,23 +1,9 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import {
-  Pressable,
-  StyleSheet,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-} from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-
-export type TimeSlotProps = Omit<
-  PressableProps,
-  "children" | "style" | "disabled"
-> & {
-  time: string;
-  disabled?: boolean;
-  style?: PressableProps["style"];
-  textStyle?: StyleProp<TextStyle>;
-};
+import type { TimeSlotProps } from "../types/timeSlot";
+export type { TimeSlotProps } from "../types/timeSlot";
 
 export function TimeSlot({
   time,

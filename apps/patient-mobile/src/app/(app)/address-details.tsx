@@ -26,7 +26,7 @@ import { colors, fontFamilies } from "@startup/design-tokens";
 import { Header, useToast, useToastFeedback } from "@startup/mobile-ui";
 import { BriefcaseBusiness, House, MapPin } from "lucide-react-native";
 import { supabase, useMobileSession } from "../../services/supabase";
-import { useLocationDraft } from "../../features/locations/locationDraft";
+import { useLocationDraft } from "../../features/locations/stores/locationDraft";
 
 type Kind = "house" | "office" | "other";
 const first = (value: string | string[] | undefined) =>

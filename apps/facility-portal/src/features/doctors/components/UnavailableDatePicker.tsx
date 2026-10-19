@@ -1,4 +1,6 @@
 "use client";
+import type { UnavailableDatePickerProps } from "../types/unavailableDatePicker";
+
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -9,14 +11,7 @@ export function UnavailableDatePicker({
   disabled,
   minDate,
   label = "Select date",
-}: {
-  value: string;
-  onChange: (date: string) => void;
-  timeZone?: string;
-  disabled: boolean;
-  minDate?: string;
-  label?: string;
-}) {
+}: UnavailableDatePickerProps) {
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",

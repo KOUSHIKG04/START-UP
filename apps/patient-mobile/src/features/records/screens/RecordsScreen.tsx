@@ -1,43 +1,26 @@
+import { useRecords } from "../hooks/useRecords";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useCallback } from "react";
+
 import { Pressable, StyleSheet, View } from "react-native";
-import { useFocusEffect } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+
 import {
   CalendarDays,
   ChevronRight,
   FileText,
   Stethoscope,
 } from "lucide-react-native";
-import { listMyClinicalRecords } from "@startup/data-access";
+
 import { formatDisplayDate, type ClinicalRecord } from "@startup/contracts";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import {
-  Card,
-  FadedScrollView,
-  Header,
-  Skeleton,
-  useToastFeedback,
-} from "@startup/mobile-ui";
-import { supabase } from "../../../services/supabase";
+import { Card, FadedScrollView, Header, Skeleton } from "@startup/mobile-ui";
+
 import type { RecordsScreenProps } from "../types/records";
 
 export function RecordsScreen({
   onBackPress,
   onViewRecord,
 }: RecordsScreenProps) {
-  const records = useQuery({
-    queryKey: ["my-clinical-records"],
-    queryFn: () => listMyClinicalRecords(supabase!),
-    enabled: Boolean(supabase),
-  });
-  useFocusEffect(
-    useCallback(() => {
-      if (supabase) void records.refetch();
-    }, [records.refetch])
-  );
-  useToastFeedback({ error: records.isError ? "Could not load records." : "" });
-
+  const { records } = useRecords({ onBackPress, onViewRecord });
   return (
     <View style={styles.screen}>
       <Header title="Records" app="patient" onBackPress={onBackPress} />

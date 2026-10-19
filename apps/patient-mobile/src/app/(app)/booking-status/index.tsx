@@ -1,10 +1,8 @@
 import { router, useLocalSearchParams, type Href } from "expo-router";
 import { BookingStatusScreen } from "../../../features/appointments/screens/BookingStatusScreen";
 import type { VisitSessionMode } from "../../../features/appointments/types/appointment";
-import {
-  appointmentFromParams,
-  type AppointmentParams,
-} from "../../../features/appointments/utils/appointmentParams";
+import { appointmentFromParams } from "../../../features/appointments/utils/appointmentParams";
+import { type AppointmentParams } from "../../../features/appointments/types/appointment-params";
 
 export default function BookingStatusRoute() {
   const params = useLocalSearchParams<AppointmentParams>();

@@ -1,5 +1,8 @@
+import { useAmbulanceCompletion } from "../hooks/useAmbulanceCompletion";
+import type { AmbulanceCompletionProps } from "../types/ambulance-completion";
+import { experienceRatings } from "../utils/ambulanceCompletionConstants";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useState } from "react";
+
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Ambulance,
@@ -11,50 +14,20 @@ import {
   UserRound,
 } from "lucide-react-native";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Button, Card, useToastFeedback } from "@startup/mobile-ui";
-import type { MyAmbulanceBooking } from "@startup/contracts";
-
-const experienceRatings = [
-  { emoji: "😞", label: "Very poor" },
-  { emoji: "😐", label: "Okay" },
-  { emoji: "🙂", label: "Good" },
-  { emoji: "😊", label: "Great" },
-  { emoji: "😍", label: "Excellent" },
-] as const;
+import { Button, Card } from "@startup/mobile-ui";
 
 export function AmbulanceCompletion({
   onGoHome,
   booking,
   onSubmitRating,
-}: {
-  onGoHome: () => void;
-  booking: MyAmbulanceBooking;
-  onSubmitRating: (rating: number) => Promise<void>;
-}) {
-  const [rating, setRating] = useState<number>();
-  const [ratingSubmitted, setRatingSubmitted] = useState(
-    booking.review_rating !== null
-  );
-  const [ratingPending, setRatingPending] = useState(false);
-  const [ratingError, setRatingError] = useState("");
-  useToastFeedback({ error: ratingError });
-
-  const handleRatingSubmit = async () => {
-    if (rating === undefined || ratingSubmitted) return;
-    setRatingPending(true);
-    setRatingError("");
-    try {
-      await onSubmitRating(rating + 1);
-      setRatingSubmitted(true);
-    } catch (cause) {
-      setRatingError(
-        cause instanceof Error ? cause.message : "Could not submit rating."
-      );
-    } finally {
-      setRatingPending(false);
-    }
-  };
-
+}: AmbulanceCompletionProps) {
+  const {
+    rating,
+    setRating,
+    ratingSubmitted,
+    ratingPending,
+    handleRatingSubmit,
+  } = useAmbulanceCompletion({ onGoHome, booking, onSubmitRating });
   return (
     <ScrollView
       contentContainerStyle={styles.content}
@@ -189,9 +162,11 @@ export function AmbulanceCompletion({
                   pressed ? styles.pressed : undefined,
                 ]}
               >
-                <Text variant="bodyEmphasis" style={styles.ratingEmoji}>
-                  {item.emoji}
-                </Text>
+                <item.icon
+                  size={27}
+                  color={colors.patient.primaryDark}
+                  accessible={false}
+                />
               </Pressable>
             ))}
           </View>
@@ -414,10 +389,6 @@ const styles = StyleSheet.create({
   selectedRating: {
     borderColor: colors.patient.primaryDark,
     backgroundColor: "#E8F8F4",
-  },
-  ratingEmoji: {
-    fontSize: 27,
-    lineHeight: 34,
   },
   pressed: {
     opacity: 0.72,

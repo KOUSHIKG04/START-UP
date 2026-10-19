@@ -106,5 +106,5 @@ Manual cross-app check on disposable project `enjafragbcrrgaclwopd`:
 7. Verify another facility cannot edit this practice; stale edits require refresh.
 
 Database regression tests use rollback-only fixtures:
-`packages/database/tests/facility-schedule-management.cli-smoke.sql` and
-`packages/database/tests/doctor-schedule.cli-smoke.sql`.
+`supabase/tests/smoke/facility-schedule-management.cli-smoke.sql` and
+`supabase/tests/smoke/doctor-schedule.cli-smoke.sql`.

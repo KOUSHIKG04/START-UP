@@ -5,3 +5,11 @@ export type FindDoctorScreenProps = PatientScreenProps & {
   consultationType: ConsultationType;
   onBackPress?: () => void;
 };
+
+import type { ImageSourcePropType } from "react-native";
+export type DoctorCategory = {
+  key: string;
+  label: string;
+  image: ImageSourcePropType;
+  imageScale?: number;
+};

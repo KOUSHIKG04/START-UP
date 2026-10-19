@@ -1,16 +1,17 @@
+import type { PersonalAddressFieldsProps } from "../types/personal-address-fields";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { Controller, type Control } from "react-hook-form";
-import { Navigation } from "lucide-react-native";
+import { Pressable, StyleSheet } from "react-native";
+import { Controller } from "react-hook-form";
+
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { AddressSheet } from "./AddressSheet";
-import { emptyAddress } from "./addressTypes";
-import type { ProfileFormValues } from "./ProfileForm";
+import { emptyAddress } from "../utils/addressConstants";
+
 import {
   PROFILE_PLACEHOLDER_COLOR,
   profileFormStyles,
-} from "./profileFormStyles";
+} from "./ProfileFields.styles";
 import {
   patientAddressSchema,
   patientProfileInputSchema,
@@ -21,11 +22,7 @@ export function PersonalAddressFields({
   control,
   onClearError,
   field = "address",
-}: {
-  control: Control<ProfileFormValues>;
-  onClearError: () => void;
-  field?: "email" | "address";
-}) {
+}: PersonalAddressFieldsProps) {
   const [addressOpen, setAddressOpen] = useState(false);
 
   return (

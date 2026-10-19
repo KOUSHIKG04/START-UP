@@ -1,26 +1,8 @@
-import type { ReactNode } from "react";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  View,
-  type ModalProps,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@startup/design-tokens";
-
-export type ModalSurfaceProps = Omit<
-  ModalProps,
-  "children" | "onRequestClose"
-> & {
-  children: ReactNode;
-  onClose?: () => void;
-  layout?: "dialog" | "custom";
-  dismissOnBackdrop?: boolean;
-  contentStyle?: StyleProp<ViewStyle>;
-};
+import type { ModalSurfaceProps } from "../types/modalSurface";
+export type { ModalSurfaceProps } from "../types/modalSurface";
 
 /** Shared native modal lifecycle and neutral backdrop. Custom layouts retain their own drawers/animations. */
 export function ModalSurface({

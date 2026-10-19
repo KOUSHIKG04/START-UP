@@ -1,17 +1,10 @@
 "use client";
+import { useDoctorSchedules } from "../hooks/useDoctorSchedules";
 
-import { useRouter } from "next/navigation";
-import * as React from "react";
-import { toast } from "@startup/web-ui/components/ui/toast";
-import {
-  formatDisplayDate,
-  type FacilityDoctorRosterItem,
-} from "@startup/contracts";
-import {
-  facilityDayKey,
-  facilitySchedule,
-  type PracticeSession,
-} from "../utils/facilitySchedule";
+import type { DoctorSchedulesScreenProps } from "../types/doctorSchedulesScreen";
+
+import { formatDisplayDate } from "@startup/contracts";
+
 import { Bell, Calendar } from "lucide-react";
 import { DoctorSchedulesStats } from "../components/DoctorSchedulesStats";
 import { DoctorShiftGantt } from "../components/DoctorShiftGantt";
@@ -21,31 +14,18 @@ export default function DoctorSchedulesScreen({
   doctors,
   sessions,
   loadError,
-}: {
-  doctors: FacilityDoctorRosterItem[];
-  sessions: PracticeSession[];
-  loadError?: string;
-}) {
-  React.useEffect(() => {
-    if (loadError)
-      toast.add({
-        title: "Could not load doctor schedules",
-        description: loadError,
-        type: "error",
-      });
-  }, [loadError]);
-  const [selectedDay, setSelectedDay] = React.useState(() =>
-    facilityDayKey(new Date())
-  );
-  const router = useRouter();
-  const schedule = facilitySchedule(doctors, sessions, new Date(), selectedDay);
-
+}: DoctorSchedulesScreenProps) {
+  const { selectedDay, setSelectedDay, router, schedule } = useDoctorSchedules({
+    doctors,
+    sessions,
+    loadError,
+  });
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* TopBar (Figma 840:56) */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-[#0f172a]">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Doctor Schedules
           </h1>
         </div>
@@ -53,7 +33,7 @@ export default function DoctorSchedulesScreen({
         <div className="flex items-center gap-3">
           <select
             aria-label="Manage doctor schedule"
-            className="h-9 max-w-64 rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm"
+            className="border-border bg-card h-9 max-w-64 rounded-lg border px-3 text-sm"
             value=""
             onChange={(event) => {
               if (event.target.value)
@@ -72,17 +52,17 @@ export default function DoctorSchedulesScreen({
           {/* Bell Button */}
           <button
             aria-label="Notifications"
-            className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#475569] shadow-xs transition-colors hover:bg-slate-50"
+            className="border-border bg-card text-muted-foreground hover:bg-muted flex size-9 cursor-pointer items-center justify-center rounded-lg border shadow-xs transition-colors"
           >
             <Bell className="size-4" />
           </button>
 
           {/* Date Badge */}
-          <div className="flex items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 shadow-xs">
-            <Calendar className="size-4 shrink-0 text-[#475569]" />
+          <div className="border-border bg-card flex items-center gap-2 rounded-lg border px-3 py-2 shadow-xs">
+            <Calendar className="text-muted-foreground size-4 shrink-0" />
             <span
               suppressHydrationWarning
-              className="text-[13px] font-semibold whitespace-nowrap text-[#475569]"
+              className="text-muted-foreground text-sm font-semibold whitespace-nowrap"
             >
               {formatDisplayDate(new Date(), "Asia/Kolkata")}
             </span>

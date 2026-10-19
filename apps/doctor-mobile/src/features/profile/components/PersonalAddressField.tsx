@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { usePersonalAddressField } from "../hooks/usePersonalAddressField";
+
+import type { PersonalAddressFieldProps } from "../types/personal-address-field";
+
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -9,91 +12,33 @@ import {
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { router } from "expo-router";
 import { SquareCheck, MapPin, Square, X } from "lucide-react-native";
-import { Button, Input, ModalSurface, useToast } from "@startup/mobile-ui";
+import { Button, Input, ModalSurface } from "@startup/mobile-ui";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import {
-  doctorPersonalAddressInputSchema,
-  type DoctorPersonalAddressInput,
-} from "@startup/contracts";
-import { useMobileSession } from "../../../services/supabase";
-import { useLocationDraft } from "../../locations/locationDraft";
-
-export const emptyPersonalAddress: DoctorPersonalAddressInput = {
-  label: "Home",
-  kind: "house",
-  building: "",
-  street: "",
-  locality: "",
-  city: "",
-  state: "",
-  pincode: "",
-  latitude: null,
-  longitude: null,
-  use_account_details: true,
-};
+import { doctorPersonalAddressInputSchema } from "@startup/contracts";
 
 /** Copies the supplied clinic address only after the doctor opts in. */
 export function PersonalAddressField({
   value,
   onChange,
   clinicAddress,
-}: {
-  value: DoctorPersonalAddressInput;
-  onChange: (value: DoctorPersonalAddressInput) => void;
-  clinicAddress?: DoctorPersonalAddressInput;
-}) {
-  const [sameAsClinic, setSameAsClinic] = useState(false);
-  const previousAddress = useRef(value);
-  const clinicKey = JSON.stringify(clinicAddress);
-  useEffect(() => {
-    if (!sameAsClinic) return;
-    if (!clinicKey) {
-      setSameAsClinic(false);
-      onChange(previousAddress.current);
-      return;
-    }
-    onChange(JSON.parse(clinicKey) as DoctorPersonalAddressInput);
-  }, [sameAsClinic, clinicKey, onChange]);
-  const { profile } = useMobileSession();
-  const [open, setOpen] = useState(false);
-  const waitingForMap = useRef(false);
-  const chosen = useLocationDraft((state) => state.chosen);
-  const clear = useLocationDraft((state) => state.clear);
-  const { showToast } = useToast();
-  const insets = useSafeAreaInsets();
-  useEffect(() => {
-    if (!waitingForMap.current || !chosen) return;
-    waitingForMap.current = false;
-    onChange({
-      ...value,
-      latitude: chosen.latitude,
-      longitude: chosen.longitude,
-      street: chosen.street,
-      locality: chosen.locality,
-      city: chosen.city,
-      state: chosen.state,
-      pincode: chosen.pincode,
-    });
-    clear();
-    setOpen(true);
-  }, [chosen, clear, onChange, value]);
-  const set = (
-    key: "building" | "street" | "locality" | "city" | "state" | "pincode",
-    text: string
-  ) => onChange({ ...value, [key]: text });
-  const summary = [
-    value.building,
-    value.street,
-    value.locality,
-    value.city,
-    value.state,
-    value.pincode,
-  ]
-    .filter(Boolean)
-    .join(", ");
+}: PersonalAddressFieldProps) {
+  const {
+    sameAsClinic,
+    setSameAsClinic,
+    previousAddress,
+    profile,
+    open,
+    setOpen,
+    waitingForMap,
+    clear,
+    showToast,
+    insets,
+    set,
+    summary,
+  } = usePersonalAddressField({ value, onChange, clinicAddress });
   return (
     <View style={styles.field}>
       <Text style={styles.label}>Personal Address</Text>

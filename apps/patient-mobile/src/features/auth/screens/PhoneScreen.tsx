@@ -1,42 +1,19 @@
+import { usePhoneSignIn } from "../hooks/usePhoneSignIn";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
-import { useToastFeedback } from "@startup/mobile-ui";
-import { useState } from "react";
+
 import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { sendPhoneOtp } from "@startup/data-access";
-import { supabase } from "../../../services/supabase";
+
 import {
   onboardingButtonStyles,
   OnboardingShell,
 } from "../components/OnboardingShell";
 
 export default function PhoneScreen() {
-  const [phone, setPhone] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  useToastFeedback({ error });
-  async function submit() {
-    if (!supabase) {
-      setError("Supabase is not configured.");
-      return;
-    }
-    setBusy(true);
-    setError("");
-    try {
-      const number = `+91${phone.replace(/\D/g, "")}`;
-      await sendPhoneOtp(supabase, number);
-      router.push({ pathname: "/verify-otp", params: { phone: number } });
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Could not send the code."
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { phone, setPhone, busy, submit } = usePhoneSignIn();
   return (
     <OnboardingShell onBack={() => router.back()}>
       <View style={styles.body}>

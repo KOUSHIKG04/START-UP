@@ -1,9 +1,9 @@
+import type { AmbulancePaymentProps } from "../types/ambulance-payment";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Building2,
-  Check,
   CheckCircle2,
   CreditCard,
   ReceiptText,
@@ -11,15 +11,11 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button } from "@startup/mobile-ui";
 import { ambulanceTrip } from "../utils/ambulanceConstants";
 
-export function AmbulancePayment({
-  onPaymentComplete,
-}: {
-  onPaymentComplete: () => void;
-}) {
+export function AmbulancePayment({ onPaymentComplete }: AmbulancePaymentProps) {
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "cash">(
     "upi"
   );

@@ -1,19 +1,18 @@
+import { splitBottomNavItems } from "../utils/bottomNavItems";
 import { AppText as Text } from "../primitives/AppText";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   View,
   TouchableOpacity,
-  type ViewStyle,
   type LayoutChangeEvent,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import type { LucideIcon } from "lucide-react-native";
 import { SOSButton } from "./SOSButton";
 import { getNotchedBarPath } from "../utils/notchedBarPath";
 import {
@@ -24,25 +23,9 @@ import {
   BOTTOM_NAV_BAR_SHADOW,
   BOTTOM_NAV_BAR_SOS_SIZE,
   BOTTOM_NAV_BAR_WIDTH_TOLERANCE,
-  splitBottomNavItems,
-} from "../utils/bottomNavBarConfig";
-
-export type NavItem = {
-  key: string;
-  label: string;
-  icon?: LucideIcon;
-  badge?: number | string;
-};
-
-export type BottomNavBarProps = {
-  items: NavItem[];
-  activeTab: string;
-  onTabChange: (key: string) => void;
-  showSOS?: boolean;
-  onSOSPress?: () => void;
-  renderCenterButton?: () => React.ReactNode;
-  style?: ViewStyle;
-};
+} from "../utils/bottomNavBarConstants";
+import type { NavItem, BottomNavBarProps } from "../types/bottomNavBar";
+export type { NavItem, BottomNavBarProps } from "../types/bottomNavBar";
 
 export function BottomNavBar({
   items,

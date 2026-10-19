@@ -1,5 +1,6 @@
+import type { PhoneOtpFormProps } from "../types/phoneOtpForm";
 import { AppText as Text } from "../primitives/AppText";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
@@ -13,14 +14,7 @@ export function PhoneOtpForm({
   onVerify,
   configurationError,
   footer,
-}: {
-  title: string;
-  description: string;
-  onSend: (phone: string) => Promise<void>;
-  onVerify: (phone: string, code: string) => Promise<void>;
-  configurationError?: string | null;
-  footer?: ReactNode;
-}) {
+}: PhoneOtpFormProps) {
   const theme = useMobileTheme();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");

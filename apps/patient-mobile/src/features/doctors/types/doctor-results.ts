@@ -1,4 +1,4 @@
-import type { DoctorCardProps } from "../components/DoctorCard";
+import type { DoctorCardProps } from "./doctor-card";
 import type { ConsultationType } from "../../appointments/types/appointment";
 import type { PatientScreenProps } from "../../../types/screen";
 
@@ -15,3 +15,5 @@ export type DoctorResultsScreenProps = PatientScreenProps & {
   symptom: string;
   consultationType: ConsultationType;
 };
+
+export type SortBy = DoctorFilter;

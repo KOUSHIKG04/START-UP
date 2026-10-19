@@ -1,31 +1,9 @@
-import {
-  ClipboardCheck,
-  LayoutDashboard,
-  LogOut,
-  Stethoscope,
-  Building2,
-  Ambulance,
-} from "lucide-react";
+import { navigation } from "../../components/admin/utils/navigationConstants";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { requireReviewer } from "@/lib/reviewer";
-import { signOut } from "@/lib/auth-actions";
+import { signOut } from "@/features/auth/server";
 import { Button } from "@startup/web-ui/components/ui/button";
-
-const navigation = [
-  { href: "/", label: "Overview", Icon: LayoutDashboard },
-  { href: "/verification", label: "All reviews", Icon: ClipboardCheck },
-  { href: "/verification?type=doctor", label: "Doctors", Icon: Stethoscope },
-  {
-    href: "/verification?type=facility",
-    label: "Hospitals & clinics",
-    Icon: Building2,
-  },
-  {
-    href: "/verification?type=driver",
-    label: "Ambulance drivers",
-    Icon: Ambulance,
-  },
-];
 
 export const dynamic = "force-dynamic";
 

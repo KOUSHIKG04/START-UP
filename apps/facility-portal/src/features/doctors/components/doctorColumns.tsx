@@ -1,5 +1,4 @@
 "use client";
-
 import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical, Phone, Stethoscope, Eye, Edit } from "lucide-react";
 import {
@@ -26,17 +25,17 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
       const doctor = row.original;
       return (
         <div className="flex items-center gap-2.5">
-          <Avatar className="size-8 shrink-0 rounded-full border border-slate-200">
+          <Avatar className="border-border size-8 shrink-0 rounded-full border">
             <AvatarImage src={doctor.avatar} alt={doctor.name} />
-            <AvatarFallback className="bg-[#e6f4f5] text-xs font-semibold text-[#07595d]">
+            <AvatarFallback className="bg-muted text-primary text-xs font-semibold">
               {doctor.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate leading-tight font-semibold text-[#0f172a]">
+            <p className="text-foreground truncate leading-tight font-semibold">
               {doctor.name}
             </p>
-            <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-[#94a3b8]">
+            <p className="text-muted-foreground mt-0.5 flex items-center gap-1 truncate text-xs">
               <Phone className="size-2.5 shrink-0" />
               {doctor.phone}
             </p>
@@ -49,8 +48,8 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
     accessorKey: "specialization",
     header: "Specialization",
     cell: ({ row }) => (
-      <div className="flex items-center gap-1.5 font-medium text-[#0f172a]">
-        <Stethoscope className="size-3.5 shrink-0 text-[#07595d]/60" />
+      <div className="text-foreground flex items-center gap-1.5 font-medium">
+        <Stethoscope className="text-primary/60 size-3.5 shrink-0" />
         <span>{row.original.specialization}</span>
       </div>
     ),
@@ -59,7 +58,7 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
     accessorKey: "clinzoId",
     header: "Clinzo ID",
     cell: ({ row }) => (
-      <span className="rounded bg-[#e6f4f5] px-2 py-0.5 font-mono text-[12px] font-semibold text-[#07595d]">
+      <span className="bg-muted text-primary rounded px-2 py-0.5 font-mono text-xs font-semibold">
         {row.original.clinzoId}
       </span>
     ),
@@ -71,21 +70,21 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
       const status = row.original.status;
       const badgeStyle =
         status === "Active"
-          ? "bg-[#ecfdf5] text-[#10b981] border-[#a7f3d0]"
+          ? "bg-muted text-primary border-border"
           : status === "On Call"
-            ? "bg-[#eff6ff] text-[#3b82f6] border-[#bfdbfe]"
-            : "bg-[#fffbeb] text-[#b45309] border-[#fde68a]";
+            ? "bg-muted text-primary border-border"
+            : "bg-muted text-muted-foreground border-border";
 
       const dotColor =
         status === "Active"
-          ? "bg-[#10b981]"
+          ? "bg-primary"
           : status === "On Call"
-            ? "bg-[#3b82f6]"
-            : "bg-[#f59e0b]";
+            ? "bg-primary"
+            : "bg-muted-foreground";
 
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${badgeStyle}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badgeStyle}`}
         >
           <span className={`size-1.5 rounded-full ${dotColor}`} />
           {status}
@@ -105,23 +104,23 @@ export const doctorColumns: ColumnDef<DoctorRecord>[] = [
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 rounded-lg p-0 text-[#94a3b8] hover:bg-slate-100 hover:text-[#0f172a]"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground size-8 rounded-lg p-0"
               >
                 <MoreVertical className="size-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 text-[13px]">
-              <DropdownMenuLabel className="text-[11px] font-bold text-[#64748b] uppercase">
+            <DropdownMenuContent align="end" className="w-44 text-sm">
+              <DropdownMenuLabel className="text-muted-foreground text-xs font-bold uppercase">
                 {doctor.name}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
-                <Eye className="size-3.5 text-[#64748b]" />
+                <Eye className="text-muted-foreground size-3.5" />
                 View Profile
               </DropdownMenuItem>
               <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
-                <Edit className="size-3.5 text-[#64748b]" />
+                <Edit className="text-muted-foreground size-3.5" />
                 Edit Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />

@@ -1,24 +1,7 @@
-import { useState } from "react";
 import { Image, Linking, Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import { Check, MessageCircle, Phone, User } from "lucide-react-native";
-import {
-  completeMyDriverTrip,
-  listMyDriverTrips,
-  transitionMyDriverTrip,
-} from "@startup/data-access";
-import type {
-  MyDriverTrip,
-  TransitionDriverTripInput,
-} from "@startup/contracts";
-import {
-  Button,
-  Input,
-  Loader,
-  useToast,
-  useToastFeedback,
-} from "@startup/mobile-ui";
+import { Button, Input, Loader } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -28,107 +11,20 @@ import {
   PageHeader,
 } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
-import { supabase, useMobileSession } from "../../../services/supabase";
-
-const stages: Record<Exclude<MyDriverTrip["status"], "cancelled">, string> = {
-  heading_to_pickup: "Navigate to Patient",
-  arrived_at_pickup: "At Pickup Location",
-  in_progress: "Trip in Progress",
-  arrived_at_destination: "At Destination",
-  completed: "Trip Complete",
-};
-const next: Partial<
-  Record<
-    MyDriverTrip["status"],
-    { action: TransitionDriverTripInput["action"]; label: string }
-  >
-> = {
-  heading_to_pickup: {
-    action: "arrive_pickup",
-    label: "I’ve arrived at pickup",
-  },
-  arrived_at_pickup: { action: "start", label: "Start trip" },
-  in_progress: {
-    action: "arrive_destination",
-    label: "I’ve arrived at destination",
-  },
-};
+import { useDriverTrip } from "../hooks/useDriverTrip";
+import { tripStageLabels, tripNextActions } from "../utils/tripConstants";
 export function TripScreen() {
-  const { profile } = useMobileSession();
-  const { showToast } = useToast();
-  const [pin, setPin] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [completedId, setCompletedId] = useState<string | null>(null);
-  const trips = useQuery({
-    queryKey: ["my-driver-trips", profile?.driver?.id],
-    queryFn: () => listMyDriverTrips(supabase!),
-    enabled: Boolean(supabase && profile?.driver?.id),
-  });
-  useToastFeedback({ error: trips.isError ? "Could not load trip." : "" });
-  const trip =
-    trips.data?.find(
-      (item) => !["completed", "cancelled"].includes(item.status)
-    ) ?? trips.data?.find((item) => item.id === completedId);
-  async function transition(
-    item: MyDriverTrip,
-    action: TransitionDriverTripInput["action"]
-  ) {
-    if (!supabase || busy) return;
-    setBusy(true);
-    try {
-      await transitionMyDriverTrip(supabase, {
-        tripId: item.id,
-        expectedVersion: Number(item.row_version),
-        action,
-      });
-      await trips.refetch();
-      showToast({ title: "Trip status updated", type: "success" });
-    } catch {
-      const feedback =
-        "Trip could not be updated. Refresh and check its status.";
-      showToast({
-        title: "Trip update failed",
-        message: feedback,
-        type: "error",
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function complete(item: MyDriverTrip) {
-    if (!supabase || busy) return;
-    setBusy(true);
-    try {
-      const verified = await completeMyDriverTrip(supabase, {
-        tripId: item.id,
-        patientPin: pin,
-      });
-      if (verified) {
-        setCompletedId(item.id);
-        setPin("");
-        await trips.refetch();
-        showToast({ title: "Trip completed", type: "success" });
-      } else {
-        const feedback =
-          "PIN did not match, or verification is temporarily locked. Ask the patient to check their app.";
-        showToast({
-          title: "PIN not verified",
-          message: feedback,
-          type: "error",
-        });
-      }
-    } catch {
-      const feedback =
-        "Could not complete the trip. Check the PIN and trip status.";
-      showToast({
-        title: "Trip completion failed",
-        message: feedback,
-        type: "error",
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
+  const {
+    showToast,
+    pin,
+    setPin,
+    busy,
+    setCompletedId,
+    trips,
+    trip,
+    transition,
+    complete,
+  } = useDriverTrip();
   if (!trip || trip.status === "cancelled")
     return (
       <View style={ui.screen}>
@@ -149,7 +45,7 @@ export function TripScreen() {
         </Body>
       </View>
     );
-  const title = stages[trip.status];
+  const title = tripStageLabels[trip.status];
   return (
     <View style={ui.screen}>
       <PageHeader title={title} />
@@ -158,7 +54,7 @@ export function TripScreen() {
           <>
             <Image
               source={require("../../../../assets/figma/trip-map.png")}
-              accessibilityLabel="Reference route map; live navigation is not connected"
+              alt="Reference route map; live navigation is not connected"
               style={styles.map}
             />
             {trip.status === "arrived_at_destination" ? (
@@ -282,14 +178,16 @@ export function TripScreen() {
                       ]
               }
             />
-            {next[trip.status] ? (
+            {tripNextActions[trip.status] ? (
               <Button
                 loading={busy}
                 theme="driver"
-                label={busy ? "Updating…" : next[trip.status]!.label}
+                label={busy ? "Updating…" : tripNextActions[trip.status]!.label}
                 style={ui.button}
                 disabled={busy}
-                onPress={() => void transition(trip, next[trip.status]!.action)}
+                onPress={() =>
+                  void transition(trip, tripNextActions[trip.status]!.action)
+                }
               />
             ) : null}
             {trip.status === "arrived_at_destination" ? (
@@ -366,6 +264,7 @@ export function TripScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   map: { width: "100%", height: 303, borderRadius: 12, resizeMode: "cover" },
   avatar: {

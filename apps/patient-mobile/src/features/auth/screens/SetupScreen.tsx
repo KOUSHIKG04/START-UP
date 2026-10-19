@@ -1,58 +1,15 @@
+import { useAccountSetup } from "../hooks/useAccountSetup";
 import { AppText as Text } from "@startup/mobile-ui";
-import { Button } from "@startup/mobile-ui";
-import { useToast, useToastFeedback } from "@startup/mobile-ui";
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
-import { TriangleAlert } from "lucide-react-native";
+
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { mobileSession, useMobileSession } from "../../../services/supabase";
-import {
-  onboardingButtonStyles,
-  OnboardingShell,
-} from "../components/OnboardingShell";
+
+import { OnboardingShell } from "../components/OnboardingShell";
 
 export default function SetupScreen() {
-  const auth = useMobileSession();
-  const [error, setError] = useState("");
-  const [ready, setReady] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const { showToast } = useToast();
-  useToastFeedback({ error });
-  useEffect(() => {
-    let active = true;
-    setError("");
-    setReady(false);
-    Promise.resolve(mobileSession.refresh())
-      .then(() => {
-        if (!active) return;
-        const { error: accountError } = mobileSession.getSnapshot();
-        if (accountError) throw new Error(accountError);
-        setReady(true);
-      })
-      .catch((cause) => {
-        if (active)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Could not load your account."
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, [attempt]);
-  useEffect(() => {
-    if (auth.loading || auth.error || !auth.session) return;
-    if (auth.profile?.patient_id && auth.profile.patient_profile_complete)
-      router.replace("/(app)/(tabs)");
-    else router.replace("/onboarding");
-  }, [auth.loading, auth.error, auth.session?.user.id, auth.profile]);
-
-  function openEmergency() {
-    router.push("/onboarding-sos");
-  }
-
+  useAccountSetup();
   return (
     <OnboardingShell onBack={() => router.back()}>
       <View style={styles.body}>

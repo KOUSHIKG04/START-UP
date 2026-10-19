@@ -1,67 +1,20 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useDashboardDoctorRequests } from "../hooks/useDashboardDoctorRequests";
+
+import type { DashboardDoctorRequestsProps } from "../types/dashboardDoctorRequests";
+
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { listMyFacilityDoctorRequests } from "@startup/data-access";
-import type { FacilityDoctorRequest } from "@startup/contracts";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+
 import { Skeleton } from "@startup/web-ui/components/ui/skeleton";
-import { toast } from "@startup/web-ui/components/ui/toast";
-import { useFacilityDoctorRequestEvents } from "../hooks/useFacilityDoctorRequestEvents";
-import { incomingDoctorRequests } from "../utils/incomingDoctorRequests";
 
 export function DashboardDoctorRequests({
   scope,
   initialRequests,
-}: {
-  scope: string;
-  initialRequests?: FacilityDoctorRequest[];
-}) {
-  useFacilityDoctorRequestEvents(scope);
-  const seen = useRef(
-    new Set(
-      incomingDoctorRequests(initialRequests ?? []).map((request) => request.id)
-    )
-  );
-  const requests = useQuery({
-    queryKey: ["facility-doctor-requests", scope],
-    queryFn: () => listMyFacilityDoctorRequests(createBrowserSupabaseClient()),
-    initialData: initialRequests,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
+}: DashboardDoctorRequestsProps) {
+  const { requests, pending } = useDashboardDoctorRequests({
+    scope,
+    initialRequests,
   });
-  const pending = incomingDoctorRequests(requests.data ?? []);
-  useEffect(() => {
-    if (!requests.data) return;
-    const incoming = incomingDoctorRequests(requests.data).filter(
-      (request) => !seen.current.has(request.id)
-    );
-    seen.current = new Set(
-      incomingDoctorRequests(requests.data).map((request) => request.id)
-    );
-    if (incoming.length)
-      toast.add({
-        title:
-          incoming.length === 1
-            ? "New doctor association request"
-            : `${incoming.length} new doctor association requests`,
-        description:
-          incoming.length === 1
-            ? `${incoming[0].doctor_name} requested to join ${incoming[0].facility_name}.`
-            : "Review the requests in Doctor Management.",
-        type: "info",
-      });
-  }, [requests.data]);
-  useEffect(() => {
-    if (requests.isError)
-      toast.add({
-        title: "Could not load doctor requests",
-        description: "Refresh and try again.",
-        type: "error",
-      });
-  }, [requests.isError]);
   if (requests.isLoading)
     return (
       <div aria-label="Loading doctor requests">

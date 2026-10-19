@@ -1,6 +1,5 @@
-import type { Href } from "expo-router";
 import type { DropdownOption } from "@startup/mobile-ui";
-import type { ConsultationType } from "../../appointments/types/appointment";
+
 import type { DoctorResult } from "../types/doctor-results";
 
 export const filterOptions: readonly DropdownOption[] = [
@@ -60,21 +59,3 @@ export const doctors: DoctorResult[] = [
     feeValue: 600,
   },
 ];
-
-export function getDoctorProfileRoute(
-  doctor: DoctorResult,
-  consultationType: ConsultationType
-): Href {
-  return {
-    pathname: "/doctor-profile",
-    params: {
-      name: doctor.name,
-      qualification: doctor.qualification,
-      specialty: doctor.specialty,
-      experience: doctor.experience,
-      rating: doctor.rating,
-      fee: doctor.fee,
-      consultationType,
-    },
-  } as unknown as Href;
-}

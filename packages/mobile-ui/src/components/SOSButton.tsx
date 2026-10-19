@@ -1,17 +1,10 @@
 import { AppText as Text } from "../primitives/AppText";
-import React, { useState } from "react";
-import { StyleSheet, View, Pressable, type ViewStyle } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View, Pressable } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { getSOSButtonDimensions } from "../utils/sosButtonDimensions";
-
-export type SOSButtonProps = {
-  onLongPress?: () => void;
-  onPress?: () => void;
-  size?: number;
-  isFullRed?: boolean;
-  className?: string;
-  style?: ViewStyle;
-};
+import type { SOSButtonProps } from "../types/sosButton";
+export type { SOSButtonProps } from "../types/sosButton";
 
 export function SOSButton({
   onLongPress,

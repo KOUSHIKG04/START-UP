@@ -1,103 +1,33 @@
+import { useBookingGuide } from "../hooks/useBookingGuide";
+import { steps } from "../utils/bookingGuideConstants";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useEffect, useRef, useState } from "react";
+
 import {
-  BackHandler,
   FlatList,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
-  useWindowDimensions,
 } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, SafeAreaView } from "@startup/mobile-ui";
-import { parseConsultationType } from "../../appointments/utils/consultationFlow";
-
-const steps = [
-  {
-    image: require("../../../../assets/images/booking-guide/find-care.png"),
-    imageScale: 1,
-    title: "Find the care you need",
-    description:
-      "Search by symptom or specialty. Choose clinic, online or home care from the Home screen.",
-    note: "Available services depend on the doctor’s practice.",
-  },
-  {
-    image: require("../../../../assets/images/booking-guide/choose-doctor.png"),
-    imageScale: 1.04,
-    title: "Choose your doctor",
-    description:
-      "Explore verified doctors and compare their qualifications, specialties and consultation fees.",
-    note: "Open a doctor’s profile to learn more before booking.",
-  },
-  {
-    image: require("../../../../assets/images/booking-guide/choose-slot.png"),
-    imageScale: 0.92,
-    title: "Pick a date and time",
-    description:
-      "Choose yourself or a family member, select an available slot, and enter your reason for the visit.",
-    note: "Only times published by the doctor can be booked.",
-  },
-  {
-    image: require("../../../../assets/images/booking-guide/booking-status.png"),
-    imageScale: 0.92,
-    title: "Check your booking status",
-    description:
-      "Submit your booking. It may confirm immediately or need approval. Follow its status in My Bookings.",
-    note: "For app-booked clinic visits, show your QR when you arrive.",
-  },
-] as const;
 
 export function BookingGuideScreen() {
-  const { consultationType } = useLocalSearchParams<{
-    consultationType?: string | string[];
-  }>();
-  const { width, height } = useWindowDimensions();
-  const pageWidth = Math.min(width, 600);
-  const heroHeight = Math.min(400, Math.max(200, height * 0.42));
-  const [step, setStep] = useState(0);
-  const pages = useRef<FlatList<(typeof steps)[number]>>(null);
-  const scrollToStep = (next: number) => {
-    const index = Math.max(0, Math.min(steps.length - 1, next));
-    setStep(index);
-    pages.current?.scrollToOffset({
-      offset: index * pageWidth,
-      animated: true,
-    });
-  };
-  const close = () => {
-    if (router.canGoBack()) router.back();
-    else
-      router.replace({
-        pathname: "/find-doctor",
-        params: { consultationType: parseConsultationType(consultationType) },
-      });
-  };
-  useEffect(() => {
-    const frame = requestAnimationFrame(() =>
-      pages.current?.scrollToOffset({
-        offset: step * pageWidth,
-        animated: false,
-      })
-    );
-    return () => cancelAnimationFrame(frame);
-  }, [pageWidth]);
-  useEffect(() => {
-    if (!step) return;
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        scrollToStep(step - 1);
-        return true;
-      }
-    );
-    return () => subscription.remove();
-  }, [step, pageWidth]);
-
+  const {
+    width,
+    height,
+    pageWidth,
+    heroHeight,
+    step,
+    setStep,
+    pages,
+    scrollToStep,
+    close,
+  } = useBookingGuide();
   return (
     <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
       <StatusBar style="dark" />

@@ -21,7 +21,8 @@ export * from "./notifications";
 export * from "./facility-doctors";
 export * from "./online-consultation";
 export * from "./languages";
-export * from "./dates";
+export * from "./utils/dates";
+export { notificationTime } from "./utils/notificationTime";
 export * from "./doctor-review";
 
 export * from "./doctor-locations";

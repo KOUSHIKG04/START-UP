@@ -21,14 +21,14 @@ import { CircleCheck, CircleAlert, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-
-export type ToastType = "success" | "error" | "info";
-export type ToastInput = { title: string; message?: string; type?: ToastType };
+import type { ToastType, ToastInput } from "../types/toast";
+export type { ToastType, ToastInput } from "../types/toast";
 
 type ToastContextValue = {
   showToast: (input: ToastInput) => void;
   dismissToast: () => void;
 };
+
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {

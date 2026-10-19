@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useDoctorSettings } from "../hooks/useDoctorSettings";
+
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
@@ -9,43 +10,13 @@ import {
   Moon,
   ShieldCheck,
 } from "lucide-react-native";
-import { Button, Card, ModalSurface, useToast } from "@startup/mobile-ui";
+import { Button, Card, ModalSurface } from "@startup/mobile-ui";
 import { fontFamilies } from "@startup/design-tokens";
 import { DoctorScreen, Heading, Label } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { signOutWithPushCleanup } from "../../notifications/deviceNotifications";
-import { useDoctorStore } from "../../../stores/useDoctorStore";
+
 export function SettingsScreen() {
-  const [logout, setLogout] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
-  const mounted = useRef(false);
-  const { showToast } = useToast();
-  const reset = useDoctorStore((s) => s.reset);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-  async function signOut() {
-    if (signingOut) return;
-    setSigningOut(true);
-    try {
-      const result = await signOutWithPushCleanup();
-      if (result?.error) throw result.error;
-      reset();
-      router.replace("/");
-    } catch (cause) {
-      if (mounted.current)
-        showToast({
-          title: "Could not sign out",
-          message: cause instanceof Error ? cause.message : "Try again.",
-          type: "error",
-        });
-    } finally {
-      if (mounted.current) setSigningOut(false);
-    }
-  }
+  const { logout, setLogout, signingOut, signOut } = useDoctorSettings();
   return (
     <DoctorScreen title="Settings" bottomNav={false} contentStyle={{ gap: 14 }}>
       <Card

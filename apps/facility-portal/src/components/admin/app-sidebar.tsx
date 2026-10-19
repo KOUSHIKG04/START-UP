@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,15 +15,16 @@ import {
 import { Avatar, AvatarFallback } from "@startup/web-ui/components/ui/avatar";
 
 import { navItems } from "./utils/sidebarConstants";
-import { LogoutButton } from "@/features/auth";
 
 export function AppSidebar({
   facilityName,
   userName,
+  logoutAction,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   facilityName: string;
   userName: string;
+  logoutAction: React.ReactNode;
 }) {
   const pathname = usePathname();
   const initials = userName
@@ -36,24 +36,24 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className="w-[195px] border-r border-[#e2e8f0] bg-white text-[#0f172a]"
+      className="border-border bg-card text-foreground w-(--sidebar-width) border-r"
       {...props}
     >
       <SidebarHeader className="px-3 py-3 pb-2">
         <Link href="/" className="group flex items-center gap-2">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-[16px] bg-[#07595d] shadow-xs transition-transform group-hover:scale-105">
-            <HeartPulse className="size-4.5 stroke-[2.2] text-white" />
+          <div className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-lg shadow-xs transition-transform group-hover:scale-105">
+            <HeartPulse className="text-primary-foreground size-4.5 stroke-2" />
           </div>
           <div className="flex flex-col leading-tight whitespace-nowrap">
-            <span className="text-[14px] font-bold tracking-tight text-[#07595d]">
+            <span className="text-primary text-sm font-bold tracking-tight">
               {facilityName}
             </span>
-            <span className="text-[9px] font-semibold tracking-[0.5px] text-[#94a3b8] uppercase">
+            <span className="text-muted-foreground text-xs font-semibold tracking-normal uppercase">
               admin console
             </span>
           </div>
         </Link>
-        <div className="mt-2.5 w-full border-b border-[#e2e8f0]" />
+        <div className="border-border mt-2.5 w-full border-b" />
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-1.5">
@@ -69,16 +69,16 @@ export function AppSidebar({
                 <SidebarMenuButton
                   asChild
                   isActive={isActive}
-                  className={`flex h-auto items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] transition-colors ${
+                  className={`flex h-auto items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors ${
                     isActive
-                      ? "bg-[#e6f4f5] font-semibold text-[#07595d] hover:bg-[#d8eef0] hover:text-[#07595d]"
-                      : "bg-transparent font-medium text-[#475569] hover:bg-slate-50 hover:text-[#0f172a]"
+                      ? "bg-muted text-primary hover:bg-primary/10 hover:text-primary font-semibold"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent font-medium"
                   }`}
                 >
                   <Link href={item.url}>
                     <Icon
                       className={`size-4 shrink-0 ${
-                        isActive ? "text-[#07595d]" : "text-[#475569]"
+                        isActive ? "text-primary" : "text-muted-foreground"
                       }`}
                     />
                     <span className="truncate">{item.title}</span>
@@ -92,21 +92,19 @@ export function AppSidebar({
 
       <SidebarFooter className="mt-auto p-2.5">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <LogoutButton />
-          </SidebarMenuItem>
+          <SidebarMenuItem>{logoutAction}</SidebarMenuItem>
         </SidebarMenu>
-        <div className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-[#f8fafc] p-2">
-          <Avatar className="size-7 rounded-full border border-slate-200">
-            <AvatarFallback className="bg-[#07595d] text-[11px] font-semibold text-white">
+        <div className="border-border bg-background flex items-center gap-2.5 rounded-lg border p-2">
+          <Avatar className="border-border size-7 rounded-full border">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-[12px] font-semibold text-[#0f172a]">
+            <span className="text-foreground truncate text-xs font-semibold">
               {userName}
             </span>
-            <span className="truncate text-[10px] text-[#475569]">
+            <span className="text-muted-foreground truncate text-xs">
               Facility admin
             </span>
           </div>

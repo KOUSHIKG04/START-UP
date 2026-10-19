@@ -1,3 +1,5 @@
+import type { FeedbackBottomSheetProps } from "../types/feedback-bottom-sheet";
+export type { FeedbackBottomSheetProps } from "../types/feedback-bottom-sheet";
 import { AppText as Text } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { useState } from "react";
@@ -9,14 +11,8 @@ import {
   View,
 } from "react-native";
 import { CheckCircle2 } from "lucide-react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, TextArea } from "@startup/mobile-ui";
-
-type FeedbackBottomSheetProps = {
-  visible: boolean;
-  onClose: () => void;
-  onSubmit: (comment: string) => Promise<void>;
-};
 
 export default function FeedbackBottomSheet({
   visible,

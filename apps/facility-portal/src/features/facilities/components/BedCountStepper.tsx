@@ -1,4 +1,6 @@
 "use client";
+import type { BedCountStepperProps } from "../types/bedCountStepper";
+
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "@startup/web-ui/components/ui/toast";
@@ -9,13 +11,7 @@ export function BedCountStepper({
   max,
   disabled,
   onCommit,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  disabled: boolean;
-  onCommit: (value: number) => void;
-}) {
+}: BedCountStepperProps) {
   const [draft, setDraft] = useState(String(value));
   useEffect(() => {
     if (!disabled) setDraft(String(value));

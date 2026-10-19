@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { earningsPeriods } from "../utils/earningsConstants";
+import { useDriverEarnings } from "../hooks/useDriverEarnings";
+import type { EarningsScreenProps } from "../types/earnings-screen";
+
 import { Pressable, View } from "react-native";
 import { Ambulance } from "lucide-react-native";
-import { useQuery } from "@tanstack/react-query";
-import { listMyDriverTrips } from "@startup/data-access";
-import { Skeleton, useToastFeedback } from "@startup/mobile-ui";
+
+import { Skeleton } from "@startup/mobile-ui";
 import {
   Body,
   Card,
@@ -13,36 +15,9 @@ import {
   PageHeader,
 } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
-import { supabase, useMobileSession } from "../../../services/supabase";
-export function EarningsScreen({ history = false }: { history?: boolean }) {
-  const { profile } = useMobileSession();
 
-  const trips = useQuery({
-    queryKey: ["my-driver-trips", profile?.driver?.id],
-    queryFn: () => listMyDriverTrips(supabase!),
-    enabled: Boolean(supabase && profile?.driver?.id),
-  });
-  useToastFeedback({
-    error: trips.isError ? "Could not load trip history." : "",
-  });
-
-  const [period, setPeriod] = useState("Today");
-
-  const now = new Date();
-
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  if (period === "This Week")
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-
-  if (period === "This Month") start.setDate(1);
-  const filtered =
-    trips.data?.filter(
-      (t) =>
-        t.status === "completed" &&
-        t.completed_at &&
-        new Date(t.completed_at).getTime() >= start.getTime()
-    ) ?? [];
+export function EarningsScreen({ history = false }: EarningsScreenProps) {
+  const { trips, period, setPeriod, filtered } = useDriverEarnings({ history });
   return (
     <View style={ui.screen}>
       <PageHeader title={history ? "My Trips" : "My Earnings"} />
@@ -55,7 +30,7 @@ export function EarningsScreen({ history = false }: { history?: boolean }) {
             borderRadius: 12,
           }}
         >
-          {["Today", "This Week", "This Month"].map((p) => (
+          {earningsPeriods.map((p) => (
             <Pressable
               accessibilityRole="tab"
               accessibilityState={{ selected: p === period }}

@@ -1,4 +1,5 @@
 import { LiveFacilityUpdates } from "@/features/dashboard";
+import { LogoutButton } from "@/features/auth";
 import type { ReactNode } from "react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { requireApprovedFacility } from "@/server/auth/facilityAccess";
@@ -20,6 +21,7 @@ export default async function AdminRouteLayout({
     <AdminLayout
       facilityName={access.facilities[0]?.facilityName ?? "Facility"}
       userName={user?.email ?? "Facility account"}
+      logoutAction={<LogoutButton />}
     >
       <LiveFacilityUpdates
         facilityIds={access.facilities.map((facility) => facility.facilityId)}

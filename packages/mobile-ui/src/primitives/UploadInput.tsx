@@ -1,30 +1,10 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Upload } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-
-export type UploadInputProps = Omit<
-  PressableProps,
-  "children" | "style" | "disabled"
-> & {
-  label?: string;
-  value?: string;
-  placeholder?: string;
-  error?: string;
-  disabled?: boolean;
-  style?: PressableProps["style"];
-  containerStyle?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
-};
+import type { UploadInputProps } from "../types/uploadInput";
+export type { UploadInputProps } from "../types/uploadInput";
 
 export function UploadInput({
   label,

@@ -1,30 +1,20 @@
+import { getFindDoctorRoute } from "../utils/homeRoutes";
+import type { HomeFeedContentProps } from "../types/home-feed-content";
 import { StyleSheet, View } from "react-native";
 import { router, type Href } from "expo-router";
 import { colors } from "@startup/design-tokens";
 import { IconLabel, Skeleton, useToastFeedback } from "@startup/mobile-ui";
-import { homeActions } from "../utils/HomeActions";
+import { homeActions } from "../utils/homeActionsConstants";
 import AmbulanceBanner from "./AmbulanceBanner";
-import { BookingGuideLink } from "./BookingGuideLink";
 import UpcomingAppointmentCard from "../../appointments/components/UpcomingAppointmentCard";
 import PopularServices from "./PopularServices";
-import { formatDisplayDate, type ClinicAppointment } from "@startup/contracts";
-
-function getFindDoctorRoute(consultationType: string) {
-  return {
-    pathname: "/find-doctor",
-    params: { consultationType },
-  } as unknown as Href;
-}
+import { formatDisplayDate } from "@startup/contracts";
 
 export function HomeFeedContent({
   upcoming,
   isLoading,
   isError,
-}: {
-  upcoming?: ClinicAppointment[];
-  isLoading: boolean;
-  isError: boolean;
-}) {
+}: HomeFeedContentProps) {
   useToastFeedback({
     error: isError
       ? "Could not load appointments. Open Bookings to retry."
@@ -60,17 +50,6 @@ export function HomeFeedContent({
       <View style={styles.ambulanceBanner}>
         <AmbulanceBanner
           onBookPress={() => router.push("/ambulance" as unknown as Href)}
-        />
-      </View>
-
-      <View style={styles.bookingGuideLink}>
-        <BookingGuideLink
-          onPress={() =>
-            router.push({
-              pathname: "/learn-booking",
-              params: { consultationType: "Clinic Visit" },
-            } as Href)
-          }
         />
       </View>
 
@@ -113,10 +92,6 @@ const styles = StyleSheet.create({
   },
   ambulanceBanner: {
     marginTop: 10,
-    alignItems: "center",
-  },
-  bookingGuideLink: {
-    marginTop: 12,
     alignItems: "center",
   },
 });

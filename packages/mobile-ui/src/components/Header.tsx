@@ -1,35 +1,15 @@
 import { AppText as Text } from "../primitives/AppText";
-import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type TextStyle,
-  type ViewProps,
-} from "react-native";
-import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
+import type { HeaderProps } from "../types/header";
+export type { HeaderProps } from "../types/header";
 
 export type { HeaderApp } from "../utils/headerBackground";
-
-export type HeaderProps = ViewProps & {
-  title?: string;
-  centered?: boolean;
-  centerContent?: ReactNode;
-  rightAction?: ReactNode;
-  onBackPress?: () => void;
-  onBack?: () => void;
-  app?: HeaderApp;
-  backgroundColor?: string;
-  foregroundColor?: string;
-  titleStyle?: TextStyle;
-  backAccessibilityLabel?: string;
-  safeAreaEdges?: readonly Edge[];
-};
 
 export function Header({
   title,

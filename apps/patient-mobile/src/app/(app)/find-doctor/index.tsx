@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { FindDoctorScreen } from "../../../features/doctors/screens/FindDoctorScreen";
-import { parseConsultationType } from "../../../features/appointments/utils/consultationFlow";
+import { parseConsultationType } from "../../../features/appointments/utils/consultation";
 
 export default function FindDoctorRoute() {
   const { consultationType } = useLocalSearchParams<{

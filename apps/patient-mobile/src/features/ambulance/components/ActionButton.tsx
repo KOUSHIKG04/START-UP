@@ -1,10 +1,6 @@
+import type { ActionButtonProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
-import {
-  Pressable,
-  StyleSheet,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
 export function ActionButton({
@@ -12,12 +8,7 @@ export function ActionButton({
   onPress,
   style,
   disabled = false,
-}: {
-  label: string;
-  onPress: () => void;
-  style?: StyleProp<ViewStyle>;
-  disabled?: boolean;
-}) {
+}: ActionButtonProps) {
   return (
     <Pressable
       disabled={disabled}

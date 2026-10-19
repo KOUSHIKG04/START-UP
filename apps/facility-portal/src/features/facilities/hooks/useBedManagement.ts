@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import type { BedInventoryProjection } from "@startup/contracts";
 import type { DeptBedData } from "../types/bedManagement";
-import { bedRowColor } from "../utils/bedManagementConstants";
+import { bedRowColor } from "../utils/bedRowColor";
 import {
   BedSaveError,
   reloadBedCounts,

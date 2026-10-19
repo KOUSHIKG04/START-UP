@@ -1,38 +1,17 @@
+import { ConsultationSummary } from "./ConsultationSummary";
+import { styles } from "./CompletionView.styles";
+import { useConsultationCompletion } from "../hooks/useConsultationCompletion";
+import { experienceRatings } from "../utils/consultationConstants";
+import type { CompletionViewProps } from "../types/visit-session";
+export type { CompletionViewProps } from "../types/visit-session";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  AlertCircle,
-  CalendarDays,
-  CheckCircle2,
-  ClipboardList,
-  FileText,
-  House,
-  Monitor,
-  ShieldCheck,
-  Stethoscope,
-  UserRound,
-} from "lucide-react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+
+import { Pressable, View } from "react-native";
+
+import { AlertCircle, CheckCircle2, FileText } from "lucide-react-native";
+import { colors, radius } from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
 import FeedbackBottomSheet from "./FeedbackBottomSheet";
-import type { Appointment } from "../../appointments/types/appointment";
-import type { CompletionActions } from "../types/visit-session";
-
-export interface CompletionViewProps extends CompletionActions {
-  appointment: Appointment;
-  existingRating?: number | null;
-  onSubmitRating?: (rating: number, comment?: string) => Promise<void>;
-}
-
-const experienceRatings = [
-  { emoji: "😞", label: "Very poor" },
-  { emoji: "😐", label: "Okay" },
-  { emoji: "🙂", label: "Good" },
-  { emoji: "😊", label: "Great" },
-  { emoji: "😍", label: "Excellent" },
-] as const;
 
 export function CompletionView({
   appointment,
@@ -42,41 +21,27 @@ export function CompletionView({
   existingRating,
   onSubmitRating,
 }: CompletionViewProps) {
-  const insets = useSafeAreaInsets();
-  const [rating, setRating] = useState<number | undefined>(
-    existingRating ?? undefined
-  );
-  const [ratingSubmitted, setRatingSubmitted] = useState(
-    existingRating != null
-  );
-  const [submitting, setSubmitting] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-
-  const submitRating = async (comment?: string) => {
-    if (
-      rating === undefined ||
-      ratingSubmitted ||
-      !onSubmitRating ||
-      submitting
-    )
-      return;
-    setSubmitting(true);
-    try {
-      await onSubmitRating(rating, comment);
-      setRatingSubmitted(true);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  const isClinic = appointment.consultationType === "Clinic Visit";
-  const isHome = appointment.consultationType === "Home Visit";
-  const completionCopy = isClinic
-    ? "Your Clinic Visit is Completed"
-    : isHome
-      ? "Your Home Visit is Completed"
-      : "Your online consultation is Completed";
-  const HeroIcon = isClinic ? Stethoscope : isHome ? House : Monitor;
-
+  const {
+    insets,
+    rating,
+    setRating,
+    ratingSubmitted,
+    submitting,
+    feedbackOpen,
+    setFeedbackOpen,
+    submitRating,
+    isClinic,
+    isHome,
+    completionCopy,
+    HeroIcon,
+  } = useConsultationCompletion({
+    appointment,
+    onGoHome,
+    onViewMedicines,
+    onViewPrescription,
+    existingRating,
+    onSubmitRating,
+  });
   return (
     <FadedScrollView
       contentContainerStyle={[
@@ -196,9 +161,11 @@ export function CompletionView({
                     pressed ? styles.pressed : undefined,
                   ]}
                 >
-                  <Text variant="bodyEmphasis" style={styles.ratingEmoji}>
-                    {item.emoji}
-                  </Text>
+                  <item.icon
+                    size={27}
+                    color={colors.patient.primaryDark}
+                    accessible={false}
+                  />
                 </Pressable>
               ))}
             </View>
@@ -261,320 +228,3 @@ export function CompletionView({
     </FadedScrollView>
   );
 }
-
-function ConsultationSummary({ appointment }: { appointment: Appointment }) {
-  return (
-    <Card
-      variant="outlined"
-      borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
-      backgroundColor={colors.white}
-      gap={0}
-      padding={0}
-      style={styles.summaryCard}
-    >
-      <View style={styles.summaryHeading}>
-        <ClipboardList color={colors.patient.primaryDark} size={20} />
-        <Text variant="cardHeading" style={styles.cardTitle}>
-          Consultation Summary
-        </Text>
-      </View>
-      <View style={styles.summaryRow}>
-        <View style={styles.summaryLabel}>
-          <UserRound color={colors.patient.primaryDark} size={18} />
-          <Text variant="body" style={styles.secondaryText}>
-            Doctor
-          </Text>
-        </View>
-        <Text variant="bodyEmphasis" style={styles.summaryValue}>
-          {appointment.doctorName}
-        </Text>
-      </View>
-      <View style={styles.summaryRow}>
-        <View style={styles.summaryLabel}>
-          <CalendarDays color={colors.patient.primaryDark} size={18} />
-          <Text variant="body" style={styles.secondaryText}>
-            Date & Time
-          </Text>
-        </View>
-        <Text variant="bodyEmphasis" style={styles.summaryValue}>
-          {appointment.date}, {appointment.time.split(" – ")[0]}
-        </Text>
-      </View>
-    </Card>
-  );
-}
-
-const styles = StyleSheet.create({
-  content: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-    gap: 16,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  topSection: {
-    width: "100%",
-    gap: 14,
-  },
-  bottomSection: {
-    width: "100%",
-    gap: 14,
-    marginTop: "auto",
-    paddingTop: 12,
-  },
-  completionHero: {
-    alignItems: "center",
-    gap: 7,
-    paddingTop: 10,
-    paddingBottom: 4,
-  },
-  completionHaloOuter: {
-    width: 178,
-    height: 178,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-    borderRadius: 89,
-    backgroundColor: "#E1F7F4",
-  },
-  completionHaloInner: {
-    width: 142,
-    height: 142,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 71,
-    backgroundColor: "#C8EDE9",
-  },
-  completionCheckBadge: {
-    position: "absolute",
-    top: 2,
-    right: 0,
-    width: 46,
-    height: 46,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 4,
-    borderColor: colors.white,
-    borderRadius: 23,
-    backgroundColor: colors.patient.accent,
-  },
-  completionIcon: {
-    width: 104,
-    height: 104,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 52,
-    backgroundColor: colors.patient.primaryDark,
-  },
-  thankYouTitle: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.bold,
-    fontSize: 26,
-    fontWeight: "700",
-  },
-  completedTitle: {
-    color: colors.patient.primary,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  centeredDescription: {
-    maxWidth: 250,
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    lineHeight: 17,
-    textAlign: "center",
-  },
-  clinicOrderSection: {
-    width: "100%",
-    gap: 12,
-  },
-  wellnessBanner: {
-    minHeight: 64,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 11,
-    paddingHorizontal: 16,
-    borderRadius: radius.md,
-    backgroundColor: colors.patient.surface,
-  },
-  wellnessIcon: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 18,
-    backgroundColor: colors.patient.primaryDark,
-  },
-  infoText: {
-    flex: 1,
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.medium,
-    fontSize: 13,
-    fontWeight: "500",
-    lineHeight: 18,
-  },
-  completionActionsRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  completionSecondaryAction: { flex: 1, minHeight: 48 },
-  orderMedicineNotice: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    width: "100%",
-    paddingVertical: 2,
-  },
-  orderMedicineNoticeText: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.medium,
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: "center",
-  },
-  recordsBanner: {
-    minHeight: 72,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 14,
-    borderRadius: radius.md,
-    backgroundColor: "#E8F8F4",
-  },
-  experienceCard: {
-    backgroundColor: "#E8F8F4",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
-    borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  feedbackTitle: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.medium,
-    fontSize: 15,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  feedbackDescription: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    textAlign: "center",
-  },
-  ratingRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-  },
-  ratingButton: {
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-    borderRadius: 24,
-    backgroundColor: colors.white,
-  },
-  selectedRating: {
-    borderColor: colors.patient.primaryDark,
-    backgroundColor: "#E8F8F4",
-  },
-  ratingEmoji: { fontSize: 27, lineHeight: 34 },
-  pressed: { opacity: 0.72 },
-  experienceSubmitButton: {
-    minHeight: 40,
-    marginTop: 4,
-    borderRadius: radius.md,
-    backgroundColor: colors.white,
-    borderColor: "#D1D5DB",
-    borderWidth: 1,
-  },
-  experienceSubmitButtonActive: {
-    borderColor: colors.patient.primary,
-  },
-  experienceSubmitLabel: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 13,
-  },
-  ratingSubmittedConfirmation: {
-    minHeight: 40,
-    marginTop: 4,
-    borderRadius: radius.md,
-    backgroundColor: "#DDF4EE",
-    borderWidth: 1,
-    borderColor: "#A9E4D7",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-  },
-  ratingSubmittedText: {
-    color: colors.patient.primaryDark,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 13,
-  },
-  completionSideButton: {
-    flex: 1,
-    minHeight: 48,
-    paddingHorizontal: 8,
-  },
-  completionSideButtonLabel: {
-    fontSize: 13,
-  },
-  summaryCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
-    borderRadius: radius.md,
-    backgroundColor: colors.white,
-    overflow: "hidden",
-  },
-  summaryHeading: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-    padding: 14,
-  },
-  cardTitle: {
-    color: colors.patient.text,
-    fontFamily: fontFamilies.bold,
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  summaryRow: {
-    minHeight: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderDefault,
-  },
-  summaryLabel: { flexDirection: "row", alignItems: "center", gap: 10 },
-  secondaryText: {
-    color: colors.patient.textSecondary,
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  summaryValue: {
-    maxWidth: "62%",
-    color: colors.patient.text,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
-    fontWeight: "600",
-    lineHeight: 16,
-    textAlign: "right",
-  },
-});

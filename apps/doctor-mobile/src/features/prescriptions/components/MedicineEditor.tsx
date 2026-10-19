@@ -1,16 +1,14 @@
+import {
+  medicineEditorItems1,
+  medicineEditorItems2,
+} from "../utils/medicineEditorConstants";
+import type { MedicineEditorProps } from "../types/medicine-editor";
+export type { MedicineEditorProps } from "../types/medicine-editor";
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
 import { Choice, Heading, Panel } from "../../../components/DoctorScreen";
 import { ui } from "../../../components/theme";
 import type { Medicine } from "../../../types/doctor";
-
-export type MedicineEditorProps = {
-  isEditingExisting: boolean;
-  medicine: Medicine;
-  onChange: (medicine: Medicine) => void;
-  onCancel: () => void;
-  onSave: () => void;
-};
 
 export function MedicineEditor({
   isEditingExisting,
@@ -38,7 +36,7 @@ export function MedicineEditor({
         containerStyle={ui.field}
       />
       <View style={ui.wrap}>
-        {(["Before food", "After food"] as const).map((timing) => (
+        {medicineEditorItems1.map((timing) => (
           <Choice
             key={timing}
             label={timing}
@@ -48,7 +46,7 @@ export function MedicineEditor({
         ))}
       </View>
       <View style={ui.row}>
-        {["Breakfast", "Lunch", "Dinner"].map((meal, index) => (
+        {medicineEditorItems2.map((meal, index) => (
           <Input
             key={meal}
             label={meal}

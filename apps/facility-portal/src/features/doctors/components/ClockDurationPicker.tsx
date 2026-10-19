@@ -1,4 +1,5 @@
 "use client";
+import type { ClockDurationPickerProps } from "../types/clockDurationPicker";
 
 import { useState } from "react";
 import { Clock3 } from "lucide-react";
@@ -21,14 +22,7 @@ export function ClockDurationPicker({
   max,
   disabled = false,
   onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  disabled?: boolean;
-  onChange: (minutes: number) => void;
-}) {
+}: ClockDurationPickerProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(value);
   const clamp = (minutes: number) => Math.max(min, Math.min(max, minutes));

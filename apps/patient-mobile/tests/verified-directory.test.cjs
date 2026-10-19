@@ -6,6 +6,7 @@ const vm = require("node:vm");
 const ts = require("typescript");
 function load(file, mocks = {}) {
   const exports = {};
+  const absolute = path.resolve(__dirname, file);
   vm.runInNewContext(
     ts.transpileModule(fs.readFileSync(path.resolve(__dirname, file), "utf8"), {
       compilerOptions: {
@@ -14,7 +15,22 @@ function load(file, mocks = {}) {
         target: ts.ScriptTarget.ES2022,
       },
     }).outputText,
-    { exports, require: (name) => mocks[name], Intl, setTimeout, clearTimeout }
+    {
+      exports,
+      require: (name) => {
+        if (Object.hasOwn(mocks, name)) return mocks[name];
+        if (!name.startsWith(".")) return undefined;
+        const target = path.resolve(path.dirname(absolute), name);
+        const resolved = [target, `${target}.ts`, `${target}.tsx`].find(
+          (file) => fs.existsSync(file) && fs.statSync(file).isFile()
+        );
+        if (!resolved) throw new Error(`Unmocked import: ${name}`);
+        return load(path.relative(__dirname, resolved), mocks);
+      },
+      Intl,
+      setTimeout,
+      clearTimeout,
+    }
   );
   return exports;
 }
@@ -315,7 +331,11 @@ test("switching locations resets slot state and confirms the selected location a
       if (Array.isArray(node)) return node.forEach(walk);
       if (!node || typeof node !== "object") return;
       nodes.push(node);
-      walk(node.props?.children);
+      walk(
+        typeof node.type === "function"
+          ? node.type(node.props)
+          : node.props?.children
+      );
     };
     walk(
       DoctorProfileScreen({
@@ -483,7 +503,11 @@ test("Book Slots automatically selects the earliest generated date after loading
       if (Array.isArray(node)) return node.forEach(walk);
       if (!node || typeof node !== "object") return;
       nodes.push(node);
-      walk(node.props?.children);
+      walk(
+        typeof node.type === "function"
+          ? node.type(node.props)
+          : node.props?.children
+      );
     };
     walk(BookSlots(props));
     effects.forEach((fn) => fn());

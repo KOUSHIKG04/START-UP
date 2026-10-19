@@ -1,5 +1,7 @@
+import { useProfileSettings } from "../hooks/useProfileSettings";
+import type { SettingsViewProps } from "../types/settings-view";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useState } from "react";
+
 import { Pressable, StyleSheet, Switch, View } from "react-native";
 import {
   ChevronRight,
@@ -14,11 +16,15 @@ import { HelpModal } from "./HelpModal";
 import { LogoutModal } from "./LogoutModal";
 import { PrivacyModal } from "./PrivacyModal";
 
-export function SettingsView({ onBack }: { onBack: () => void }) {
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [logoutOpen, setLogoutOpen] = useState(false);
-
+export function SettingsView({ onBack }: SettingsViewProps) {
+  const {
+    helpOpen,
+    setHelpOpen,
+    privacyOpen,
+    setPrivacyOpen,
+    logoutOpen,
+    setLogoutOpen,
+  } = useProfileSettings({ onBack });
   return (
     <View style={styles.screen}>
       <Header title="Settings" app="patient" onBackPress={onBack} />

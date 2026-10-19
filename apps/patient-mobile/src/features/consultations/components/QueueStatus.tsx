@@ -1,13 +1,13 @@
+import type { QueueStatusProps } from "../types/queue-status";
+import { queueSeatsImage } from "../utils/queueConstants";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
 import { Info, UserRound } from "lucide-react-native";
-import Svg, { Circle } from "react-native-svg";
+
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 
-const queueSeatsImage = require("../../../../assets/clinzo-symptom-icons/Queue-seates.png");
-
-export function QueueStatus({ onComplete }: { onComplete: () => void }) {
+export function QueueStatus({ onComplete }: QueueStatusProps) {
   return (
     <>
       <Card
@@ -86,6 +86,7 @@ export function QueueStatus({ onComplete }: { onComplete: () => void }) {
 
       <View style={styles.seatsImageContainer}>
         <Image
+          alt=""
           source={queueSeatsImage}
           style={styles.seatsImage}
           resizeMode="cover"

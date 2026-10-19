@@ -1,11 +1,6 @@
+import type { EmergencyModeCardProps } from "../types/ambulance-booking-form";
 import { AppText as Text } from "@startup/mobile-ui";
-import {
-  StyleSheet,
-  Switch,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, Switch, View } from "react-native";
 import { Siren } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
 
@@ -13,11 +8,7 @@ export function EmergencyModeCard({
   emergency,
   onEmergencyChange,
   style,
-}: {
-  emergency: boolean;
-  onEmergencyChange: (val: boolean) => void;
-  style?: StyleProp<ViewStyle>;
-}) {
+}: EmergencyModeCardProps) {
   return (
     <View
       style={[

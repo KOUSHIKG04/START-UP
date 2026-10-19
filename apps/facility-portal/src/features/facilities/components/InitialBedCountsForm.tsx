@@ -1,59 +1,21 @@
 "use client";
+import { initialBedCountsFormOptions } from "../utils/initialBedCountsFormConstants";
 
-import { useTransition } from "react";
-import { toast } from "@startup/web-ui/components/ui/toast";
-import type { BedInventoryProjection } from "@startup/contracts";
-import {
-  saveBedCounts,
-  reloadBedCounts,
-  BedSaveError,
-} from "../client/bedInventory";
+import { useInitialBedCounts } from "../hooks/useInitialBedCounts";
+
+import type { InitialBedCountsFormProps } from "../types/initialBedCountsForm";
 
 export function InitialBedCountsForm({
   row,
   onSaved,
-}: {
-  row: BedInventoryProjection;
-  onSaved: (row: BedInventoryProjection) => void;
-}) {
-  const [pending, startTransition] = useTransition();
-
-  function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    form.set("facilityId", row.facilityId);
-    form.set("bedTypeId", row.bedTypeId);
-    form.set("expectedRowVersion", "0");
-    startTransition(async () => {
-      try {
-        onSaved(await saveBedCounts(form));
-        toast.add({ title: "Bed counts saved", type: "success" });
-      } catch (error) {
-        if (error instanceof BedSaveError && error.code === "PT409") {
-          try {
-            (await reloadBedCounts(row.facilityId)).forEach(onSaved);
-          } catch {
-            /* Keep last confirmed counts. */
-          }
-        }
-        toast.add({
-          title: "Could not save bed counts",
-          description:
-            error instanceof Error
-              ? error.message
-              : "Check your connection and try again.",
-          type: "error",
-        });
-      }
-    });
-  }
-
+}: InitialBedCountsFormProps) {
+  const { pending, submit } = useInitialBedCounts({ row, onSaved });
   return (
     <form
       onSubmit={submit}
       className="flex flex-wrap items-end gap-2 py-1 text-sm"
     >
-      {(["total", "occupied", "maintenance"] as const).map((name) => (
+      {initialBedCountsFormOptions.map((name) => (
         <label key={name} className="flex flex-col gap-1 capitalize">
           {name}
           <input

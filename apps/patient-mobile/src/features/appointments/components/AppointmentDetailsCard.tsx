@@ -1,3 +1,4 @@
+import type { AppointmentDetailsCardProps } from "../types/appointments";
 import { AppText as Text } from "@startup/mobile-ui";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
@@ -12,15 +13,11 @@ import {
 } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Accordion, Chip } from "@startup/mobile-ui";
-import type { Appointment } from "../types/appointment";
 
 export default function AppointmentDetailsCard({
   appointment,
   defaultOpen = true,
-}: {
-  appointment: Appointment;
-  defaultOpen?: boolean;
-}) {
+}: AppointmentDetailsCardProps) {
   return (
     <Accordion
       title="Appointment Details"

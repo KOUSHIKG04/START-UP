@@ -1,11 +1,10 @@
+import { FloatingVideo } from "./FloatingVideo";
 import { AppText as Text } from "../primitives/AppText";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
-  Animated,
   FlatList,
   KeyboardAvoidingView,
-  PanResponder,
   Platform,
   Pressable,
   StyleSheet,
@@ -27,123 +26,17 @@ import {
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Input } from "../primitives/Input";
 import { useToast } from "../primitives/Toast";
+import type {
+  CallMessage,
+  ConsultationCallProps,
+} from "../types/consultationCall";
 
-export type CallMessage = {
-  id: string;
-  sender_id: string;
-  body: string;
-  created_at: string;
-};
-export type ConsultationCallProps = {
-  theme: "patient" | "doctor";
-  name: string;
-  remoteVideo: ReactNode;
-  localVideo: ReactNode;
-  cameraEnabled: boolean;
-  microphoneEnabled: boolean;
-  connected: boolean;
-  chatAllowed: boolean;
-  deviceBusy: boolean;
-  sending: boolean;
-  messages?: CallMessage[];
-  identityId?: string;
-  initialChat?: boolean;
-  onSend: (body: string) => Promise<void>;
-  onCamera: () => void;
-  onMicrophone: () => void;
-  onFlipCamera: () => void;
-  onEnd: () => void;
-  onBack: () => void;
-};
+export { clampCallPreview } from "../utils/callPreview";
 
-export function clampCallPreview(
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  previewWidth: number,
-  previewHeight: number
-) {
-  return {
-    x: Math.max(8, Math.min(x, Math.max(8, width - previewWidth - 8))),
-    y: Math.max(8, Math.min(y, Math.max(8, height - previewHeight - 8))),
-  };
-}
-
-function FloatingVideo({
-  children,
-  width,
-  height,
-  frame,
-}: {
-  children: ReactNode;
-  width: number;
-  height: number;
-  frame: { width: number; height: number };
-}) {
-  const position = useRef(new Animated.ValueXY({ x: 8, y: 8 })).current;
-  const current = useRef({ x: 8, y: 8 });
-  const origin = useRef(current.current);
-  const initialized = useRef(false);
-  const bounds = useRef({
-    ...frame,
-    previewWidth: width,
-    previewHeight: height,
-  });
-  useEffect(() => {
-    bounds.current = { ...frame, previewWidth: width, previewHeight: height };
-    if (!frame.width || !frame.height) return;
-    const next = initialized.current
-      ? current.current
-      : { x: frame.width - width - 16, y: 16 };
-    current.current = clampCallPreview(
-      next.x,
-      next.y,
-      frame.width,
-      frame.height,
-      width,
-      height
-    );
-    position.setValue(current.current);
-    initialized.current = true;
-  }, [frame.width, frame.height, width, height, position]);
-  const pan = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gesture) =>
-          Math.abs(gesture.dx) + Math.abs(gesture.dy) > 8,
-        onPanResponderGrant: () => {
-          origin.current = current.current;
-        },
-        onPanResponderMove: (_, gesture) => {
-          const b = bounds.current;
-          current.current = clampCallPreview(
-            origin.current.x + gesture.dx,
-            origin.current.y + gesture.dy,
-            b.width,
-            b.height,
-            b.previewWidth,
-            b.previewHeight
-          );
-          position.setValue(current.current);
-        },
-        onPanResponderTerminationRequest: () => false,
-      }),
-    [position]
-  );
-  return (
-    <Animated.View
-      {...pan.panHandlers}
-      accessibilityLabel="Video preview. Drag to reposition"
-      style={[
-        styles.floating,
-        { width, height, transform: position.getTranslateTransform() },
-      ]}
-    >
-      {children}
-    </Animated.View>
-  );
-}
+export type {
+  CallMessage,
+  ConsultationCallProps,
+} from "../types/consultationCall";
 
 export function ConsultationCall(props: ConsultationCallProps) {
   const { theme, name, messages, identityId } = props;
@@ -510,19 +403,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-  },
-  floating: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#173B4A",
-    elevation: 5,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
   },
   video: { flex: 1 },
   tinySelf: {

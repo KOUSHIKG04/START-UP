@@ -1,19 +1,17 @@
 "use client";
-import { useState, useTransition } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFacilityUnavailableTime } from "../hooks/useFacilityUnavailableTime";
+
+import type { FacilityUnavailableTimeProps } from "../types/facilityUnavailableTime";
+
 import { Button } from "@startup/web-ui/components/ui/button";
 import { Input } from "@startup/web-ui/components/ui/input";
 import { Label } from "@startup/web-ui/components/ui/label";
-import { toast } from "@startup/web-ui/components/ui/toast";
+
 import { formatDisplayDateTime } from "@startup/contracts";
-import {
-  addFacilityDoctorUnavailability,
-  loadFacilityDoctorSchedule,
-  removeFacilityDoctorUnavailability,
-} from "../server/scheduleActions";
+
 import { UnavailableDatePicker } from "./UnavailableDatePicker";
 import { ClockTimePicker } from "./ClockTimePicker";
-import { practiceSlotIso } from "../utils/scheduleEditor";
+
 import {
   card,
   unavailableServiceOptions as scopes,
@@ -21,46 +19,26 @@ import {
 
 export function FacilityUnavailableTime({
   practiceId,
-}: {
-  practiceId: string;
-}) {
-  const client = useQueryClient();
-  const schedule = useQuery({
-    queryKey: ["facility-practice-schedule", practiceId],
-    queryFn: () => loadFacilityDoctorSchedule(practiceId),
-  });
-  type Scope = (typeof scopes)[number][0];
-  const [selectedScopes, setScopes] = useState<Scope[]>(["all"]);
-  function toggleScope(value: Scope) {
-    setScopes((current) => {
-      if (value === "all") return ["all"];
-      const services = current.filter((item) => item !== "all");
-      const next = services.includes(value)
-        ? services.filter((item) => item !== value)
-        : [...services, value];
-      return next.length === 0 || next.length === 3 ? ["all"] : next;
-    });
-  }
-  const scopeLabel = selectedScopes.includes("all")
-    ? "all services"
-    : scopes
-        .filter(([value]) => selectedScopes.includes(value))
-        .map(([, label]) => label)
-        .join(" and ");
-  const [date, setDate] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [reason, setReason] = useState("");
-  const [pending, startTransition] = useTransition();
-  const result = schedule.data as
-    Awaited<ReturnType<typeof loadFacilityDoctorSchedule>> | undefined;
-  const zone = result?.ok ? result.doctor.booking_timezone : null;
-  const fail = (description: string) =>
-    toast.add({
-      title: "Unavailable time could not be updated",
-      description,
-      type: "error",
-    });
+}: FacilityUnavailableTimeProps) {
+  const {
+    addUnavailableTime,
+    removeUnavailableTime,
+    schedule,
+    selectedScopes,
+    toggleScope,
+    scopeLabel,
+    date,
+    setDate,
+    start,
+    setStart,
+    end,
+    setEnd,
+    reason,
+    setReason,
+    pending,
+    result,
+    zone,
+  } = useFacilityUnavailableTime({ practiceId });
   return (
     <section className={`${card} max-w-full min-w-0`}>
       <h2 className="text-[15px] font-normal">Unavailable time / Leave</h2>
@@ -90,57 +68,7 @@ export function FacilityUnavailableTime({
       <p className="text-sm text-[#475569]">
         This block applies to {scopeLabel.toLowerCase()}.
       </p>
-      <form
-        className="min-w-0 space-y-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!zone) return;
-          const day = date;
-          if (!day) {
-            fail("Choose a date.");
-            return;
-          }
-          try {
-            const startsAt = practiceSlotIso(day, start, zone);
-            const nextDay = new Date(Date.parse(day + "T00:00:00Z") + 86400000)
-              .toISOString()
-              .slice(0, 10);
-            const endsAt =
-              end === "24:00"
-                ? practiceSlotIso(nextDay, "00:00", zone)
-                : practiceSlotIso(day, end, zone);
-            if (endsAt <= startsAt)
-              throw new Error("End time must be after start time.");
-            startTransition(async () => {
-              const response = await addFacilityDoctorUnavailability({
-                practiceId,
-                startsAt,
-                endsAt,
-                reason,
-                serviceModes: selectedScopes,
-              });
-              if (!response.ok) {
-                fail(response.error);
-                return;
-              }
-              setDate("");
-              setStart("");
-              setEnd("");
-              setReason("");
-              await client.invalidateQueries({
-                queryKey: ["facility-practice-schedule", practiceId],
-              });
-              toast.add({ title: "Unavailable time saved", type: "success" });
-            });
-          } catch (cause) {
-            fail(
-              cause instanceof Error
-                ? cause.message
-                : "Check the date and hours."
-            );
-          }
-        }}
-      >
+      <form className="min-w-0 space-y-4" onSubmit={addUnavailableTime}>
         <UnavailableDatePicker
           value={date}
           onChange={setDate}
@@ -210,22 +138,7 @@ export function FacilityUnavailableTime({
                 <Button
                   variant="outline"
                   disabled={pending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      const response = await removeFacilityDoctorUnavailability(
-                        practiceId,
-                        item.id,
-                        Number(item.row_version)
-                      );
-                      if (!response.ok) {
-                        fail(response.error);
-                        return;
-                      }
-                      await client.invalidateQueries({
-                        queryKey: ["facility-practice-schedule", practiceId],
-                      });
-                    })
-                  }
+                  onClick={() => removeUnavailableTime(item)}
                 >
                   Remove
                 </Button>

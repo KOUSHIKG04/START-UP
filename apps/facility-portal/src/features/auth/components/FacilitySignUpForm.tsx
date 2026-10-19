@@ -1,47 +1,16 @@
 "use client";
+import { useFacilitySignUp } from "../hooks/useFacilitySignUp";
 
-import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+
 import { Button } from "@startup/web-ui/components/ui/button";
 import { Card, CardContent } from "@startup/web-ui/components/ui/card";
 import { Input } from "@startup/web-ui/components/ui/input";
 import { Label } from "@startup/web-ui/components/ui/label";
 
 export function FacilitySignUpForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setMessage("");
-    try {
-      const { error } = await createBrowserSupabaseClient().auth.signUp({
-        email: email.trim(),
-        password,
-      });
-      if (error?.code === "email_address_invalid") {
-        throw new Error(
-          "Use a real email inbox. Supabase does not accept example.com or other test domains for signup."
-        );
-      }
-      if (error?.code === "email_address_not_authorized") {
-        throw new Error(
-          "This Supabase project can only email its team members until custom SMTP is configured. Use a team email for testing."
-        );
-      }
-      if (error) throw error;
-      setMessage(
-        "Check your email to confirm this account, then sign in and register your facility."
-      );
-    } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Sign-up failed.");
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { email, setEmail, password, setPassword, message, busy, submit } =
+    useFacilitySignUp();
   return (
     <Card className="w-full max-w-md">
       <CardContent className="space-y-5 p-6">

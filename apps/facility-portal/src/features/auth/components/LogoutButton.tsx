@@ -1,22 +1,11 @@
 "use client";
+import { useLogout } from "../hooks/useLogout";
 
-import { useActionState, useEffect } from "react";
 import { LoaderCircle, LogOut } from "lucide-react";
 import { SidebarMenuButton } from "@startup/web-ui/components/ui/sidebar";
-import { toast } from "@startup/web-ui/components/ui/toast";
-import { logout } from "../server/actions";
 
 export function LogoutButton() {
-  const [state, action, pending] = useActionState(logout, { error: null });
-  useEffect(() => {
-    if (state.error)
-      toast.add({
-        title: "Logout failed",
-        description: state.error,
-        type: "error",
-      });
-  }, [state]);
-
+  const { action, pending } = useLogout();
   return (
     <form action={action}>
       <SidebarMenuButton

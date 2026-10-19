@@ -1,9 +1,7 @@
 import { router, useLocalSearchParams, type Href } from "expo-router";
 import { PrescriptionScreen } from "../../../features/prescriptions/screens/PrescriptionScreen";
-import {
-  appointmentFromParams,
-  type AppointmentParams,
-} from "../../../features/appointments/utils/appointmentParams";
+import { appointmentFromParams } from "../../../features/appointments/utils/appointmentParams";
+import { type AppointmentParams } from "../../../features/appointments/types/appointment-params";
 
 export default function PrescriptionRoute() {
   const params = useLocalSearchParams<

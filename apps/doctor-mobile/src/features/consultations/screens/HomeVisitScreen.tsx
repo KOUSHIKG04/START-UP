@@ -1,7 +1,8 @@
+import { pinDigitIndices } from "../utils/homeVisitConstants";
+import { useHomeVisit } from "../hooks/useHomeVisit";
 import { Input } from "@startup/mobile-ui";
-import { useToastFeedback } from "@startup/mobile-ui";
-import { useRef, useState } from "react";
-import { Image, Linking, TextInput, View } from "react-native";
+
+import { Image, Linking, View } from "react-native";
 import { router } from "expo-router";
 import { Button } from "@startup/mobile-ui";
 import { MessageCircle, Navigation, Phone } from "lucide-react-native";
@@ -14,13 +15,11 @@ import {
   Panel,
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
-import { useVisit, visitRoute } from "../utils/consultation";
+import { visitRoute } from "../utils/consultationRoutes";
+
 export function HomeVisitScreen() {
-  const { patient, appointment } = useVisit();
-  const [pin, setPin] = useState(["", "", "", ""]);
-  const [error, setError] = useState("");
-  useToastFeedback({ error });
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const { patient, appointment, pin, setPin, setError, inputs } =
+    useHomeVisit();
   if (!patient || !appointment) return <MissingPatient />;
   const navigate = async () => {
     try {
@@ -35,7 +34,7 @@ export function HomeVisitScreen() {
     <DoctorScreen title="Home visit" bottomNav={false}>
       <Image
         source={require("../../../../assets/figma/map.png")}
-        accessibilityLabel="Reference map showing the home visit area in Bengaluru"
+        alt="Reference map showing the home visit area in Bengaluru"
         style={{ width: "100%", height: 216, borderRadius: 14, marginTop: 6 }}
         resizeMode="cover"
       />
@@ -83,7 +82,7 @@ export function HomeVisitScreen() {
           Enter Patient’s PIN to Proceed
         </Heading>
         <View style={ui.row}>
-          {[0, 1, 2, 3].map((index) => (
+          {pinDigitIndices.map((index) => (
             <Input
               variant="unstyled"
               key={index}

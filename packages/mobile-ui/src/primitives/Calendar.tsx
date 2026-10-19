@@ -1,35 +1,18 @@
+import { weekdays, monthLabel, fullDayLabel } from "../utils/calendarConstants";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { AppTheme } from "../utils/appTheme";
 import {
   calendarMonthDays,
   formatCalendarDay,
   parseCalendarDay,
-} from "./calendarDays";
+} from "../utils/calendarDays";
+import type { CalendarProps } from "../types/calendar";
 
-const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-const monthLabel = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  year: "numeric",
-});
-const fullDayLabel = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-});
-
-export type CalendarProps = {
-  value?: string;
-  onChange: (day: string) => void;
-  minDate?: string;
-  maxDate?: string;
-  theme?: AppTheme;
-};
+export type { CalendarProps } from "../types/calendar";
 
 /** Single-day calendar for local YYYY-MM-DD values. It never converts a day through UTC. */
 export function Calendar({
@@ -190,8 +173,9 @@ const styles = StyleSheet.create({
   },
   weekday: { fontFamily: fontFamilies.medium, fontSize: 12 },
   day: {
-    width: 40,
-    height: 40,
+    width: "100%",
+    maxWidth: 40,
+    aspectRatio: 1,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

@@ -22,15 +22,13 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-import {
-  PersonalAddressField,
-  emptyPersonalAddress,
-} from "../../features/profile/components/PersonalAddressField";
+import { PersonalAddressField } from "../../features/profile/components/PersonalAddressField";
+import { emptyPersonalAddress } from "../../features/profile/utils/personalAddressConstants";
 import {
   doctorPersonalAddressInputSchema,
   type DoctorPersonalAddressInput,
 } from "@startup/contracts";
-import { useClinicLocationDraft } from "../../features/locations/clinicLocationDraft";
+import { useClinicLocationDraft } from "../../features/locations/stores/clinicLocationDraft";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { File } from "expo-file-system";
@@ -61,10 +59,8 @@ import {
   updateMyOwnedClinicLocation,
   type RegisteredCareFacility,
 } from "@startup/data-access";
-import {
-  OnboardingButton,
-  OnboardingShell,
-} from "../../features/auth/components/OnboardingShell";
+import { OnboardingShell } from "../../features/auth/components/OnboardingShell";
+import { OnboardingButton } from "../../features/auth/components/OnboardingButton";
 import {
   mobileSession,
   supabase,

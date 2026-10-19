@@ -1,10 +1,6 @@
-import type {
-  ClinicSession,
-  FacilityDoctorRosterItem,
-} from "@startup/contracts";
+import type { PracticeSession } from "../types/facilitySchedule";
+import type { FacilityDoctorRosterItem } from "@startup/contracts";
 import type { DeptSchedule } from "../types/doctorSchedules";
-
-export type PracticeSession = { practiceId: string; session: ClinicSession };
 
 const dayKey = (date: Date, timeZone = "Asia/Kolkata") =>
   new Intl.DateTimeFormat("en-CA", {

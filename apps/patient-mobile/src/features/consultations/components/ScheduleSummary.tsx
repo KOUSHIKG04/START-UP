@@ -1,3 +1,4 @@
+import type { ScheduleSummaryProps } from "../types/schedule-summary";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import {
@@ -6,11 +7,10 @@ import {
   Clock3,
   UserRound,
 } from "lucide-react-native";
-import { colors, fontFamilies, radius, shadows } from "@startup/design-tokens";
+import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
-import type { Appointment } from "../../appointments/types/appointment";
 
-export function ScheduleSummary({ appointment }: { appointment: Appointment }) {
+export function ScheduleSummary({ appointment }: ScheduleSummaryProps) {
   return (
     <Card
       variant="outlined"

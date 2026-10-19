@@ -1,3 +1,4 @@
+import { display, pad } from "../utils/clockTime";
 import { useState } from "react";
 import {
   Modal,
@@ -12,27 +13,15 @@ import { Clock3 } from "lucide-react-native";
 import { Button } from "./Button";
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
-import type { AppTheme } from "../utils/appTheme";
 import { fontFamilies } from "@startup/design-tokens";
+import type { ClockTimePickerProps } from "../types/clockTimePicker";
+
+export type { ClockTimePickerProps } from "../types/clockTimePicker";
 
 const size = 260;
-const center = size / 2;
-const pad = (n: number) => String(n).padStart(2, "0");
-function display(value: string) {
-  if (!value) return "Select time";
-  if (value === "24:00") return "12:00 AM";
-  const [h, m] = value.split(":").map(Number);
-  return `${h % 12 || 12}:${pad(m)} ${h >= 12 ? "PM" : "AM"}`;
-}
 
-export type ClockTimePickerProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  endOfDay?: boolean;
-  theme?: AppTheme;
-};
+const center = size / 2;
+
 export function ClockTimePicker({
   label,
   value,
@@ -329,6 +318,7 @@ export function ClockTimePicker({
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   flex: { flex: 1, minWidth: 0 },

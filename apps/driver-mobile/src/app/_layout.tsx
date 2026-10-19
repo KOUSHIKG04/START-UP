@@ -16,12 +16,10 @@ import {
 import { QueryProvider } from "../providers/QueryProvider";
 import { Button } from "@startup/mobile-ui";
 import { mobileSession, useMobileSession } from "../services/supabase";
-import { DriverLocationReporter } from "../features/tracking/DriverLocationReporter";
-import "../features/tracking/backgroundLocationTask";
-import {
-  signOutWithPushCleanup,
-  useDeviceNotifications,
-} from "../features/notifications/deviceNotifications";
+import { DriverLocationReporter } from "../features/tracking/components/DriverLocationReporter";
+import "../features/tracking/services/backgroundLocationTask";
+import { signOutWithPushCleanup } from "../features/notifications/services/deviceNotifications";
+import { useDeviceNotifications } from "../features/notifications/hooks/useDeviceNotifications";
 
 void SplashScreen.preventAutoHideAsync();
 export const unstable_settings = { initialRouteName: "(auth)" };

@@ -1,33 +1,11 @@
+import type { DoctorCardProps } from "../types/doctor-card";
+export type { DoctorCardProps } from "../types/doctor-card";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useRef, type ReactNode } from "react";
-import {
-  type GestureResponderEvent,
-  type StyleProp,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from "react-native";
-import { Briefcase, UserRound } from "lucide-react-native";
+import { type GestureResponderEvent, StyleSheet, View } from "react-native";
+import { Briefcase, Star, UserRound } from "lucide-react-native";
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
-
-export type DoctorCardProps = {
-  name: string;
-  qualification: string;
-  specialty: string;
-  experience: string;
-  rating?: string;
-  showRating?: boolean;
-  fee?: string;
-  distanceMeters?: number | null;
-  hideFee?: boolean;
-  hideExperience?: boolean;
-  onPress?: () => void;
-  showChevron?: boolean;
-  contextLabel?: string;
-  variant?: "default" | "profile" | "detail";
-  style?: StyleProp<ViewStyle>;
-};
 
 function splitQualification(q: string): {
   degree: string;
@@ -297,9 +275,12 @@ function Pill({
 function StarIcon() {
   return (
     <View style={styles.starWrap}>
-      <Text variant="inherit" style={styles.starEmoji}>
-        ★
-      </Text>
+      <Star
+        size={13}
+        color={colors.patient.primaryDark}
+        fill={colors.patient.primaryDark}
+        accessible={false}
+      />
     </View>
   );
 }
@@ -525,10 +506,5 @@ const styles = StyleSheet.create({
   starWrap: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  starEmoji: {
-    color: colors.patient.primaryDark,
-    fontSize: 13,
-    lineHeight: 14,
   },
 });

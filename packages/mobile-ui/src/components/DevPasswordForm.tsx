@@ -1,3 +1,4 @@
+import type { DevPasswordFormProps } from "../types/devPasswordForm";
 import { AppText as Text } from "../primitives/AppText";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -11,12 +12,7 @@ export function DevPasswordForm({
   onSignIn,
   onSignUp,
   configurationError,
-}: {
-  title: string;
-  onSignIn: (email: string, password: string) => Promise<void>;
-  onSignUp?: (email: string, password: string) => Promise<boolean>;
-  configurationError?: string | null;
-}) {
+}: DevPasswordFormProps) {
   const theme = useMobileTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

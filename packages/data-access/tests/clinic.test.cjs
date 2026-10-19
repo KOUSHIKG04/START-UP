@@ -1,0 +1,257 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const { createRequire } = require("node:module");
+const ts = require("typescript");
+
+const cache = new Map();
+function load(file) {
+  file = path.resolve(file);
+  if (cache.has(file)) return cache.get(file).exports;
+  const module = { exports: {} };
+  cache.set(file, module);
+  const output = ts.transpileModule(fs.readFileSync(file, "utf8"), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+    },
+  }).outputText;
+  vm.runInNewContext(output, {
+    module,
+    exports: module.exports,
+    require(name) {
+      if (name === "@startup/contracts")
+        return load(path.join(__dirname, "../../contracts/src/index.ts"));
+      if (!name.startsWith(".")) return createRequire(file)(name);
+      const base = path.resolve(path.dirname(file), name);
+      const target = [base + ".ts", path.join(base, "index.ts")].find(
+        fs.existsSync
+      );
+      if (!target) throw new Error(`Missing module ${name}`);
+      return load(target);
+    },
+    Date,
+    Error,
+  });
+  return module.exports;
+}
+const api = load(path.join(__dirname, "../src/clinic/operations.ts"));
+const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
+function fixture(respond = () => id) {
+  const calls = [];
+  return {
+    calls,
+    client: {
+      async rpc(name, args) {
+        calls.push({ name, args: args && JSON.parse(JSON.stringify(args)) });
+        return { data: respond(name, args), error: null };
+      },
+    },
+  };
+}
+
+test("booking retains the idempotency key, patient, service, window and trimmed reason", async () => {
+  const f = fixture();
+  assert.equal(
+    await api.bookClinicAppointment(f.client, {
+      patientId: id,
+      windowId: id,
+      practiceServiceId: id,
+      idempotencyKey: id,
+      reason: "  Review  ",
+    }),
+    id
+  );
+  assert.deepEqual(f.calls, [
+    {
+      name: "book_clinic_appointment",
+      args: {
+        p_patient_id: id,
+        p_window_id: id,
+        p_practice_service_id: id,
+        p_reason: "Review",
+        p_idempotency_key: id,
+      },
+    },
+  ]);
+  await assert.rejects(
+    api.bookClinicAppointment(f.client, {
+      patientId: "invalid",
+      windowId: id,
+      practiceServiceId: id,
+      idempotencyKey: id,
+      reason: "",
+    })
+  );
+  assert.equal(f.calls.length, 1);
+});
+
+test("walk-in booking preserves empty phone/reason as null and transitions retain optimistic versions", async () => {
+  const f = fixture();
+  await api.bookPortalWalkInAppointment(f.client, {
+    practiceId: id,
+    windowId: id,
+    practiceServiceId: id,
+    patientName: " Patient ",
+    patientPhone: "",
+    reason: "",
+    idempotencyKey: id,
+  });
+  assert.equal(f.calls[0].name, "book_portal_walk_in_appointment");
+  assert.equal(f.calls[0].args.p_patient_name, "Patient");
+  assert.equal(f.calls[0].args.p_patient_phone, null);
+  assert.equal(f.calls[0].args.p_reason, null);
+  await api.transitionClinicAppointment(f.client, {
+    appointmentId: id,
+    expectedVersion: 3,
+    action: "approve",
+  });
+  assert.deepEqual(f.calls[1], {
+    name: "transition_clinic_appointment",
+    args: {
+      p_appointment_id: id,
+      p_expected_version: 3,
+      p_action: "approve",
+      p_note: null,
+    },
+  });
+});
+
+test("availability retains separate legacy and mode-aware RPCs and their limits", async () => {
+  const f = fixture(() => []);
+  await api.listPracticeClinicSlots(f.client, id);
+  await api.listPracticeClinicSlots(f.client, id, id, 10000, "home");
+  assert.deepEqual(f.calls[0], {
+    name: "list_practice_clinic_slots",
+    args: {
+      p_practice_id: id,
+      p_service_id: null,
+      p_limit: 100,
+    },
+  });
+  assert.deepEqual(f.calls[1], {
+    name: "list_practice_service_slots",
+    args: {
+      p_practice_id: id,
+      p_service_id: id,
+      p_limit: 10000,
+      p_mode: "home",
+    },
+  });
+  await assert.rejects(
+    api.listPracticeClinicSlots(f.client, id, undefined, 101),
+    /Invalid slot limit/
+  );
+  await assert.rejects(
+    api.listPracticeClinicSlots(f.client, id, undefined, 10001, "online"),
+    /Invalid slot limit/
+  );
+  await api.listClinicSlots(f.client, new Date("2026-10-18T08:00:00Z"), 25);
+  assert.equal(f.calls[2].args.p_after, "2026-10-18T08:00:00.000Z");
+});
+
+test("publishing preserves explicit duration, fees, service modes and selected times", async () => {
+  const f = fixture((name) =>
+    name === "publish_selected_doctor_slots" ? [id] : id
+  );
+  const input = {
+    practiceId: id,
+    startsAt: "2026-10-18T09:00:00+05:30",
+    endsAt: "2026-10-18T21:00:00+05:30",
+    slotMinutes: 15,
+    feeMinor: 50000,
+    currency: "INR",
+  };
+  await api.publishClinicSession(f.client, input);
+  await api.publishDoctorServiceSession(f.client, { ...input, mode: "online" });
+  await api.publishSelectedDoctorSlots(f.client, {
+    practiceId: id,
+    mode: "home",
+    slotStarts: [input.startsAt],
+    slotMinutes: 30,
+    feeMinor: 80000,
+    currency: "INR",
+  });
+  assert.equal(f.calls[0].args.p_slot_minutes, 15);
+  assert.equal(f.calls[0].args.p_ends_at, input.endsAt);
+  assert.equal(f.calls[1].name, "publish_doctor_service_session");
+  assert.equal(f.calls[1].args.p_mode, "online");
+  assert.deepEqual(f.calls[2].args.p_slot_starts, [input.startsAt]);
+  assert.equal(f.calls[2].args.p_slot_minutes, 30);
+  assert.equal(f.calls[2].args.p_fee_minor, 80000);
+});
+
+test("check-in tokens retain validation and API errors reach the caller unchanged", async () => {
+  const token = "a".repeat(72);
+  const f = fixture((name) =>
+    name === "issue_clinic_checkin_token" ? token : id
+  );
+  assert.equal(await api.issueClinicCheckinToken(f.client, id), token);
+  assert.equal(await api.redeemClinicCheckinToken(f.client, token), id);
+  assert.deepEqual(f.calls[1], {
+    name: "redeem_clinic_checkin_token",
+    args: { p_token: token },
+  });
+  await assert.rejects(api.redeemClinicCheckinToken(f.client, "invalid"));
+  assert.equal(f.calls.length, 2);
+  const error = { message: "Version conflict", code: "P0001" };
+  await assert.rejects(
+    api.listMyPractices({ rpc: async () => ({ error }) }),
+    (value) => value === error
+  );
+});
+
+test("practice appointment aggregation retains deduplication and reverse chronological order", async () => {
+  const other = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cc";
+  const appointment = {
+    id,
+    visit_mode: "clinic",
+    public_code: "A-01",
+    status: "confirmed",
+    row_version: "1",
+    patient_id: id,
+    patient_name: "Patient",
+    patient_public_code: "P-01",
+    patient_gender: null,
+    patient_age_years: null,
+    patient_blood_group: null,
+    service_name: "Clinic",
+    doctor_name: "Doctor",
+    facility_name: "Clinic",
+    reason: null,
+    fee_minor: "50000",
+    currency: "INR",
+    starts_at: "2026-10-18T10:00:00Z",
+    ends_at: "2026-10-18T10:15:00Z",
+    timezone: "Asia/Kolkata",
+    request_expires_at: null,
+    decision_reason: null,
+    queue_state: null,
+    ticket_number: null,
+    ahead_count: 0,
+    can_consult: false,
+    assessment: null,
+  };
+  const f = fixture((name, args) =>
+    name === "list_my_practices"
+      ? [id, other].map((practice_id) => ({
+          practice_id,
+          doctor_name: "Doctor",
+          facility_name: "Clinic",
+          verified: true,
+          is_clinician: true,
+        }))
+      : args.p_practice_id === id
+        ? [appointment]
+        : [
+            appointment,
+            { ...appointment, id: other, starts_at: "2026-10-18T12:00:00Z" },
+          ]
+  );
+  const appointments = await api.listMyPracticeAppointments(f.client);
+  assert.equal(appointments.length, 2);
+  assert.equal(appointments[0].id, other);
+  assert.equal(appointments[1].id, id);
+});

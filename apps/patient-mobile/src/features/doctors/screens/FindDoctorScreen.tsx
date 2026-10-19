@@ -1,53 +1,31 @@
+import { useFindDoctor } from "../hooks/useFindDoctor";
+import { getDoctorResultsRoute } from "../utils/doctorRoutes";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { searchPublicPractices } from "@startup/data-access";
-import { supabase } from "../../../services/supabase";
-import {
-  Animated,
-  BackHandler,
-  Image,
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+
+import { Animated, Pressable, StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type Href } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { ChevronLeft, Mic, X } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
   gradients,
   radius,
-  shadows,
   spacing,
 } from "@startup/design-tokens";
+import { FadedScrollView, SafeAreaView, SearchInput } from "@startup/mobile-ui";
+import { COLLAPSE_DISTANCE } from "../../../utils/headerConstants";
+
 import {
-  Chip,
-  FadedScrollView,
-  SafeAreaView,
-  SearchInput,
-} from "@startup/mobile-ui";
-import {
-  COLLAPSE_DISTANCE,
-  getHeaderAnimationStyles,
-} from "../../../utils/headerConstants";
-import type { ConsultationType } from "../../appointments/types/appointment";
-import {
-  COLLAPSED_HEADER_H,
   CONTENT_TOP,
   EXPANDED_HEADER_HEIGHT,
   SEARCH_END_TOP_OFFSET,
   SEARCH_OVERLAP,
-  categories,
-  getDoctorResultsRoute,
-  symptoms,
 } from "../utils/findDoctorConstants";
 import { FindDoctorCategories } from "../components/FindDoctorCategories";
 import { FindDoctorSearchList } from "../components/FindDoctorSearchList";
+import { BookingGuideLink } from "../components/BookingGuideLink";
 
 import type { FindDoctorScreenProps } from "../types/find-doctor";
 
@@ -55,108 +33,31 @@ export function FindDoctorScreen({
   consultationType,
   onBackPress,
 }: FindDoctorScreenProps) {
-  const [selectedSymptom, setSelectedSymptom] = useState<string>();
-  const [showAllCategories, setShowAllCategories] = useState(false);
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const searchInputRef = useRef<TextInput>(null);
-
-  const { top: topInset } = useSafeAreaInsets();
-  const scrollYRef = useRef<Animated.Value | null>(null);
-  if (scrollYRef.current === null) {
-    scrollYRef.current = new Animated.Value(0);
-  }
-  const scrollY = scrollYRef.current;
-  const searchEndTop = topInset + SEARCH_END_TOP_OFFSET;
-  const { collapsedHeight, expandedHeaderStyle, searchStyle } =
-    getHeaderAnimationStyles(scrollY, topInset, {
-      expandedHeight: EXPANDED_HEADER_HEIGHT,
-      searchOverlap: SEARCH_OVERLAP,
-      collapsedHeight: COLLAPSED_HEADER_H,
-      searchEndTop,
-    });
-
-  const handleOpenSearch = () => {
-    if (isSearchActive) return;
-    setIsSearchActive(true);
-    Animated.timing(scrollY, {
-      toValue: COLLAPSE_DISTANCE,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
+  const {
+    isSearchActive,
+    searchQuery,
+    setSearchQuery,
+    searchPlaceholder,
+    recentSearches,
+    rememberSearch,
+    clearRecentSearches,
+    searchInputRef,
+    scrollY,
+    collapsedHeight,
+    expandedHeaderStyle,
+    searchStyle,
+    handleOpenSearch,
+    handleCloseSearch,
+    handleBack,
+    doctorMatches,
+    filteredCategories,
+    searchActivePaddingTop,
+  } = useFindDoctor({ consultationType, onBackPress });
+  const openResults = (term: string) => {
+    rememberSearch(term);
+    if (isSearchActive) handleCloseSearch();
+    router.push(getDoctorResultsRoute(term, consultationType));
   };
-
-  const handleCloseSearch = useCallback(() => {
-    Keyboard.dismiss();
-    searchInputRef.current?.blur();
-    setIsSearchActive(false);
-    setSearchQuery("");
-    if (scrollYRef.current) {
-      Animated.timing(scrollYRef.current, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, []);
-
-  const handleBack = () => {
-    if (isSearchActive) {
-      handleCloseSearch();
-      return;
-    }
-    if (onBackPress) {
-      onBackPress();
-      return;
-    }
-    router.back();
-  };
-
-  useEffect(() => {
-    if (!isSearchActive) return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      handleCloseSearch();
-      return true;
-    });
-    return () => sub.remove();
-  }, [isSearchActive, handleCloseSearch]);
-
-  const visibleCategories = showAllCategories
-    ? categories
-    : categories.slice(0, 8);
-
-  const trimmedQuery = searchQuery.trim().toLowerCase();
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 250);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-  const doctorQuery = useQuery({
-    queryKey: ["find-doctor-suggestions", debouncedQuery],
-    queryFn: () =>
-      searchPublicPractices(supabase!, { query: debouncedQuery, limit: 20 }),
-    enabled: isSearchActive && Boolean(supabase) && debouncedQuery.length >= 2,
-  });
-  const doctorMatches = [
-    ...new Map(
-      (doctorQuery.data ?? [])
-        .filter((item) => item.doctor_name.toLowerCase().includes(trimmedQuery))
-        .map((item) => [
-          item.doctor_id,
-          { id: item.doctor_id, name: item.doctor_name },
-        ])
-    ).values(),
-  ];
-  const filteredCategories = trimmedQuery
-    ? categories.filter(
-        (c) =>
-          c.label.toLowerCase().includes(trimmedQuery) ||
-          c.key.toLowerCase().includes(trimmedQuery)
-      )
-    : categories;
-
-  const searchActivePaddingTop = collapsedHeight + 8;
-
   return (
     <View style={styles.screen}>
       <LinearGradient
@@ -236,7 +137,7 @@ export function FindDoctorScreen({
         >
           <SearchInput
             ref={searchInputRef}
-            accessibilityLabel="Describe what you're feeling"
+            accessibilityLabel="Search by symptoms or speciality"
             containerStyle={styles.search}
             iconSize={18}
             inputStyle={styles.searchInput}
@@ -244,13 +145,10 @@ export function FindDoctorScreen({
             onFocus={handleOpenSearch}
             onSubmitEditing={() => {
               if (searchQuery.trim()) {
-                handleCloseSearch();
-                router.push(
-                  getDoctorResultsRoute(searchQuery.trim(), consultationType)
-                );
+                openResults(searchQuery.trim());
               }
             }}
-            placeholder="Describe what you're feeling..."
+            placeholder={searchPlaceholder}
             placeholderTextColor={colors.patient.muted}
             returnKeyType="search"
             value={searchQuery}
@@ -303,16 +201,17 @@ export function FindDoctorScreen({
       >
         {!isSearchActive ? (
           <>
+            <BookingGuideLink
+              onPress={() =>
+                router.push({
+                  pathname: "/learn-booking",
+                  params: { consultationType },
+                } as Href)
+              }
+            />
             <FindDoctorCategories
-              selectedSymptom={selectedSymptom}
-              onSelectSymptom={(symptom) => {
-                setSelectedSymptom(
-                  selectedSymptom === symptom ? undefined : symptom
-                );
-                router.push(getDoctorResultsRoute(symptom, consultationType));
-              }}
               onSelectCategory={(_key, label) => {
-                router.push(getDoctorResultsRoute(label, consultationType));
+                openResults(label);
               }}
             />
           </>
@@ -321,17 +220,18 @@ export function FindDoctorScreen({
             filteredCategories={filteredCategories}
             doctorMatches={doctorMatches}
             searchQuery={searchQuery}
+            recentSearches={recentSearches}
+            onSelectSymptom={openResults}
+            onSelectRecent={openResults}
+            onClearRecentSearches={clearRecentSearches}
             onSelectDoctor={(name) => {
-              handleCloseSearch();
-              router.push(getDoctorResultsRoute(name, consultationType));
+              openResults(name);
             }}
             onSelectCategory={(_key, label) => {
-              handleCloseSearch();
-              router.push(getDoctorResultsRoute(label, consultationType));
+              openResults(label);
             }}
             onSearchAnyway={(query) => {
-              handleCloseSearch();
-              router.push(getDoctorResultsRoute(query, consultationType));
+              openResults(query);
             }}
           />
         )}

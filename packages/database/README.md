@@ -1,48 +1,55 @@
 # Shared database models (trusted tooling only)
 
-Supabase is the backend for all four applications. This package preserves the 79
-baseline Drizzle domain models, database constraints and synthetic solo-doctor seed.
-The UI/database review adds two aggregate inventory models, and onboarding adds
-two driver invitation models (83 total locally). Post-baseline migrations are not
-applied to the linked development project; they were verified on a disposable project;
-see ../../plans/ui-db-validation/README.md. It is
-not an HTTP server and must never be imported into browser or Expo bundles.
+This package is optional Drizzle tooling for the same Supabase PostgreSQL backend
+used by Patient, Doctor, Driver, Facility Portal and Company Admin. It does not
+create another database or a separately deployed API. Keep its trusted client and
+models out of browser and Expo bundles.
 
-- `src/schema/`: typed models; edit these for table changes.
-- `src/client.ts`: pooled PostgreSQL connection for trusted scripts.
-- `tooling/seed.ts`: optional development fixture, not an Auth account.
-- `tests/integration.test.ts` and `tests/clinic.integration.test.ts`: opt-in
-  checks against an already migrated, disposable Supabase database. They roll
-  back their fixtures, including temporary Auth users. The clinic test follows
-  solo-doctor onboarding through a completed appointment.
-- `tests/clinic.cli-smoke.sql`: passwordless, rolled-back clinic workflow smoke
-  test for a disposable hosted project. It covers the main onboarding-to-completion
-  path but does not replace the full Bun integration suite.
-- `tests/inventory.cli-smoke.sql`: rolled-back tenant, role, version, count,
-  audit and event checks for aggregate facility bed inventory.
+| Location                         | Responsibility                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `src/schema`                     | Domain table models for optional SQL generation and model checks               |
+| `src/client.ts`, `src/config.ts` | Trusted PostgreSQL tooling client and URL validation                           |
+| `drizzle.config.ts`              | Offline generation into the root Supabase migration history                    |
+| `tooling`                        | Explicit development fixtures, maintenance scripts and disposable verification |
+| `tests`                          | Drizzle model/filesystem checks and opt-in Bun database integration tests      |
+| `../../supabase/tests/smoke`     | Existing transactional SQL smoke fixtures                                      |
 
-From C:\startup:
+Supabase CLI owns the applied migration history. Drizzle metadata is for
+generation only; never run Drizzle push/migrate as a second runner. Models are not
+automatically synchronized with SQL-only changes or a hosted project. Review
+model/schema drift and generated SQL before deliberately promoting changes.
+
+The existing `src/schema/payments.ts` owns payment models. Future integrations
+extend that owner through root migrations, shared contracts/operations and server
+handlers; do not create another model tree. See the
+[package ownership guide](../ARCHITECTURE.md) and
+[Supabase guide](../../supabase/README.md). This cleanup changes no models,
+constraints, migrations, generated wire types or deployed state.
+
+## Checks and fixtures
+
+From the repository root:
 
 ```powershell
-pnpm db:generate
-pnpm --filter @startup/database typecheck
 pnpm --filter @startup/database test
+pnpm --filter @startup/database typecheck
 ```
 
-Review generated SQL in `supabase/migrations/`. Drizzle metadata is only used for
-schema generation. Supabase CLI is the only migration runner; do not use Drizzle
-migrate/push or create a second migration ledger. SQL-only RPC/policy changes use
-`pnpm supabase migration new descriptive_name`.
+The model and filesystem tests do not connect to a database. SQL smoke checks
+moved byte-for-byte to `supabase/tests/smoke`; the existing
+`tooling/verify-disposable.ps1` interface and explicit target guards are preserved.
+See [backend SQL test instructions](../../supabase/tests/README.md).
+The `.cli-smoke.sql` fixtures are not pgTAP files.
 
-Optional seed: copy `.env.example` to `.env` in this package, configure a development
-project database URL, then run `pnpm --filter @startup/database db:seed --demo`.
-Bun is used only for the local seed and tests, not for a deployed backend server.
-The fixture creates no real Auth login, patient data, staff employee or beds.
+`tests/integration.test.ts` and `tests/clinic.integration.test.ts` remain explicitly
+opt-in checks against an already migrated disposable database. Without their
+environment setup they skip; skipping is not evidence that deployed SQL works.
 
-For integration tests, set TEST_DATABASE_URL and the exact opt-in value from the
-environment example, apply migrations to that disposable database with Supabase
-CLI, then run `pnpm --filter @startup/database test:database`. Without those
-variables, the suite skips; a skipped test is not evidence that SQL works.
+`tooling/seed.ts` remains the optional synthetic Drizzle fixture behind the
+existing `db:seed` command. The main manual SQL demo fixture is
+`supabase/seed.sql`; a differing alternative is preserved under
+`supabase/fixtures`. None is executed by this cleanup, and automatic SQL seeding
+stays disabled. Keep fixture selection explicit and separate from deployment.
 
 ### Hosted verification without Docker
 

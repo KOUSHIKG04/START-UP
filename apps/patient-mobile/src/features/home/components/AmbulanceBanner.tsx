@@ -1,18 +1,9 @@
+import type { AmbulanceBannerProps } from "../types/home";
+export type { AmbulanceBannerProps } from "../types/home";
 import { AppText as Text } from "@startup/mobile-ui";
-import {
-  Image,
-  StyleSheet,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
-import { colors, fontFamilies, shadows } from "@startup/design-tokens";
+import { Image, StyleSheet, View } from "react-native";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, StatusBadge } from "@startup/mobile-ui";
-
-export type AmbulanceBannerProps = {
-  onBookPress?: () => void;
-  style?: StyleProp<ViewStyle>;
-};
 
 export function AmbulanceBanner({ onBookPress, style }: AmbulanceBannerProps) {
   return (
@@ -44,6 +35,7 @@ export function AmbulanceBanner({ onBookPress, style }: AmbulanceBannerProps) {
 
       <View style={styles.imageCard}>
         <Image
+          alt=""
           accessibilityIgnoresInvertColors
           resizeMode="cover"
           source={require("../../../../assets/images/ambulance.png")}

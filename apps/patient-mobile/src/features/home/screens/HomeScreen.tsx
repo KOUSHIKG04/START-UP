@@ -1,243 +1,59 @@
+import { useHomeScreen } from "../hooks/useHomeScreen";
+import type { HomeScreenProps } from "../types/home-screen";
+
 import { AppText as Text } from "@startup/mobile-ui";
-import { useTimeGreeting } from "@startup/mobile-ui";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  BackHandler,
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+
+import { Animated, Pressable, StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Location from "expo-location";
-import { router, type Href } from "expo-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  listClinicAppointments,
-  listMyPatientLocations,
-  saveMyPatientLocation,
-} from "@startup/data-access";
-import type { SavedPatientLocation } from "@startup/contracts";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Bell,
-  ChevronDown,
-  ChevronLeft,
-  MapPin,
-  Search,
-  X,
-} from "lucide-react-native";
+
+import { router } from "expo-router";
+
+import { Bell, ChevronDown, ChevronLeft, MapPin, X } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
   gradients,
   shadows,
 } from "@startup/design-tokens";
-import {
-  FadedScrollView,
-  IconLabel,
-  SafeAreaView,
-  SearchInput,
-} from "@startup/mobile-ui";
+import { FadedScrollView, SafeAreaView, SearchInput } from "@startup/mobile-ui";
 import { HomeSearchResults } from "../components/HomeSearchResults";
 import { HomeFeedContent } from "../components/HomeFeedContent";
-import { NotificationDrawer } from "../../../components/NotificationDrawer";
-import { useTypewriterPlaceholder } from "../../../hooks/useTypewriterPlaceholder";
-import { supabase, useMobileSession } from "../../../services/supabase";
-import {
-  formatSavedLocation,
-  locationHeadline,
-} from "../../locations/locationDisplay";
-import { canGeocodeAddress } from "../../locations/geocoding";
+import { NotificationDrawer } from "../../notifications/components/NotificationDrawer";
+
+import { locationHeadline } from "../../locations/utils/locationDisplay";
+
 import {
   COLLAPSE_DISTANCE,
   CONTENT_TOP,
   EXPANDED_HEADER_HEIGHT,
   SEARCH_HEIGHT,
   SEARCH_OVERLAP,
-  getHeaderAnimationStyles,
 } from "../../../utils/headerConstants";
 
-function getFindDoctorRoute(consultationType: string) {
-  return {
-    pathname: "/find-doctor",
-    params: { consultationType },
-  } as unknown as Href;
-}
-
-const ALL_SPECIALITIES = [
-  "General Physician",
-  "Dermatologist",
-  "Cardiologist",
-  "Pediatrician",
-  "Orthopedic",
-  "Gynecologist",
-  "ENT Specialist",
-  "Neurologist",
-  "Dentist",
-] as const;
-
-export function HomeScreen({
-  onNotificationPress,
-}: {
-  onNotificationPress?: () => void;
-} = {}) {
-  useEffect(() => {
-    router.prefetch("/select-location");
-  }, []);
-  const greeting = useTimeGreeting();
-  const { top: topInset } = useSafeAreaInsets();
-  const { profile } = useMobileSession();
-  const queryClient = useQueryClient();
-  const geocodedLocation = useRef<string | null>(null);
-  const savedLocations = useQuery({
-    queryKey: ["my-patient-locations", profile?.patient_id],
-    queryFn: () => listMyPatientLocations(supabase!),
-    enabled: Boolean(supabase && profile?.patient_id),
-  });
-  const selectedLocation = savedLocations.data?.find(
-    (item: SavedPatientLocation) => item.selected
-  );
-  useEffect(() => {
-    if (
-      !selectedLocation ||
-      selectedLocation.latitude !== null ||
-      geocodedLocation.current === selectedLocation.id ||
-      !supabase
-    )
-      return;
-    geocodedLocation.current = selectedLocation.id;
-    void (async () => {
-      try {
-        if (!(await canGeocodeAddress())) return;
-        const [point] = await Location.geocodeAsync(
-          formatSavedLocation(selectedLocation)
-        );
-        if (!point) return;
-        await saveMyPatientLocation(
-          supabase,
-          {
-            label: selectedLocation.label,
-            kind: selectedLocation.kind,
-            building: selectedLocation.building || undefined,
-            street: selectedLocation.street || undefined,
-            locality: selectedLocation.locality || undefined,
-            city: selectedLocation.city || undefined,
-            state: selectedLocation.state || undefined,
-            pincode: selectedLocation.pincode || undefined,
-            instructions: selectedLocation.instructions || undefined,
-            use_account_details: selectedLocation.use_account_details,
-            receiver_name: selectedLocation.receiver_name || undefined,
-            receiver_phone: selectedLocation.receiver_phone || undefined,
-            latitude: point.latitude,
-            longitude: point.longitude,
-          },
-          selectedLocation.id
-        );
-        await queryClient.invalidateQueries({
-          queryKey: ["my-patient-locations"],
-        });
-      } catch {
-        /* The address remains available to edit when geocoding fails. */
-      }
-    })();
-  }, [selectedLocation, queryClient]);
-  const scrollYRef = useRef<Animated.Value | null>(null);
-  if (scrollYRef.current === null) {
-    scrollYRef.current = new Animated.Value(0);
-  }
-  const scrollY = scrollYRef.current;
-  const searchInputRef = useRef<TextInput>(null);
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchPlaceholder = useTypewriterPlaceholder();
-
-  const appointments = useQuery({
-    queryKey: ["patient-clinic-appointments"],
-    queryFn: () => listClinicAppointments(supabase!),
-    enabled: Boolean(supabase),
-  });
-
-  const upcoming = appointments.data
-    ?.filter(
-      (item) =>
-        ["pending", "confirmed"].includes(item.status) &&
-        new Date(item.ends_at).getTime() >= Date.now()
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
-    );
-
-  const { collapsedHeight, expandedHeaderStyle, searchStyle } =
-    getHeaderAnimationStyles(scrollY, topInset);
-
-  const handleCloseSearch = useCallback(() => {
-    Keyboard.dismiss();
-    searchInputRef.current?.blur();
-
-    setIsSearchActive(false);
-    setSearchQuery("");
-
-    if (scrollYRef.current) {
-      Animated.timing(scrollYRef.current, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, []);
-
-  const handleOpenSearch = () => {
-    if (isSearchActive) return;
-    setIsSearchActive(true);
-    Animated.timing(scrollY, {
-      toValue: COLLAPSE_DISTANCE,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  // Intercept Android hardware back press so hitting back navigation
-  // returns to the home page instead of exiting the app
-  useEffect(() => {
-    if (!isSearchActive) return;
-
-    const onBackPress = () => {
-      handleCloseSearch();
-      return true; // prevent exiting the app
-    };
-
-    const backHandlerSubscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
-
-    return () => backHandlerSubscription.remove();
-  }, [isSearchActive, handleCloseSearch]);
-
-  const handleSelectItem = (term: string) => {
-    Keyboard.dismiss();
-    router.push({
-      pathname: "/doctor-results",
-      params: { symptom: term, consultationType: "Clinic Visit" },
-    } as unknown as Href);
-  };
-
-  // Live filtered results when user is typing
-  const trimmedQuery = searchQuery.trim().toLowerCase();
-  const liveResults = trimmedQuery
-    ? ALL_SPECIALITIES.filter((title) =>
-        title.toLowerCase().includes(trimmedQuery)
-      ).map((title) => ({ title, type: "Speciality" as const }))
-    : [];
-
-  // 4px below the collapsed search bar for search content
-  const searchActivePaddingTop = topInset + 68 + 4;
-
+export function HomeScreen({ onNotificationPress }: HomeScreenProps = {}) {
+  const {
+    greeting,
+    selectedLocation,
+    scrollY,
+    searchInputRef,
+    isSearchActive,
+    isNotificationOpen,
+    setIsNotificationOpen,
+    searchQuery,
+    setSearchQuery,
+    searchPlaceholder,
+    appointments,
+    upcoming,
+    collapsedHeight,
+    expandedHeaderStyle,
+    searchStyle,
+    handleCloseSearch,
+    handleOpenSearch,
+    handleSelectItem,
+    trimmedQuery,
+    liveResults,
+    searchActivePaddingTop,
+  } = useHomeScreen({ onNotificationPress });
   return (
     <View style={styles.screen}>
       <LinearGradient
@@ -262,7 +78,7 @@ export function HomeScreen({
         <SafeAreaView edges={["top"]} style={styles.safeArea}>
           <View style={styles.headerRow}>
             <Text variant="sectionHeading" style={styles.greeting}>
-              {greeting} 👋
+              {greeting}
             </Text>
             <Pressable
               accessibilityRole="button"

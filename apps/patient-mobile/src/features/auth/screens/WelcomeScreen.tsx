@@ -1,6 +1,6 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import {

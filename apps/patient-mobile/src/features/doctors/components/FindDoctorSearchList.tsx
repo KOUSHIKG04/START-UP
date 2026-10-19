@@ -1,39 +1,86 @@
-import { AppText as Text } from "@startup/mobile-ui";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  View,
-  type ImageSourcePropType,
-} from "react-native";
+import type { FindDoctorSearchListProps } from "../types/find-doctor-search-list";
+import type { CategoryItem } from "../types/find-doctor-search-list";
+export type { CategoryItem } from "../types/find-doctor-search-list";
+import { AppText as Text, Chip } from "@startup/mobile-ui";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import { Search } from "lucide-react-native";
-
-interface CategoryItem {
-  key: string;
-  label: string;
-  image: ImageSourcePropType;
-  imageScale?: number;
-}
+import { Clock3, Search } from "lucide-react-native";
+import { symptoms } from "../utils/findDoctorConstants";
 
 export function FindDoctorSearchList({
   filteredCategories,
   doctorMatches,
   searchQuery,
+  recentSearches,
+  onSelectSymptom,
+  onSelectRecent,
+  onClearRecentSearches,
   onSelectCategory,
   onSelectDoctor,
   onSearchAnyway,
-}: {
-  filteredCategories: readonly CategoryItem[];
-  doctorMatches: readonly { id: string; name: string }[];
-  searchQuery: string;
-  onSelectCategory: (categoryKey: string, categoryLabel: string) => void;
-  onSelectDoctor: (doctorName: string) => void;
-  onSearchAnyway: (query: string) => void;
-}) {
+}: FindDoctorSearchListProps) {
   return (
     <View style={styles.searchActiveList}>
-      {doctorMatches.length > 0 || filteredCategories.length > 0 ? (
+      {!searchQuery.trim() ? (
+        <>
+          <Text variant="sectionHeading" style={styles.sectionTitle}>
+            Most searched symptoms
+          </Text>
+          <View style={styles.chipList}>
+            {symptoms.map((symptom) => (
+              <Chip
+                key={symptom}
+                label={symptom}
+                onPress={() => onSelectSymptom(symptom)}
+                style={styles.chip}
+                labelStyle={styles.chipLabel}
+              />
+            ))}
+          </View>
+          <View style={styles.recentsHeader}>
+            <Text variant="sectionHeading" style={styles.sectionTitle}>
+              Recent searches
+            </Text>
+            {recentSearches.length > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Clear recent searches"
+                onPress={onClearRecentSearches}
+                style={styles.clearButton}
+              >
+                <Text variant="label" style={styles.clearText}>
+                  Clear
+                </Text>
+              </Pressable>
+            )}
+          </View>
+          {recentSearches.length > 0 ? (
+            recentSearches.map((term) => (
+              <Pressable
+                key={term}
+                accessibilityRole="button"
+                accessibilityLabel={`Search again for ${term}`}
+                onPress={() => onSelectRecent(term)}
+                style={({ pressed }) => [
+                  styles.categoryRow,
+                  pressed && styles.categoryRowPressed,
+                ]}
+              >
+                <View style={styles.doctorIcon}>
+                  <Clock3 color={colors.patient.primaryDark} size={21} />
+                </View>
+                <Text variant="body" style={styles.categoryRowTitle}>
+                  {term}
+                </Text>
+              </Pressable>
+            ))
+          ) : (
+            <Text variant="body" style={styles.emptyRecentText}>
+              Your searches will appear here.
+            </Text>
+          )}
+        </>
+      ) : doctorMatches.length > 0 || filteredCategories.length > 0 ? (
         <>
           {doctorMatches.map((doctor) => (
             <Pressable
@@ -76,6 +123,7 @@ export function FindDoctorSearchList({
               ]}
             >
               <Image
+                alt=""
                 source={category.image}
                 style={[
                   styles.categoryRowImage,
@@ -118,6 +166,47 @@ export function FindDoctorSearchList({
 const styles = StyleSheet.create({
   searchActiveList: {
     paddingTop: 4,
+  },
+  sectionTitle: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  chipList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 28,
+  },
+  chip: {
+    backgroundColor: colors.patient.surface,
+    borderColor: "transparent",
+  },
+  chipLabel: {
+    color: colors.patient.text,
+    fontSize: 13,
+  },
+  recentsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  clearButton: {
+    minHeight: 44,
+    paddingHorizontal: 8,
+    justifyContent: "center",
+  },
+  clearText: {
+    color: colors.patient.primaryDark,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 13,
+  },
+  emptyRecentText: {
+    color: colors.patient.textSecondary,
+    fontFamily: fontFamilies.regular,
+    fontSize: 14,
+    lineHeight: 20,
   },
   categoryRow: {
     flexDirection: "row",

@@ -1,7 +1,8 @@
+import type { ProfileIdentityProps } from "../types/profile";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
-import type { ReactNode } from "react";
+
 import { Mars, Venus } from "lucide-react-native";
 
 export function ProfileIdentity({
@@ -11,14 +12,7 @@ export function ProfileIdentity({
   photoUrl,
   children,
   inverse = false,
-}: {
-  initials: string;
-  name: string;
-  gender?: string | null;
-  photoUrl?: string;
-  children?: ReactNode;
-  inverse?: boolean;
-}) {
+}: ProfileIdentityProps) {
   return (
     <View style={styles.identity}>
       <View style={styles.avatarShadow}>

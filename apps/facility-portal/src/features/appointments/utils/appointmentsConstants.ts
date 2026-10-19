@@ -11,3 +11,14 @@ export const defaultAppointmentPeriod: AppointmentPeriod = "Today";
 export const appointmentsDateFormatter = {
   format: (date: Date) => formatDisplayDate(date, "Asia/Kolkata"),
 };
+
+export const appointmentStatuses = [
+  "All",
+  "Pending",
+  "Confirmed",
+  "Rejected",
+  "Cancelled",
+  "Completed",
+  "No_show",
+  "In_consultation",
+];

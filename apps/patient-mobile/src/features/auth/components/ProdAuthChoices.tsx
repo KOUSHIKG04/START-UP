@@ -1,3 +1,4 @@
+import type { ProdAuthChoicesProps } from "../types/form-fields";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Phone } from "lucide-react-native";
@@ -30,10 +31,7 @@ function GoogleIcon({ size = 20 }: { size?: number }) {
 export function ProdAuthChoices({
   onContinueWithGoogle,
   onContinueWithPhone,
-}: {
-  onContinueWithGoogle: () => void;
-  onContinueWithPhone: () => void;
-}) {
+}: ProdAuthChoicesProps) {
   return (
     <View style={styles.choices}>
       {/* Continue with Google */}

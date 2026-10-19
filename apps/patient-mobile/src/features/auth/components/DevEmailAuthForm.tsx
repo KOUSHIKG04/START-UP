@@ -1,24 +1,11 @@
+import type { DevEmailAuthFormProps } from "../types/dev-email-auth-form";
+export type { DevEmailAuthFormProps } from "../types/dev-email-auth-form";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { onboardingButtonStyles } from "./OnboardingShell";
-
-type DevEmailAuthFormProps = {
-  confirmationPending: boolean;
-  onBackToSignIn: () => void;
-  emailMode: "signin" | "signup";
-  email: string;
-  onEmailChange: (v: string) => void;
-  password: string;
-  onPasswordChange: (v: string) => void;
-  confirmPassword: string;
-  onConfirmPasswordChange: (v: string) => void;
-  busy: boolean;
-  onSubmit: () => void;
-  onSwitchEmailMode: () => void;
-};
 
 function EmailConfirmationNotice({
   email,
