@@ -110,6 +110,13 @@ export function useScheduleEditor({
       draftVersion.current = Number(p.row_version);
       draftPractice.current = p.practice_id;
       setDraft({
+        timeBlocks:
+          mode === "clinic"
+            ? p.clinic_time_blocks
+            : mode === "online"
+              ? p.online_time_blocks
+              : p.home_time_blocks,
+        homeTravelBuffer: p.home_travel_buffer_minutes ?? 0,
         days: (mode === "online"
           ? (p.online_working_days ?? p.working_days)
           : mode === "home"
@@ -133,6 +140,8 @@ export function useScheduleEditor({
         homeDuration: p.home_slot_minutes,
         online: p.online_daily_limit,
         walkIn: p.walkin_daily_limit,
+        clinicApp: p.clinic_app_daily_limit ?? p.walkin_daily_limit,
+        clinicWalkin: p.clinic_walkin_daily_limit ?? 0,
         autoAccept: p.auto_accept,
         autoLimit: p.auto_accept_limit,
         homeVisits: p.home_visits,
@@ -194,16 +203,33 @@ export function useScheduleEditor({
   const suggestion = suggestConsultationDuration(
     draft.start,
     draft.end,
-    dailyLimit
+    dailyLimit,
+    draft.timeBlocks
   );
   const suggestedTimes = suggestedDuration
-    ? previewTimeBlock(draft.start, draft.end, suggestedDuration)
+    ? (draft.timeBlocks ?? [{ start: draft.start, end: draft.end }]).flatMap(
+        (block) => previewTimeBlock(block.start, block.end, suggestedDuration)
+      )
     : [];
   const update = (changes: Partial<Schedule>) => {
     dirty.current = true;
     setDraft((current) => ({ ...current, ...changes }));
   };
   const scheduleSettings = () => ({
+    clinicTimeBlocks:
+      mode === "clinic"
+        ? (draft.timeBlocks ?? [{ start: draft.start, end: draft.end }])
+        : saved.data?.clinic_time_blocks,
+    onlineTimeBlocks:
+      mode === "online"
+        ? (draft.timeBlocks ?? [{ start: draft.start, end: draft.end }])
+        : saved.data?.online_time_blocks,
+    homeTimeBlocks:
+      mode === "home"
+        ? (draft.timeBlocks ?? [{ start: draft.start, end: draft.end }])
+        : saved.data?.home_time_blocks,
+    homeTravelBufferMinutes:
+      draft.homeTravelBuffer ?? saved.data?.home_travel_buffer_minutes ?? 0,
     workingDays:
       mode === "clinic"
         ? draft.days.map((day) => day + 1)
@@ -245,6 +271,8 @@ export function useScheduleEditor({
     homeSlotMinutes: draft.homeDuration,
     onlineDailyLimit: draft.online,
     walkinDailyLimit: draft.walkIn,
+    clinicAppDailyLimit: draft.clinicApp ?? draft.walkIn,
+    clinicWalkinDailyLimit: draft.clinicWalkin ?? 0,
     autoAccept: draft.autoAccept,
     autoAcceptLimit: draft.autoAccept ? draft.autoLimit : 0,
     homeVisits: draft.homeVisits,

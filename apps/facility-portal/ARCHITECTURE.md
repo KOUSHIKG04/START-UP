@@ -187,3 +187,59 @@ singleton browser service; map listeners and cleanup stay in the map hook.
 `doctorApi` is a feature client service, while query/cache behavior stays in hooks.
 Pure schedule-draft conversion and bed-row color helpers are separate from static
 configuration. Named contracts live in feature types; public exports stay deliberate.
+
+## Reception registration and clinic capacity
+
+`features/doctors` owns editable total clinic capacity, app quota and reception
+walk-in quota in its existing schedule editor. Shared contracts reject allocations
+whose sum exceeds the total. Existing settings retain their app allocation;
+reception starts at zero until explicitly configured.
+
+`features/appointments` loads `get_portal_clinic_day` through its existing Server
+Actions and `@startup/data-access`. The staff-only response includes the selected
+clinic date, working hours, full physical timetable and separate used/remaining
+counts, including booked, blocked and past times. The patient availability APIs
+return only app-bookable choices.
+
+Reception registration retains name/contact/reason and adds optional age/gender
+and same-day check-in. Patient creation, reservation, queue ticket and optional
+check-in share one transaction with idempotency protection. Registration requires
+managed-practice access; it does not create an Auth account or establish patient
+app access. Managers receive demographics through the existing authorized
+appointment list. The table exposes booking source, arrival/queue state and
+check-in, call-next, hold, resume and no-show actions; backend transitions remain
+the authority for state, order and permissions. Queue boundaries remain per session.
+
+The backend is defined by `20261015062322_portal_walk_in_appointments.sql` and
+`20261021174352_clinic_channel_capacity_and_reception.sql`, both deployed to the
+linked backend on 2026-10-21 with existing limits preserved. The rollback-only
+`supabase/tests/smoke/clinic-channel-capacity.cli-smoke.sql` covers editable saves,
+channel and total exhaustion, demographics, retries, queue creation and access
+denial. Browser component previews use synthetic data; authenticated reception
+and native mobile device verification remain separate.
+
+## Mixed visit time blocks
+
+The existing Doctor Schedule editor supports multiple time blocks for each visit
+type, using that type's selected working days, duration, fee and daily quota.
+`settingsDraft` restores the saved arrays and retains legacy single-hour fields.
+Home blocks have an editable buffer before and after them. Shared contracts reject
+invalid, undersized or overlapping blocks; the backend additionally checks the
+doctor's other published modes and practices. To insert an online or home visit
+inside previously continuous clinic hours, first publish the split clinic blocks.
+
+The staff-only `get_portal_clinic_day` response includes `clinic_time_blocks` and
+`doctor_timeline`. Reception's registration dialog shows the selected day's clinic,
+online and home sessions, including other-practice time and travel reservations,
+while its registration choices remain clinic-only. It exposes no other-practice
+patient details. Queue boundaries and queue transition authority are unchanged.
+
+`20261022071502_multi_block_service_schedules.sql` was deployed to the linked
+backend on 2026-10-22. All four prior schedules retained their hours, prices and
+quotas; the migration does not configure an illustrative mixed day. New publication
+replaces only unbooked future availability from the selected date, preserving
+existing reservations and rejecting conflicting edits with a useful error.
+The rollback-only `supabase/tests/smoke/multi-block-schedule.cli-smoke.sql` tests
+interleaving, patient choices, buffers, protected bookings, stale versions and
+authorization. Web component screenshots use synthetic data and mocked actions;
+authenticated live UI verification remains separate.

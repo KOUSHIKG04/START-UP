@@ -8,3 +8,5 @@ allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - expo-linear-gradient@57.0.2
+patchedDependencies:
+  expo-router@57.0.24: patches/expo-router@57.0.24.patch

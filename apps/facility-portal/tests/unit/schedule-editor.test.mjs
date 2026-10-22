@@ -42,11 +42,22 @@ test("24:00 closes the day; incomplete slots and invalid windows are excluded", 
     JSON.stringify(previewClocks("23:00", "24:00", 30)),
     JSON.stringify(["23:00", "23:30"])
   );
+
   assert.equal(
     JSON.stringify(previewClocks("09:00", "09:40", 30)),
     JSON.stringify(["09:00"])
   );
   assert.equal(previewClocks("24:00", "24:00", 15).length, 0);
+});
+
+test("split-block setup suggestions exclude the online/home gaps", () => {
+  assert.equal(
+    suggestConsultationDuration("09:00", "17:00", 12, [
+      { start: "09:00", end: "10:00" },
+      { start: "14:00", end: "17:00" },
+    ]),
+    20
+  );
 });
 
 test("duration suggestion follows working hours and daily cap without exceeding duration bounds", () => {
@@ -240,8 +251,22 @@ for (const mode of ["clinic", "online"])
       duration
     );
     nodes
-      .find((node) => node.props.title === "Daily booking limit")
+      .find(
+        (node) =>
+          node.props.title ===
+          (mode === "clinic" ? "Total clinic capacity" : "Daily booking limit")
+      )
       .props.onChange(20);
+    if (mode === "clinic") {
+      nodes = view.render();
+      nodes
+        .find((node) => node.props.title === "App booking quota")
+        .props.onChange(12);
+      nodes = view.render();
+      nodes
+        .find((node) => node.props.title === "Reception walk-in quota")
+        .props.onChange(8);
+    }
     nodes = view.render();
     assert.equal(
       nodes.find((node) => node.type === "Duration").props.value,
@@ -263,6 +288,10 @@ for (const mode of ["clinic", "online"])
       view.publications[0];
     assert.equal(practice, "practice-a");
     assert.equal(selectedMode, mode);
+    if (mode === "clinic") {
+      assert.equal(settings.clinicAppDailyLimit, 12);
+      assert.equal(settings.clinicWalkinDailyLimit, 8);
+    }
     assert.equal(version, 8);
     assert.equal(date, chosen);
     assert.equal(
@@ -284,7 +313,7 @@ test("published schedule keeps a sixty-minute duration and hides setup recalcula
     undefined
   );
   nodes
-    .find((node) => node.props.title === "Daily booking limit")
+    .find((node) => node.props.title === "Total clinic capacity")
     .props.onChange(30);
   nodes = view.render();
   assert.equal(nodes.find((node) => node.type === "Duration").props.value, 60);
@@ -292,5 +321,48 @@ test("published schedule keeps a sixty-minute duration and hides setup recalcula
     .find((node) => node.type === "form")
     .props.onSubmit({ preventDefault() {} });
   await view.finish();
+  assert.equal(view.publications[0][2].slotMinutes, 60);
+});
+
+test("clinic editor adds a second block and publishes the gap without changing duration", async () => {
+  const view = editor({ mode: "clinic", published: true });
+  let nodes = view.render();
+  nodes
+    .find((node) => node.type === "Time" && node.props.label === "End Time")
+    .props.onChange("10:00");
+  nodes = view.render();
+  nodes
+    .find((node) => node.props.children === "Add time block")
+    .props.onClick();
+  nodes = view.render();
+  nodes
+    .filter(
+      (node) => node.type === "Time" && node.props.label === "Start Time"
+    )[1]
+    .props.onChange("11:00");
+  nodes = view.render();
+  nodes
+    .filter(
+      (node) => node.type === "Time" && node.props.label === "End Time"
+    )[1]
+    .props.onChange("17:00");
+  nodes = view.render();
+  assert.equal(
+    nodes.filter(
+      (node) => node.type === "Time" && node.props.label === "Start Time"
+    ).length,
+    2
+  );
+  nodes
+    .find((node) => node.type === "form")
+    .props.onSubmit({ preventDefault() {} });
+  await view.finish();
+  assert.equal(
+    JSON.stringify(view.publications[0][2].clinicTimeBlocks),
+    JSON.stringify([
+      { start: "09:00", end: "10:00" },
+      { start: "11:00", end: "17:00" },
+    ])
+  );
   assert.equal(view.publications[0][2].slotMinutes, 60);
 });

@@ -10,7 +10,13 @@ import {
   Moon,
   ShieldCheck,
 } from "lucide-react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 import { Card, FadedScrollView, Header } from "@startup/mobile-ui";
 import { HelpModal } from "./HelpModal";
 import { LogoutModal } from "./LogoutModal";
@@ -37,11 +43,9 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         <Card
           variant="outlined"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           backgroundColor={colors.white}
           padding={16}
-          style={styles.cardNoShadow}
+          style={styles.cardSurface}
         >
           <View style={[styles.settingItemRow, styles.disabledRow]}>
             <View style={styles.iconCircle}>
@@ -75,11 +79,9 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         <Card
           variant="outlined"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           backgroundColor={colors.white}
           padding={16}
-          style={styles.cardNoShadow}
+          style={styles.cardSurface}
         >
           <Pressable
             accessibilityRole="button"
@@ -109,11 +111,9 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         <Card
           variant="outlined"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           backgroundColor={colors.white}
           padding={16}
-          style={styles.cardNoShadow}
+          style={styles.cardSurface}
         >
           <Pressable
             accessibilityRole="button"
@@ -143,11 +143,9 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         <Card
           variant="outlined"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           backgroundColor={colors.white}
           padding={16}
-          style={styles.cardNoShadow}
+          style={styles.cardSurface}
         >
           <Pressable
             accessibilityRole="button"
@@ -192,10 +190,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 60,
   },
-  cardNoShadow: {
-    elevation: 0,
-    shadowOpacity: 0,
-    boxShadow: "none",
+  cardSurface: {
+    ...surfaces.card,
     overflow: "hidden",
   },
   actionRow: {

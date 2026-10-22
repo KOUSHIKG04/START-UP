@@ -38,6 +38,8 @@ function load(file) {
   return module.exports;
 }
 const api = load(path.join(__dirname, "../src/clinic/operations.ts"));
+const schedules = load(path.join(__dirname, "../src/doctors/schedule.ts"));
+const clinical = load(path.join(__dirname, "../src/clinical/operations.ts"));
 const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
 function fixture(respond = () => id) {
   const calls = [];
@@ -51,6 +53,142 @@ function fixture(respond = () => id) {
     },
   };
 }
+
+test("availability preserves the live daily allowance alongside time choices", async () => {
+  const f = fixture(() => [
+    {
+      service_mode: "online",
+      window_id: id,
+      practice_service_id: id,
+      practice_id: id,
+      doctor_name: "Test doctor",
+      facility_name: "Test clinic",
+      address: "Test address",
+      starts_at: "2026-10-23T08:00:00Z",
+      ends_at: "2026-10-23T08:15:00Z",
+      timezone: "Asia/Kolkata",
+      fee_minor: "10000",
+      currency: "INR",
+      daily_bookings_remaining: 8,
+    },
+  ]);
+  const slots = await api.listPracticeClinicSlots(
+    f.client,
+    id,
+    undefined,
+    10000,
+    "online"
+  );
+  assert.equal(slots[0].daily_bookings_remaining, 8);
+  assert.equal(slots[0].window_id, id);
+});
+
+test("consultation reads preserve signed assessment and prescription details", async () => {
+  const f = fixture(() => ({
+    status: "signed",
+    signed_at: "2026-10-23T09:00:00Z",
+    assessment: "Saved assessment",
+    medicines: [],
+    vitals: [],
+    diagnosis: "Saved diagnosis",
+    prescription_issued: false,
+    followup: null,
+  }));
+  const record = await clinical.getDoctorConsultationDraft(f.client, id);
+  assert.equal(record.status, "signed");
+  assert.equal(record.assessment, "Saved assessment");
+  assert.deepEqual(f.calls[0], {
+    name: "get_doctor_consultation_draft",
+    args: { p_appointment_id: id },
+  });
+});
+
+test("editable quotas survive saves and publication; invalid allocations never reach the API", async () => {
+  const settings = {
+    workingDays: [1, 2, 3],
+    clinicStart: "09:00",
+    clinicEnd: "18:00",
+    slotMinutes: 30,
+    onlineSlotMinutes: 30,
+    homeSlotMinutes: 60,
+    onlineDailyLimit: 5,
+    walkinDailyLimit: 20,
+    clinicAppDailyLimit: 12,
+    clinicWalkinDailyLimit: 8,
+    clinicTimeBlocks: [
+      { start: "09:00", end: "10:00" },
+      { start: "11:00", end: "12:00" },
+    ],
+    homeTimeBlocks: [{ start: "16:00", end: "17:00" }],
+    homeTravelBufferMinutes: 15,
+    autoAccept: true,
+    autoAcceptLimit: 20,
+    homeVisits: false,
+    homeRadiusKm: null,
+    onlineFeeMinor: 10000,
+    clinicFeeMinor: 20000,
+    homeFeeMinor: null,
+  };
+  const f = fixture((name, args) => {
+    const saved = { ...args.p_settings, practice_id: id, row_version: "2" };
+    return name === "save_my_schedule_preferences"
+      ? saved
+      : { settings: saved, slot_count: 20, horizon_days: 30 };
+  });
+  const saved = await schedules.saveMySchedulePreferences(
+    f.client,
+    id,
+    settings,
+    1
+  );
+  assert.equal(saved.clinic_app_daily_limit, 12);
+  assert.equal(saved.clinic_walkin_daily_limit, 8);
+  assert.equal(saved.clinic_time_blocks.length, 2);
+  await schedules.publishMyDoctorSchedule(
+    f.client,
+    id,
+    "clinic",
+    settings,
+    2,
+    "2026-11-01"
+  );
+  assert.equal(f.calls[1].args.p_settings.clinic_app_daily_limit, 12);
+  assert.equal(f.calls[1].args.p_settings.clinic_walkin_daily_limit, 8);
+  assert.equal(f.calls[1].args.p_effective_from, "2026-11-01");
+  assert.equal(f.calls[1].args.p_settings.clinic_time_blocks[1].start, "11:00");
+  assert.equal(f.calls[1].args.p_settings.home_travel_buffer_minutes, 15);
+  await assert.rejects(
+    schedules.saveMySchedulePreferences(
+      f.client,
+      id,
+      {
+        ...settings,
+        clinicTimeBlocks: [
+          { start: "09:00", end: "10:00" },
+          { start: "09:30", end: "11:00" },
+        ],
+      },
+      2
+    )
+  );
+  await assert.rejects(
+    schedules.saveMySchedulePreferences(
+      f.client,
+      id,
+      { ...settings, homeTimeBlocks: [{ start: "00:05", end: "01:05" }] },
+      2
+    )
+  );
+  await assert.rejects(
+    schedules.saveMySchedulePreferences(
+      f.client,
+      id,
+      { ...settings, clinicWalkinDailyLimit: 9 },
+      2
+    )
+  );
+  assert.equal(f.calls.length, 2);
+});
 
 test("booking retains the idempotency key, patient, service, window and trimmed reason", async () => {
   const f = fixture();
@@ -103,6 +241,9 @@ test("walk-in booking preserves empty phone/reason as null and transitions retai
   assert.equal(f.calls[0].args.p_patient_name, "Patient");
   assert.equal(f.calls[0].args.p_patient_phone, null);
   assert.equal(f.calls[0].args.p_reason, null);
+  assert.equal(f.calls[0].args.p_patient_age, null);
+  assert.equal(f.calls[0].args.p_patient_gender, null);
+  assert.equal(f.calls[0].args.p_check_in, false);
   await api.transitionClinicAppointment(f.client, {
     appointmentId: id,
     expectedVersion: 3,
@@ -117,6 +258,38 @@ test("walk-in booking preserves empty phone/reason as null and transitions retai
       p_note: null,
     },
   });
+});
+
+test("reception forwards demographics and check-in without changing the idempotency key", async () => {
+  const f = fixture();
+  await api.bookPortalWalkInAppointment(f.client, {
+    practiceId: id,
+    windowId: id,
+    practiceServiceId: id,
+    patientName: "Walk-in Patient",
+    patientPhone: "1234567890",
+    reason: "Review",
+    patientAge: 29,
+    patientGender: "Other",
+    checkIn: true,
+    idempotencyKey: id,
+  });
+  assert.equal(f.calls[0].args.p_patient_age, 29);
+  assert.equal(f.calls[0].args.p_patient_gender, "Other");
+  assert.equal(f.calls[0].args.p_check_in, true);
+  assert.equal(f.calls[0].args.p_idempotency_key, id);
+  await assert.rejects(
+    api.bookPortalWalkInAppointment(f.client, {
+      practiceId: id,
+      windowId: id,
+      practiceServiceId: id,
+      patientName: "Patient",
+      patientAge: 121,
+      patientGender: "Other",
+      idempotencyKey: id,
+    })
+  );
+  assert.equal(f.calls.length, 1);
 });
 
 test("availability retains separate legacy and mode-aware RPCs and their limits", async () => {
@@ -234,6 +407,23 @@ test("practice appointment aggregation retains deduplication and reverse chronol
     can_consult: false,
     assessment: null,
   };
+  const linked = fixture(() => [
+    {
+      ...appointment,
+      practice_id: id,
+      practice_service_id: other,
+    },
+  ]);
+  const [linkedAppointment] = await api.listClinicAppointments(linked.client);
+  assert.equal(linkedAppointment.practice_id, id);
+  assert.equal(linkedAppointment.practice_service_id, other);
+  const legacy = fixture(() => [appointment]);
+  const [legacyAppointment] = await api.listClinicAppointments(legacy.client);
+  assert.equal(legacyAppointment.practice_id, undefined);
+  const invalid = fixture(() => [
+    { ...appointment, practice_id: "wrong-doctor-id" },
+  ]);
+  await assert.rejects(api.listClinicAppointments(invalid.client));
   const f = fixture((name, args) =>
     name === "list_my_practices"
       ? [id, other].map((practice_id) => ({

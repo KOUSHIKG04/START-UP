@@ -1,6 +1,6 @@
 # @startup/design-tokens
 
-Shared TypeScript tokens, generated Tailwind CSS v4 theme variables, and Albert Sans font assets.
+Shared TypeScript tokens, generated Tailwind CSS v4 theme variables, and Inter font assets.
 
 Keep the existing category files in `src`, font assets in `assets/fonts`, CSS
 generator in `scripts` and tests in `tests`. The package has no app hooks or domain
@@ -11,7 +11,7 @@ regenerate CSS or change token values as a side effect.
 
 ## Public exports
 
-The root exports `colors`, palette shortcuts (`patientColors`, `doctorColors`, `driverColors`, `adminColors`, `sosColors`), `gradients` and gradient shortcuts, `spacing`, `radius`, `shadows`, `typography`, and `fontFamilies`. `tokens` (also the default export) groups the original six token categories.
+The root exports `colors`, palette shortcuts (`patientColors`, `doctorColors`, `driverColors`, `adminColors`, `sosColors`), `gradients` and gradient shortcuts, `spacing`, `radius`, `shadows`, `surfaces`, `typography`, and `fontFamilies`. `tokens` (also the default export) groups these token categories.
 
 `mobileThemes`, `MobileThemeName`, and `MobileThemeColors` provide patient, doctor, and driver semantic colors, including foreground, background, surface, border, placeholder, danger, and disabled roles. `webColors` contains the web chart and dark-mode palette. `colors.ui` holds shared component details.
 
@@ -34,21 +34,29 @@ Use utilities such as `bg-patient-bg`, `text-admin-text`, and `bg-gradient-admin
 
 ## Fonts
 
-Four bundled TrueType assets use extensionless public subpaths. Register them in an Expo application with `useFonts`:
+Four Inter TrueType assets use extensionless public subpaths. Register them in an Expo application with `useFonts`:
 
 ```tsx
 import { useFonts } from "expo-font";
 const [fontsLoaded] = useFonts({
-  AlbertSans_400Regular: require("@startup/design-tokens/fonts/AlbertSans_400Regular"),
-  AlbertSans_500Medium: require("@startup/design-tokens/fonts/AlbertSans_500Medium"),
-  AlbertSans_600SemiBold: require("@startup/design-tokens/fonts/AlbertSans_600SemiBold"),
-  AlbertSans_700Bold: require("@startup/design-tokens/fonts/AlbertSans_700Bold"),
+  Inter_400Regular: require("@startup/design-tokens/fonts/Inter_400Regular"),
+  Inter_500Medium: require("@startup/design-tokens/fonts/Inter_500Medium"),
+  Inter_600SemiBold: require("@startup/design-tokens/fonts/Inter_600SemiBold"),
+  Inter_700Bold: require("@startup/design-tokens/fonts/Inter_700Bold"),
 });
 ```
 
-Wait for font loading in the app's existing loading flow. Registration names match `fontFamilies` and `typography`.
+Wait for font loading in the app's existing loading flow. Registration names match `fontFamilies` and `typography`. Inter is distributed under the SIL Open Font License in `assets/fonts/INTER_LICENSE.txt`. The older Albert Sans assets remain available for existing direct imports.
 
 ## Changing tokens
+
+`shadows.card` owns the shared soft card shadow. `surfaces.card` combines that shadow
+with a `0.4` border in light gray (`colors.border`, `#E0E5EB`). Shared mobile cards,
+content accordions, app panels, the booking guide and Profile cards consume the
+surface preset. Reuse `surfaces.card` for a custom content-card container instead
+of copying border or shadow values into a screen. Layout, background colors and
+spacing stay with the component. Floating overlays, navigation, photos, form inputs
+and meaningful selected/error states retain their own treatment.
 
 Edit `src/colors.ts`, `src/gradients.ts`, or `src/web-colors.ts`, then run `pnpm --filter @startup/design-tokens generate` and commit the generated `theme.css`. Do not edit CSS directly. `src/themes.ts` maps colors to mobile semantic roles.
 

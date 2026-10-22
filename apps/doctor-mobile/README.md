@@ -38,7 +38,7 @@ manual address completion before saving.
 - `src/screens`: Home, appointments, clinical notes, prescription, online consultation, chat, home visit, profile, schedule, and QR lookup.
 - `src/components`: doctor screen/header helpers and patient cards built on shared mobile UI.
 - `src/data`, `src/types`, `src/store`, `src/utils`: demo fixtures, typed visit models, session state, lookup and schedule logic.
-- `../../packages/mobile-ui` and `../../packages/design-tokens`: shared controls, navigation, Albert Sans, and theme tokens.
+- `../../packages/mobile-ui` and `../../packages/design-tokens`: shared controls, navigation, Inter, and theme tokens.
 
 ## Demo flows
 

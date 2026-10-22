@@ -1,6 +1,6 @@
 import {
   Building,
-  DollarSign,
+  IndianRupee,
   User,
   Star,
   Settings,
@@ -20,7 +20,7 @@ export const rows = [
   },
   {
     title: "Earnings & Payouts",
-    icon: DollarSign,
+    icon: IndianRupee,
     color: "#FF7800",
     background: "#FFF3E2",
   },

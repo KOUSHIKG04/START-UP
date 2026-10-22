@@ -17,6 +17,12 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
   const [pending, startTransition] = React.useTransition();
   const [practices, setPractices] = React.useState<Practice[]>([]);
   const [slots, setSlots] = React.useState<Slot[]>([]);
+  const [clinicDay, setClinicDay] = React.useState<Awaited<
+    ReturnType<typeof loadPortalWalkInSlots>
+  > | null>(null);
+  const [patientAge, setPatientAge] = React.useState("");
+  const [patientGender, setPatientGender] = React.useState("");
+  const [checkIn, setCheckIn] = React.useState(true);
   const [practiceId, setPracticeId] = React.useState("");
   const [windowId, setWindowId] = React.useState("");
   const [patientName, setPatientName] = React.useState("");
@@ -42,10 +48,11 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
     }
   }
 
-  async function choosePractice(id: string) {
+  async function choosePractice(id: string, localDay?: string) {
     setPracticeId(id);
     setWindowId("");
     setSlots([]);
+    setClinicDay(null);
     const request = ++slotsRequest.current;
     if (!id) {
       setLoadingSlots(false);
@@ -53,8 +60,11 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
     }
     setLoadingSlots(true);
     try {
-      const available = await loadPortalWalkInSlots(id);
-      if (request === slotsRequest.current) setSlots(available);
+      const available = await loadPortalWalkInSlots(id, localDay);
+      if (request === slotsRequest.current) {
+        setSlots(available.slots);
+        setClinicDay(available);
+      }
     } catch {
       if (request === slotsRequest.current)
         toast.add({
@@ -70,7 +80,22 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const slot = slots.find((item) => item.windowId === windowId);
-    if (!slot || !practiceId || patientName.trim().length < 2) return;
+    if (
+      !slot ||
+      slot.state !== "open" ||
+      !clinicDay ||
+      clinicDay.walkin_remaining < 1 ||
+      !practiceId ||
+      patientName.trim().length < 2
+    )
+      return;
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: clinicDay.timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const checkInNow = checkIn && clinicDay.local_day === today;
     startTransition(async () => {
       try {
         const result = await createPortalWalkInAppointment({
@@ -78,6 +103,9 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
           windowId: slot.windowId,
           practiceServiceId: slot.practiceServiceId,
           patientName: patientName.trim(),
+          patientAge: patientAge === "" ? null : Number(patientAge),
+          patientGender: patientGender || null,
+          checkIn: checkInNow,
           patientPhone: patientPhone.trim(),
           reason: reason.trim(),
           idempotencyKey: requestKey,
@@ -88,20 +116,27 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
             description: result.error,
             type: "error",
           });
+          await choosePractice(practiceId, clinicDay.local_day);
           return;
         }
         toast.add({
           title: "Appointment created",
-          description: "Check the patient in when they arrive.",
+          description: checkInNow
+            ? "Patient registered and checked in to the queue."
+            : "Check the patient in when they arrive.",
           type: "success",
         });
         setOpen(false);
         setPatientName("");
+        setPatientAge("");
+        setPatientGender("");
+        setCheckIn(true);
         setPatientPhone("");
         setReason("");
         setPracticeId("");
         setWindowId("");
         setSlots([]);
+        setClinicDay(null);
         setRequestKey(crypto.randomUUID());
         onCreated();
         router.refresh();
@@ -126,6 +161,13 @@ export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
     practiceId,
     windowId,
     setWindowId,
+    clinicDay,
+    patientAge,
+    setPatientAge,
+    patientGender,
+    setPatientGender,
+    checkIn,
+    setCheckIn,
     patientName,
     setPatientName,
     patientPhone,

@@ -1,13 +1,32 @@
 import type { Metadata } from "next";
-import { Albert_Sans, Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@startup/web-ui/components/ui/tooltip";
 import { Toaster } from "@startup/web-ui/components/ui/toast";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 
-const albertSans = Albert_Sans({
-  variable: "--font-albert-sans",
-  subsets: ["latin"],
+const inter = localFont({
+  variable: "--font-inter",
+  display: "swap",
+  src: [
+    {
+      path: "../../../../packages/design-tokens/assets/fonts/Inter_400Regular.ttf",
+      weight: "400",
+    },
+    {
+      path: "../../../../packages/design-tokens/assets/fonts/Inter_500Medium.ttf",
+      weight: "500",
+    },
+    {
+      path: "../../../../packages/design-tokens/assets/fonts/Inter_600SemiBold.ttf",
+      weight: "600",
+    },
+    {
+      path: "../../../../packages/design-tokens/assets/fonts/Inter_700Bold.ttf",
+      weight: "700",
+    },
+  ],
 });
 
 const geistSans = Geist({
@@ -34,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${albertSans.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body

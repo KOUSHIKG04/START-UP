@@ -4,6 +4,69 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const ts = require("typescript");
+
+test("booking availability reports daily bookings separately from time choices", () => {
+  const jsx = (type, props) => ({ type, props });
+  const { BookingTimeSection } = load(
+    "../src/features/doctors/components/BookingTimeSection.tsx",
+    {
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+      "react-native": { View: "View" },
+      "@startup/mobile-ui": { AppText: "Text", TimeSlot: "TimeSlot" },
+      "./BookSlots.styles": { styles: {} },
+    }
+  );
+  function all(node, result = []) {
+    if (Array.isArray(node)) node.forEach((item) => all(item, result));
+    else if (node && typeof node === "object") {
+      result.push(node);
+      all(node.props?.children, result);
+    }
+    return result;
+  }
+  const slot = (remaining) => ({
+    starts_at: "2026-10-23T09:00:00Z",
+    window_id: "slot",
+    daily_bookings_remaining: remaining,
+  });
+  const render = (slots, extra = {}) =>
+    all(
+      BookingTimeSection({
+        dateSlots: slots,
+        selectedDate: "2026-10-23",
+        timeZone: "Asia/Kolkata",
+        setSelectedTime() {},
+        ...extra,
+      })
+    );
+  const choices = Array.from({ length: 28 }, (_, i) => ({
+    ...slot(8),
+    window_id: String(i),
+  }));
+  let nodes = render(choices);
+  assert.ok(nodes.some((node) => node.props?.children === "8 bookings left"));
+  assert.equal(nodes.filter((node) => node.type === "TimeSlot").length, 28);
+  assert.ok(
+    nodes.some(
+      (node) => node.props?.children === "Choose any available time below."
+    )
+  );
+  assert.ok(
+    render([slot(8)]).some((node) => node.props?.children === "1 booking left")
+  );
+  assert.equal(
+    render(choices, { loading: true }).some(
+      (node) => node.props?.children === "8 bookings left"
+    ),
+    false
+  );
+  assert.equal(
+    render([slot(undefined)]).some((node) =>
+      String(node.props?.children).includes("booking left")
+    ),
+    false
+  );
+});
 function load(file, mocks = {}) {
   const exports = {};
   const absolute = path.resolve(__dirname, file);
@@ -173,6 +236,7 @@ test("doctor card omits appointment availability and still opens the profile", (
         colors: { patient: {} },
         fontFamilies: {},
         radius: {},
+        surfaces: { card: {} },
       },
       "@startup/mobile-ui": { AppText: "Text", Card: "Card" },
     }
@@ -464,6 +528,7 @@ test("Book Slots automatically selects the earliest generated date after loading
         colors: { patient: {} },
         fontFamilies: {},
         radius: {},
+        surfaces: { card: {} },
       },
       "@startup/mobile-ui": {
         AppText: "Text",
@@ -535,9 +600,9 @@ test("Book Slots automatically selects the earliest generated date after loading
   assert.equal(times.length, 1);
   assert.equal(times[0].key, "first");
   const availability = nodes.find(
-    (node) => node.props.children?.[1] === " slots available"
+    (node) => node.props.children === "Choose any available time below."
   );
-  assert.equal(availability.props.children.length, 2);
+  assert.ok(availability);
   assert.equal(
     nodes.find(
       (node) =>

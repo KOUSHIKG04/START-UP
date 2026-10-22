@@ -15,12 +15,9 @@ export function ScheduleSummary({ appointment }: ScheduleSummaryProps) {
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       backgroundColor={colors.white}
       gap={13}
       padding={16}
-      style={styles.doctorCard}
     >
       <View style={styles.doctorHeaderRow}>
         <View style={styles.doctorAvatar}>
@@ -117,9 +114,6 @@ export function ScheduleSummary({ appointment }: ScheduleSummaryProps) {
 }
 
 const styles = StyleSheet.create({
-  doctorCard: {
-    boxShadow: "0px 3px 12px rgba(0, 36, 41, 0.08)",
-  },
   doctorHeaderRow: {
     flexDirection: "row",
     alignItems: "center",

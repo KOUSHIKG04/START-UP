@@ -4,7 +4,6 @@ import { styles } from "../components/ProfileScreen.styles";
 import { usePatientProfile } from "../hooks/usePatientProfile";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
@@ -12,7 +11,7 @@ import { router } from "expo-router";
 import {
   Bell,
   CalendarDays,
-  Receipt,
+  IndianRupee,
   Mail,
   MapPin,
   Pencil,
@@ -65,73 +64,73 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
         }
       >
         <StatusBar style="light" />
-        <LinearGradient
-          style={styles.summaryGradient}
-          colors={gradients.patientBanner.colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+        <Header
+          title="Profile"
+          app="patient"
+          onBackPress={onBackPress}
+          rightAction={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open Settings"
+              onPress={() => setCurrentView("settings")}
+              style={({ pressed }) => [
+                styles.headerSettings,
+                pressed && styles.headerSettingsPressed,
+              ]}
+            >
+              <View style={styles.headerSettingsCircle}>
+                <SettingsIcon size={20} color={colors.patient.primaryDark} />
+              </View>
+            </Pressable>
+          }
+        />
+        <Card
+          theme="patient"
+          variant="plain"
+          borderRadius={0}
+          padding={0}
+          gap={0}
+          style={styles.profileCard}
         >
-          <SafeAreaView edges={["top"]}>
-            <Header
-              title="Profile"
-              app="patient"
-              backgroundColor="transparent"
-              safeAreaEdges={[]}
-              onBackPress={onBackPress}
-              rightAction={
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Open Settings"
-                  onPress={() => setCurrentView("settings")}
-                  style={({ pressed }) => [
-                    styles.headerSettings,
-                    pressed && styles.headerSettingsPressed,
-                  ]}
-                >
-                  <View style={styles.headerSettingsCircle}>
-                    <SettingsIcon
-                      size={22}
-                      color={colors.patient.primaryDark}
-                    />
-                  </View>
-                </Pressable>
-              }
-            />
-            <View style={styles.identitySection}>
-              {detail.isLoading ? (
-                <View style={styles.identityLoading}>
-                  <Skeleton width={88} height={88} radius={44} />
-                  <View style={styles.identityLoadingCopy}>
-                    <Skeleton width="80%" height={26} />
-                    <Skeleton width={116} height={44} />
-                  </View>
-                </View>
-              ) : (
-                <ProfileIdentity
-                  initials={name
-                    .split(/\s+/)
-                    .slice(0, 2)
-                    .map((part) => part[0])
-                    .join("")
-                    .toUpperCase()}
-                  inverse
-                  name={name}
-                  gender={detail.data?.gender}
-                  photoUrl={profilePhoto.data}
-                >
-                  <ProfileStats
-                    age={
-                      detail.data?.age_years == null
-                        ? "—"
-                        : `${detail.data.age_years} yrs`
-                    }
-                    blood={detail.data?.blood_group ?? "—"}
-                  />
-                </ProfileIdentity>
-              )}
+          <LinearGradient
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            colors={gradients.patientBanner.colors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          />
+          {detail.isLoading ? (
+            <View style={styles.identityLoading}>
+              <Skeleton width={88} height={88} radius={44} />
+              <View style={styles.identityLoadingCopy}>
+                <Skeleton width="80%" height={26} />
+                <Skeleton width={116} height={44} />
+              </View>
             </View>
-          </SafeAreaView>
-        </LinearGradient>
+          ) : (
+            <ProfileIdentity
+              initials={name
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((part) => part[0])
+                .join("")
+                .toUpperCase()}
+              inverse
+              name={name}
+              gender={detail.data?.gender}
+              photoUrl={profilePhoto.data}
+            >
+              <ProfileStats
+                age={
+                  detail.data?.age_years == null
+                    ? "—"
+                    : `${detail.data.age_years} yrs`
+                }
+                blood={detail.data?.blood_group ?? "—"}
+              />
+            </ProfileIdentity>
+          )}
+        </Card>
         <FadedScrollView
           contentContainerStyle={styles.content}
           edgeColor={colors.white}
@@ -141,16 +140,15 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
           <View style={styles.section}>
             <Card
               theme="patient"
-              variant="outlined"
-              borderWidth={1}
-              borderRadius={16}
+              variant="elevated"
+              borderRadius={14}
               padding={0}
               gap={0}
-              style={styles.flatCard}
+              style={styles.cardSurface}
             >
               <ProfileAction
                 title="Add family members"
-                icon={<Users size={21} color={colors.patient.primaryDark} />}
+                icon={<Users size={21} color={colors.white} />}
                 trailingIcon={
                   <View style={styles.familyPlus}>
                     <Plus size={21} color={colors.patient.primaryDark} />
@@ -170,17 +168,19 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
               title="Personal details"
               defaultOpen
               theme="patient"
-              variant="outlined"
+              variant="plain"
               leftIcon={
-                <View style={styles.actionIcon}>
-                  <UserRound size={21} color={colors.patient.primaryDark} />
+                <View style={[styles.actionIcon, styles.detailsIcon]}>
+                  <UserRound size={21} color={colors.white} />
                 </View>
               }
-              style={styles.detailsAccordion}
+              style={[styles.cardSurface, styles.detailsAccordion]}
               headerStyle={styles.detailsHeader}
               titleStyle={styles.personalTitle}
               contentStyle={styles.detailsBody}
               separatorColor={colors.border}
+              chevronColor={colors.patient.textSecondary}
+              chevronSize={24}
             >
               {detail.isLoading ? (
                 <View style={styles.detailLoading}>
@@ -256,35 +256,31 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
           <View style={styles.section}>
             <Card
               theme="patient"
-              variant="outlined"
-              borderWidth={1}
-              borderRadius={16}
+              variant="elevated"
+              borderRadius={14}
               padding={0}
               gap={0}
-              style={styles.flatCard}
+              style={styles.cardSurface}
             >
               <ProfileAction
                 title="My Bookings"
 
-                icon={
-                  <CalendarDays size={21} color={colors.patient.primaryDark} />
-                }
+                icon={<CalendarDays size={21} color={colors.white} />}
                 onPress={() => router.navigate("/appointments")}
               />
             </Card>
 
             <Card
               theme="patient"
-              variant="outlined"
-              borderWidth={1}
-              borderRadius={16}
+              variant="elevated"
+              borderRadius={14}
               padding={0}
               gap={0}
-              style={styles.flatCard}
+              style={styles.cardSurface}
             >
               <ProfileAction
                 title="Transactions"
-                icon={<Receipt size={21} color={colors.patient.primaryDark} />}
+                icon={<IndianRupee size={21} color={colors.white} />}
                 onPress={() =>
                   showToast({
                     type: "info",
@@ -297,17 +293,16 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
             </Card>
             <Card
               theme="patient"
-              variant="outlined"
-              borderWidth={1}
-              borderRadius={16}
+              variant="elevated"
+              borderRadius={14}
               padding={0}
               gap={0}
-              style={styles.flatCard}
+              style={styles.cardSurface}
             >
               <ProfileAction
                 title="Notifications"
 
-                icon={<Bell size={21} color={colors.patient.primaryDark} />}
+                icon={<Bell size={21} color={colors.white} />}
                 count={unreadCount > 0 ? `${unreadCount} new` : undefined}
                 onPress={() => setNotificationsOpen(true)}
               />

@@ -5,9 +5,11 @@ import { Image, StyleSheet, View } from "react-native";
 import { Info, UserRound } from "lucide-react-native";
 
 import { colors, fontFamilies, radius } from "@startup/design-tokens";
-import { Button, Card } from "@startup/mobile-ui";
+import { Card } from "@startup/mobile-ui";
 
-export function QueueStatus({ onComplete }: QueueStatusProps) {
+export function QueueStatus({ appointment }: QueueStatusProps) {
+  const ahead = Math.max(0, appointment.ahead_count);
+  const state = appointment.queue_state;
   return (
     <>
       <Card
@@ -21,12 +23,18 @@ export function QueueStatus({ onComplete }: QueueStatusProps) {
         style={[styles.centeredCard, styles.flatCard]}
       >
         <View style={styles.queueHeading}>
-          <Text variant="cardHeading" style={styles.queueTitle}>
-            You are in queue
+          <Text variant="inherit" style={styles.queueTitle}>
+            {state === "called"
+              ? "It’s your turn"
+              : state === "in_service"
+                ? "Consultation in progress"
+                : state === "held"
+                  ? "Your place is on hold"
+                  : "You are in queue"}
           </Text>
           <View style={styles.liveBadge}>
             <View style={styles.liveDot} />
-            <Text variant="body" style={styles.liveText}>
+            <Text variant="inherit" style={styles.liveText}>
               LIVE
             </Text>
           </View>
@@ -34,31 +42,31 @@ export function QueueStatus({ onComplete }: QueueStatusProps) {
 
         <View style={styles.queueStatsRow}>
           <View style={styles.queueStatBox}>
-            <Text variant="label" style={styles.statPanelLabel}>
+            <Text variant="inherit" style={styles.statPanelLabel}>
               TOKEN NUMBER
             </Text>
 
-            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
-              7
+            <Text variant="inherit" style={styles.statBigNumber}>
+              {appointment.ticket_number ?? "—"}
             </Text>
           </View>
 
           <View style={styles.queueStatBox}>
-            <Text variant="label" style={styles.statPanelLabel}>
-              ESTIMATED TIME
+            <Text variant="inherit" style={styles.statPanelLabel}>
+              PEOPLE AHEAD
             </Text>
-            <Text variant="bodyEmphasis" style={styles.statBigNumber}>
-              37
-              <Text variant="caption" style={styles.waitTimeUnit}>
-                MIN.
-              </Text>
+            <Text variant="inherit" style={styles.statBigNumber}>
+              {ahead}
             </Text>
           </View>
         </View>
 
         <View style={styles.peopleAheadSection}>
           <View style={styles.peopleAvatarsRow}>
-            {[1, 2, 3, 4, 5].map((id) => (
+            {Array.from(
+              { length: Math.min(ahead, 5) },
+              (_, index) => index
+            ).map((id) => (
               <View key={id} style={styles.avatarCircle}>
                 <UserRound
                   color={colors.patient.accent}
@@ -68,18 +76,26 @@ export function QueueStatus({ onComplete }: QueueStatusProps) {
                 />
               </View>
             ))}
-            <View style={styles.plusCircle}>
-              <Text variant="body" style={styles.plusCircleText}>
-                +2
-              </Text>
-            </View>
+            {ahead > 5 ? (
+              <View style={styles.plusCircle}>
+                <Text variant="inherit" style={styles.plusCircleText}>
+                  +{ahead - 5}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
         <View style={styles.notifyBanner}>
           <Info color={colors.patient.accent} size={22} strokeWidth={2} />
-          <Text variant="body" style={styles.notifyBannerText}>
-            We’ll notify you when it’s almost your turn.
+          <Text variant="inherit" style={styles.notifyBannerText}>
+            {state === "called"
+              ? "Please go to the consultation room."
+              : state === "held"
+                ? "Reception or your doctor will return you to the queue."
+                : state === "in_service"
+                  ? "Your doctor has started the consultation."
+                  : "Your place updates as the clinic queue moves."}
           </Text>
         </View>
       </Card>
@@ -92,18 +108,13 @@ export function QueueStatus({ onComplete }: QueueStatusProps) {
           resizeMode="cover"
         />
       </View>
-
-      <Button
-        label="Preview completed visit"
-        onPress={onComplete}
-        style={styles.fullWidthButton}
-      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
   flatCard: {
+    boxShadow: "none",
     elevation: 0,
     shadowOpacity: 0,
     borderWidth: 1,
@@ -116,14 +127,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 12,
   },
   queueTitle: {
+    flex: 1,
     color: colors.patient.text,
     fontFamily: fontFamilies.bold,
     fontSize: 17,
     fontWeight: "700",
   },
   liveBadge: {
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

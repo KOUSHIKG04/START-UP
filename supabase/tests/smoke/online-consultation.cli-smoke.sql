@@ -117,7 +117,17 @@ BEGIN
   listed := public.list_care_appointments(NULL);
   IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(listed) x WHERE x->>'id'=appointment_id::text AND x->>'visit_mode'='online') THEN
     RAISE EXCEPTION 'Patient appointment mode missing'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(listed) x WHERE x->>'id'=appointment_id::text
+      AND x->>'practice_id'=practice_id::text AND x->>'practice_service_id'=service_id::text) THEN
+    RAISE EXCEPTION 'Patient appointment doctor profile link is incorrect'; END IF;
   PERFORM set_config('request.jwt.claim.sub',stranger_auth::text,true);
+  BEGIN
+    IF EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_care_appointments(NULL)) x
+        WHERE x->>'id'=appointment_id::text) THEN
+      RAISE EXCEPTION 'Stranger could read an appointment doctor profile link';
+    END IF;
+  EXCEPTION WHEN SQLSTATE '42501' THEN NULL;
+  END;
   IF public.get_online_join_context(appointment_id) IS NOT NULL THEN RAISE EXCEPTION 'Stranger could join'; END IF;
   denied := false;
   BEGIN PERFORM public.list_online_messages(appointment_id);

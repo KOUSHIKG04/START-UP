@@ -12,11 +12,9 @@ export function OnlineScheduleCard({ appointment }: OnlineScheduleCardProps) {
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       gap={10}
       padding={16}
-      style={styles.flatCard}
+      style={styles.cardSurface}
     >
       <Text variant="cardHeading" style={styles.onlineDoctorName}>
         {appointment.doctorName}

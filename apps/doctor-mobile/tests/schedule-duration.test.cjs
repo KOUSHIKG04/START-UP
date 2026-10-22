@@ -32,6 +32,10 @@ const fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript");
 const exportsForSchedule = {};
+const scheduleContracts = load(
+  "../../../packages/contracts/src/doctor-schedule.ts",
+  { zod: { z: require("zod") } }
+);
 vm.runInNewContext(
   ts.transpileModule(
     fs.readFileSync(
@@ -42,7 +46,13 @@ vm.runInNewContext(
       compilerOptions: { module: ts.ModuleKind.CommonJS },
     }
   ).outputText,
-  { exports: exportsForSchedule }
+  {
+    exports: exportsForSchedule,
+    require: (name) => {
+      if (name === "@startup/contracts") return scheduleContracts;
+      throw Error(name);
+    },
+  }
 );
 const { suggestConsultationDuration, slotStartTimes, scheduleError } =
   exportsForSchedule;
@@ -55,6 +65,37 @@ test("setup suggestion divides working hours by the booking limit and uses five-
   assert.equal(suggestConsultationDuration("17:00", "09:00", 12), null);
   assert.equal(suggestConsultationDuration("bad", "17:00", 12), null);
   assert.equal(suggestConsultationDuration("09:00", "17:00", 100), 5);
+});
+
+test("split-block duration suggestions exclude gaps and shared validation rejects overlapping blocks", () => {
+  assert.equal(
+    suggestConsultationDuration("09:00", "17:00", 12, [
+      { start: "09:00", end: "10:00" },
+      { start: "14:00", end: "17:00" },
+    ]),
+    20
+  );
+  assert.equal(
+    scheduleContracts.scheduleBlocksError(
+      [
+        { start: "09:00", end: "10:00" },
+        { start: "09:30", end: "11:00" },
+      ],
+      30
+    ),
+    "Time blocks and travel buffers cannot overlap."
+  );
+  assert.equal(
+    scheduleContracts.scheduleBlocksError(
+      [
+        { start: "12:30", end: "13:30" },
+        { start: "13:45", end: "14:45" },
+      ],
+      60,
+      15
+    ),
+    "Time blocks and travel buffers cannot overlap."
+  );
 });
 
 test("saved sixty-minute consultations remain valid when increasing the booking limit", () => {
@@ -178,7 +219,10 @@ function scheduleView({ published = false } = {}) {
         return { settings: prefs };
       },
     },
-    "@startup/contracts": { formatDisplayDate: (value) => value },
+    "@startup/contracts": {
+      ...scheduleContracts,
+      formatDisplayDate: (value) => value,
+    },
     "../../../services/supabase": {
       supabase: {},
       useMobileSession: () => ({ profile: { doctor: { id: "doctor" } } }),
@@ -240,8 +284,16 @@ test("initial setup previews a suggestion, applies it only on confirmation, and 
   nodes = view.render();
   assert.equal(nodes.find((node) => node.type === "Duration").props.value, 40);
   nodes
-    .find((node) => node.props.title === "Daily booking limit")
+    .find((node) => node.props.title === "Total clinic capacity")
     .props.onChange(20);
+  nodes = view.render();
+  nodes
+    .find((node) => node.props.title === "App booking quota")
+    .props.onChange(12);
+  nodes = view.render();
+  nodes
+    .find((node) => node.props.title === "Reception walk-in quota")
+    .props.onChange(8);
   nodes = view.render();
   assert.equal(nodes.find((node) => node.type === "Duration").props.value, 40);
   const initialDate = nodes.find((node) => node.type === "DatePicker").props
@@ -261,6 +313,8 @@ test("initial setup previews a suggestion, applies it only on confirmation, and 
   assert.equal(view.publications[0][2], "clinic");
   assert.equal(view.publications[0][3].slotMinutes, 40);
   assert.equal(view.publications[0][3].walkinDailyLimit, 20);
+  assert.equal(view.publications[0][3].clinicAppDailyLimit, 12);
+  assert.equal(view.publications[0][3].clinicWalkinDailyLimit, 8);
   assert.equal(view.publications[0][3].onlineSlotMinutes, 30);
   assert.equal(view.publications[0][5], chosenDate);
 });
@@ -273,8 +327,30 @@ test("published schedule keeps its saved duration and does not offer setup recal
     undefined
   );
   nodes
-    .find((node) => node.props.title === "Daily booking limit")
+    .find((node) => node.props.title === "Total clinic capacity")
     .props.onChange(30);
   nodes = view.render();
   assert.equal(nodes.find((node) => node.type === "Duration").props.value, 60);
+});
+
+test("doctor publishes split clinic blocks with the same saved appointment duration", async () => {
+  const view = scheduleView({ published: true });
+  let nodes = view.render();
+  nodes
+    .find((node) => node.props.title === "Clinic Hours")
+    .props.onUpdate({
+      start: "09:00",
+      end: "17:00",
+      timeBlocks: [
+        { start: "09:00", end: "10:00" },
+        { start: "11:00", end: "17:00" },
+      ],
+    });
+  nodes = view.render();
+  await nodes
+    .find((node) => node.props.label === "Publish Schedule")
+    .props.onPress();
+  assert.equal(view.publications[0][3].clinicTimeBlocks.length, 2);
+  assert.equal(view.publications[0][3].clinicTimeBlocks[1].start, "11:00");
+  assert.equal(view.publications[0][3].slotMinutes, 60);
 });

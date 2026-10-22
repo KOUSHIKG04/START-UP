@@ -1,8 +1,8 @@
 export const fontFamilies = {
-  regular: "AlbertSans_400Regular",
-  medium: "AlbertSans_500Medium",
-  semibold: "AlbertSans_600SemiBold",
-  bold: "AlbertSans_700Bold",
+  regular: "Inter_400Regular",
+  medium: "Inter_500Medium",
+  semibold: "Inter_600SemiBold",
+  bold: "Inter_700Bold",
 } as const;
 
 export const typography = {

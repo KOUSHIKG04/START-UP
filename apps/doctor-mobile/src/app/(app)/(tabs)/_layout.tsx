@@ -10,7 +10,14 @@ const items: NavItem[] = [
   { key: "schedule", label: "Schedules", icon: Calendars },
   { key: "profile", label: "Profile", icon: User },
 ];
-const fullScreen = ["online-consultation", "chat", "home-visit", "scan-qr"];
+const fullScreen = [
+  "clinical-notes",
+  "prescription",
+  "online-consultation",
+  "chat",
+  "home-visit",
+  "scan-qr",
+];
 export default function TabsLayout() {
   return (
     <View style={styles.container}>

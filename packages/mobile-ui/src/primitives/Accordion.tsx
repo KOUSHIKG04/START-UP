@@ -3,7 +3,7 @@ import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { useState } from "react";
 import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { ChevronDown } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import type { AccordionVariant, AccordionProps } from "../types/accordion";
 export type { AccordionVariant, AccordionProps } from "../types/accordion";
 
@@ -167,12 +167,7 @@ function getVariantStyle(
       return {
         backgroundColor: theme.surface,
         borderRadius: radius.md,
-        shadowColor: colors.ui.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 3,
-        borderWidth: 0,
+        ...surfaces.card,
       };
     case "surface":
       return {
@@ -192,8 +187,7 @@ function getVariantStyle(
       return {
         backgroundColor: theme.surface,
         borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: theme.border,
+        ...surfaces.card,
       };
   }
 }

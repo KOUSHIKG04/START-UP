@@ -98,7 +98,7 @@ export {
   type AccordionVariant,
 } from "./primitives/Accordion";
 export * from "./utils/notchedBarPath";
-export { albertSansFonts } from "./utils/fonts";
+export { interFonts, albertSansFonts } from "./utils/fonts";
 
 export {
   MobileThemeProvider,

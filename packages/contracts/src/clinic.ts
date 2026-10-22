@@ -17,6 +17,12 @@ export const portalWalkInBookingSchema = z
     windowId: uuidSchema,
     practiceServiceId: uuidSchema,
     patientName: z.string().trim().min(2).max(160),
+    patientAge: z.number().int().min(0).max(120).nullable().optional(),
+    patientGender: z
+      .enum(["Male", "Female", "Other", "Prefer not to say"])
+      .nullable()
+      .optional(),
+    checkIn: z.boolean().optional(),
     patientPhone: z
       .string()
       .trim()
@@ -86,6 +92,12 @@ export const clinicTransitionSchema = z
 
 export const clinicSlotSchema = z.object({
   service_mode: z.enum(["clinic", "online", "home"]).optional(),
+  daily_bookings_remaining: z
+    .number()
+    .int()
+    .nonnegative()
+    .nullable()
+    .optional(),
   window_id: uuidSchema,
   practice_service_id: uuidSchema,
   practice_id: uuidSchema,
@@ -98,6 +110,43 @@ export const clinicSlotSchema = z.object({
   fee_minor: z.string(),
   currency: z.string(),
 });
+
+export const portalClinicDaySchema = z.object({
+  local_day: z.iso.date(),
+  timezone: z.string(),
+  clinic_start: z.string(),
+  clinic_end: z.string(),
+  clinic_time_blocks: z
+    .array(z.object({ start: z.string(), end: z.string() }))
+    .optional(),
+  doctor_timeline: z
+    .array(
+      z.object({
+        session_id: uuidSchema,
+        practice_id: uuidSchema,
+        service_mode: z.enum(["clinic", "online", "home"]),
+        starts_at: z.string(),
+        ends_at: z.string(),
+        travel_buffer_minutes: z.number().int().nonnegative(),
+        state: z.string(),
+      })
+    )
+    .optional(),
+  total_limit: z.number().int().nonnegative(),
+  app_limit: z.number().int().nonnegative(),
+  walkin_limit: z.number().int().nonnegative(),
+  total_used: z.number().int().nonnegative(),
+  app_used: z.number().int().nonnegative(),
+  walkin_used: z.number().int().nonnegative(),
+  app_remaining: z.number().int().nonnegative(),
+  walkin_remaining: z.number().int().nonnegative(),
+  slots: z.array(
+    clinicSlotSchema.extend({
+      state: z.enum(["open", "booked", "unavailable", "past"]),
+    })
+  ),
+});
+export type PortalClinicDay = z.infer<typeof portalClinicDaySchema>;
 
 export const clinicPracticeSchema = z.object({
   practice_id: uuidSchema,
@@ -164,6 +213,8 @@ export const revokeClinicUnavailabilitySchema = z
 
 export const clinicAppointmentSchema = z.object({
   id: uuidSchema,
+  practice_id: uuidSchema.nullish(),
+  practice_service_id: uuidSchema.nullish(),
   visit_mode: z.enum(["clinic", "online", "home"]),
   public_code: z.string(),
   status: z.enum([
@@ -178,6 +229,15 @@ export const clinicAppointmentSchema = z.object({
   row_version: z.string(),
   patient_id: uuidSchema,
   patient_name: z.string(),
+  patient_phone: z.string().nullish(),
+  source: z
+    .enum([
+      "patient_online",
+      "reception_walk_in",
+      "staff_booking",
+      "offline_sync",
+    ])
+    .optional(),
   patient_public_code: z.string(),
   patient_gender: z.string().nullable(),
   patient_age_years: z.number().int().nullable(),
@@ -219,6 +279,7 @@ export type ClinicTransitionInput = z.infer<typeof clinicTransitionSchema>;
 export type ClinicAppointment = z.infer<typeof clinicAppointmentSchema>;
 export type ClinicPractice = z.infer<typeof clinicPracticeSchema>;
 export type ClinicSession = z.infer<typeof clinicSessionSchema>;
+export type ClinicSlot = z.infer<typeof clinicSlotSchema>;
 export type SetClinicAutoConfirmLimitInput = z.infer<
   typeof setClinicAutoConfirmLimitSchema
 >;

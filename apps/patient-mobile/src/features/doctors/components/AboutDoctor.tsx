@@ -1,7 +1,7 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { MapPin } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Button, Card, CardSeparator, Chip } from "@startup/mobile-ui";
 import type { AboutDoctorProps } from "../types/doctor-profile";
 import { doctorLanguageName } from "../utils/doctorDisplay";
@@ -21,8 +21,6 @@ export function AboutDoctor({
       <Card
         variant="outlined"
         borderRadius={radius.md}
-        borderColor="#E0E5EB"
-        borderWidth={1}
         backgroundColor={colors.white}
         gap={16}
         padding={16}
@@ -113,10 +111,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   aboutCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     borderRadius: radius.md,
     backgroundColor: colors.white,
   },

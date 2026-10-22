@@ -18,7 +18,7 @@ import {
 } from "react-native";
 
 import { MapPin, X } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { type PatientAddress } from "../types/address";
 
 import {
@@ -258,9 +258,8 @@ const styles = StyleSheet.create({
   },
   scroll: { flexShrink: 1 },
   locationCard: {
+    ...surfaces.card,
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",

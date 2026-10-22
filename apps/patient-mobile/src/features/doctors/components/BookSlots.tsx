@@ -60,8 +60,6 @@ export function BookSlots({
       <Card
         variant="outlined"
         borderRadius={radius.md}
-        borderColor="#E0E5EB"
-        borderWidth={1}
         backgroundColor={colors.white}
         gap={20}
         padding={16}

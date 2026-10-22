@@ -3,7 +3,7 @@ import { AppText as Text } from "@startup/mobile-ui";
 
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronDown, Lock } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Button, Card, Input, Loader } from "@startup/mobile-ui";
 
 export function ProfilePinCard() {
@@ -13,12 +13,10 @@ export function ProfilePinCard() {
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       backgroundColor={colors.white}
       padding={16}
       gap={showPin ? 14 : 0}
-      style={styles.cardNoShadow}
+      style={styles.cardSurface}
     >
       <Pressable
         accessibilityRole="button"
@@ -89,9 +87,8 @@ export function ProfilePinCard() {
 }
 
 const styles = StyleSheet.create({
-  cardNoShadow: {
-    elevation: 0,
-    shadowOpacity: 0,
+  cardSurface: {
+    ...surfaces.card,
   },
   actionRow: {
     minHeight: 46,

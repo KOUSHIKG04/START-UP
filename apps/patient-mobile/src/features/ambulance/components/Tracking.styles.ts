@@ -1,5 +1,11 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   content: {
@@ -20,10 +26,8 @@ export const styles = StyleSheet.create({
     height: 195,
     borderRadius: radius.md,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     backgroundColor: colors.patient.surface,
-    boxShadow: "none",
   },
   trackingMap: {
     width: "100%",
@@ -61,7 +65,7 @@ export const styles = StyleSheet.create({
   },
   centeredCard: {
     alignItems: "center",
-    boxShadow: "none",
+    ...surfaces.card,
   },
   otpNotice: {
     width: "100%",
@@ -104,7 +108,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    boxShadow: "none",
+    ...surfaces.card,
   },
   avatar: {
     width: 46,
@@ -385,10 +389,8 @@ export const styles = StyleSheet.create({
     height: 195,
     borderRadius: radius.md,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     backgroundColor: colors.patient.surface,
-    boxShadow: "none",
   },
   liveMap: {
     width: "100%",

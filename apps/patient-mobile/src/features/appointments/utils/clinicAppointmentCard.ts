@@ -6,6 +6,8 @@ export function clinicAppointmentCard(item: ClinicAppointment): Appointment {
   return {
     id: item.public_code,
     backendId: item.id,
+    practiceId: item.practice_id ?? undefined,
+    serviceId: item.practice_service_id ?? undefined,
     doctorName: item.doctor_name,
     qualification: "",
     specialty: item.service_name,

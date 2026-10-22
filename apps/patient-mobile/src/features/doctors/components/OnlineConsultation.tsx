@@ -1,7 +1,7 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Video } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 import type { OnlineConsultationProps } from "../types/doctor-profile";
 
@@ -13,8 +13,6 @@ export function OnlineConsultation({
     <Card
       backgroundColor={colors.white}
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       gap={14}
       orientation="horizontal"
       padding={14}
@@ -47,12 +45,9 @@ export function OnlineConsultation({
 
 const styles = StyleSheet.create({
   consultationCard: {
+    ...surfaces.card,
     alignItems: "center",
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
-    elevation: 0,
-    shadowOpacity: 0,
   },
   consultationIconContainer: {
     width: 48,

@@ -14,6 +14,7 @@ import {
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { ConsultationForm } from "../../clinic/components/ConsultationForm";
+import { ConsultationRecord } from "../../clinic/components/ConsultationRecord";
 import { visitRoute } from "../utils/consultationRoutes";
 
 import { createConsultation } from "../../../data/demo";
@@ -36,6 +37,14 @@ export function ClinicalNotesScreen() {
     setConfirm,
   } = useClinicalNotes();
   if (isLiveAppointment && liveAppointment) {
+    if (liveAppointment.status === "completed" && liveAppointment.can_consult)
+      return (
+        <ConsultationRecord
+          appointmentId={liveAppointment.id}
+          patientName={liveAppointment.patient_name}
+          timezone={liveAppointment.timezone}
+        />
+      );
     if (
       liveAppointment.status === "in_consultation" &&
       liveAppointment.can_consult

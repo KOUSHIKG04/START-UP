@@ -4,7 +4,7 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { useRef, type ReactNode } from "react";
 import { type GestureResponderEvent, StyleSheet, View } from "react-native";
 import { Briefcase, Star, UserRound } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
 
 function splitQualification(q: string): {
@@ -76,7 +76,7 @@ export default function DoctorCard({
         onTouchMove={onPress ? handleTouchMove : undefined}
         pressRetentionOffset={8}
         padding={16}
-        style={[styles.flatCard, style]}
+        style={[styles.cardSurface, style]}
       >
         <View style={styles.headerRow}>
           <View style={styles.avatarSquare}>
@@ -150,16 +150,14 @@ export default function DoctorCard({
       accessibilityLabel={`${name}, ${specialty}${showRating && rating ? `, rating ${rating}` : ""}${hideFee || !fee ? "" : `, consultation fee ${fee}`}${distanceMeters == null ? "" : `, ${(distanceMeters / 1000).toFixed(1)} km away`}`}
       variant="outlined"
       backgroundColor="#E6F4F3"
-      borderColor="#E0E5EB"
       borderRadius={radius.lg}
-      borderWidth={1}
       gap={10}
       onPress={onPress ? handlePress : undefined}
       onTouchStart={onPress ? handleTouchStart : undefined}
       onTouchMove={onPress ? handleTouchMove : undefined}
       pressRetentionOffset={8}
       padding={14}
-      style={[styles.flatCard, style]}
+      style={[styles.cardSurface, style]}
     >
       <View
         style={[
@@ -314,8 +312,8 @@ function MetricCell({
 }
 
 const styles = StyleSheet.create({
-  flatCard: {
-    boxShadow: "none",
+  cardSurface: {
+    ...surfaces.card,
   },
   headerRow: {
     flexDirection: "row",

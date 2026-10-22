@@ -7,7 +7,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@startup/design-tokens";
 import {
-  albertSansFonts,
+  interFonts,
   Loader,
   SafeAreaProvider,
   MobileThemeProvider,
@@ -40,7 +40,7 @@ const navTheme = {
 };
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts(albertSansFonts);
+  const [fontsLoaded, fontError] = useFonts(interFonts);
   const auth = useMobileSession();
 
   useEffect(() => {

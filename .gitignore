@@ -94,12 +94,14 @@ apps/doctor-mobile/tests/*
 !apps/patient-mobile/tests/
 apps/patient-mobile/tests/*
 !apps/patient-mobile/tests/verified-directory.test.cjs
+!apps/patient-mobile/tests/appointment-cards.test.cjs
 !apps/patient-mobile/tests/notifications.test.cjs
 !apps/patient-mobile/tests/keyboard-scroll.test.cjs
 !apps/patient-mobile/tests/booking-guide.test.cjs
 !apps/patient-mobile/tests/map-picker.test.cjs
 !apps/patient-mobile/tests/feature-structure.test.cjs
 !apps/patient-mobile/tests/feature-lifecycle.test.cjs
+!apps/patient-mobile/tests/expo-router-linking.test.cjs
 !apps/driver-mobile/tests/
 apps/driver-mobile/tests/*
 !apps/driver-mobile/tests/driver.test.mjs

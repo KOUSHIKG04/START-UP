@@ -4,7 +4,13 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Download, FileText, Info, Pill, Share2 } from "lucide-react-native";
 
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 import {
   Button,
   Card,
@@ -77,12 +83,10 @@ export function PrescriptionScreen({
             <Card
               variant="outlined"
               borderRadius={radius.md}
-              borderWidth={1}
-              borderColor="#E0E5EB"
               gap={10}
               orientation="horizontal"
               padding={14}
-              style={styles.noElevation}
+              style={styles.cardSurface}
             >
               <FileText color={colors.patient.primary} size={23} />
               <View style={styles.flexCopy}>
@@ -259,10 +263,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   emptyCard: {
+    ...surfaces.card,
     backgroundColor: colors.white,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     padding: 28,
     alignItems: "center",
     justifyContent: "center",
@@ -281,16 +284,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
-  noElevation: { elevation: 0, shadowOpacity: 0 },
+  cardSurface: {
+    ...surfaces.card,
+  },
   medicinesCard: {
+    ...surfaces.card,
     backgroundColor: colors.white,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     padding: 16,
     gap: 12,
-    elevation: 0,
-    shadowOpacity: 0,
   },
   flexCopy: { flex: 1, minWidth: 0, gap: 2 },
   cardTitle: {
@@ -321,10 +323,9 @@ const styles = StyleSheet.create({
   },
   vitalsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   vitalCard: {
+    ...surfaces.card,
     backgroundColor: colors.white,
     borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     paddingHorizontal: 12,
     paddingVertical: 8,
     minWidth: 90,

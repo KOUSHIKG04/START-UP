@@ -52,6 +52,12 @@ Import supported APIs from `@startup/mobile-ui`. Use props/callbacks to connect
 components to app features. Add a shared component when it has a reusable UI
 contract; keep one-screen compositions in the feature that owns them.
 
+`Card` in its default/elevated and outlined variants, and outlined/elevated
+`Accordion` surfaces, use `surfaces.card`: a `0.4` light gray border and the shared
+soft shadow. Custom content cards use the same preset from `@startup/design-tokens`.
+Explicit style/prop overrides still support selected and other semantic states;
+plain/soft variants remain available for layout and tinted containers.
+
 `SectionHeader` accepts a title, optional action text/callback, visibility and style
 overrides. It inherits the app palette or accepts an explicit `theme`.
 
@@ -82,10 +88,17 @@ controls still need meaningful labels. Chip radio variants expose checked state.
 
 ## Fonts
 
-Pass `albertSansFonts` to Expo's `useFonts` at the app root. The font loader uses
+Pass `interFonts` to Expo's `useFonts` at the app root. The font loader uses
 public `@startup/design-tokens/fonts/*` exports, not sibling-directory paths.
+`albertSansFonts` remains a compatibility alias for existing callers.
 
 ## Verification
+
+During in-call chat, tapping the floating video in `ConsultationCall` restores the
+full-screen video. Its accessible button remains separate from camera flip, while
+`FloatingVideo` continues to own the drag threshold and bounds. Component tests
+cover the return action in Patient and Doctor themes; native gestures require a
+connected device for verification.
 
 From the monorepo root:
 

@@ -143,6 +143,10 @@ export const consultationIntakeSchema = z
 export type ConsultationIntakeInput = z.infer<typeof consultationIntakeSchema>;
 
 export const doctorConsultationDraftSchema = z.object({
+  status: z.enum(["active", "signed", "amended"]).optional(),
+  signed_at: z.string().nullable().optional(),
+  assessment: z.string().nullable().optional(),
+  medicines: clinicalRecordSchema.shape.medicines.optional(),
   vitals: recordVitalSchema.omit({ appointmentId: true }).array(),
   diagnosis: z.string().nullable(),
   prescription_issued: z.boolean(),

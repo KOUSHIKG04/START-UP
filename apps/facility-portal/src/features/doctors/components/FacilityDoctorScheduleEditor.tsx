@@ -60,6 +60,22 @@ export function FacilityDoctorScheduleEditor({
     feeLabel,
     save,
   } = useFacilityDoctorSchedule({ practiceId, mode });
+  const blocksKey =
+    mode === "clinic"
+      ? "clinicTimeBlocks"
+      : mode === "online"
+        ? "onlineTimeBlocks"
+        : "homeTimeBlocks";
+  const timeBlocks = draft[blocksKey] ?? [
+    { start: draft[startKey] ?? "09:00", end: draft[endKey] ?? "17:00" },
+  ];
+  const changeBlocks = (blocks: typeof timeBlocks) =>
+    update({
+      [blocksKey]: blocks,
+      [startKey]: [...blocks].sort((a, b) => a.start.localeCompare(b.start))[0]
+        .start,
+      [endKey]: [...blocks].sort((a, b) => b.end.localeCompare(a.end))[0].end,
+    });
   return (
     <div className="w-full max-w-full min-w-0 space-y-6 pb-12">
       <div className="space-y-1">
@@ -125,23 +141,85 @@ export function FacilityDoctorScheduleEditor({
             }
           >
             <p className="text-xs text-[#475569]">
-              Set your start and end times.
+              Add separate time blocks for these working days. Leave gaps for
+              other appointment types or breaks.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ClockTimePicker
-                label="Start Time"
-                value={draft[startKey] ?? ""}
+            {timeBlocks.map((block, index) => (
+              <div key={index} className="space-y-3">
+                <p className="text-sm font-medium">Time block {index + 1}</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ClockTimePicker
+                    label="Start Time"
+                    value={block.start}
+                    disabled={pending}
+                    onChange={(value) =>
+                      changeBlocks(
+                        timeBlocks.map((item, i) =>
+                          i === index ? { ...item, start: value } : item
+                        )
+                      )
+                    }
+                  />
+                  <ClockTimePicker
+                    label="End Time"
+                    value={block.end}
+                    disabled={pending}
+                    endOfDay
+                    onChange={(value) =>
+                      changeBlocks(
+                        timeBlocks.map((item, i) =>
+                          i === index ? { ...item, end: value } : item
+                        )
+                      )
+                    }
+                  />
+                </div>
+                {timeBlocks.length > 1 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={pending}
+                    onClick={() =>
+                      changeBlocks(timeBlocks.filter((_, i) => i !== index))
+                    }
+                  >
+                    Remove time block {index + 1}
+                  </Button>
+                ) : null}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={
+                pending || timeBlocks.length >= 8 || draft[endKey] === "24:00"
+              }
+              onClick={() => {
+                const start = draft[endKey] ?? "17:00";
+                const [h, m] = start.split(":").map(Number);
+                const finish = Math.min(h * 60 + m + 60, 1440);
+                changeBlocks([
+                  ...timeBlocks,
+                  {
+                    start,
+                    end: `${String(Math.floor(finish / 60)).padStart(2, "0")}:${String(finish % 60).padStart(2, "0")}`,
+                  },
+                ]);
+              }}
+            >
+              Add time block
+            </Button>
+            {mode === "home" ? (
+              <NumberSetting
+                title="Travel buffer before and after each block"
+                value={draft.homeTravelBufferMinutes ?? 0}
+                min={0}
+                max={180}
+                suffix="min"
                 disabled={pending}
-                onChange={(value) => update({ [startKey]: value })}
+                onChange={(value) => update({ homeTravelBufferMinutes: value })}
               />
-              <ClockTimePicker
-                label="End Time"
-                value={draft[endKey] ?? ""}
-                disabled={pending}
-                endOfDay
-                onChange={(value) => update({ [endKey]: value })}
-              />
-            </div>
+            ) : null}
           </ScheduleSection>
           <ScheduleSection title="Appointment slots">
             <p className="text-xs text-[#475569]">
@@ -167,7 +245,11 @@ export function FacilityDoctorScheduleEditor({
               />
               {mode !== "home" ? (
                 <NumberSetting
-                  title="Daily booking limit"
+                  title={
+                    mode === "clinic"
+                      ? "Total clinic capacity"
+                      : "Daily booking limit"
+                  }
                   value={draft[limitKey]}
                   min={0}
                   max={100}
@@ -177,6 +259,36 @@ export function FacilityDoctorScheduleEditor({
                 />
               ) : null}
             </div>
+            {mode === "clinic" ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <NumberSetting
+                  title="App booking quota"
+                  value={draft.clinicAppDailyLimit ?? draft.walkinDailyLimit}
+                  min={0}
+                  max={100}
+                  suffix="bookings"
+                  disabled={pending}
+                  onChange={(clinicAppDailyLimit) =>
+                    update({ clinicAppDailyLimit })
+                  }
+                />
+                <NumberSetting
+                  title="Reception walk-in quota"
+                  value={draft.clinicWalkinDailyLimit ?? 0}
+                  min={0}
+                  max={100}
+                  suffix="bookings"
+                  disabled={pending}
+                  onChange={(clinicWalkinDailyLimit) =>
+                    update({ clinicWalkinDailyLimit })
+                  }
+                />
+                <p className="text-muted-foreground text-sm sm:col-span-2">
+                  App and walk-in quotas must fit within total clinic capacity.
+                  Set a walk-in quota to accept reception registrations.
+                </p>
+              </div>
+            ) : null}
             {mode !== "home" ? (
               <>
                 <p className="text-xs text-[#475569]">
@@ -367,7 +479,7 @@ export function FacilityDoctorScheduleEditor({
       </HelpDialog>
       <Dialog
         open={suggestedDuration !== null}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) setSuggestedDuration(null);
         }}
       >

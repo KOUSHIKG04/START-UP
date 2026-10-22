@@ -56,7 +56,7 @@ The structure follows `apps/patient-mobile`: Expo Router files select and connec
 
 | Location                                           | Responsibility                                                                                                                                          |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/app/_layout.tsx`                              | Root stack, shared Albert Sans font loading, splash lifecycle and safe-area provider. The package entry is `expo-router/entry`.                         |
+| `src/app/_layout.tsx`                              | Root stack, shared Inter font loading, splash lifecycle and safe-area provider. The package entry is `expo-router/entry`.                               |
 | `src/app/*.tsx`                                    | Thin route adapters for welcome, details, documents, verification and chat; connect navigation and store actions to screens.                            |
 | `src/app/(tabs)/`                                  | Home, Trips, Earnings and Profile navigation with shared `BottomNavBar`. The active-trip route is hidden from the bar. Verification gates the tab area. |
 | `src/screens/registration/RegistrationScreens.tsx` | Welcome, personal details, vehicle/documents and pending/verified presentations.                                                                        |
@@ -69,7 +69,7 @@ The structure follows `apps/patient-mobile`: Expo Router files select and connec
 | `src/store/documents.ts`                           | In-memory selected-document metadata and vehicle details.                                                                                               |
 | `src/components/DriverUI.tsx`                      | Driver-specific composition helpers for headers, text, cards, metrics and screen spacing.                                                               |
 
-`@startup/design-tokens` remains the shared source for the driver palette and Albert Sans families. `@startup/mobile-ui` supplies shared buttons, inputs, bottom navigation, fonts and safe-area exports. Driver-specific compositions belong in this app; reusable primitives and token changes belong in the shared packages. Existing product/design context remains authoritative; this extension does not establish a new design system.
+`@startup/design-tokens` remains the shared source for the driver palette and Inter families. `@startup/mobile-ui` supplies shared buttons, inputs, bottom navigation, fonts and safe-area exports. Driver-specific compositions belong in this app; reusable primitives and token changes belong in the shared packages. Existing product/design context remains authoritative; this extension does not establish a new design system.
 
 ## Preview walkthrough
 
@@ -105,7 +105,7 @@ Source file: [CLINZO Figma design](https://www.figma.com/design/JPyiy9pnS8Ywy9Sl
 
 **Custom companion screens:** `/trips` and `/profile` extend the supplied navigation using the incumbent driver visual language; no separate Figma nodes were supplied for them.
 
-`assets/figma/hero.png`, `verified.png`, `online-map.png` and `trip-map.png` are exported imagery from the supplied Figma design. They provide the welcome hero, verification illustration and map references. UI text, controls, state changes and navigation are implemented in React Native. Shared Albert Sans font assets originate from `packages/design-tokens/assets/fonts`; interface icons use `lucide-react-native`.
+`assets/figma/hero.png`, `verified.png`, `online-map.png` and `trip-map.png` are exported imagery from the supplied Figma design. They provide the welcome hero, verification illustration and map references. UI text, controls, state changes and navigation are implemented in React Native. Shared Inter font assets originate from `packages/design-tokens/assets/fonts`; interface icons use `lucide-react-native`.
 
 ## Future backend integrations
 

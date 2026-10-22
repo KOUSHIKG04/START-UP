@@ -2,7 +2,7 @@ import type { AmbulanceBannerProps } from "../types/home";
 export type { AmbulanceBannerProps } from "../types/home";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { Button, StatusBadge } from "@startup/mobile-ui";
 
 export function AmbulanceBanner({ onBookPress, style }: AmbulanceBannerProps) {
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     backgroundColor: "#E6F7F6",
-    boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.12)",
+    ...surfaces.card,
   },
   content: {
     minWidth: 0,

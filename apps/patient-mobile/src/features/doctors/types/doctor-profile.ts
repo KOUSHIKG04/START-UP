@@ -2,6 +2,7 @@ import type { DoctorCardProps } from "../components/DoctorCard";
 import type { ConsultationType } from "../../appointments/types/appointment";
 import type { PatientScreenProps } from "../../../types/screen";
 import type { ProfileTab } from "./booking-calendar";
+import type { ClinicSlot } from "@startup/contracts";
 
 export type BookingSelection = {
   date: string;
@@ -53,12 +54,14 @@ export type BookSlotsProps = {
   consultationType: ConsultationType;
   onBookAppointment: (selection: BookingSelection) => void;
   onGoToAbout: () => void;
-  slots: {
-    window_id: string;
-    starts_at: string;
-    fee_minor: string;
-    currency: string;
-  }[];
+  slots: Pick<
+    ClinicSlot,
+    | "window_id"
+    | "starts_at"
+    | "fee_minor"
+    | "currency"
+    | "daily_bookings_remaining"
+  >[];
   patientOptions: { id: string; label: string; verified: boolean }[];
   loading?: boolean;
   error?: string | null;

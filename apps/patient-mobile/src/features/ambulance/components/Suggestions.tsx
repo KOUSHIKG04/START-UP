@@ -4,7 +4,7 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Clock3, Heart, MapPin } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 
 export function Suggestions({
   query,
@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   suggestionCard: {
+    ...surfaces.card,
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
@@ -157,8 +158,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
   },
   suggestionPin: {
     width: 42,

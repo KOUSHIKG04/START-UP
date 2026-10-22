@@ -32,20 +32,29 @@ BEGIN
   EXECUTE 'RESET ROLE';
   IF (SELECT count(*) FROM clinzo.appointment_window w JOIN clinzo.session s ON s.id=w.session_id
     WHERE s.doctor_facility_id=practice AND (w.starts_at AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date AND w.starts_at>now())<=2 THEN
-    RAISE EXCEPTION 'Booking cap still truncates offered times'; END IF;
-  SELECT w.id,ss.practice_service_id INTO wid,psid FROM clinzo.appointment_window w JOIN clinzo.session s ON s.id=w.session_id
-    JOIN clinzo.session_service ss ON ss.session_id=s.id WHERE s.doctor_facility_id=practice
-    AND (w.starts_at AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date AND (w.starts_at AT TIME ZONE zone)::time=time '18:00';
-  IF wid IS NULL THEN RAISE EXCEPTION 'Late evening slot missing'; END IF;
+    RAISE EXCEPTION 'Stored schedule windows were unexpectedly truncated'; END IF;
+  SELECT count(*) INTO count_before
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date;
+  IF count_before<>2 THEN RAISE EXCEPTION 'Clinic discovery did not cap times at the daily limit'; END IF;
+  SELECT (entry->>'window_id')::uuid,(entry->>'practice_service_id')::uuid INTO wid,psid
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date
+    LIMIT 1;
   INSERT INTO clinzo.patient(public_code,full_name) VALUES(gen_random_uuid()::text,'Daily cap patient') RETURNING id INTO patient;
   INSERT INTO clinzo.patient_access(patient_id,identity_id,relationship,verified_at) VALUES(patient,outsider_identity,'self',now());
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',outsider_auth::text,true);
   today_sid:=public.book_clinic_appointment(patient,wid,psid,'',gen_random_uuid());
   EXECUTE 'RESET ROLE';
-  SELECT w.id,ss.practice_service_id INTO wid,psid FROM clinzo.appointment_window w JOIN clinzo.session s ON s.id=w.session_id
-    JOIN clinzo.session_service ss ON ss.session_id=s.id WHERE s.doctor_facility_id=practice
-    AND (w.starts_at AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date AND (w.starts_at AT TIME ZONE zone)::time=time '19:00';
+  SELECT count(*) INTO count_after
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date;
+  IF count_after<>1 THEN RAISE EXCEPTION 'Reserved booking did not reduce advertised time count'; END IF;
+  SELECT (entry->>'window_id')::uuid,(entry->>'practice_service_id')::uuid INTO wid,psid
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date
+    LIMIT 1;
   EXECUTE 'SET LOCAL ROLE authenticated';
   today_wid:=public.book_clinic_appointment(patient,wid,psid,'',gen_random_uuid());
   EXECUTE 'RESET ROLE';
@@ -65,8 +74,14 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub',doctor_auth::text,true);
   PERFORM public.transition_clinic_appointment(today_sid,version,'reject','Choose a different time');
   EXECUTE 'RESET ROLE';
-  IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
-    WHERE (entry->>'window_id')::uuid=wid) THEN RAISE EXCEPTION 'Rejection did not restore daily capacity'; END IF;
+  SELECT count(*) INTO count_after
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date;
+  IF count_after<>1 THEN RAISE EXCEPTION 'Rejection did not restore one available time'; END IF;
+  SELECT (entry->>'window_id')::uuid,(entry->>'practice_service_id')::uuid INTO wid,psid
+    FROM jsonb_array_elements(public.list_practice_service_slots(practice,'clinic',NULL,now(),10000)) entry
+    WHERE ((entry->>'starts_at')::timestamptz AT TIME ZONE zone)::date=(now() AT TIME ZONE zone)::date
+    LIMIT 1;
   EXECUTE 'SET LOCAL ROLE authenticated';
   PERFORM set_config('request.jwt.claim.sub',outsider_auth::text,true);
   sid:=public.book_clinic_appointment(patient,wid,psid,'',gen_random_uuid());

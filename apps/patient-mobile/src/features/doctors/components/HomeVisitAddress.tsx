@@ -1,7 +1,7 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Navigation } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Button, Card, Input } from "@startup/mobile-ui";
 import type { HomeVisitAddressProps } from "../types/doctor-profile";
 
@@ -15,8 +15,6 @@ export function HomeVisitAddress({
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       backgroundColor={colors.white}
       gap={12}
       padding={14}
@@ -60,10 +58,7 @@ export function HomeVisitAddress({
 
 const styles = StyleSheet.create({
   addressCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     borderRadius: radius.md,
   },
   locationButton: {

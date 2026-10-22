@@ -9,6 +9,8 @@ export function initialSchedule(mode: "clinic" | "online" | "home"): Schedule {
     homeDuration: 60,
     online: 8,
     walkIn: 12,
+    clinicApp: 12,
+    clinicWalkin: 0,
     autoAccept: false,
     autoLimit: 1,
     homeVisits: false,

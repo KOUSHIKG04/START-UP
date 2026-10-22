@@ -3,7 +3,13 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Pill } from "lucide-react-native";
 
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 import {
   Button,
   Card,
@@ -172,10 +178,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   emptyCard: {
+    ...surfaces.card,
     backgroundColor: colors.white,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     padding: 28,
     alignItems: "center",
     justifyContent: "center",

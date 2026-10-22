@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 export const s = StyleSheet.create({
   googleAttribution: {
     color: "#5E5E5E",
@@ -14,6 +14,7 @@ export const s = StyleSheet.create({
   bookingContent: { paddingBottom: 40 },
   hospitalList: { gap: 12, paddingHorizontal: 16, paddingBottom: 4 },
   hospitalCard: {
+    ...surfaces.card,
     width: 300,
     minHeight: 104,
     flexDirection: "row",
@@ -23,8 +24,6 @@ export const s = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
   },
   hospitalSelected: {
     backgroundColor: colors.patient.surface,

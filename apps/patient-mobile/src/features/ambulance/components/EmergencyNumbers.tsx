@@ -1,7 +1,7 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { Phone } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { emergencyNumbers } from "../utils/ambulanceConstants";
 
 export function EmergencyNumbers() {
@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   numberCard: {
+    ...surfaces.card,
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 6,
@@ -47,8 +48,6 @@ const styles = StyleSheet.create({
     gap: 4,
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
   },
   numberHeader: {
     flexDirection: "row",

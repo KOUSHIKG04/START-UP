@@ -67,7 +67,8 @@ export function AppointmentDetailScreen() {
               · {item.facility_name}
             </Label>
             <Label muted>
-              Booking {item.public_code} · {item.status.replaceAll("_", " ")}
+              Booking {item.public_code.slice(-8)} ·{" "}
+              {item.status.replaceAll("_", " ")}
             </Label>
             {item.visit_mode === "clinic" && item.queue_state ? (
               <Label muted>
@@ -77,10 +78,14 @@ export function AppointmentDetailScreen() {
             ) : null}
             {item.reason ? <Label muted>Reason: {item.reason}</Label> : null}
             {item.status === "pending" ||
-            item.queue_state === "waiting" ||
-            item.queue_state === "called" ? (
+            (!item.can_consult &&
+              ["waiting", "called"].includes(item.queue_state ?? "")) ? (
               <Input
-                label="Reason for rejection or hold"
+                label={
+                  item.status === "pending"
+                    ? "Reason for rejection"
+                    : "Reason for hold"
+                }
                 value={notes[item.id] ?? ""}
                 onChangeText={(value) =>
                   setNotes((current) => ({ ...current, [item.id]: value }))
@@ -175,7 +180,8 @@ export function AppointmentDetailScreen() {
               />
             ) : null}
             {item.status === "confirmed" &&
-            ["waiting", "called"].includes(item.queue_state ?? "") ? (
+            ["waiting", "called"].includes(item.queue_state ?? "") &&
+            !item.can_consult ? (
               <Button
                 loading={
                   transition.isPending &&
@@ -249,6 +255,22 @@ export function AppointmentDetailScreen() {
                       appointmentId: item.id,
                       patientId: item.patient_id,
                       mode: "online",
+                    },
+                  })
+                }
+              />
+            ) : null}
+            {item.status === "completed" && item.can_consult ? (
+              <Button
+                theme="doctor"
+                label="View consultation record"
+                onPress={() =>
+                  router.push({
+                    pathname: "/clinical-notes",
+                    params: {
+                      appointmentId: item.id,
+                      patientId: item.patient_id,
+                      mode: item.visit_mode,
                     },
                   })
                 }

@@ -2,7 +2,7 @@ import type { PatientCardProps } from "../types/patient-card";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight, User } from "lucide-react-native";
 import { Button } from "@startup/mobile-ui";
-import { fontFamilies } from "@startup/design-tokens";
+import { fontFamilies, surfaces } from "@startup/design-tokens";
 
 import { Heading, Label } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
@@ -110,6 +110,7 @@ export function PatientCard({
 
 const styles = StyleSheet.create({
   card: {
+    ...surfaces.card,
     padding: 16,
     gap: 14,
     borderRadius: 16,

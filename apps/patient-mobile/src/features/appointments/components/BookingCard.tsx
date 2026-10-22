@@ -1,40 +1,80 @@
 import type { BookingCardProps } from "../types/booking-card";
-import { AppText as Text } from "@startup/mobile-ui";
-import { StyleSheet, View } from "react-native";
+import { AppText as Text, Card, useToast } from "@startup/mobile-ui";
+import {
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  type GestureResponderEvent,
+} from "react-native";
+import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   CalendarDays,
   ChevronRight,
-  Clock3,
+  EllipsisVertical,
   UserRound,
 } from "lucide-react-native";
 import {
   colors,
   fontFamilies,
   gradients,
+  mobileTypography,
   radius,
+  typography,
 } from "@startup/design-tokens";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardSeparator,
-} from "@startup/mobile-ui";
 
 export default function BookingCard({
   appointment,
   onPress,
   statusLabel,
+  footer,
+  onMorePress,
+  moreDisabled = false,
+  moreLoading = false,
 }: BookingCardProps) {
+  const { showToast } = useToast();
+  const openDoctorProfile = (event?: GestureResponderEvent) => {
+    event?.stopPropagation();
+    if (!appointment.practiceId) {
+      showToast({
+        type: "info",
+        title: "Doctor details unavailable",
+        message:
+          "The doctor profile link is not available for this booking yet.",
+      });
+      return;
+    }
+    router.push({
+      pathname: "/doctor-profile",
+      params: {
+        practiceId: appointment.practiceId,
+        serviceId: appointment.serviceId ?? "",
+        consultationType: appointment.consultationType,
+      },
+    });
+  };
+  const doctorLinkLabel = `View doctor profile for ${appointment.doctorName}`;
+  const displayedStatus =
+    statusLabel ??
+    (appointment.status === "approved" ? "Confirmed" : "Pending");
+  const statusTone =
+    displayedStatus.toLowerCase() === "pending"
+      ? styles.pendingStatus
+      : ["cancelled", "no show"].includes(displayedStatus.toLowerCase())
+        ? styles.inactiveStatus
+        : styles.confirmedStatus;
+
   return (
     <Card
-      accessibilityRole={onPress ? "button" : undefined}
-      accessibilityLabel={`${appointment.consultationType} with ${appointment.doctorName} on ${appointment.date}${onPress ? ". Open appointment details" : ""}`}
-      onPress={onPress}
+      accessible={false}
+      variant="outlined"
+      theme="patient"
       backgroundColor={gradients.patientBanner.colors[0]}
       borderRadius={radius.lg}
-      gap={11}
-      padding={16}
+      padding={0}
+      gap={0}
+      style={styles.card}
     >
       <LinearGradient
         pointerEvents="none"
@@ -43,176 +83,241 @@ export default function BookingCard({
         end={{ x: 1, y: 0 }}
         style={styles.gradient}
       />
-      <View style={styles.topRow}>
-        <Text variant="body" style={styles.type}>
-          {appointment.consultationType}
-        </Text>
-        <View style={styles.statusBadge}>
-          <View
-            style={[
-              styles.statusDot,
-              appointment.status === "approved"
-                ? styles.statusDotApproved
-                : styles.statusDotPending,
-            ]}
-          />
-          <Text variant="body" style={styles.statusText}>
-            {statusLabel ??
-              (appointment.status === "approved" ? "Confirmed" : "Pending")}
-          </Text>
-        </View>
-      </View>
-      <CardHeader gap={11}>
-        <View style={styles.avatar}>
-          <UserRound color={colors.white} size={22} strokeWidth={1.8} />
-        </View>
-        <CardContent gap={1} style={styles.identity}>
-          <Text variant="body" numberOfLines={1} style={styles.name}>
-            {appointment.doctorName}
-          </Text>
-          <Text variant="body" style={styles.specialty}>
-            {appointment.specialty}
-          </Text>
-        </CardContent>
-        {onPress ? (
-          <View style={styles.chevron}>
-            <ChevronRight
-              color={colors.patient.primaryDark}
-              size={19}
-              strokeWidth={2.3}
-            />
-          </View>
-        ) : null}
-      </CardHeader>
-      <CardSeparator color="#FFFFFF44" />
-      <View style={styles.details}>
-        <View style={styles.detail}>
-          <CalendarDays color={colors.white} size={18} strokeWidth={1.8} />
-          <View style={styles.detailCopy}>
-            <Text variant="label" style={styles.detailLabel}>
-              Date
-            </Text>
-            <Text
-              variant="bodyEmphasis"
-              numberOfLines={1}
-              style={styles.detailValue}
+      <Pressable
+        accessibilityRole={onPress ? "button" : undefined}
+        accessibilityLabel={`${appointment.consultationType} with ${appointment.doctorName} on ${appointment.date} at ${appointment.time}${onPress ? ". Open appointment details" : ""}`}
+        accessibilityActions={[
+          { name: "doctorProfile", label: doctorLinkLabel },
+          ...(onMorePress
+            ? [{ name: "bookingActions", label: "More booking actions" }]
+            : []),
+        ]}
+        onAccessibilityAction={(event) => {
+          if (event.nativeEvent.actionName === "doctorProfile")
+            openDoctorProfile();
+          if (
+            event.nativeEvent.actionName === "bookingActions" &&
+            !moreDisabled &&
+            !moreLoading
+          )
+            onMorePress?.();
+        }}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.summary,
+          pressed && onPress && styles.pressed,
+        ]}
+      >
+        <View style={styles.row}>
+          <View style={styles.profileSummary}>
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel={doctorLinkLabel}
+              onPress={openDoctorProfile}
+              style={({ pressed }) => [
+                styles.avatar,
+                pressed && styles.pressed,
+              ]}
             >
+              <UserRound color={colors.white} size={24} strokeWidth={1.8} />
+            </Pressable>
+            <View style={styles.content}>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={doctorLinkLabel}
+                onPress={openDoctorProfile}
+                style={({ pressed }) => [
+                  styles.nameLink,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text variant="inherit" numberOfLines={2} style={styles.name}>
+                  {appointment.doctorName}
+                </Text>
+              </Pressable>
+              <Text variant="inherit" style={styles.specialty}>
+                {appointment.specialty ? `${appointment.specialty} · ` : ""}
+                {appointment.consultationType}
+              </Text>
+            </View>
+          </View>
+          {onMorePress || onPress ? (
+            <View style={styles.trailingActions}>
+              {onMorePress ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`More booking actions for ${appointment.doctorName}`}
+                  accessibilityState={{
+                    disabled: moreDisabled || moreLoading,
+                    busy: moreLoading,
+                  }}
+                  disabled={moreDisabled || moreLoading}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    onMorePress();
+                  }}
+                  style={({ pressed }) => [
+                    styles.moreButton,
+                    pressed && styles.pressed,
+                    moreDisabled && styles.disabled,
+                  ]}
+                >
+                  {moreLoading ? (
+                    <ActivityIndicator color={colors.white} size="small" />
+                  ) : (
+                    <EllipsisVertical color={colors.white} size={18} />
+                  )}
+                </Pressable>
+              ) : null}
+              {onPress ? (
+                <View style={styles.chevron}>
+                  <ChevronRight
+                    color={colors.patient.primaryDark}
+                    size={18}
+                    strokeWidth={2}
+                  />
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
+        <View style={styles.scheduleRow}>
+          <View style={styles.schedule}>
+            <CalendarDays color={colors.white} size={14} strokeWidth={1.8} />
+            <Text variant="inherit" style={styles.scheduleText}>
               {appointment.date}
+              {"\u00a0· "}
+              {appointment.time.replace(/\s([ap]m)\b/gi, "\u00a0$1")}
+            </Text>
+          </View>
+          <View style={styles.statusBadge}>
+            <View
+              style={[styles.statusDot, { backgroundColor: statusTone.color }]}
+            />
+            <Text variant="inherit" style={styles.statusText}>
+              {displayedStatus}
             </Text>
           </View>
         </View>
-        <View style={styles.detail}>
-          <Clock3 color={colors.white} size={18} strokeWidth={1.8} />
-          <View style={styles.detailCopy}>
-            <Text variant="label" style={styles.detailLabel}>
-              Time
-            </Text>
-            <Text
-              variant="bodyEmphasis"
-              numberOfLines={1}
-              style={styles.detailValue}
-            >
-              {appointment.time}
-            </Text>
-          </View>
-        </View>
-      </View>
-      {onPress ? (
-        <Text variant="body" style={styles.viewDetails}>
-          View appointment details
-        </Text>
-      ) : null}
+      </Pressable>
+      {footer ? <View style={styles.footer}>{footer}</View> : null}
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
+  card: { overflow: "hidden" },
   gradient: { ...StyleSheet.absoluteFill, borderRadius: radius.lg },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  summary: { paddingVertical: 16, gap: 12 },
+  footer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#FFFFFF33",
+  },
+  moreButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
+    justifyContent: "center",
   },
-  type: {
-    color: colors.white,
-    fontFamily: fontFamilies.medium,
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  statusBadge: {
+  disabled: { opacity: 0.5 },
+  row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "#FFFFFF2E",
+    gap: 8,
+    paddingHorizontal: 16,
   },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusDotApproved: { backgroundColor: "#A7F3D0" },
-  statusDotPending: { backgroundColor: "#FDE68A" },
-  statusText: {
-    color: colors.white,
-    fontFamily: fontFamilies.medium,
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "capitalize",
+  trailingActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  scheduleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#FFFFFF33",
+    paddingTop: 12,
+    paddingHorizontal: 16,
+  },
+  profileSummary: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    flexShrink: 0,
+    borderRadius: 14,
     backgroundColor: "#FFFFFF42",
     alignItems: "center",
     justifyContent: "center",
   },
-  identity: { flex: 1 },
+  content: { flex: 1, minWidth: 0, gap: 4 },
+  nameLink: { minWidth: 0, justifyContent: "center" },
   name: {
+    ...typography.body,
     color: colors.white,
-    fontFamily: fontFamilies.bold,
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 19,
+    fontFamily: fontFamilies.semibold,
+    fontWeight: "600",
   },
   specialty: {
-    color: "#D8F1EF",
+    ...typography.caption,
+    color: "#EFFAF9",
     fontFamily: fontFamilies.regular,
-    fontSize: 11,
-    lineHeight: 15,
   },
-  chevron: {
-    width: 34,
-    height: 34,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 17,
-    backgroundColor: colors.patient.surface,
-  },
-  details: { flexDirection: "row", gap: 14 },
-  detail: {
-    minWidth: 0,
-    flex: 1,
+  statusBadge: {
+    maxWidth: "48%",
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "#0000001A",
   },
-  detailCopy: { flex: 1, minWidth: 0 },
-  detailLabel: {
-    color: "#C8EDE9",
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  confirmedStatus: { color: "#A7F3D0" },
+  pendingStatus: { color: "#FDE68A" },
+  inactiveStatus: { color: "#EFFAF9" },
+  statusText: {
+    ...mobileTypography.caption,
+    flexShrink: 1,
+    color: colors.white,
     fontFamily: fontFamilies.medium,
-    fontSize: 10,
-    lineHeight: 13,
+    fontWeight: "500",
+    textTransform: "capitalize",
   },
-  detailValue: {
+  schedule: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+  },
+  scheduleText: {
+    ...typography.caption,
+    flex: 1,
     color: colors.white,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 11,
-    lineHeight: 15,
+    fontFamily: fontFamilies.medium,
+    fontWeight: "500",
+    fontVariant: ["tabular-nums"],
   },
-  viewDetails: {
-    alignSelf: "flex-end",
-    color: colors.white,
-    fontFamily: fontFamilies.semibold,
-    fontSize: 12,
+  chevron: {
+    width: 28,
+    height: 28,
+    flexShrink: 0,
+    borderRadius: 14,
+    backgroundColor: colors.patient.surface,
+    alignItems: "center",
+    justifyContent: "center",
   },
+  pressed: { opacity: 0.75 },
 });

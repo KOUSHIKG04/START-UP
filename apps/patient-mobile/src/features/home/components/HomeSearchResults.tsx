@@ -4,7 +4,7 @@ export type { SearchResultItem } from "../types/home-search-results";
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Search } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 
 export function HomeSearchResults({
   liveResults,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginHorizontal: 16,
     overflow: "hidden",
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
+    ...surfaces.card,
   },
   liveResultRow: {
     alignItems: "center",

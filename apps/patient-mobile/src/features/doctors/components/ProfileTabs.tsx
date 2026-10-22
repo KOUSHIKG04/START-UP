@@ -1,6 +1,6 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { profileTabs } from "../utils/doctorProfileConstants";
 import type { ProfileTabsProps } from "../types/doctor-profile";
 
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     padding: 1,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
-    boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.08)",
+    ...surfaces.card,
   },
   tab: {
     flex: 1,

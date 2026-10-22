@@ -10,7 +10,7 @@ import {
 import {
   bookPortalWalkInAppointment,
   listMyPractices,
-  listPracticeClinicSlots,
+  getPortalClinicDay,
   redeemClinicCheckinToken,
   setClinicAutoConfirmLimit,
   transitionClinicAppointment,
@@ -30,29 +30,31 @@ export async function loadPortalWalkInPractices() {
     }));
 }
 
-export async function loadPortalWalkInSlots(practiceId: string) {
+export async function loadPortalWalkInSlots(
+  practiceId: string,
+  localDay?: string
+) {
   const parsed = uuidSchema.safeParse(practiceId);
-  if (!parsed.success) return [];
+  if (!parsed.success) throw new Error("Choose a doctor.");
   await requireApprovedFacility();
   const client = await createClient();
   const practices = await listMyPractices(client);
-  if (
-    !practices.some(
-      (practice) => practice.practice_id === parsed.data && practice.verified
-    )
-  )
-    return [];
-  return (
-    await listPracticeClinicSlots(client, parsed.data, undefined, 100, "clinic")
-  ).map((slot) => ({
-    windowId: slot.window_id,
-    practiceServiceId: slot.practice_service_id,
-    startsAt: slot.starts_at,
-    endsAt: slot.ends_at,
-    timezone: slot.timezone,
-    feeMinor: slot.fee_minor,
-    currency: slot.currency,
-  }));
+  if (!practices.some((p) => p.practice_id === parsed.data && p.verified))
+    throw new Error("Practice access required.");
+  const day = await getPortalClinicDay(client, parsed.data, localDay);
+  return {
+    ...day,
+    slots: day.slots.map((slot) => ({
+      windowId: slot.window_id,
+      practiceServiceId: slot.practice_service_id,
+      startsAt: slot.starts_at,
+      endsAt: slot.ends_at,
+      timezone: slot.timezone,
+      feeMinor: slot.fee_minor,
+      currency: slot.currency,
+      state: slot.state,
+    })),
+  };
 }
 
 export async function createPortalWalkInAppointment(
@@ -80,7 +82,10 @@ export async function createPortalWalkInAppointment(
         ? String(error.code)
         : null;
     if (code === "23514")
-      return { error: "That slot is full. Choose another time." };
+      return {
+        error:
+          "The clinic quota or selected time is full. Refresh availability and choose another time or date.",
+      };
     if (code === "22023")
       return {
         error:

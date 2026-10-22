@@ -36,6 +36,7 @@ function review({
   error,
   status = "pending",
   queueState = null,
+  visitMode = "clinic",
 } = {}) {
   const state = [];
   let cursor = 0;
@@ -53,7 +54,7 @@ function review({
     row_version: "7",
     status,
     can_consult: true,
-    visit_mode: "clinic",
+    visit_mode: visitMode,
     starts_at: new Date(
       Date.now() + (expired ? -3600000 : 86400000)
     ).toISOString(),
@@ -62,7 +63,7 @@ function review({
     ).toISOString(),
     timezone: "Asia/Kolkata",
     facility_name: "Test clinic",
-    public_code: "APT-TEST",
+    public_code: "APT-LONG-12345678",
     queue_state: queueState,
   };
   const react = {
@@ -170,6 +171,21 @@ test("separate appointment page accepts a current request and refreshes the home
   assert.equal(view.toasts[0].type, "success");
   assert.equal(view.refreshes[0][0], "doctor-clinic-appointments");
 });
+
+test("completed online appointments reopen their signed consultation record", () => {
+  const view = review({ status: "completed", visitMode: "online" });
+  const nodes = view.render();
+  nodes
+    .find((node) => node.props.label === "View consultation record")
+    .props.onPress();
+  assert.equal(view.routes[0].pathname, "/clinical-notes");
+  assert.equal(view.routes[0].params.appointmentId, "booking");
+  assert.equal(view.routes[0].params.mode, "online");
+  assert.equal(
+    nodes.some((node) => String(node.props.label).includes("QR")),
+    false
+  );
+});
 test("expired request cannot be accepted and explains how to recover", async () => {
   const view = review({ expired: true });
   const nodes = view.render();
@@ -236,6 +252,16 @@ test("one Start consultation action calls the queue, uses its new version, and o
   const view = review({ status: "confirmed", queueState: "waiting" });
   const nodes = view.render();
   assert.equal(
+    nodes.find((node) => node.type === "Input"),
+    undefined
+  );
+  assert.equal(
+    nodes.find((node) => node.props.label === "Hold"),
+    undefined
+  );
+  assert.match(JSON.stringify(nodes), /12345678/);
+  assert.doesNotMatch(JSON.stringify(nodes), /APT-LONG-/);
+  assert.equal(
     nodes.find((node) => node.props.label === "Call patient"),
     undefined
   );
@@ -248,4 +274,37 @@ test("one Start consultation action calls the queue, uses its new version, and o
   assert.equal(view.calls[1].expectedVersion, 8);
   assert.equal(view.routes[0].pathname, "/clinical-notes");
   assert.equal(view.routes[0].params.appointmentId, "booking");
+});
+
+test("record-visit and prescription routes hide the parent navbar while normal tabs retain it", () => {
+  const jsx = (type, props) => ({ type, props });
+  const { default: TabsLayout } = load("../src/app/(app)/(tabs)/_layout.tsx", {
+    "react/jsx-runtime": { jsx, jsxs: jsx },
+    "react-native": { View: "View", StyleSheet: { create: (value) => value } },
+    "expo-router": {
+      Tabs: Object.assign(() => null, { Screen: "TabScreen" }),
+      router: {},
+    },
+    "lucide-react-native": {},
+    "@startup/mobile-ui": { BottomNavBar: "NavBar" },
+    "../../../components/DoctorScreen": { IconButton: "IconButton" },
+    "../../../components/theme": { palette: {} },
+  });
+  const tabs = TabsLayout().props.children;
+  for (const route of [
+    "clinical-notes/index",
+    "prescription/index",
+    "scan-qr/index",
+  ]) {
+    assert.equal(
+      tabs.props.tabBar({ state: { index: 0, routes: [{ name: route }] } }),
+      null
+    );
+  }
+  assert.equal(
+    tabs.props.tabBar({
+      state: { index: 0, routes: [{ name: "appointments/index" }] },
+    }).type,
+    "NavBar"
+  );
 });

@@ -121,12 +121,27 @@ export function useAppointments({
     lastPage,
   };
 
-  function act(item: ClinicAppointment, action: "approve" | "reject") {
+  function act(
+    item: ClinicAppointment,
+    action:
+      | "approve"
+      | "reject"
+      | "check_in"
+      | "call"
+      | "hold"
+      | "resume"
+      | "no_show"
+      | "cancel"
+  ) {
     const note =
-      action === "reject"
-        ? window.prompt("Reason for rejecting this appointment")
+      action === "reject" || action === "hold"
+        ? window.prompt(
+            action === "hold"
+              ? "Reason for holding this patient"
+              : "Reason for rejecting this appointment"
+          )
         : null;
-    if (action === "reject" && !note?.trim()) return;
+    if ((action === "reject" || action === "hold") && !note?.trim()) return;
     startTransition(async () => {
       try {
         const result = await changePortalAppointment({

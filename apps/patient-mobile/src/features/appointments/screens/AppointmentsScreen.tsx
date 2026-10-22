@@ -1,11 +1,10 @@
 import { useAppointments } from "../hooks/useAppointments";
 import { bookingFilters } from "../utils/appointmentsConstants";
 import { AppText as Text } from "@startup/mobile-ui";
+import { useState } from "react";
 
 import { ScrollView, StyleSheet, View } from "react-native";
 import { router, type Href } from "expo-router";
-
-import QRCode from "react-qr-code";
 
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import {
@@ -13,15 +12,26 @@ import {
   Chip,
   FadedScrollView,
   Header,
+  ModalSurface,
   Skeleton,
 } from "@startup/mobile-ui";
 import BookingCard from "../components/BookingCard";
 import type { AppointmentsScreenProps } from "../types/appointments";
 import { clinicAppointmentCard } from "../utils/clinicAppointmentCard";
+import { canOpenClinicVisit, clinicVisitRoute } from "../utils/clinicVisit";
 
 export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
-  const { filter, setFilter, qr, appointments, cancel, issueQr, visible } =
-    useAppointments({ onBackPress });
+  const { filter, setFilter, appointments, cancel, visible } = useAppointments({
+    onBackPress,
+  });
+  const [menuAppointmentId, setMenuAppointmentId] = useState<string | null>(
+    null
+  );
+  const menuAppointment = visible.find(
+    (item) =>
+      item.id === menuAppointmentId &&
+      (item.status === "pending" || item.status === "confirmed")
+  );
   return (
     <View style={styles.screen}>
       <Header title="My Bookings" app="patient" onBackPress={onBackPress} />
@@ -47,8 +57,8 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
         </ScrollView>
         {appointments.isLoading ? (
           <View style={styles.loadingList}>
-            <Skeleton theme="patient" height={148} radius={16} />
-            <Skeleton theme="patient" height={148} radius={16} />
+            <Skeleton theme="patient" height={144} radius={16} />
+            <Skeleton theme="patient" height={144} radius={16} />
           </View>
         ) : null}
         {!appointments.isLoading &&
@@ -72,100 +82,123 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
             ) : null}
           </View>
         ) : null}
-        {visible.map((item) => (
-          <View key={item.id} style={styles.listItem}>
+        {visible.map((item) => {
+          const canShowQr =
+            canOpenClinicVisit(item) && item.queue_state === "awaiting_arrival";
+          const canJoin =
+            item.visit_mode === "online" &&
+            ["confirmed", "in_consultation"].includes(item.status);
+          const canCancel =
+            item.status === "pending" || item.status === "confirmed";
+          const showQueue = canOpenClinicVisit(item) && !canShowQr;
+          const hasFooter =
+            canShowQr || canJoin || showQueue || item.status === "completed";
+          return (
             <BookingCard
+              key={item.id}
               appointment={clinicAppointmentCard(item)}
               statusLabel={item.status.replaceAll("_", " ")}
+              onMorePress={
+                canCancel ? () => setMenuAppointmentId(item.id) : undefined
+              }
+              moreDisabled={cancel.isPending}
+              moreLoading={cancel.isPending && cancel.variables?.id === item.id}
               onPress={() =>
                 router.push({
                   pathname: "/appointment-details/[id]",
                   params: { id: item.id },
                 } as Href)
               }
+              footer={
+                hasFooter ? (
+                  <View style={styles.cardActions}>
+                    {canShowQr || showQueue ? (
+                      <Button
+                        label={
+                          canShowQr ? "Show check-in QR" : "View clinic queue"
+                        }
+                        onPress={() =>
+                          router.push(clinicVisitRoute(item) as unknown as Href)
+                        }
+                        style={styles.actionButton}
+                        labelStyle={styles.actionLabel}
+                      />
+                    ) : null}
+                    {canJoin ? (
+                      <Button
+                        label="Join consultation"
+                        onPress={() =>
+                          router.push({
+                            pathname: "/visit-session",
+                            params: {
+                              ...clinicAppointmentCard(item),
+                              mode: "online-video",
+                            },
+                          } as unknown as Href)
+                        }
+                        style={styles.actionButton}
+                        labelStyle={styles.actionLabel}
+                      />
+                    ) : null}
+                    {item.status === "completed" ? (
+                      <View style={styles.ratingRow}>
+                        <Text variant="inherit" style={styles.thankYou}>
+                          Thank you
+                        </Text>
+                        <Button
+                          label="Rate doctor"
+                          variant="outline"
+                          style={styles.actionButton}
+                          labelStyle={styles.actionLabel}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/rate-doctor/[id]",
+                              params: { id: item.id },
+                            } as Href)
+                          }
+                        />
+                      </View>
+                    ) : null}
+                  </View>
+                ) : undefined
+              }
             />
-            {item.visit_mode === "clinic" && item.queue_state ? (
-              <Text variant="body" style={styles.description}>
-                Queue: {item.queue_state.replaceAll("_", " ")}
-                {item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}
-                {item.queue_state === "waiting"
-                  ? ` · ${item.ahead_count} ahead`
-                  : ""}
-              </Text>
-            ) : null}
-            {item.status === "pending" ||
-            item.status === "confirmed" ||
-            (item.visit_mode === "online" &&
-              item.status === "in_consultation") ? (
-              <View style={styles.actionRow}>
-                {item.visit_mode === "clinic" &&
-                item.status === "confirmed" &&
-                item.queue_state === "awaiting_arrival" ? (
-                  <Button
-                    loading={issueQr.isPending && issueQr.variables === item.id}
-                    label="Show check-in QR"
-                    variant="outline"
-                    disabled={issueQr.isPending}
-                    onPress={() => issueQr.mutate(item.id)}
-                    style={styles.actionButton}
-                    labelStyle={styles.actionLabel}
-                  />
-                ) : null}
-                {item.visit_mode === "online" &&
-                ["confirmed", "in_consultation"].includes(item.status) ? (
-                  <Button
-                    label="Join consultation"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/visit-session",
-                        params: {
-                          ...clinicAppointmentCard(item),
-                          mode: "online-video",
-                        },
-                      } as unknown as Href)
-                    }
-                    style={styles.actionButton}
-                    labelStyle={styles.actionLabel}
-                  />
-                ) : null}
-                {item.status === "pending" || item.status === "confirmed" ? (
-                  <Button
-                    loading={
-                      cancel.isPending && cancel.variables?.id === item.id
-                    }
-                    label="Cancel booking"
-                    variant="outline"
-                    disabled={cancel.isPending}
-                    onPress={() => cancel.mutate(item)}
-                    style={styles.actionButton}
-                    labelStyle={styles.actionLabel}
-                  />
-                ) : null}
-              </View>
-            ) : null}
-            {item.status === "completed" ? (
-              <Button
-                label="Thank you · Rate doctor"
-                variant="outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/rate-doctor/[id]",
-                    params: { id: item.id },
-                  } as Href)
-                }
-              />
-            ) : null}
-            {qr && qr.appointmentId === item.id ? (
-              <View style={styles.qr}>
-                <QRCode value={qr.token} size={220} />
-                <Text variant="body">
-                  Show this to the clinic. It expires in five minutes.
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        ))}
+          );
+        })}
       </FadedScrollView>
+      <ModalSurface
+        visible={Boolean(menuAppointment)}
+        onClose={() => setMenuAppointmentId(null)}
+        dismissOnBackdrop
+      >
+        <Text variant="inherit" style={styles.menuTitle}>
+          Booking actions
+        </Text>
+        <Text variant="inherit" style={styles.description}>
+          {menuAppointment?.doctor_name}
+          {menuAppointment ? ` · ${menuAppointment.public_code.slice(-8)}` : ""}
+        </Text>
+        <Button
+          theme="patient"
+          label="Cancel booking"
+          variant="danger"
+          disabled={cancel.isPending || !menuAppointment}
+          loading={
+            cancel.isPending && cancel.variables?.id === menuAppointmentId
+          }
+          onPress={() => {
+            if (!menuAppointment || cancel.isPending) return;
+            setMenuAppointmentId(null);
+            cancel.mutate(menuAppointment);
+          }}
+        />
+        <Button
+          theme="patient"
+          label="Close"
+          variant="ghost"
+          onPress={() => setMenuAppointmentId(null)}
+        />
+      </ModalSurface>
     </View>
   );
 }
@@ -179,14 +212,39 @@ const styles = StyleSheet.create({
     paddingBottom: 126,
   },
   filters: { gap: 8 },
-  listItem: { gap: 10 },
   loadingList: { gap: 12 },
-  actionRow: { flexDirection: "row", gap: 8 },
-  actionButton: { flex: 1, minWidth: 0, paddingHorizontal: 6 },
-  actionLabel: { fontSize: 12 },
+  cardActions: { gap: 12 },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  thankYou: {
+    color: colors.white,
+    fontFamily: fontFamilies.medium,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  actionButton: {
+    alignSelf: "stretch",
+    minWidth: 0,
+    borderColor: "#FFFFFF99",
+    borderWidth: 1,
+  },
+  actionLabel: { fontSize: 14, color: colors.white },
+  menuTitle: {
+    color: colors.patient.text,
+    fontFamily: fontFamilies.semibold,
+    fontSize: 18,
+    lineHeight: 24,
+  },
   description: {
     color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyState: {
     alignItems: "center",
@@ -205,12 +263,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.regular,
     fontSize: 13,
     textAlign: "center",
-  },
-  qr: {
-    alignItems: "center",
-    gap: 8,
-    padding: 16,
-    backgroundColor: colors.white,
   },
   error: { color: colors.patient.text, fontFamily: fontFamilies.medium },
 });

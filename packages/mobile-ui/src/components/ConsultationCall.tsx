@@ -255,9 +255,20 @@ export function ConsultationCall(props: ConsultationCallProps) {
           height={chat ? 172 : 140}
           frame={frame}
         >
-          <View style={styles.video}>
-            {chat ? props.remoteVideo : props.localVideo}
-          </View>
+          <Pressable
+            accessibilityRole={chat ? "button" : undefined}
+            accessibilityLabel={
+              chat ? "Return to full-screen video" : undefined
+            }
+            accessible={chat}
+            disabled={!chat}
+            onPress={() => setChat(false)}
+            style={styles.video}
+          >
+            <View pointerEvents="none" style={styles.video}>
+              {chat ? props.remoteVideo : props.localVideo}
+            </View>
+          </Pressable>
           {chat ? (
             <View pointerEvents="none" style={styles.tinySelf}>
               {props.localVideo}

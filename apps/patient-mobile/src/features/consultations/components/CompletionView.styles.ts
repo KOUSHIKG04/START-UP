@@ -1,5 +1,11 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 export const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
@@ -141,12 +147,9 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E8F8F4",
   },
   experienceCard: {
+    ...surfaces.card,
     backgroundColor: "#E8F8F4",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     borderRadius: radius.md,
-    elevation: 0,
-    shadowOpacity: 0,
   },
   feedbackTitle: {
     color: colors.patient.text,
@@ -223,10 +226,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
   },
   summaryCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     borderRadius: radius.md,
     backgroundColor: colors.white,
     overflow: "hidden",

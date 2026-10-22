@@ -121,8 +121,21 @@ export function ScheduleScreen({ mode }: ScheduleScreenProps) {
         }
         start={draft.start}
         end={draft.end}
+        blocks={draft.timeBlocks}
+        disabled={busy}
         onUpdate={update}
       />
+      {mode === "home" ? (
+        <NumberSetting
+          title="Travel buffer before and after each block"
+          value={draft.homeTravelBuffer ?? 0}
+          suffix="min"
+          min={0}
+          max={180}
+          disabled={busy}
+          onChange={(homeTravelBuffer) => update({ homeTravelBuffer })}
+        />
+      ) : null}
       <ScheduleSection title="Appointment slots">
         <Label muted style={{ fontSize: 12 }}>
           {mode === "home"
@@ -177,7 +190,11 @@ export function ScheduleScreen({ mode }: ScheduleScreenProps) {
           {mode !== "home" ? (
             <View style={{ flex: 1, minWidth: 0 }}>
               <NumberSetting
-                title="Daily booking limit"
+                title={
+                  mode === "clinic"
+                    ? "Total clinic capacity"
+                    : "Daily booking limit"
+                }
                 stepper
                 disabled={busy}
                 value={mode === "online" ? draft.online : draft.walkIn}
@@ -193,6 +210,34 @@ export function ScheduleScreen({ mode }: ScheduleScreenProps) {
             </View>
           ) : null}
         </View>
+        {mode === "clinic" ? (
+          <View style={{ gap: 12 }}>
+            <NumberSetting
+              title="App booking quota"
+              stepper
+              disabled={busy}
+              value={draft.clinicApp ?? draft.walkIn}
+              min={0}
+              max={100}
+              suffix="bookings"
+              onChange={(clinicApp) => update({ clinicApp })}
+            />
+            <NumberSetting
+              title="Reception walk-in quota"
+              stepper
+              disabled={busy}
+              value={draft.clinicWalkin ?? 0}
+              min={0}
+              max={100}
+              suffix="bookings"
+              onChange={(clinicWalkin) => update({ clinicWalkin })}
+            />
+            <Label muted>
+              App and walk-in quotas must fit within total clinic capacity. Set
+              a walk-in quota to accept reception registrations.
+            </Label>
+          </View>
+        ) : null}
         {mode !== "home" ? (
           <>
             <Label muted style={{ fontSize: 12 }}>
@@ -359,9 +404,8 @@ export function ScheduleScreen({ mode }: ScheduleScreenProps) {
         <Label muted>
           Choose working days, hours and the slot interval. Publishing creates
           the next 30 days automatically. Auto-accept uses one shared daily
-          limit across all services. The daily booking limit counts active
-          bookings; patients can choose any available time within your working
-          hours.
+          limit across all services. Clinic app bookings and reception walk-ins
+          use separate editable quotas within total clinic capacity.
         </Label>
         <Button
           theme="doctor"

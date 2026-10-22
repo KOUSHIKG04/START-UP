@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 
 export const palette = {
   ...colors.doctor,
@@ -52,8 +52,7 @@ export const ui = StyleSheet.create({
   },
   panel: {
     backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: palette.border,
+    ...surfaces.card,
     borderRadius: 14,
     padding: 16,
     gap: 14,

@@ -1,4 +1,5 @@
 import type { Schedule } from "../../../types/doctor";
+import { scheduleBlocksError } from "@startup/contracts";
 export function minutes(value: string): number {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return NaN;
   const [hour, minute] = value.split(":").map(Number);
@@ -42,6 +43,15 @@ export function scheduleError(
     return "Enter daily limits from 0 to 100.";
   if (!schedule.days.length) return "Select at least one working day.";
   if (
+    mode === "clinic" &&
+    (![schedule.clinicApp ?? schedule.walkIn, schedule.clinicWalkin ?? 0].every(
+      (value) => Number.isInteger(value) && value >= 0 && value <= 100
+    ) ||
+      (schedule.clinicApp ?? schedule.walkIn) + (schedule.clinicWalkin ?? 0) >
+        schedule.walkIn)
+  )
+    return "App and walk-in quotas must fit within total clinic capacity.";
+  if (
     !Number.isFinite(minutes(schedule.start)) ||
     !Number.isFinite(endMinutes(schedule.end))
   )
@@ -54,6 +64,12 @@ export function scheduleError(
       : mode === "home"
         ? schedule.homeDuration
         : schedule.duration;
+  const blocksError = scheduleBlocksError(
+    schedule.timeBlocks ?? [{ start: schedule.start, end: schedule.end }],
+    duration,
+    mode === "home" ? (schedule.homeTravelBuffer ?? 0) : 0
+  );
+  if (blocksError) return blocksError;
   if (endMinutes(schedule.end) - minutes(schedule.start) < duration)
     return "Working hours must fit at least one appointment slot.";
   if (
@@ -78,9 +94,14 @@ export function previewSlots(schedule: Schedule): string[] {
 export function suggestConsultationDuration(
   start: string,
   end: string,
-  dailyLimit: number
+  dailyLimit: number,
+  blocks?: import("@startup/contracts").DoctorTimeBlock[]
 ): number | null {
-  const available = endMinutes(end) - minutes(start);
+  const available =
+    blocks?.reduce(
+      (total, block) => total + endMinutes(block.end) - minutes(block.start),
+      0
+    ) ?? endMinutes(end) - minutes(start);
   if (
     !Number.isFinite(available) ||
     available < 5 ||

@@ -6,7 +6,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import {
-  albertSansFonts,
+  interFonts,
   Loader,
   SafeAreaProvider,
   MobileThemeProvider,
@@ -29,7 +29,7 @@ function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
   return null;
 }
 export default function RootLayout() {
-  const [loaded, error] = useFonts(albertSansFonts);
+  const [loaded, error] = useFonts(interFonts);
   const auth = useMobileSession();
   const routedAccount = useRef<string | null>(null);
   useEffect(() => {

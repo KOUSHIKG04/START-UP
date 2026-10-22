@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { AppText as Text } from "@startup/mobile-ui";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 
 export function BookingGuideLink({ onPress }: { onPress: () => void }) {
   return (
@@ -36,11 +36,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 14,
     backgroundColor: colors.white,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    ...surfaces.card,
   },
   pressed: { opacity: 0.75 },
   helpIcon: {

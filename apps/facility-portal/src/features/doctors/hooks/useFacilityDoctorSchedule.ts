@@ -89,16 +89,24 @@ export function useFacilityDoctorSchedule({
     effectiveDate && effectiveDate >= today ? effectiveDate : today;
   const serviceDays = draft[daysKey] ?? draft.workingDays;
   const duration = draft[durationKey];
+  const blocksKey =
+    mode === "clinic"
+      ? "clinicTimeBlocks"
+      : mode === "online"
+        ? "onlineTimeBlocks"
+        : "homeTimeBlocks";
+  const timeBlocks = draft[blocksKey] ?? [
+    { start: draft[startKey] ?? "", end: draft[endKey] ?? "" },
+  ];
   const suggestion = suggestConsultationDuration(
     draft[startKey] ?? "",
     draft[endKey] ?? "",
-    draft[limitKey]
+    draft[limitKey],
+    timeBlocks
   );
   const suggestedTimes = suggestedDuration
-    ? previewClocks(
-        draft[startKey] ?? "",
-        draft[endKey] ?? "",
-        suggestedDuration
+    ? timeBlocks.flatMap((block) =>
+        previewClocks(block.start, block.end, suggestedDuration)
       )
     : [];
   const update = (changes: Partial<DoctorScheduleSettings>) =>

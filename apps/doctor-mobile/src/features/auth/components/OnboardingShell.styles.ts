@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white, overflow: "hidden" },
   topCrop: {
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
   dim: { opacity: 0.65 },
   buttonText: {
     color: colors.white,
-    fontFamily: "AlbertSans_600SemiBold",
+    fontFamily: fontFamilies.semibold,
     fontSize: 16,
     lineHeight: 22,
   },

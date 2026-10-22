@@ -13,11 +13,9 @@ export function PaymentOptions() {
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       gap={10}
       padding={14}
-      style={styles.flatCard}
+      style={styles.cardSurface}
     >
       <Text variant="cardHeading" style={styles.paymentTitle}>
         Payment

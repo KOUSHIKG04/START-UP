@@ -1,7 +1,7 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Pressable, StyleSheet, View } from "react-native";
-import { colors, fontFamilies, shadows } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
 export type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
 
@@ -10,8 +10,8 @@ export function IconLabel({
   label,
   theme,
   backgroundColor,
-  borderColor = colors.borderDefault,
-  borderWidth = 0,
+  borderColor = surfaces.card.borderColor,
+  borderWidth = surfaces.card.borderWidth,
   iconColor,
   iconSize = 28,
   surfaceSize = 56,
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   iconSurface: {
     alignItems: "center",
     justifyContent: "center",
-    ...shadows.card,
+    ...surfaces.card,
   },
   label: {
     fontFamily: fontFamilies.semibold,

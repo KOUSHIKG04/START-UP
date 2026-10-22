@@ -297,3 +297,117 @@ test("shared calendar keeps local days and generates a complete leap-month grid"
   assert.equal(days.find(Boolean), "2028-02-01");
   assert.equal(days.filter(Boolean).at(-1), "2028-02-29");
 });
+
+test("returning to a finished video consultation shows its record link instead of QR recovery", () => {
+  const jsx = (type, props) => ({ type, props });
+  const routes = [];
+  const { LiveOnlineConsultation } = load(
+    "../src/features/consultations/components/LiveOnlineConsultation.tsx",
+    {
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+      "../hooks/useLiveOnlineConsultation": {
+        useLiveOnlineConsultation: () => ({
+          live: { loading: false },
+          start: {},
+          token: {},
+          appointment: {
+            status: "completed",
+            patient_name: "Test patient",
+            patient_id: "patient",
+          },
+        }),
+      },
+      "./LiveVideoStage": { LiveVideoStage: "Video" },
+      "./OnlineConsultation.styles": { styles: {} },
+      "expo-router": { router: { replace: (route) => routes.push(route) } },
+      "react-native-safe-area-context": { SafeAreaView: "SafeAreaView" },
+      "@livekit/react-native": { LiveKitRoom: "Room" },
+      "@startup/mobile-ui": { Button: "Button", Loader: "Loader" },
+      "../../../components/DoctorScreen": {
+        Heading: "Heading",
+        Label: "Label",
+        DoctorScreen: "Screen",
+      },
+    }
+  );
+  const tree = LiveOnlineConsultation({ appointmentId: aid });
+  assert.equal(tree.props.title, "Consultation completed");
+  const buttons = tree.props.children.filter((node) => node.type === "Button");
+  buttons
+    .find((node) => node.props.label === "View consultation record")
+    .props.onPress();
+  assert.equal(routes[0].params.appointmentId, aid);
+  assert.equal(routes[0].params.mode, "online");
+  tree.props.onBackPress();
+  assert.equal(routes[1], "/appointments");
+  assert.equal(
+    routes.some((route) => String(route).includes("scan-qr")),
+    false
+  );
+});
+
+test("completed record displays saved assessment and medicines without editable fields", () => {
+  const jsx = (type, props) => ({ type, props });
+  const { ConsultationRecord } = load(
+    "../src/features/clinic/components/ConsultationRecord.tsx",
+    {
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+      "react-native": { View: "View" },
+      "expo-router": { router: { replace() {} } },
+      "@startup/mobile-ui": { Button: "Button", Loader: "Loader" },
+      "../../../components/DoctorScreen": {
+        DoctorScreen: "Screen",
+        Heading: "Heading",
+        Label: "Label",
+        Panel: "Panel",
+      },
+      "../hooks/useConsultationDraft": {
+        useConsultationDraft: () => ({
+          draft: {
+            data: {
+              status: "signed",
+              assessment: "Saved assessment",
+              diagnosis: "Saved diagnosis",
+              vitals: [],
+              prescription_issued: true,
+              followup: null,
+              medicines: [
+                {
+                  medicine_name: "Saved medicine",
+                  strength: "10 mg",
+                  form: "tablet",
+                  route: "oral",
+                  instructions: "Saved instructions",
+                  schedule: null,
+                },
+              ],
+            },
+          },
+        }),
+      },
+    }
+  );
+  const nodes = [];
+  function walk(node) {
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (!node || typeof node !== "object") return;
+    nodes.push(node);
+    walk(node.props?.children);
+  }
+  walk(
+    ConsultationRecord({
+      appointmentId: aid,
+      patientName: "Patient",
+      timezone: "Asia/Kolkata",
+    })
+  );
+  assert.ok(nodes.some((node) => node.props.children === "Saved assessment"));
+  assert.ok(nodes.some((node) => node.props.children === "Saved instructions"));
+  assert.equal(
+    nodes.some(
+      (node) =>
+        node.type === "Input" || node.props.label === "Sign and complete"
+    ),
+    false
+  );
+});

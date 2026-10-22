@@ -55,6 +55,9 @@ export const scheduleRule = clinzo
         .default("clinic"),
       fee_minor: integer("fee_minor").notNull().default(0),
       automatic: boolean("automatic").notNull().default(false),
+      travel_buffer_minutes: integer("travel_buffer_minutes")
+        .notNull()
+        .default(0),
       materialized_through: date("materialized_through", { mode: "string" }),
       effective_from: date("effective_from", { mode: "string" }).notNull(),
       effective_until: date("effective_until", { mode: "string" }),
@@ -73,11 +76,20 @@ export const scheduleRule = clinzo
     (table) => [
       uniqueIndex("schedule_rule_uq_1").on(table.family_id, table.version),
       uniqueIndex("published_service_schedule_uq")
-        .on(table.doctor_facility_id, table.service_mode)
+        .on(
+          table.doctor_facility_id,
+          table.service_mode,
+          table.local_start,
+          table.local_end
+        )
         .where(sql`${table.state} = 'published' and ${table.automatic}`),
       check(
         "schedule_rule_fee_minor_check",
         sql`${table.fee_minor} between 0 and 100000000`
+      ),
+      check(
+        "schedule_rule_travel_buffer_check",
+        sql`${table.travel_buffer_minutes} between 0 and 180`
       ),
       check(
         "schedule_rule_service_mode_check",

@@ -12,8 +12,6 @@ export function TripControls({ location }: TripControlsProps) {
     <Card
       variant="outlined"
       borderRadius={radius.md}
-      borderWidth={1}
-      borderColor="#E0E5EB"
       backgroundColor={colors.white}
       padding={16}
       gap={10}

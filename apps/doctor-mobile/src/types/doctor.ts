@@ -42,6 +42,8 @@ export type Consultation = {
 export type Message = { id: string; text: string; sent: boolean; time: string };
 
 export type Schedule = {
+  timeBlocks?: import("@startup/contracts").DoctorTimeBlock[];
+  homeTravelBuffer?: number;
   days: number[];
   start: string;
   end: string;
@@ -50,6 +52,8 @@ export type Schedule = {
   homeDuration: number;
   online: number;
   walkIn: number;
+  clinicApp?: number;
+  clinicWalkin?: number;
   autoAccept: boolean;
   autoLimit: number;
   homeVisits: boolean;

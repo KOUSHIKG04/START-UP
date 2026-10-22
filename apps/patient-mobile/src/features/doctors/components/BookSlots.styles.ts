@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 
 export const styles = StyleSheet.create({
   container: {
@@ -7,10 +7,7 @@ export const styles = StyleSheet.create({
     gap: 14,
   },
   bookSlotsCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     borderRadius: radius.md,
     backgroundColor: colors.white,
   },
@@ -97,6 +94,8 @@ export const styles = StyleSheet.create({
   },
   sectionHeadingRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
     alignItems: "center",
     justifyContent: "space-between",
   },

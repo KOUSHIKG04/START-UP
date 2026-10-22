@@ -108,6 +108,7 @@ function harness({
           },
           fontFamilies: {},
           radius: {},
+          surfaces: { card: {} },
         };
       if (id.endsWith("/MobileThemeProvider"))
         return { useMobileThemeName: (override) => override ?? theme };

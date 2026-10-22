@@ -65,11 +65,18 @@ export type Database = Omit<HostedDatabase, "public"> & {
           p_window_id: string;
           p_practice_service_id: string;
           p_patient_name: string;
+          p_patient_age: number | null;
+          p_patient_gender: string | null;
+          p_check_in: boolean;
           p_patient_phone: string | null;
           p_reason: string | null;
           p_idempotency_key: string;
         };
         Returns: string;
+      };
+      get_portal_clinic_day: {
+        Args: { p_practice_id: string; p_local_day: string | null };
+        Returns: import("./supabase.types").Json;
       };
     };
   };

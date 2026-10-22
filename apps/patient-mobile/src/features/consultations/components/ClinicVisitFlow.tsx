@@ -1,11 +1,13 @@
 import type { ClinicVisitFlowProps } from "../types/visit-session";
 export type { ClinicVisitFlowProps } from "../types/visit-session";
 import { AppText as Text } from "@startup/mobile-ui";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { MapPin, QrCode } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
+import QRCode from "react-qr-code";
 import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
-import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
+import { Button, Card, FadedScrollView, Loader } from "@startup/mobile-ui";
+import { useClinicCheckIn } from "../hooks/useClinicCheckIn";
 
 import { QueueStatus } from "./QueueStatus";
 import { ScheduleSummary } from "./ScheduleSummary";
@@ -14,7 +16,19 @@ export function ClinicVisitFlow({
   appointment,
   onComplete,
 }: ClinicVisitFlowProps) {
-  const [checkedIn, setCheckedIn] = useState(false);
+  const { live, item, appointments, canShowQr, qr, issueQr, refreshQr } =
+    useClinicCheckIn(appointment.backendId);
+  const completionShown = useRef(false);
+  useEffect(() => {
+    if (item?.status === "completed" && !completionShown.current) {
+      completionShown.current = true;
+      onComplete();
+    }
+  }, [item?.status, onComplete]);
+  const checkedIn = Boolean(
+    item &&
+    ["waiting", "called", "in_service", "held"].includes(item.queue_state ?? "")
+  );
 
   return (
     <FadedScrollView
@@ -22,8 +36,15 @@ export function ClinicVisitFlow({
       showsVerticalScrollIndicator={false}
     >
       <ScheduleSummary appointment={appointment} />
-      {checkedIn ? (
-        <QueueStatus onComplete={onComplete} />
+      {appointments.isLoading && live ? <Loader theme="patient" /> : null}
+      {appointments.isError ? (
+        <Card theme="patient" gap={12}>
+          <Text>Could not load your clinic visit.</Text>
+          <Button label="Retry" onPress={() => void appointments.refetch()} />
+        </Card>
+      ) : null}
+      {checkedIn && item ? (
+        <QueueStatus appointment={item} />
       ) : (
         <>
           <Card
@@ -36,19 +57,43 @@ export function ClinicVisitFlow({
             padding={20}
             style={[styles.centeredCard, styles.flatCard, styles.noBorderCard]}
           >
-            <View style={styles.qrSurface}>
-              <QrCode
-                color={colors.patient.text}
-                size={112}
-                strokeWidth={1.5}
-              />
+            <View
+              style={styles.qrSurface}
+              accessibilityLabel="Clinic check-in QR code"
+            >
+              {qr ? (
+                <QRCode value={qr} size={190} />
+              ) : issueQr.isPending ? (
+                <Loader theme="patient" />
+              ) : null}
             </View>
-            <Text variant="body" style={styles.checkInCode}>
-              BK12454OPY
+            <Text variant="inherit" style={styles.checkInCode}>
+              {appointment.id.slice(-8)}
             </Text>
-            <Text variant="body" style={styles.centeredDescription}>
-              Show this check-in code at reception to mark your attendance.
+            <Text variant="inherit" style={styles.centeredDescription}>
+              {qr
+                ? "Show this check-in code at reception or to your doctor. It expires in five minutes."
+                : !live
+                  ? "Open this visit from My Bookings to access your check-in QR."
+                  : issueQr.isError
+                    ? "Could not load your QR code. Try again."
+                    : !item
+                      ? "Your appointment is not available yet."
+                      : canShowQr
+                        ? "Generate a fresh QR code before checking in."
+                        : item.status === "confirmed" &&
+                            item.queue_state === "awaiting_arrival"
+                          ? "Your QR code is available on the day of your clinic appointment."
+                          : `Appointment ${item.status.replaceAll("_", " ")}. Check-in is unavailable.`}
             </Text>
+            {canShowQr ? (
+              <Button
+                label={qr ? "Refresh QR code" : "Generate check-in QR"}
+                loading={issueQr.isPending}
+                disabled={issueQr.isPending}
+                onPress={refreshQr}
+              />
+            ) : null}
           </Card>
           <Card
             variant="outlined"
@@ -62,17 +107,28 @@ export function ClinicVisitFlow({
             <View style={styles.locationRow}>
               <MapPin color={colors.patient.primaryDark} size={21} />
               <View style={styles.flexCopy}>
-                <Text variant="cardHeading" style={styles.cardTitle}>
+                <Text variant="inherit" style={styles.cardTitle}>
                   {appointment.hospital}
                 </Text>
-                <Text variant="body" style={styles.secondaryText}>
+                <Text variant="inherit" style={styles.secondaryText}>
                   {appointment.location}
                 </Text>
               </View>
             </View>
+            <Text variant="inherit" style={styles.secondaryText}>
+              Your queue appears once reception or your doctor confirms
+              check-in.
+            </Text>
             <Button
               label="I’ve checked in"
-              onPress={() => setCheckedIn(true)}
+              disabled={
+                !live ||
+                !item ||
+                item.status !== "confirmed" ||
+                appointments.isFetching
+              }
+              loading={appointments.isFetching}
+              onPress={() => void appointments.refetch()}
             />
           </Card>
         </>
@@ -89,6 +145,7 @@ const styles = StyleSheet.create({
     paddingBottom: 126,
   },
   flatCard: {
+    boxShadow: "none",
     elevation: 0,
     shadowOpacity: 0,
   },
@@ -100,8 +157,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   qrSurface: {
-    width: 150,
-    height: 150,
+    width: 214,
+    height: 214,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.md,

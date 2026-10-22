@@ -11,7 +11,7 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { Button } from "@startup/mobile-ui";
 import { ambulanceTrip } from "../utils/ambulanceConstants";
 
@@ -312,11 +312,10 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   card: {
+    ...surfaces.card,
     padding: 16,
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
     gap: 12,
   },
   cardHeader: {

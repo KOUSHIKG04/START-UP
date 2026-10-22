@@ -15,6 +15,8 @@ export const initialSettings: DoctorScheduleSettings = {
   homeSlotMinutes: 60,
   onlineDailyLimit: 8,
   walkinDailyLimit: 12,
+  clinicAppDailyLimit: 12,
+  clinicWalkinDailyLimit: 0,
   autoAccept: false,
   autoAcceptLimit: 0,
   homeVisits: false,

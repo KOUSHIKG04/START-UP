@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, shadows } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { teal } from "../utils/registrationConstants";
 export const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
@@ -81,9 +81,7 @@ export const s = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: -26,
     padding: 26,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
-    ...shadows.card,
+    ...surfaces.card,
   },
   benefitHeading: {
     flexDirection: "row",
@@ -278,9 +276,8 @@ export const s = StyleSheet.create({
     maxWidth: 280,
   },
   statusCard: {
+    ...surfaces.card,
     width: "100%",
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
     borderRadius: 16,
     padding: 16,
     marginTop: 30,

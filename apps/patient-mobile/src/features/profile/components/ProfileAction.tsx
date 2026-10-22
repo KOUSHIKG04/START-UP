@@ -41,7 +41,11 @@ export function ProfileAction({
       ) : null}
       <View style={styles.trailingIcon}>
         {trailingIcon ?? (
-          <ChevronRight size={19} color={colors.patient.primaryDark} />
+          <ChevronRight
+            size={24}
+            color={colors.patient.textSecondary}
+            strokeWidth={2}
+          />
         )}
       </View>
     </Pressable>

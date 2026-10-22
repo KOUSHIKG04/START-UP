@@ -235,3 +235,34 @@ test("preview movement is bounded to the visible call area after keyboard/layout
   const resized = clampCallPreview(250, 400, 390, 260, 132, 172);
   assert.equal(resized.y, 80);
 });
+
+test("tapping the video in chat restores full-screen video for both apps", () => {
+  for (const theme of ["patient", "doctor"]) {
+    const h = harness();
+    const p = { ...props, theme, initialChat: true };
+    let all = nodes(h.render(p));
+    assert.ok(all.some((node) => node.type === "FlatList"));
+    const preview = all.find(
+      (node) => node.props?.accessibilityLabel === "Return to full-screen video"
+    );
+    assert.equal(preview.props.accessibilityRole, "button");
+    assert.equal(preview.props.disabled, false);
+    preview.props.onPress();
+    all = nodes(h.render(p));
+    assert.equal(
+      all.some((node) => node.type === "FlatList"),
+      false
+    );
+    assert.ok(
+      all.some(
+        (node) => node.props?.accessibilityLabel === "Open consultation chat"
+      )
+    );
+    all
+      .find(
+        (node) => node.props?.accessibilityLabel === "Open consultation chat"
+      )
+      .props.onPress();
+    assert.ok(nodes(h.render(p)).some((node) => node.type === "FlatList"));
+  }
+});

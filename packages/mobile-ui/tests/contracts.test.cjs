@@ -119,13 +119,80 @@ const component = (name) =>
 const { MobileThemeProvider } = load(
   path.resolve(__dirname, "../src/theme/MobileThemeProvider.tsx")
 );
-const { mobileThemes } = load(
+const { mobileThemes, surfaces } = load(
   path.resolve(__dirname, "../../design-tokens/src/index.ts")
 );
 const flatten = (style) =>
   Object.assign({}, ...[style].flat(Infinity).filter(Boolean));
 const themed = (theme, element) =>
   render(jsx(MobileThemeProvider, { theme, children: element }));
+
+test("content cards share the subtle border and shadow across apps while preserving overrides", () => {
+  const Card = component("Card");
+  for (const theme of ["patient", "doctor", "driver"]) {
+    for (const variant of ["outlined", "elevated"]) {
+      let presses = 0;
+      const host = themed(
+        theme,
+        jsx(Card, {
+          variant,
+          onPress: () => presses++,
+        })
+      ).find((node) => node.type === "Pressable");
+      const style = flatten(host.props.style({ pressed: false }));
+      assert.equal(style.borderWidth, 0.4);
+      assert.equal(style.borderColor, surfaces.card.borderColor);
+      assert.equal(style.boxShadow, surfaces.card.boxShadow);
+      assert.equal(style.backgroundColor, mobileThemes[theme].surface);
+      host.props.onPress();
+      assert.equal(presses, 1);
+    }
+  }
+  const custom = themed(
+    "doctor",
+    jsx(Card, {
+      borderColor: "selected-border",
+      borderWidth: 2,
+      style: { boxShadow: "none" },
+    })
+  ).find((node) => node.type === "Pressable");
+  const style = flatten(custom.props.style({ pressed: false }));
+  assert.equal(style.borderWidth, 2);
+  assert.equal(style.borderColor, "selected-border");
+  assert.equal(style.boxShadow, "none");
+  const plain = themed("patient", jsx(Card, { variant: "plain" })).find(
+    (node) => node.type === "Pressable"
+  );
+  const plainStyle = flatten(plain.props.style({ pressed: false }));
+  assert.equal(plainStyle.borderWidth, 0);
+  assert.equal(plainStyle.boxShadow, undefined);
+});
+
+test("content accordions use the shared surface and keep their toggle action", () => {
+  const Accordion = component("Accordion");
+  for (const theme of ["patient", "doctor", "driver"]) {
+    let nextOpen;
+    const nodes = themed(
+      theme,
+      jsx(Accordion, {
+        title: "Personal details",
+        variant: "outlined",
+        onToggle: (value) => {
+          nextOpen = value;
+        },
+      })
+    );
+    const container = nodes.find((node) => node.type === "View");
+    const style = flatten(container.props.style);
+    assert.equal(style.borderWidth, 0.4);
+    assert.equal(style.borderColor, surfaces.card.borderColor);
+    assert.equal(style.boxShadow, surfaces.card.boxShadow);
+    const button = nodes.find((node) => node.type === "Pressable");
+    assert.equal(button.props.accessibilityState.expanded, false);
+    button.props.onPress();
+    assert.equal(nextOpen, true);
+  }
+});
 
 test("Chip inherits each app palette and supports explicit overrides", () => {
   const Chip = component("Chip");

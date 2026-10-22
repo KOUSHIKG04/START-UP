@@ -41,7 +41,7 @@ import {
   MapPin,
   X,
 } from "lucide-react-native";
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import {
   doctorQualificationSchema,
   doctorSpecialtiesSchema,
@@ -1281,6 +1281,7 @@ const styles = StyleSheet.create({
   addressFields: { paddingHorizontal: 24, paddingBottom: 32, gap: 16 },
   confirmAddress: { height: 54, borderRadius: 12 },
   locationCard: {
+    ...surfaces.card,
     height: 54,
     flexDirection: "row",
     alignItems: "center",
@@ -1289,8 +1290,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     borderRadius: 12,
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
     gap: 12,
   },
   mapButton: { height: 54, borderRadius: 12, borderColor: "#D1D1D1" },

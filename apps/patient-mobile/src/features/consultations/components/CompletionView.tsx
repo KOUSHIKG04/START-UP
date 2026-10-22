@@ -134,8 +134,6 @@ export function CompletionView({
             variant="outlined"
             backgroundColor="#E8F8F4"
             borderRadius={radius.md}
-            borderWidth={1}
-            borderColor="#E0E5EB"
             gap={12}
             padding={16}
             style={styles.experienceCard}

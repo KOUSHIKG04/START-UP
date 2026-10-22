@@ -1,5 +1,5 @@
 import { AppText as Text } from "@startup/mobile-ui";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, type Href } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { StyleSheet, View } from "react-native";
 import { listClinicAppointments } from "@startup/data-access";
@@ -15,6 +15,10 @@ import {
 import { Button } from "@startup/mobile-ui";
 import BookingCard from "../../../features/appointments/components/BookingCard";
 import { clinicAppointmentCard } from "../../../features/appointments/utils/clinicAppointmentCard";
+import {
+  canOpenClinicVisit,
+  clinicVisitRoute,
+} from "../../../features/appointments/utils/clinicVisit";
 import { supabase } from "../../../services/supabase";
 
 export default function AppointmentDetailsRoute() {
@@ -63,7 +67,7 @@ export default function AppointmentDetailsRoute() {
               <Text variant="sectionHeading" style={styles.sectionTitle}>
                 Appointment details
               </Text>
-              <Detail label="Appointment ID" value={card.id} />
+              <Detail label="Appointment ID" value={card.id.slice(-8)} />
               <Detail label="Visit type" value={card.consultationType} />
               <Detail
                 label="Date and time"
@@ -85,24 +89,32 @@ export default function AppointmentDetailsRoute() {
               ) : null}
             </Card>
             {item.status === "completed" ? (
+              <View style={styles.ratingRow}>
+                <Text variant="body" style={styles.thankYou}>
+                  Thank you
+                </Text>
+                <Button
+                  label="Rate doctor"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/rate-doctor/[id]",
+                      params: { id: item.id },
+                    })
+                  }
+                />
+              </View>
+            ) : null}
+            {canOpenClinicVisit(item) ? (
               <Button
-                label="Thank you · Rate doctor"
+                label={
+                  item.queue_state === "awaiting_arrival"
+                    ? "Show check-in QR"
+                    : "View clinic queue"
+                }
                 onPress={() =>
-                  router.push({
-                    pathname: "/rate-doctor/[id]",
-                    params: { id: item.id },
-                  })
+                  router.push(clinicVisitRoute(item) as unknown as Href)
                 }
               />
-            ) : null}
-            {item.visit_mode === "clinic" && item.queue_state ? (
-              <Text variant="body" style={styles.message}>
-                Queue: {item.queue_state.replaceAll("_", " ")}
-                {item.ticket_number ? ` · ticket ${item.ticket_number}` : ""}
-                {item.queue_state === "waiting"
-                  ? ` · ${item.ahead_count} ahead`
-                  : ""}
-              </Text>
             ) : null}
           </>
         ) : null}
@@ -128,6 +140,14 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.patient.background },
   content: { gap: 16, padding: spacing.lg, paddingBottom: 126 },
   loading: { minHeight: 160 },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  thankYou: { color: colors.patient.text, fontFamily: fontFamilies.medium },
   message: {
     color: colors.patient.textSecondary,
     fontFamily: fontFamilies.regular,

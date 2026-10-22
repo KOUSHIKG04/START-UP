@@ -372,11 +372,32 @@ export const doctorSchedulePreferences = clinzo
       online_end: time("online_end").notNull().default("15:00"),
       home_start: time("home_start").notNull().default("16:00"),
       home_end: time("home_end").notNull().default("17:00"),
+      clinic_time_blocks: jsonb("clinic_time_blocks")
+        .$type<{ start: string; end: string }[]>()
+        .notNull()
+        .default(sql`'[]'::jsonb`),
+      online_time_blocks: jsonb("online_time_blocks")
+        .$type<{ start: string; end: string }[]>()
+        .notNull()
+        .default(sql`'[]'::jsonb`),
+      home_time_blocks: jsonb("home_time_blocks")
+        .$type<{ start: string; end: string }[]>()
+        .notNull()
+        .default(sql`'[]'::jsonb`),
+      home_travel_buffer_minutes: integer("home_travel_buffer_minutes")
+        .notNull()
+        .default(0),
       slot_minutes: smallint("slot_minutes").notNull(),
       online_slot_minutes: smallint("online_slot_minutes").notNull(),
       home_slot_minutes: smallint("home_slot_minutes").notNull(),
       online_daily_limit: smallint("online_daily_limit").notNull(),
       walkin_daily_limit: smallint("walkin_daily_limit").notNull(),
+      clinic_app_daily_limit: integer("clinic_app_daily_limit")
+        .default(0)
+        .notNull(),
+      clinic_walkin_daily_limit: integer("clinic_walkin_daily_limit")
+        .default(0)
+        .notNull(),
       auto_accept: boolean("auto_accept").notNull().default(false),
       auto_accept_limit: smallint("auto_accept_limit").notNull().default(0),
       home_visits: boolean("home_visits").notNull().default(false),
@@ -395,6 +416,14 @@ export const doctorSchedulePreferences = clinzo
       check(
         "schedule_service_days_check",
         sql`cardinality(${table.online_working_days}) between 1 and 7 and cardinality(${table.home_working_days}) between 1 and 7 and ${table.online_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[] and ${table.home_working_days} <@ ARRAY[1,2,3,4,5,6,7]::smallint[]`
+      ),
+      check(
+        "clinic_channel_limits_check",
+        sql`${table.clinic_app_daily_limit} between 0 and 100 and ${table.clinic_walkin_daily_limit} between 0 and 100 and ${table.clinic_app_daily_limit} + ${table.clinic_walkin_daily_limit} <= ${table.walkin_daily_limit}`
+      ),
+      check(
+        "schedule_home_travel_buffer_check",
+        sql`${table.home_travel_buffer_minutes} between 0 and 180`
       ),
       check(
         "schedule_service_hours_check",

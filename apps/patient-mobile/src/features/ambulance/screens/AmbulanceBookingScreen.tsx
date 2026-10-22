@@ -5,7 +5,7 @@ import { Keyboard, StyleSheet, View } from "react-native";
 
 import * as Crypto from "expo-crypto";
 
-import { colors, fontFamilies } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { Header } from "@startup/mobile-ui";
 
 import type { AmbulanceBookingScreenProps } from "../types/ambulance";
@@ -196,6 +196,7 @@ const s = StyleSheet.create({
   bookingContent: { paddingBottom: 40 },
   hospitalList: { gap: 12, paddingHorizontal: 16, paddingBottom: 4 },
   hospitalCard: {
+    ...surfaces.card,
     width: 128,
     height: 96,
     justifyContent: "center",
@@ -203,8 +204,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
   },
   hospitalSelected: {
     backgroundColor: "#E8F5F4",

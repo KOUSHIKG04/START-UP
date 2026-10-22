@@ -55,7 +55,7 @@ export function VisitSessionScreen({
       {mode === "clinic-check-in" ? (
         <ClinicVisitFlow
           appointment={appointment}
-          onComplete={() => setCompleted(true)}
+          onComplete={onRealComplete ?? (() => setCompleted(true))}
         />
       ) : (
         <HomeVisitFlow

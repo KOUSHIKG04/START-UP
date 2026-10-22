@@ -4,7 +4,6 @@ import { useDoctorProfile } from "../hooks/useDoctorProfile";
 import { rows } from "../utils/profileConstants";
 
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Image, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
@@ -45,68 +44,68 @@ export function ProfileScreen() {
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
-      <View style={styles.summary}>
-        <SafeAreaView edges={["top"]}>
-          <Header
-            title="Profile"
-            app="doctor"
-            backgroundColor="transparent"
-            safeAreaEdges={[]}
-            onBackPress={() =>
-              router.canGoBack() ? router.back() : router.navigate("/")
-            }
-          />
-          <View style={styles.identitySection}>
-            {profile.isLoading ? (
-              <View style={styles.identity}>
-                <Skeleton width={72} height={72} radius={36} />
-                <View style={styles.identityCopy}>
-                  <Skeleton width="80%" height={24} />
-                  <Skeleton width="70%" height={18} />
-                </View>
-              </View>
-            ) : (
-              <>
-                <View style={styles.identity}>
-                  <View style={styles.avatarShadow}>
-                    <View style={styles.avatar}>
-                      {profilePhotoUrl ? (
-                        <Image
-                          source={{ uri: profilePhotoUrl }}
-                          style={styles.photo}
-                        />
-                      ) : (
-                        <Text style={styles.initials}>{initials}</Text>
-                      )}
-                    </View>
-                  </View>
-                  <View style={styles.identityCopy}>
-                    <Text style={styles.name}>
-                      {name}
-                      {profile.data?.qualification ||
-                      profile.data?.qualification_claim ? (
-                        <Text style={styles.qualification}>
-                          {" "}
-                          {profile.data.qualification ||
-                            profile.data.qualification_claim}
-                        </Text>
-                      ) : null}
-                    </Text>
-                    <Text style={styles.specialty}>
-                      {profile.data?.specialties
-                        .map((item) => item.name)
-                        .join(", ") || "Specialty awaiting review"}
-                    </Text>
-                    <Text style={styles.email} numberOfLines={1}>
-                      {profile.data?.contact_email || session?.user.email || ""}
-                    </Text>
-                  </View>
-                </View>
-              </>
-            )}
+      <Header
+        title="Profile"
+        app="doctor"
+        onBackPress={() =>
+          router.canGoBack() ? router.back() : router.navigate("/")
+        }
+      />
+      <Card
+        theme="doctor"
+        variant="plain"
+        backgroundColor={palette.primary}
+        borderRadius={0}
+        padding={0}
+        gap={0}
+        style={styles.profileCard}
+      >
+        {profile.isLoading ? (
+          <View style={styles.identity}>
+            <Skeleton width={72} height={72} radius={36} />
+            <View style={styles.identityCopy}>
+              <Skeleton width="80%" height={24} />
+              <Skeleton width="70%" height={18} />
+            </View>
           </View>
-        </SafeAreaView>
-      </View>
+        ) : (
+          <View style={styles.identity}>
+            <View style={styles.avatarShadow}>
+              <View style={styles.avatar}>
+                {profilePhotoUrl ? (
+                  <Image
+                    source={{ uri: profilePhotoUrl }}
+                    style={styles.photo}
+                  />
+                ) : (
+                  <Text style={styles.initials}>{initials}</Text>
+                )}
+              </View>
+            </View>
+            <View style={styles.identityCopy}>
+              <Text style={styles.name}>
+                {name}
+                {profile.data?.qualification ||
+                profile.data?.qualification_claim ? (
+                  <Text style={styles.qualification}>
+                    {" "}
+                    {profile.data.qualification ||
+                      profile.data.qualification_claim}
+                  </Text>
+                ) : null}
+              </Text>
+              <Text style={styles.specialty}>
+                {profile.data?.specialties
+                  .map((item) => item.name)
+                  .join(", ") || "Specialty awaiting review"}
+              </Text>
+              <Text style={styles.email} numberOfLines={1}>
+                {profile.data?.contact_email || session?.user.email || ""}
+              </Text>
+            </View>
+          </View>
+        )}
+      </Card>
       <FadedScrollView
         edgeColor={palette.white}
         showsVerticalScrollIndicator={false}
@@ -122,15 +121,17 @@ export function ProfileScreen() {
           theme="doctor"
           variant="outlined"
           leftIcon={
-            <View style={styles.actionIcon}>
-              <User size={21} color={palette.primary} />
+            <View style={[styles.actionIcon, styles.detailsIcon]}>
+              <User size={21} color={palette.white} />
             </View>
           }
-          style={styles.detailsAccordion}
+          style={[styles.cardSurface, styles.detailsAccordion]}
           headerStyle={styles.detailsHeader}
           titleStyle={styles.accordionTitle}
           contentStyle={styles.detailsBody}
           separatorColor={palette.border}
+          chevronColor={palette.muted}
+          chevronSize={24}
         >
           {profile.isLoading ? (
             <View style={styles.details}>
@@ -264,11 +265,10 @@ export function ProfileScreen() {
               key={title}
               theme="doctor"
               variant="outlined"
-              borderWidth={1}
-              borderRadius={16}
+              borderRadius={14}
               padding={0}
               gap={0}
-              style={styles.flatCard}
+              style={styles.cardSurface}
             >
               <Pressable
                 accessibilityRole="button"
@@ -291,12 +291,12 @@ export function ProfileScreen() {
                 ]}
               >
                 <View style={styles.actionIcon}>
-                  <Icon size={21} color={palette.primary} />
+                  <Icon size={21} color={palette.white} />
                 </View>
                 <Text style={styles.actionTitle}>{title}</Text>
                 <ChevronRight
-                  size={19}
-                  color={palette.primary}
+                  size={24}
+                  color={palette.muted}
                   style={styles.trailingIcon}
                 />
               </Pressable>

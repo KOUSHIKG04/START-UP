@@ -15,18 +15,31 @@ export function BookingTimeSection({
   error,
   timeZone,
 }: Props) {
+  const dailyAllowances = dateSlots.flatMap((slot) =>
+    slot.daily_bookings_remaining == null ? [] : [slot.daily_bookings_remaining]
+  );
+  const bookingsRemaining = dailyAllowances.length
+    ? Math.min(dateSlots.length, ...dailyAllowances)
+    : null;
   return (
     <View style={styles.bookingSection}>
       <View style={styles.sectionHeadingRow}>
         <Text variant="sectionHeading" style={styles.sectionTitle}>
           Select time
         </Text>
-        {dateSlots.length > 0 ? (
+        {bookingsRemaining !== null && !loading && !error ? (
           <Text variant="body" style={styles.availability}>
-            {dateSlots.length} slots available
+            {bookingsRemaining === 1
+              ? "1 booking left"
+              : `${bookingsRemaining} bookings left`}
           </Text>
         ) : null}
       </View>
+      {dateSlots.length > 0 && !loading && !error ? (
+        <Text variant="body" style={styles.availability}>
+          Choose any available time below.
+        </Text>
+      ) : null}
       {selectedDate && !loading && !error && dateSlots.length === 0 ? (
         <Text variant="body" style={styles.availability}>
           Not available on this date. Choose another date.

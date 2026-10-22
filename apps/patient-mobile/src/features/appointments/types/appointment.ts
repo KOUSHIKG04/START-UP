@@ -8,6 +8,8 @@ export type VisitSessionMode =
 export type Appointment = {
   id: string;
   backendId?: string;
+  practiceId?: string;
+  serviceId?: string;
   doctorName: string;
   qualification: string;
   specialty: string;

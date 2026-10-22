@@ -13,7 +13,13 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
 
 export function AmbulanceCompletion({
@@ -67,8 +73,6 @@ export function AmbulanceCompletion({
         <Card
           variant="outlined"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           backgroundColor={colors.white}
           gap={0}
           padding={0}
@@ -138,8 +142,6 @@ export function AmbulanceCompletion({
           variant="outlined"
           backgroundColor="#E8F8F4"
           borderRadius={radius.md}
-          borderWidth={1}
-          borderColor="#E0E5EB"
           gap={12}
           padding={16}
           style={styles.experienceCard}
@@ -295,12 +297,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   summaryCard: {
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+    ...surfaces.card,
     borderRadius: radius.md,
     backgroundColor: colors.white,
     overflow: "hidden",
-    boxShadow: "none",
   },
   summaryHeading: {
     flexDirection: "row",
@@ -358,11 +358,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   experienceCard: {
+    ...surfaces.card,
     backgroundColor: "#E8F8F4",
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
     borderRadius: radius.md,
-    boxShadow: "none",
   },
   feedbackTitle: {
     color: colors.patient.text,

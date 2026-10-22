@@ -11,13 +11,14 @@ export const colors = {
     navMuted: "#8E9BAE",
     cardDescription: "#71818F",
     overlay: "#00000066",
-    menuBorder: "rgba(0, 0, 0, 0.08)",
+    menuBorder: "#00000014",
     menuShadow: "#055B56",
-    pressedOverlay: "rgba(0, 0, 0, 0.03)",
+    pressedOverlay: "#00000008",
     fade: "#E6F7F6",
-    navFadeStart: "rgba(255,255,255,0)",
-    navFadeEnd: "rgba(255,255,255,0.96)",
+    navFadeStart: "#FFFFFF00",
+    navFadeEnd: "#FFFFFFF5",
   },
+
   // Patient Mobile App
   patient: {
     primary: "#008877",

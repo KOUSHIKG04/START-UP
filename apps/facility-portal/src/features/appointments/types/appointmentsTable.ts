@@ -12,7 +12,18 @@ export type AppointmentsTableProps = {
   now: number;
   pageRows: ClinicAppointment[];
   pending: boolean;
-  onAct: (item: ClinicAppointment, action: "approve" | "reject") => void;
+  onAct: (
+    item: ClinicAppointment,
+    action:
+      | "approve"
+      | "reject"
+      | "check_in"
+      | "call"
+      | "hold"
+      | "resume"
+      | "no_show"
+      | "cancel"
+  ) => void;
   pagination: AppointmentsPaginationData;
   onPageChange: (page: number) => void;
   displayedCount: number;

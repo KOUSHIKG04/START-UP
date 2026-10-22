@@ -74,6 +74,22 @@ removed; working route paths and groups are preserved.
 
 ## Booking composition
 
+Booking-time headers show the server's remaining daily booking allowance, bounded
+by the number of eligible time choices for the selected date. They no longer
+present the number of time options as the number of appointments available.
+Online retains all eligible time choices; clinic retains its existing discovery
+cap. `daily_bookings_remaining` is optional/nullable for compatibility, so older
+responses show the time-selection helper without inventing a booking count.
+The shared call surface also accepts a tap on its floating video during chat to
+restore the full-screen video. Camera, message, room and drag ownership are retained.
+
+`20261022084126_consultation_availability_and_signed_records.sql` was deployed on
+2026-10-22. The private remaining-capacity calculation is shared with the existing
+admission guard; slot RPC names, choices and booking limits are unchanged. Rollback
+SQL verifies choice preservation and allowance changes on reservation/cancellation.
+Component tests cover quota copy and both app themes' preview action. Native video
+tap/drag and layout verification remains separate.
+
 `FindDoctorScreen` owns the booking guide entry below its search field. The
 `BookingGuideLink` component lives in `features/doctors/components`; Home no
 longer renders that entry. The guide keeps the current consultation type.
@@ -90,10 +106,82 @@ invalidation, and loading ownership are retained.
 The practice-timezone day formatter is in `utils/bookingDates.ts`; do not replace
 it with UTC conversion when refactoring.
 
+Clinic slot discovery caps the returned choices per practice and booking day at
+the remaining app allocation and total capacity, using
+the earliest eligible times. The cap is applied before the RPC result limit so
+later dates remain discoverable. Online and home results retain their behavior;
+existing appointments and stored windows are preserved. This backend change is
+in `20261021152313_cap_clinic_time_options_by_daily_limit.sql`, deployed to the
+linked backend on 2026-10-21. Transaction checks verified 54-to-12 clinic results,
+unchanged non-clinic results and compatible results from all three listing RPCs.
+`20261021174352_clinic_channel_capacity_and_reception.sql` extends this policy
+with editable app and reception quotas within the total clinic capacity; deployment
+was verified on 2026-10-21. Existing limits become app allocations; reception starts
+at zero until configured. App
+reservations cannot consume the reception allocation. The source-aware admission
+guard shares the existing booking-day lock with the total-capacity guard.
+`supabase/tests/smoke/clinic-channel-capacity.cli-smoke.sql` verifies quota edits,
+channel exhaustion, total capacity, reception demographics/idempotency, queue
+creation and denied access inside a transaction that is rolled back. The older
+daily-capacity fixture still requires a disposable database. Native booking
+verification remains separate. Reception-created patients do not automatically
+gain app access from a matching phone number.
+
 The focused booking regression checks are in `tests/verified-directory.test.cjs`.
 They load extracted local modules and exercise location switching, selected fees,
 available slots, and confirmation loading. Device and end-to-end checks remain
 necessary when changing those behaviors.
+
+## Clinic-day check-in page
+
+My Bookings and Appointment Details open the existing `/visit-session` route in
+`clinic-check-in` mode. The entry appears on the clinic's local appointment day;
+arrived patients can reopen their queue. Full backend IDs stay in navigation.
+`ClinicVisitFlow` restores the separate Hospital Visit layout from `main`, using
+the existing summary, QR surface, facility section and queue illustration.
+
+`consultations/hooks/useClinicCheckIn.ts` owns secure token issuance and expiry,
+and observes the existing `patient-clinic-appointments` cache. It refreshes on
+focus and polls every 15 seconds while focused, without adding another realtime
+subscription. A token expires after five minutes and can be refreshed explicitly.
+The “I’ve checked in” button reloads server state; it cannot mark arrival locally.
+Only server-confirmed arrival reveals the queue, with the actual ticket and people
+ahead. No estimated wait is invented. Completion follows the backend appointment
+status through the existing completion destination. These changes require no
+backend schema update. Focused QR/expiry/navigation tests pass; native camera,
+screen layout and an authenticated cross-device check-in remain unverified.
+
+My Bookings and Appointment Details share the compact `BookingCard`: its body
+opens appointment details, while only the avatar and doctor name open the booked
+doctor's profile. `tests/appointment-cards.test.cjs` checks these separate press
+targets and preserves the practice/service IDs through display mapping. Those
+cards use the patient teal gradient with light text and a circular trailing
+arrow. Doctor identity and visit type form the first row, with the menu and arrow
+at its right. The menu retains a 44px touch target. Date and time share one line
+below an edge-to-edge divider on the left, with the status at the right end of the same row.
+Metadata wraps when space is limited. Their Inter scale uses 16/24 SemiBold for the
+doctor name, 13/18 for specialty, visit type and scheduling, and 12/16 Medium for
+status. The card inherits its explicit typography rather than the larger global
+trial roles, permits metadata wrapping, and keeps AM/PM attached to its time.
+Browser checks cover 320, 390 and 430px previews; native verification is separate.
+My Bookings places eligible Join/QR actions, queue information, issued QR codes
+and completed-visit ratings in a transparent footer over the same card gradient.
+Footer text and button outlines use light colors for contrast. Pending/confirmed
+bookings expose cancellation through a three-dot menu using `ModalSurface`.
+The screen retains action eligibility, mutation arguments and loading states.
+The card summary is its own press target, so footer actions cannot also open
+appointment details. Cards without footer content do not render an empty footer.
+Appointment ID text in details and the actions menu shows only the final eight
+characters; route parameters, stored IDs and mutation inputs retain full IDs.
+The booked doctor profile
+IDs are added to the existing authorized `list_care_appointments` projection by
+`20261021090000_appointment_doctor_profile_links.sql`. This migration was applied
+and recorded on the linked backend on 2026-10-21. Older responses still render
+and show an unavailable message rather than guessing a doctor. Native navigation
+still requires device verification.
+The deployment check verified the correct practice/service IDs on eight existing
+appointments, preserved prior fields and ordering, and retained authenticated-only
+RPC execution. No unrelated pending migrations were applied.
 
 ## Complete feature review
 
@@ -122,6 +210,13 @@ issues; source checks and mocks do not establish native/device verification.
 
 ## Development log capture
 
+The workspace pnpm patch for `expo-router@57.0.24` defers native initial-link
+tracking until commit and cancels it on cleanup. It is shared by Patient, Doctor
+and Driver; it does not change this app's routes or protected-group decisions.
+See [dependency patch notes](../../patches/README.md) and
+`tests/expo-router-linking.test.cjs` before upgrading Router. Native startup and
+reload verification remain separate from the deterministic hook tests.
+
 `pnpm --filter patient-mobile start:logs` starts the existing Expo development
 client server and mirrors terminal stdout/stderr into `.expo/logs/start-*.log`.
 Pass the existing Expo options as needed, for example `start:logs --tunnel`.
@@ -136,3 +231,12 @@ restarts. The phone must be connected and authorized for USB/wireless debugging.
 device when several are connected. `APP_VARIANT` selects the existing development,
 preview or production package; `--package PACKAGE` overrides it for Expo Go or a
 specific build. Logs stay in the ignored `.expo` directory.
+
+Doctor schedules may contain multiple clinic blocks separated by online or home
+visits. Patient discovery continues using the existing mode-filtered slot APIs;
+unavailable visit blocks and home travel reservations are excluded during backend
+materialization. The clinic app quota remains a daily maximum across all clinic
+blocks and may exceed the number of physical times that fit in a shorter day.
+Existing appointments retain their IDs, times and queue sessions. This integration
+is deployed in `20261022071502_multi_block_service_schedules.sql` (2026-10-22);
+rollback tests confirm the patient-visible clinic times match split availability.

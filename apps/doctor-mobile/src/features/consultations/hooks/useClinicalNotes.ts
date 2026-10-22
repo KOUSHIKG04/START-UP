@@ -49,11 +49,16 @@ export function useClinicalNotes() {
             action: "complete",
             note: assessment.trim() || null,
           }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setCompleteMessage("Consultation signed and completed.");
-      void queryClient.invalidateQueries({
-        queryKey: ["doctor-clinic-appointments"],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["doctor-clinic-appointments"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["doctor-consultation-draft", liveAppointment!.id],
+        }),
+      ]);
     },
     onError: () => {
       setCompleteMessage(

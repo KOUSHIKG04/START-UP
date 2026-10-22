@@ -1,5 +1,11 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.patient.background },
   headerTitle: {
@@ -22,9 +28,8 @@ export const styles = StyleSheet.create({
   bottomSection: {
     gap: 14,
   },
-  flatCard: {
-    elevation: 0,
-    shadowOpacity: 0,
+  cardSurface: {
+    ...surfaces.card,
   },
   pendingCard: {
     padding: 16,

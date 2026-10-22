@@ -1,7 +1,7 @@
 import { AppText as Text } from "./AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
-import { colors, fontFamilies, shadows } from "@startup/design-tokens";
+import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import type {
   CardVariant,
   CardOrientation,
@@ -146,9 +146,7 @@ function getCardPalette(
     case "outlined":
       return {
         backgroundColor: theme.surface,
-        borderColor: theme.border,
-        borderWidth: 1,
-        ...shadows.card,
+        ...surfaces.card,
       };
     case "soft":
       return {
@@ -166,9 +164,7 @@ function getCardPalette(
     default:
       return {
         backgroundColor: theme.surface,
-        borderColor: "transparent",
-        borderWidth: 0,
-        ...shadows.card,
+        ...surfaces.card,
       };
   }
 }

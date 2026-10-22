@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import type { AppTheme } from "../utils/appTheme";
 
 export function notificationPalette(app: AppTheme) {
@@ -109,8 +109,7 @@ export function createNotificationStyles(app: AppTheme) {
       minHeight: 88,
       borderRadius: radius.md,
       backgroundColor: colors.white,
-      borderWidth: 1,
-      borderColor: "#E0E5EB",
+      ...surfaces.card,
       position: "relative",
     },
     unreadCard: {

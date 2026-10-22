@@ -11,7 +11,7 @@ import {
   MapPin,
   Stethoscope,
 } from "lucide-react-native";
-import { colors, fontFamilies, radius } from "@startup/design-tokens";
+import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import { Accordion, Chip } from "@startup/mobile-ui";
 
 export default function AppointmentDetailsCard({
@@ -46,7 +46,7 @@ export default function AppointmentDetailsCard({
       <DetailRow
         icon={<Hash size={17} color={colors.textSecondary} />}
         label="Appointment ID"
-        value={appointment.id}
+        value={appointment.id.slice(-8)}
       />
       <DetailRow
         icon={<CalendarClock size={17} color={colors.textSecondary} />}
@@ -105,10 +105,9 @@ function DetailRow({
 
 const styles = StyleSheet.create({
   card: {
+    ...surfaces.card,
     borderRadius: radius.md,
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
   },
   header: {
     paddingHorizontal: 16,

@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
-import { colors } from "@startup/design-tokens";
+import { colors, fontFamilies } from "@startup/design-tokens";
 import { FadedScrollView } from "@startup/mobile-ui";
 import { keyboardScrollAdjustment } from "../utils/keyboardScroll";
 
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   dim: { opacity: 0.65 },
   buttonText: {
     color: colors.white,
-    fontFamily: "AlbertSans_600SemiBold",
+    fontFamily: fontFamilies.semibold,
     fontSize: 17,
     lineHeight: 22,
   },

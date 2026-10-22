@@ -34,6 +34,12 @@ implementing new Driver functionality.
 
 ## Shared operations and lifecycle
 
+Neutral cards use `surfaces.card` from `@startup/design-tokens`: a 0.4 light gray
+border combined with `shadows.card`. The Profile screen composes the shared
+`mobile-ui` Card for separate action rows, using the same 64px height, themed icon
+circles and semibold labels as Patient and Doctor. `DriverUI` keeps its existing
+Card adapter for other screens, with the same surface preset through `ui.card`.
+
 Backend adapters already exist for onboarding, saved locations, driver fleet and
 profile, availability/offers, trips, tracking, and SOS. Their reusable operations
 are in `packages/data-access/src/ambulance` and the driver location modules, with

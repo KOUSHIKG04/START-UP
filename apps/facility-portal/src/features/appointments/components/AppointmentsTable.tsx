@@ -15,7 +15,10 @@ import {
   AvatarImage,
 } from "@startup/web-ui/components/ui/avatar";
 
-import { appointmentPeriods } from "../utils/appointmentsConstants";
+import {
+  appointmentPeriods,
+  appointmentSourceLabels,
+} from "../utils/appointmentsConstants";
 
 export function AppointmentsTable({
   now,
@@ -90,6 +93,7 @@ export function AppointmentsTable({
               <th className="px-3 py-3">Doctor / Department</th>
               <th className="px-3 py-3">Time</th>
               <th className="px-3 py-3">Mode</th>
+              <th className="px-3 py-3">Source / Queue</th>
               <th className="px-3 py-3">Status</th>
               <th className="px-3 py-3 text-right">Actions</th>
             </tr>
@@ -106,6 +110,15 @@ export function AppointmentsTable({
                   timeZone: item.timezone,
                 }
               );
+              const clinicDayFormatter = new Intl.DateTimeFormat("en-CA", {
+                timeZone: item.timezone,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              });
+              const isClinicDay =
+                clinicDayFormatter.format(start) ===
+                clinicDayFormatter.format(new Date(now));
               const expiredPending =
                 item.status === "pending" &&
                 (start.getTime() <= now ||
@@ -163,6 +176,43 @@ export function AppointmentsTable({
                         {row.patientName}
                       </span>
                     </div>
+                    <details className="mt-2 text-xs">
+                      <summary className="text-primary cursor-pointer">
+                        Patient details
+                      </summary>
+                      <dl className="mt-2 space-y-1">
+                        <div>
+                          <dt className="inline font-medium">Age: </dt>
+                          <dd className="inline">
+                            {item.patient_age_years ?? "Not recorded"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="inline font-medium">Gender: </dt>
+                          <dd className="inline">
+                            {item.patient_gender ?? "Not recorded"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="inline font-medium">Contact: </dt>
+                          <dd className="inline">
+                            {item.patient_phone ?? "Not recorded"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="inline font-medium">Reason: </dt>
+                          <dd className="inline">
+                            {item.reason || "Not recorded"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="inline font-medium">Appointment: </dt>
+                          <dd className="inline">
+                            {item.public_code.slice(-8)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </details>
                   </td>
 
                   {/* Doctor & Department */}
@@ -194,6 +244,22 @@ export function AppointmentsTable({
                     </span>
                   </td>
 
+                  <td className="px-3 py-3.5 text-xs">
+                    <p>
+                      {item.source
+                        ? appointmentSourceLabels[item.source]
+                        : "Not recorded"}
+                    </p>
+                    {item.visit_mode === "clinic" ? (
+                      <p className="mt-1 capitalize">
+                        {item.queue_state?.replaceAll("_", " ") ??
+                          "No queue entry"}
+                        {item.queue_state === "waiting"
+                          ? ` · ${item.ahead_count} ahead`
+                          : ""}
+                      </p>
+                    ) : null}
+                  </td>
                   {/* Status */}
                   <td className="px-3 py-3.5">
                     {row.status === "Pending" && !expiredPending && (
@@ -240,6 +306,58 @@ export function AppointmentsTable({
                   {/* Actions */}
                   <td className="px-3 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      {item.visit_mode === "clinic" &&
+                      item.status === "confirmed" ? (
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          {(
+                            [
+                              [
+                                "check_in",
+                                "Check in",
+                                item.queue_state === "awaiting_arrival" &&
+                                  isClinicDay,
+                              ],
+                              [
+                                "call",
+                                "Call next",
+                                item.queue_state === "waiting" &&
+                                  item.ahead_count === 0 &&
+                                  isClinicDay,
+                              ],
+                              [
+                                "hold",
+                                "Hold",
+                                ["waiting", "called"].includes(
+                                  item.queue_state ?? ""
+                                ),
+                              ],
+                              ["resume", "Resume", item.queue_state === "held"],
+                              [
+                                "no_show",
+                                "No-show",
+                                end.getTime() <= now &&
+                                  [
+                                    "awaiting_arrival",
+                                    "waiting",
+                                    "called",
+                                    "held",
+                                  ].includes(item.queue_state ?? ""),
+                              ],
+                            ] as const
+                          )
+                            .filter(([, , visible]) => visible)
+                            .map(([action, label]) => (
+                              <button
+                                key={action}
+                                disabled={pending}
+                                onClick={() => onAct(item, action)}
+                                className="border-border hover:bg-muted rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-50"
+                              >
+                                {label}
+                              </button>
+                            ))}
+                        </div>
+                      ) : null}
                       {row.status === "Pending" && !expiredPending && (
                         <>
                           <button

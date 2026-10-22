@@ -3,7 +3,13 @@ export type { HomeVisitFlowProps } from "../types/visit-session";
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Info } from "lucide-react-native";
-import { colors, fontFamilies, radius, spacing } from "@startup/design-tokens";
+import {
+  colors,
+  fontFamilies,
+  radius,
+  spacing,
+  surfaces,
+} from "@startup/design-tokens";
 import { Button, Card, FadedScrollView } from "@startup/mobile-ui";
 import AppointmentDetailsCard from "../../appointments/components/AppointmentDetailsCard";
 
@@ -38,12 +44,10 @@ export function HomeVisitFlow({ appointment, onComplete }: HomeVisitFlowProps) {
       <Card
         variant="outlined"
         borderRadius={radius.md}
-        borderWidth={1}
-        borderColor="#E0E5EB"
         backgroundColor={colors.white}
         gap={16}
         padding={18}
-        style={[styles.centeredCard, styles.flatCard]}
+        style={[styles.centeredCard, styles.cardSurface]}
       >
         {/* <Text style={styles.cardTitle}>OTP verification</Text> */}
         <View style={styles.otpNotice}>
@@ -85,6 +89,7 @@ const styles = StyleSheet.create({
     paddingBottom: 126,
   },
   trackingCard: {
+    ...surfaces.card,
     minHeight: 74,
     flexDirection: "row",
     alignItems: "center",
@@ -93,10 +98,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: radius.md,
     backgroundColor: colors.patient.surface,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
-    elevation: 0,
-    shadowOpacity: 0,
   },
   trackingIconSurface: {
     width: 46,
@@ -151,11 +152,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
-  flatCard: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderWidth: 1,
-    borderColor: "#E0E5EB",
+  cardSurface: {
+    ...surfaces.card,
     borderRadius: radius.md,
   },
   centeredCard: {

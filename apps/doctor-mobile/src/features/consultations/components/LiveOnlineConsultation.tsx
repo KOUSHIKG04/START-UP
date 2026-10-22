@@ -3,13 +3,10 @@ import { styles } from "./OnlineConsultation.styles";
 import { useLiveOnlineConsultation } from "../hooks/useLiveOnlineConsultation";
 import type { LiveOnlineConsultationProps } from "../types/live-online-consultation";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { LiveKitRoom } from "@livekit/react-native";
 import { Button, Loader } from "@startup/mobile-ui";
-import {
-  Heading,
-  Label,
-  MissingPatient,
-} from "../../../components/DoctorScreen";
+import { Heading, Label, DoctorScreen } from "../../../components/DoctorScreen";
 export function LiveOnlineConsultation({
   appointmentId,
   initialChat,
@@ -22,7 +19,52 @@ export function LiveOnlineConsultation({
         <Loader theme="doctor" size="large" style={{ flex: 1 }} />
       </SafeAreaView>
     );
-  if (!appointment) return <MissingPatient />;
+  if (!appointment)
+    return (
+      <DoctorScreen title="Video consultation" bottomNav={false}>
+        <Label>
+          {live.error
+            ? "Could not load this consultation. Return to appointments and try again."
+            : "This consultation is unavailable for your account."}
+        </Label>
+        <Button
+          theme="doctor"
+          label="Back to appointments"
+          onPress={() => router.replace("/appointments")}
+        />
+      </DoctorScreen>
+    );
+  if (appointment.status === "completed")
+    return (
+      <DoctorScreen
+        title="Consultation completed"
+        bottomNav={false}
+        onBackPress={() => router.replace("/appointments")}
+      >
+        <Heading>{appointment.patient_name}</Heading>
+        <Label>This consultation is signed and saved.</Label>
+        <Button
+          theme="doctor"
+          label="View consultation record"
+          onPress={() =>
+            router.replace({
+              pathname: "/clinical-notes",
+              params: {
+                appointmentId,
+                patientId: appointment.patient_id,
+                mode: "online",
+              },
+            })
+          }
+        />
+        <Button
+          theme="doctor"
+          variant="outline"
+          label="Back to appointments"
+          onPress={() => router.replace("/appointments")}
+        />
+      </DoctorScreen>
+    );
   if (appointment.status === "confirmed")
     return (
       <SafeAreaView style={styles.screen}>
@@ -39,7 +81,19 @@ export function LiveOnlineConsultation({
         />
       </SafeAreaView>
     );
-  if (appointment.status !== "in_consultation") return <MissingPatient />;
+  if (appointment.status !== "in_consultation")
+    return (
+      <DoctorScreen title="Video consultation" bottomNav={false}>
+        <Label>
+          This appointment is {appointment.status.replaceAll("_", " ")}.
+        </Label>
+        <Button
+          theme="doctor"
+          label="Back to appointments"
+          onPress={() => router.replace("/appointments")}
+        />
+      </DoctorScreen>
+    );
   if (!token.data)
     return (
       <SafeAreaView style={styles.screen}>
