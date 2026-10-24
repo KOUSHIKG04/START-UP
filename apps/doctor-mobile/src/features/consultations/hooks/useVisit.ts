@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { appointments, patients } from "../../../data/demo";
 import type { Appointment, VisitMode } from "../../../types/doctor";
+
 export function useVisit() {
   const params = useLocalSearchParams<{
     appointmentId?: string;

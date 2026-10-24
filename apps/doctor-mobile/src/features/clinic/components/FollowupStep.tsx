@@ -1,5 +1,7 @@
 import type { FollowupStepProps } from "../types/followup-step";
+
 export type { FollowupStepProps } from "../types/followup-step";
+
 import { Button, DatePicker, Input } from "@startup/mobile-ui";
 
 export function FollowupStep({

@@ -1,8 +1,10 @@
 "use client";
+
 import type { NumberSettingProps } from "../types/numberSetting";
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Input } from "@startup/web-ui/components/ui/input";
+
 export function NumberSetting({
   title,
   value,

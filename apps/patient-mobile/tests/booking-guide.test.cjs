@@ -1,9 +1,12 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 function guide({ canGoBack = true } = {}) {
   let step = 0;
   const moves = [],
@@ -103,6 +106,7 @@ function guide({ canGoBack = true } = {}) {
   };
   return { render, moves, routes, step: () => step };
 }
+
 test("Next advances all four steps and Start booking returns to the existing doctor search", () => {
   const g = guide();
   for (let i = 0; i < 3; i++)
@@ -116,6 +120,7 @@ test("Next advances all four steps and Start booking returns to the existing doc
     .props.onPress();
   assert.deepEqual(g.routes, ["back"]);
 });
+
 test("Skip closes the guide and does not create or book anything", () => {
   const g = guide();
   g.render()
@@ -123,6 +128,7 @@ test("Skip closes the guide and does not create or book anything", () => {
     .props.onPress();
   assert.deepEqual(g.routes, ["back"]);
 });
+
 test("swiping and previous-step controls stay in sync", () => {
   const g = guide();
   g.render()
@@ -135,6 +141,7 @@ test("swiping and previous-step controls stay in sync", () => {
   assert.equal(g.step(), 1);
   assert.equal(g.moves.at(-1).offset, 360);
 });
+
 test("a directly opened guide falls back to Find Doctors with the same consultation mode", () => {
   const g = guide({ canGoBack: false });
   g.render()

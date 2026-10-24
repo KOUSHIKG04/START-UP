@@ -5,7 +5,9 @@ import { styles } from "../components/TripChat.styles";
 import { useDriverChat } from "../hooks/useDriverChat";
 
 import type { DriverMessage } from "../types/chat-screen";
+
 export type { DriverMessage } from "../types/chat-screen";
+
 import { Input } from "@startup/mobile-ui";
 import { useCallback } from "react";
 import {

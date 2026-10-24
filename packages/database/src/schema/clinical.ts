@@ -93,7 +93,9 @@ export const consultation = clinzo
     ]
   )
   .enableRLS();
+
 export type Consultation = typeof consultation.$inferSelect;
+
 export type NewConsultation = typeof consultation.$inferInsert;
 
 export const vitalObservation = clinzo
@@ -137,7 +139,9 @@ export const vitalObservation = clinzo
     ]
   )
   .enableRLS();
+
 export type VitalObservation = typeof vitalObservation.$inferSelect;
+
 export type NewVitalObservation = typeof vitalObservation.$inferInsert;
 
 export const clinicalNote = clinzo
@@ -182,7 +186,9 @@ export const clinicalNote = clinzo
     ]
   )
   .enableRLS();
+
 export type ClinicalNote = typeof clinicalNote.$inferSelect;
+
 export type NewClinicalNote = typeof clinicalNote.$inferInsert;
 
 export const consultationDiagnosis = clinzo
@@ -223,7 +229,9 @@ export const consultationDiagnosis = clinzo
     ]
   )
   .enableRLS();
+
 export type ConsultationDiagnosis = typeof consultationDiagnosis.$inferSelect;
+
 export type NewConsultationDiagnosis =
   typeof consultationDiagnosis.$inferInsert;
 
@@ -272,7 +280,9 @@ export const clinicalAttachment = clinzo
     ]
   )
   .enableRLS();
+
 export type ClinicalAttachment = typeof clinicalAttachment.$inferSelect;
+
 export type NewClinicalAttachment = typeof clinicalAttachment.$inferInsert;
 
 export const followupRecommendation = clinzo
@@ -326,7 +336,9 @@ export const followupRecommendation = clinzo
     ]
   )
   .enableRLS();
+
 export type FollowupRecommendation = typeof followupRecommendation.$inferSelect;
+
 export type NewFollowupRecommendation =
   typeof followupRecommendation.$inferInsert;
 

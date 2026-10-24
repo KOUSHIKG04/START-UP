@@ -1,4 +1,5 @@
 import type { BedInventoryProjection } from "@startup/contracts";
+
 export class BedSaveError extends Error {
   constructor(
     message: string,
@@ -7,6 +8,7 @@ export class BedSaveError extends Error {
     super(message);
   }
 }
+
 export async function saveBedCounts(
   form: FormData
 ): Promise<BedInventoryProjection> {
@@ -28,6 +30,7 @@ export async function saveBedCounts(
     );
   return result.row;
 }
+
 export async function reloadBedCounts(
   facilityId: string
 ): Promise<BedInventoryProjection[]> {

@@ -181,6 +181,7 @@ export default function VerificationStatusScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: palette.white },
   body: { flex: 1 },

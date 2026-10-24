@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { FacilityDoctorScheduleScreen } from "@/features/doctors";
+
 export default async function ManageDoctorServiceSchedulePage({
   params,
 }: {

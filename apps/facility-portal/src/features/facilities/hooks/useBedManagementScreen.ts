@@ -1,9 +1,11 @@
 "use client";
+
 import type { BedManagementScreenProps } from "../types/bedManagementScreen";
 import { useEffect } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import { useBedManagement } from "./useBedManagement";
 import { bedManagementDateFormatter } from "../utils/bedManagementDate";
+
 export function useBedManagementScreen({
   inventory,
   loadError,

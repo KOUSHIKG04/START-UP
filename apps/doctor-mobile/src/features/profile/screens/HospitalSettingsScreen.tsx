@@ -9,6 +9,7 @@ import { DoctorScreen, Label, Panel } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 
 import { useClinicLocationDraft } from "../../locations/stores/clinicLocationDraft";
+
 export function HospitalSettingsScreen() {
   const {
     profile,
@@ -224,6 +225,7 @@ export function HospitalSettingsScreen() {
     </DoctorScreen>
   );
 }
+
 const styles = StyleSheet.create({
   input: { height: 54, minHeight: 54, borderRadius: 12 },
   label: { color: palette.text, fontSize: 13 },

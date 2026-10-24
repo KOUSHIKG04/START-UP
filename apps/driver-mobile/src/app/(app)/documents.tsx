@@ -25,9 +25,11 @@ const documents: { kind: DriverDocumentKind; title: string }[] = [
   { kind: "ambulance_image", title: "Ambulance image" },
   { kind: "equipment_images", title: "Equipment images" },
 ];
+
 type Picked = Partial<
   Record<DriverDocumentKind, DocumentPicker.DocumentPickerAsset>
 >;
+
 export default function DriverDocuments() {
   const { session } = useMobileSession();
   const queryClient = useQueryClient();
@@ -244,6 +246,7 @@ export default function DriverDocuments() {
     </View>
   );
 }
+
 function field(
   label: string,
   value: string,
@@ -264,6 +267,7 @@ function field(
     />
   );
 }
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F7FBFA" },
   header: {

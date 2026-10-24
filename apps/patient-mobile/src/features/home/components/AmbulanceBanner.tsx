@@ -1,5 +1,7 @@
 import type { AmbulanceBannerProps } from "../types/home";
+
 export type { AmbulanceBannerProps } from "../types/home";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { Image, StyleSheet, View } from "react-native";
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";

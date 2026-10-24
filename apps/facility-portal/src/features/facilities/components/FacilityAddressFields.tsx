@@ -1,4 +1,5 @@
 "use client";
+
 import { getFacilityLocation } from "../services/browserLocation";
 import { Button } from "@startup/web-ui/components/ui/button";
 import { Input } from "@startup/web-ui/components/ui/input";
@@ -6,6 +7,7 @@ import { Label } from "@startup/web-ui/components/ui/label";
 import { Spinner } from "@startup/web-ui/components/ui/spinner";
 import { FacilityLocationMap } from "./FacilityLocationMap";
 import type { FacilityAddressFieldsProps } from "../types/facilityAddressFields";
+
 export function FacilityAddressFields({
   mapsApiKey,
   facilityAddress,

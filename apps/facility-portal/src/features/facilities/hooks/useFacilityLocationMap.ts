@@ -1,4 +1,5 @@
 "use client";
+
 import { centerOf } from "../utils/mapCoordinates";
 import { loadMaps } from "../services/googleMaps";
 import type { FacilityLocationMapProps } from "../types/facilityLocationMap";
@@ -8,6 +9,7 @@ import type {
   MapInstance,
 } from "../types/facilityLocationMap";
 import { useEffect, useRef, useState } from "react";
+
 export function useFacilityLocationMap({
   apiKey,
   selected,

@@ -3,7 +3,9 @@ import {
   medicineEditorItems2,
 } from "../utils/medicineEditorConstants";
 import type { MedicineEditorProps } from "../types/medicine-editor";
+
 export type { MedicineEditorProps } from "../types/medicine-editor";
+
 import { View } from "react-native";
 import { Button, Input } from "@startup/mobile-ui";
 import { Choice, Heading, Panel } from "../../../components/DoctorScreen";

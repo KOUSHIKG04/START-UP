@@ -1,10 +1,12 @@
 import { type ImageSourcePropType } from "react-native";
+
 export interface CategoryItem {
   key: string;
   label: string;
   image: ImageSourcePropType;
   imageScale?: number;
 }
+
 export type FindDoctorSearchListProps = {
   filteredCategories: readonly CategoryItem[];
   doctorMatches: readonly { id: string; name: string }[];

@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 test("booking availability reports daily bookings separately from time choices", () => {
@@ -67,6 +72,7 @@ test("booking availability reports daily bookings separately from time choices",
     false
   );
 });
+
 function load(file, mocks = {}) {
   const exports = {};
   const absolute = path.resolve(__dirname, file);
@@ -97,6 +103,7 @@ function load(file, mocks = {}) {
   );
   return exports;
 }
+
 test("missing fee is not displayed as free", () => {
   const { formatConsultationFee } = load(
     "../src/features/doctors/utils/doctorDisplay.ts",
@@ -106,6 +113,7 @@ test("missing fee is not displayed as free", () => {
   assert.equal(formatConsultationFee("0", "INR"), "₹0");
   assert.equal(formatConsultationFee("25000", "INR"), "₹250");
 });
+
 test("verified practice without a service remains in clinic results only", () => {
   const { uniqueDoctorPractices } = load(
     "../src/features/doctors/utils/doctorSearch.ts"
@@ -120,6 +128,7 @@ test("verified practice without a service remains in clinic results only", () =>
   assert.equal(uniqueDoctorPractices([row], "online").length, 0);
   assert.equal(uniqueDoctorPractices([row], "home").length, 0);
 });
+
 test("multiple associations produce one card with a real fee regardless of row order", () => {
   const { uniqueDoctorPractices } = load(
     "../src/features/doctors/utils/doctorSearch.ts"
@@ -149,6 +158,7 @@ test("multiple associations produce one card with a real fee regardless of row o
     assert.equal(result[0].fee_minor, "100000");
   }
 });
+
 test("available practice wins and separate doctors with the same name remain separate", () => {
   const { uniqueDoctorPractices } = load(
     "../src/features/doctors/utils/doctorSearch.ts"
@@ -173,6 +183,7 @@ test("available practice wins and separate doctors with the same name remain sep
   assert.equal(result.length, 2);
   assert.equal(result.find((row) => row.doctor_id === "one").practice_id, "b");
 });
+
 test("earliest available location wins, then nearest location for equal times", () => {
   const { uniqueDoctorPractices } = load(
     "../src/features/doctors/utils/doctorSearch.ts"
@@ -198,6 +209,7 @@ test("earliest available location wins, then nearest location for equal times", 
     "c"
   );
 });
+
 test("availability text uses the practice timezone and keeps the facility name", () => {
   const { practiceAvailabilityLabel } = load(
     "../src/features/doctors/utils/doctorDisplay.ts",
@@ -220,6 +232,7 @@ test("availability text uses the practice timezone and keeps the facility name",
     "No appointments available · San Hospital"
   );
 });
+
 test("doctor card omits appointment availability and still opens the profile", () => {
   const jsx = (type, props) => ({ type, props });
   const { default: DoctorCard } = load(

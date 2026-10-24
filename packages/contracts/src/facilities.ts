@@ -13,6 +13,7 @@ export const registeredCareFacilitySchema = z.object({
   kind: z.enum(["hospital", "clinic"]),
   address: z.string(),
 });
+
 export type RegisteredCareFacility = z.infer<
   typeof registeredCareFacilitySchema
 >;
@@ -26,6 +27,7 @@ export const doctorFacilityRequestSchema = z.object({
   rejection_reason: z.string().nullable(),
   created_at: z.iso.datetime({ offset: true }),
 });
+
 export type DoctorFacilityRequest = z.infer<typeof doctorFacilityRequestSchema>;
 
 export const facilityDoctorRequestSchema = doctorFacilityRequestSchema.extend({
@@ -34,6 +36,7 @@ export const facilityDoctorRequestSchema = doctorFacilityRequestSchema.extend({
   doctor_code: z.string(),
   credential_status: z.enum(["pending", "verified", "suspended"]),
 });
+
 export type FacilityDoctorRequest = z.infer<typeof facilityDoctorRequestSchema>;
 
 export const registerCareFacilitySchema = z
@@ -62,6 +65,7 @@ export const registerCareFacilitySchema = z
       });
     }
   });
+
 export type RegisterCareFacilityInput = z.infer<
   typeof registerCareFacilitySchema
 >;
@@ -70,11 +74,14 @@ export const bedTypeCatalogSchema = z.object({
   code: z.string(),
   name: z.string(),
 });
+
 export type BedTypeCatalogItem = z.infer<typeof bedTypeCatalogSchema>;
+
 export const companyFacilityBedDeclarationSchema = z.object({
   offers_beds: z.boolean().nullable(),
   bed_types: z.array(z.string()),
 });
+
 export type CompanyFacilityBedDeclaration = z.infer<
   typeof companyFacilityBedDeclarationSchema
 >;
@@ -121,6 +128,7 @@ export const bedInventoryRpcSchema = z.object({
 });
 
 const bedCountSchema = z.number().int().min(0).max(2147483647);
+
 export const updateBedInventorySchema = z
   .object({
     facilityId: uuidSchema,

@@ -1,6 +1,7 @@
 import { useMapPicker } from "../hooks/useMapPicker";
 
 export type { Point, PlaceDetails } from "../types/pick-location-screen";
+
 import { StatusBar } from "expo-status-bar";
 
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";

@@ -1,4 +1,5 @@
 "use client";
+
 import { useVerificationFilters } from "../hooks/useVerificationFilters";
 
 import type { VerificationFiltersProps } from "../types/verification-filters";

@@ -1,4 +1,5 @@
 import type { MyAmbulanceBooking } from "@startup/contracts";
+
 export type LiveAmbulanceRequestsListProps = {
   bookings?: MyAmbulanceBooking[];
   isLoading: boolean;

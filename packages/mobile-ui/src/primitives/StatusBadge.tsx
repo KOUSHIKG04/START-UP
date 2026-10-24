@@ -2,6 +2,7 @@ import { AppText as Text } from "./AppText";
 import { StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { StatusBadgeProps } from "../types/statusBadge";
+
 export type { StatusBadgeProps } from "../types/statusBadge";
 
 export function StatusBadge({

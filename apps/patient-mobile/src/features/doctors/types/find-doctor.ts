@@ -7,6 +7,7 @@ export type FindDoctorScreenProps = PatientScreenProps & {
 };
 
 import type { ImageSourcePropType } from "react-native";
+
 export type DoctorCategory = {
   key: string;
   label: string;

@@ -1,6 +1,8 @@
 import { useDoctorResults } from "../hooks/useDoctorResults";
 import type { SortBy } from "../types/doctor-results";
+
 export type { SortBy } from "../types/doctor-results";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 

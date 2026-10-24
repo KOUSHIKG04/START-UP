@@ -12,6 +12,7 @@ import {
   startDriverBackgroundLocation,
   stopDriverBackgroundLocation,
 } from "../services/backgroundLocationTask";
+
 export function useDriverLocationReporter() {
   const { profile } = useMobileSession();
   const fleet = useQuery({

@@ -54,6 +54,9 @@ The user's requested scope takes precedence over this guidance.
   changes. Distinguish local implementation from deployment and device verification.
 - Format every added or changed supported file with the root Prettier configuration.
   Avoid repo-wide formatting during a scoped feature change unless requested.
+- Leave one blank line between top-level declarations (including exports and
+  functions). Run `pnpm spacing:check <path>` to check and
+  `pnpm spacing:fix <path>` to add missing gaps without changing code behavior.
 - Run checks appropriate to the change and applicable nested instructions. Report
   existing failures and unverified behavior accurately.
 - For documentation-only changes, format/check the touched Markdown and review the

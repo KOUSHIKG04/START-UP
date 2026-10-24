@@ -1,4 +1,5 @@
 import type { useBookSlots } from "../hooks/useBookSlots";
+
 export type Props = Pick<
   ReturnType<typeof useBookSlots>,
   | "today"

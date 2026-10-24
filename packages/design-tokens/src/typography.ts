@@ -56,6 +56,7 @@ export const typography = {
 } as const;
 
 export type Typography = typeof typography;
+
 export type FontFamilies = typeof fontFamilies;
 
 /** Proposed readable mobile scale; legacy tokens remain unchanged during the Patient trial. */
@@ -117,4 +118,5 @@ export const mobileTypography = {
     fontWeight: "600",
   },
 } as const;
+
 export type MobileTypographyRole = keyof typeof mobileTypography;

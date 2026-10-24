@@ -1,7 +1,9 @@
 "use client";
+
 import type { VerificationFiltersProps } from "../types/verification-filters";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+
 export function useVerificationFilters({
   initialType,
   initialStatus,

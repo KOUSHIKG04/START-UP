@@ -10,6 +10,7 @@ import { ScrollView, View } from "react-native";
 import { Button } from "@startup/mobile-ui";
 import { DriverTrackingMap } from "./DriverTrackingMap";
 import { EmergencyModeCard } from "./EmergencyModeCard";
+
 export function HospitalJourney({
   emergency,
   onEmergencyChange,

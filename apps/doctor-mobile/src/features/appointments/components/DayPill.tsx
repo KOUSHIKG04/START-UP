@@ -3,6 +3,7 @@ import type { DayPillProps } from "../types/day-pill";
 import { memo } from "react";
 import { Pressable } from "react-native";
 import { Heading, Label } from "../../../components/DoctorScreen";
+
 export const DayPill = memo(function DayPill({
   day,
   selected,

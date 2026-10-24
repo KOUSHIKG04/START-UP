@@ -28,6 +28,7 @@ import { resolveDoctorAddress } from "../../features/locations/services/resolveA
 import { getDoctorDeviceLocation } from "../../features/locations/services/deviceLocation";
 
 type Point = { latitude: number; longitude: number };
+
 type PlaceDetails = {
   street: string;
   locality: string;
@@ -35,6 +36,7 @@ type PlaceDetails = {
   state: string;
   pincode: string;
 };
+
 const emptyDetails: PlaceDetails = {
   street: "",
   locality: "",
@@ -42,6 +44,7 @@ const emptyDetails: PlaceDetails = {
   state: "",
   pincode: "",
 };
+
 const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 

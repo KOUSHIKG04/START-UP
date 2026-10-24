@@ -6,6 +6,7 @@ import { Pressable, View, Alert } from "react-native";
 import { Phone, Star, UserRound } from "lucide-react-native";
 import { colors, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
+
 export function DriverCard({
   name,
   vehicle,

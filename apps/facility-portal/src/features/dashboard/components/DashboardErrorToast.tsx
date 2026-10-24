@@ -1,4 +1,5 @@
 "use client";
+
 import type { DashboardErrorToastProps } from "../types/dashboardErrorToast";
 
 import { useEffect } from "react";

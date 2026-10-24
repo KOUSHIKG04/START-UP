@@ -52,3 +52,24 @@ idempotent processing. Provider SDK setup does not belong in shared UI.
 
 See [backend ownership](../README.md) and the
 [package extension guide](../../packages/ARCHITECTURE.md).
+
+## Appointment recovery and the payment boundary
+
+Appointment attendance, recovery requests and rescheduling use the existing
+PostgreSQL clinic RPC owner, implemented locally in
+`20261023075921_appointment_recovery_and_rescheduling.sql`. They do not require a
+new Edge Function. Authorization, optimistic versions, idempotent replacement,
+capacity release/reservation, lineage and queue updates stay in one database
+transaction; private request rows are read through authorized appointment projections.
+Policy edits use a separate authenticated, versioned schedule-permission RPC.
+Source presence does not establish migration deployment.
+
+`process-payment` remains a disabled, planned integration. The existing
+`clinzo.payment` and `fare_quote` models reference ambulance bookings; consultation
+billing requires appointment-specific persistence and verified allocations before
+paid consultation bookings or payment carry-over can be enabled. Recovery currently
+creates no charge, credit, deduction, provider operation or refund. Provider capture,
+signed webhooks, refund outbox/reconciliation and financial permissions must be
+implemented before activating real money. See the
+[appointment recovery payment plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md) for the
+required ownership, policy decisions and tests.

@@ -1,5 +1,6 @@
 import type { TriggerPosition } from "../types/dropdown";
 import { MENU_GAP } from "./dropdownConstants";
+
 export function calculateMenuPosition({
   triggerPosition,
   menuHeight,

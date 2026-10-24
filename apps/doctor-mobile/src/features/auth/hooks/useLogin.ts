@@ -6,6 +6,7 @@ import {
   signUpWithDevPassword,
 } from "@startup/data-access";
 import { devPasswordLoginEnabled, supabase } from "../../../services/supabase";
+
 export function useLogin() {
   const [mode, setMode] = useState<"dev" | "prod">(
     devPasswordLoginEnabled ? "dev" : "prod"

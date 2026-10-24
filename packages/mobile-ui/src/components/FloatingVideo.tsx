@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Animated, PanResponder, StyleSheet } from "react-native";
 import { clampCallPreview } from "../utils/callPreview";
+
 export function FloatingVideo({
   children,
   width,
@@ -75,6 +76,7 @@ export function FloatingVideo({
     </Animated.View>
   );
 }
+
 const styles = StyleSheet.create({
   floating: {
     position: "absolute",

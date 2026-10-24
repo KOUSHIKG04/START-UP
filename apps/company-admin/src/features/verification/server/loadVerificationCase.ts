@@ -7,6 +7,7 @@ import {
   listCompanyDoctorFacilityRequests,
 } from "@startup/data-access";
 import { requireReviewer } from "@/lib/reviewer";
+
 export async function loadVerificationCase({ params }: CaseDetailProps) {
   const [{ id }, client] = await Promise.all([params, requireReviewer()]);
   const item = await getCompanyVerificationCase(client, id);

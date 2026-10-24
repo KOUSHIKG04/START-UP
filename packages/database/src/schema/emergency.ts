@@ -68,7 +68,9 @@ export const guestEmergencySession = clinzo
     ]
   )
   .enableRLS();
+
 export type GuestEmergencySession = typeof guestEmergencySession.$inferSelect;
+
 export type NewGuestEmergencySession =
   typeof guestEmergencySession.$inferInsert;
 
@@ -105,7 +107,9 @@ export const emergencyCase = clinzo
     ]
   )
   .enableRLS();
+
 export type EmergencyCase = typeof emergencyCase.$inferSelect;
+
 export type NewEmergencyCase = typeof emergencyCase.$inferInsert;
 
 export const triageObservation = clinzo
@@ -146,7 +150,9 @@ export const triageObservation = clinzo
     ]
   )
   .enableRLS();
+
 export type TriageObservation = typeof triageObservation.$inferSelect;
+
 export type NewTriageObservation = typeof triageObservation.$inferInsert;
 
 export const emergencyStartOverride = clinzo
@@ -191,6 +197,8 @@ export const emergencyStartOverride = clinzo
     ]
   )
   .enableRLS();
+
 export type EmergencyStartOverride = typeof emergencyStartOverride.$inferSelect;
+
 export type NewEmergencyStartOverride =
   typeof emergencyStartOverride.$inferInsert;

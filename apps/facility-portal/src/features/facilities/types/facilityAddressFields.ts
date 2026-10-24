@@ -1,4 +1,5 @@
 import type { useFacilityVerification } from "../hooks/useFacilityVerification";
+
 export type FacilityAddressFieldsProps = Pick<
   ReturnType<typeof useFacilityVerification>,
   | "mapsApiKey"

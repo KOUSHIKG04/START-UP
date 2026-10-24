@@ -243,3 +243,47 @@ The rollback-only `supabase/tests/smoke/multi-block-schedule.cli-smoke.sql` test
 interleaving, patient choices, buffers, protected bookings, stale versions and
 authorization. Web component screenshots use synthetic data and mocked actions;
 authenticated live UI verification remains separate.
+
+## Appointment attendance and recovery
+
+`features/appointments` owns the Manage appointment dialog,
+`hooks/useAppointmentRecovery.ts`, recovery display types and its Server Actions.
+Actions require approved-facility access, validate shared input contracts, and call
+the clinic operations in `@startup/data-access`; database practice permissions remain
+authoritative. Loading replacement times and arranging a move additionally check
+the authorized appointment's `can_manage` projection. Request decisions and
+attendance actions require backend `can_manage_practice` permission.
+
+The table and its filters use `appointmentRecoveryView` for expired requests,
+needs-review, waiting-for-doctor, no-show, doctor-unavailable and rescheduled labels.
+Its 30-second display clock cannot complete visits or decide attendance. Clinic
+review follows the session end; other modes use the booked end plus configured
+grace. Staff confirm patient no-show after the deadline or record doctor
+unavailability separately with a reason. Resolving an attendance review does not
+itself decide attendance. Approving a requested move revalidates its target; review
+requests do not hold capacity.
+
+Server Actions revalidate appointments and dashboard routes after mutations; the
+dialog refreshes on success and on returned stale/mutation errors. Request creation
+and decisions update the appointment version and explicitly call the existing
+`emit_appointment_change` private emitter so the facility-scoped live-update bridge
+refreshes pages. There is no direct browser access or
+subscription to the private recovery request table. Replacement transactions retain
+booking-source quotas and chain history; clinic arrivals get a new awaiting-arrival
+ticket rather than inheriting check-in or QR state.
+
+`features/doctors/components/AppointmentRecoveryPolicy.tsx` belongs to the existing
+Doctor Schedule editor, with a separate versioned Server Action/RPC save. It requires
+an approved doctor association and backend schedule-edit permission. Defaults are
+15 minutes of attendance grace, zero minutes of patient notice and one patient move;
+the respective ranges are 0–180, 0–10080 and 0–10. The policy applies to the practice
+across visit types and does not publish slots. Reloading stale settings starts from
+the latest saved version.
+
+Recovery is locally implemented in
+`20261023075921_appointment_recovery_and_rescheduling.sql`; rollback-only backend
+workflow checks passed, while shared-database deployment awaits explicit approval. Desktop and narrow-width synthetic component
+previews are captured in `.impeccable/review/recovery-desktop.png` and
+`recovery-mobile.png` at the repository root. They do not establish authenticated
+live workflow or native Patient/Doctor verification. Consultation billing is deferred
+under the [payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).

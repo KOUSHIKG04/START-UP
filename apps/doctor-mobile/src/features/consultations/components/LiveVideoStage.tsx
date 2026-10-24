@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { router } from "expo-router";
 import { Button, ModalSurface } from "@startup/mobile-ui";
 import { Heading, Label } from "../../../components/DoctorScreen";
+
 export function LiveVideoStage({
   appointmentId,
   patientName,

@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { Input } from "./Input";
 import type { TextAreaProps } from "../types/textArea";
+
 export type { TextAreaProps } from "../types/textArea";
 
 export function TextArea({

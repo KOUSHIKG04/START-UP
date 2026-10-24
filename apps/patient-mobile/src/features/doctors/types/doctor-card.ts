@@ -1,4 +1,5 @@
 import type { StyleProp, ViewStyle } from "react-native";
+
 export type DoctorCardProps = {
   name: string;
   qualification: string;

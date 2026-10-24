@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 // Execute shared UI with native hosts mocked; gestures/layout still need a device.
@@ -233,6 +238,7 @@ const notification = (id, read = false) => ({
   important: false,
   emergency: false,
 });
+
 test("filters retain state and dispatch read, press and delete actions by id", () => {
   const h = harness();
   const pressed = [],

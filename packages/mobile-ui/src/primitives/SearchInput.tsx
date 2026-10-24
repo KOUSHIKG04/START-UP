@@ -5,6 +5,7 @@ import { StyleSheet, TextInput, View } from "react-native";
 import { Search } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { SearchInputProps } from "../types/searchInput";
+
 export type { SearchInputProps } from "../types/searchInput";
 
 export const SearchInput = forwardRef<TextInput, SearchInputProps>(

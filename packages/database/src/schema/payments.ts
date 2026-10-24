@@ -82,7 +82,9 @@ export const fareQuote = clinzo
     ]
   )
   .enableRLS();
+
 export type FareQuote = typeof fareQuote.$inferSelect;
+
 export type NewFareQuote = typeof fareQuote.$inferInsert;
 
 export const payment = clinzo
@@ -164,7 +166,9 @@ export const payment = clinzo
     ]
   )
   .enableRLS();
+
 export type Payment = typeof payment.$inferSelect;
+
 export type NewPayment = typeof payment.$inferInsert;
 
 export const refund = clinzo
@@ -212,7 +216,9 @@ export const refund = clinzo
     ]
   )
   .enableRLS();
+
 export type Refund = typeof refund.$inferSelect;
+
 export type NewRefund = typeof refund.$inferInsert;
 
 export const providerEvent = clinzo
@@ -249,5 +255,7 @@ export const providerEvent = clinzo
     ]
   )
   .enableRLS();
+
 export type ProviderEvent = typeof providerEvent.$inferSelect;
+
 export type NewProviderEvent = typeof providerEvent.$inferInsert;

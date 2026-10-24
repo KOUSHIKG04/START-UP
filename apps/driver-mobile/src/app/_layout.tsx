@@ -22,12 +22,15 @@ import { signOutWithPushCleanup } from "../features/notifications/services/devic
 import { useDeviceNotifications } from "../features/notifications/hooks/useDeviceNotifications";
 
 void SplashScreen.preventAutoHideAsync();
+
 export const unstable_settings = { initialRouteName: "(auth)" };
+
 function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
   const { showToast } = useToast();
   useDeviceNotifications(identityId, showToast);
   return null;
 }
+
 export default function RootLayout() {
   const [loaded, error] = useFonts(interFonts);
   const auth = useMobileSession();

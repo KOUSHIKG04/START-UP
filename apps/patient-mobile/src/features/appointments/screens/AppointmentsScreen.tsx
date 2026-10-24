@@ -1,4 +1,6 @@
 import { useAppointments } from "../hooks/useAppointments";
+import { appointmentRecoveryView } from "@startup/contracts";
+import { AppointmentRecoveryActions } from "../components/AppointmentRecoveryActions";
 import { bookingFilters } from "../utils/appointmentsConstants";
 import { AppText as Text } from "@startup/mobile-ui";
 import { useState } from "react";
@@ -18,19 +20,20 @@ import {
 import BookingCard from "../components/BookingCard";
 import type { AppointmentsScreenProps } from "../types/appointments";
 import { clinicAppointmentCard } from "../utils/clinicAppointmentCard";
-import { canOpenClinicVisit, clinicVisitRoute } from "../utils/clinicVisit";
+import { clinicVisitRoute } from "../utils/clinicVisit";
 
 export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
-  const { filter, setFilter, appointments, cancel, visible } = useAppointments({
-    onBackPress,
-  });
+  const { filter, setFilter, appointments, cancel, visible, now } =
+    useAppointments({
+      onBackPress,
+    });
   const [menuAppointmentId, setMenuAppointmentId] = useState<string | null>(
     null
   );
   const menuAppointment = visible.find(
     (item) =>
       item.id === menuAppointmentId &&
-      (item.status === "pending" || item.status === "confirmed")
+      appointmentRecoveryView(item, now).canCancel
   );
   return (
     <View style={styles.screen}>
@@ -83,21 +86,27 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
           </View>
         ) : null}
         {visible.map((item) => {
-          const canShowQr =
-            canOpenClinicVisit(item) && item.queue_state === "awaiting_arrival";
-          const canJoin =
-            item.visit_mode === "online" &&
-            ["confirmed", "in_consultation"].includes(item.status);
-          const canCancel =
-            item.status === "pending" || item.status === "confirmed";
-          const showQueue = canOpenClinicVisit(item) && !canShowQr;
+          const recovery = appointmentRecoveryView(item, now);
+          const canShowQr = recovery.canShowQr;
+          const canJoin = recovery.canJoin;
+          const canCancel = recovery.canCancel;
+          const showQueue = recovery.canShowQueue;
           const hasFooter =
-            canShowQr || canJoin || showQueue || item.status === "completed";
+            canShowQr ||
+            canJoin ||
+            showQueue ||
+            item.status === "completed" ||
+            recovery.canReschedule ||
+            recovery.canReview ||
+            recovery.bookAgain ||
+            Boolean(recovery.message) ||
+            Boolean(item.recovery?.request) ||
+            Boolean(item.recovery?.rescheduled_to_id);
           return (
             <BookingCard
               key={item.id}
               appointment={clinicAppointmentCard(item)}
-              statusLabel={item.status.replaceAll("_", " ")}
+              statusLabel={recovery.patientStatus}
               onMorePress={
                 canCancel ? () => setMenuAppointmentId(item.id) : undefined
               }
@@ -112,6 +121,12 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
               footer={
                 hasFooter ? (
                   <View style={styles.cardActions}>
+                    <AppointmentRecoveryActions
+                      item={item}
+                      now={now}
+                      buttonStyle={styles.actionButton}
+                      labelStyle={styles.actionLabel}
+                    />
                     {canShowQr || showQueue ? (
                       <Button
                         label={

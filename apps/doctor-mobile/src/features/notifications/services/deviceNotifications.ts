@@ -16,6 +16,7 @@ import { appointmentDetailsRoute } from "../../appointments/utils/appointmentNav
 
 const installationKey = "clinzo-doctor-push-installation";
 // Importing the module itself can activate its Android push listener in Expo Go.
+
 export const Notifications: typeof import("expo-notifications") | null =
   isRunningInExpoGo() ? null : require("expo-notifications");
 

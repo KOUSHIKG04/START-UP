@@ -1,4 +1,5 @@
 "use client";
+
 import { useDataTable } from "../hooks/use-data-table";
 import type { DataTableProps } from "../types/dataTable";
 import { flexRender } from "@tanstack/react-table";

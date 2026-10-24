@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDriver } from "../../../stores/driver";
+
 export function useDriverChat() {
   const messages = useDriver((s) => s.messages);
   const send = useDriver((s) => s.send);

@@ -1,7 +1,9 @@
 import { useMapPicker } from "../hooks/useMapPicker";
 
 import type { Point, PlaceDetails } from "../types/map-picker";
+
 export type { Point, PlaceDetails } from "../types/map-picker";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { StatusBar } from "expo-status-bar";
 

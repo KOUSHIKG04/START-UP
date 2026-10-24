@@ -6,6 +6,7 @@ import {
   spacing,
   surfaces,
 } from "@startup/design-tokens";
+
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.patient.background },
   headerTitle: {

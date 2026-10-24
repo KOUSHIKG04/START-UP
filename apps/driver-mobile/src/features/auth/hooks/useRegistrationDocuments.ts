@@ -4,6 +4,7 @@ import { useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import { documentTypes } from "../utils/registrationConstants";
 import type { RegistrationDocuments } from "../types/registration";
+
 export function useRegistrationDocuments({
   onSubmit,
   onBack,

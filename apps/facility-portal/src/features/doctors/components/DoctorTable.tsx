@@ -1,4 +1,5 @@
 "use client";
+
 import type { DoctorTableProps } from "../types/doctorTable";
 
 import { DataTable } from "@startup/web-ui/components/data-table";

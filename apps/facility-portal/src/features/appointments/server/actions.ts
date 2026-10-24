@@ -1,4 +1,5 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import {
   clinicCheckinTokenSchema,
@@ -14,7 +15,68 @@ import {
   redeemClinicCheckinToken,
   setClinicAutoConfirmLimit,
   transitionClinicAppointment,
+  listClinicAppointments,
+  listAppointmentRescheduleOptions,
+  rescheduleAppointment,
+  resolveAppointmentAttendance,
+  decideAppointmentRecovery,
 } from "@startup/data-access";
+import {
+  rescheduleAppointmentSchema,
+  attendanceOutcomeSchema,
+  recoveryDecisionSchema,
+} from "@startup/contracts";
+
+export async function loadPortalRecoverySlots(appointmentId: string) {
+  await requireApprovedFacility();
+  const client = await createClient();
+  const item = (await listClinicAppointments(client)).find(
+    (item) => item.id === uuidSchema.parse(appointmentId)
+  );
+  if (!item?.recovery?.can_manage) throw new Error("Practice access required.");
+  return listAppointmentRescheduleOptions(client, item.id);
+}
+
+export async function changePortalAppointmentRecovery(
+  kind: "reschedule" | "attendance" | "decision",
+  input: unknown
+): Promise<{ error: string | null }> {
+  await requireApprovedFacility();
+  const client = await createClient();
+  try {
+    if (kind === "reschedule") {
+      const parsed = rescheduleAppointmentSchema.parse(input);
+      const item = (await listClinicAppointments(client)).find(
+        (item) => item.id === parsed.appointmentId
+      );
+      if (!item?.recovery?.can_manage)
+        return { error: "Practice access required." };
+      await rescheduleAppointment(client, parsed);
+    } else if (kind === "attendance")
+      await resolveAppointmentAttendance(
+        client,
+        attendanceOutcomeSchema.parse(input)
+      );
+    else if (kind === "decision")
+      await decideAppointmentRecovery(
+        client,
+        recoveryDecisionSchema.parse(input)
+      );
+    else return { error: "Invalid recovery action." };
+    revalidatePath("/appointments");
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    return { error: null };
+  } catch (error) {
+    return {
+      error:
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "Could not update this appointment. Refresh and retry.",
+    };
+  }
+}
+
 import { createClient } from "@/lib/supabase/server";
 import { requireApprovedFacility } from "@/server/auth/facilityAccess";
 

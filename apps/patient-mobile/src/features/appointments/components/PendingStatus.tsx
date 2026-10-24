@@ -6,6 +6,7 @@ import { View } from "react-native";
 import { CheckCircle2, Clock3 } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
 import { Button } from "@startup/mobile-ui";
+
 export function PendingStatus({ onPreviewApproval }: PendingStatusProps) {
   return (
     <View style={styles.pendingCard}>

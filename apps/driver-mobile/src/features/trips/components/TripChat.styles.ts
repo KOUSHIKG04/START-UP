@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { fontFamilies } from "@startup/design-tokens";
 import { palette } from "../../../components/theme";
+
 export const styles = StyleSheet.create({
   messages: { padding: 16, gap: 16 },
   bubble: { maxWidth: "82%", borderRadius: 12, padding: 12, gap: 4 },

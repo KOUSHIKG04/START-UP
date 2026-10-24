@@ -9,6 +9,7 @@ import {
   setSelectedPracticeId,
 } from "../services/selectedPractice";
 import { selectedPracticeQueryKey } from "../utils/practiceQueryKeys";
+
 export function useSelectPractice() {
   const { profile } = useMobileSession();
   const doctorId = profile?.doctor?.id;

@@ -2,6 +2,7 @@ import type { Point } from "../types/map-picker";
 
 export const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
+
 export function validPoint(
   latitude: unknown,
   longitude: unknown

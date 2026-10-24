@@ -5,6 +5,7 @@ import {
 } from "@startup/data-access";
 import { AppState } from "react-native";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useProfilePin() {
   const { profile } = useMobileSession();
   const [showPin, setShowPin] = useState(false);

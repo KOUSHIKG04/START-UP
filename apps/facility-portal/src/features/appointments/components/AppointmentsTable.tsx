@@ -1,4 +1,5 @@
 import type { AppointmentsTableProps } from "../types/appointmentsTable";
+import { appointmentRecoveryView } from "@startup/contracts";
 
 import {
   Calendar,
@@ -24,6 +25,7 @@ export function AppointmentsTable({
   now,
   pageRows,
   pending,
+  onManage,
   onAct,
   pagination,
   onPageChange,
@@ -142,8 +144,7 @@ export function AppointmentsTable({
                     : item.visit_mode === "home"
                       ? "Home Visit"
                       : "In-Person",
-                status:
-                  item.status.charAt(0).toUpperCase() + item.status.slice(1),
+                status: appointmentRecoveryView(item, now).staffStatus,
               };
               return (
                 <tr
@@ -306,6 +307,17 @@ export function AppointmentsTable({
                   {/* Actions */}
                   <td className="px-3 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      {item.recovery?.can_manage ? (
+                        <button
+                          type="button"
+                          className="border-border hover:bg-muted rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-50"
+                          disabled={pending}
+                          onClick={() => onManage(item)}
+                        >
+                          Manage ·{" "}
+                          {appointmentRecoveryView(item, now).staffStatus}
+                        </button>
+                      ) : null}
                       {item.visit_mode === "clinic" &&
                       item.status === "confirmed" ? (
                         <div className="flex flex-wrap justify-end gap-1.5">
@@ -335,7 +347,8 @@ export function AppointmentsTable({
                               [
                                 "no_show",
                                 "No-show",
-                                end.getTime() <= now &&
+                                appointmentRecoveryView(item, now)
+                                  .canMarkNoShow &&
                                   [
                                     "awaiting_arrival",
                                     "waiting",

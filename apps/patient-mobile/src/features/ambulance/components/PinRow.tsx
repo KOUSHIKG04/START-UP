@@ -6,6 +6,7 @@ import { View } from "react-native";
 import { Info } from "lucide-react-native";
 import { colors, radius } from "@startup/design-tokens";
 import { Card } from "@startup/mobile-ui";
+
 export function PinRow({ pin }: PinRowProps) {
   return (
     <Card

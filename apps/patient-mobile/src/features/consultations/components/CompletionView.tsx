@@ -3,7 +3,9 @@ import { styles } from "./CompletionView.styles";
 import { useConsultationCompletion } from "../hooks/useConsultationCompletion";
 import { experienceRatings } from "../utils/consultationConstants";
 import type { CompletionViewProps } from "../types/visit-session";
+
 export type { CompletionViewProps } from "../types/visit-session";
+
 import { AppText as Text } from "@startup/mobile-ui";
 
 import { Pressable, View } from "react-native";

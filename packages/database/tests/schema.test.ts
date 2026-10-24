@@ -5,17 +5,21 @@ import * as schema from "../src/schema";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { fileURLToPath } from "node:url";
 import { readFileSync, readdirSync } from "node:fs";
+
 const migrationFolder = fileURLToPath(
   new URL("../../../supabase/migrations", import.meta.url)
 );
 
 const tables = Object.values(schema).filter((value) => is(value, PgTable));
+
 describe("database model contract", () => {
   test("domain tables use RLS and only online chat is public for Realtime", () => {
     expect(tables).toHaveLength(98);
     for (const table of tables) {
       const config = getTableConfig(table);
-      expect(config.schema ?? "public").toBe(config.name === "online_message" ? "public" : "clinzo");
+      expect(config.schema ?? "public").toBe(
+        config.name === "online_message" ? "public" : "clinzo"
+      );
       expect(config.enableRLS).toBe(true);
     }
   });
@@ -27,13 +31,14 @@ describe("database model contract", () => {
     expect(config.uniqueConstraints.some((c) => c.nullsNotDistinct)).toBe(true);
   });
   test("protects active appointments and driver/vehicle/booking exclusivity", () => {
-    const activeAppointmentIndex = getTableConfig(schema.appointment).indexes.find(
-      (index) => index.config.name === "appointment_active_uq_1"
-    );
-    expect(activeAppointmentIndex?.config.columns.map((column) => "name" in column ? column.name : null)).toEqual([
-      "patient_id",
-      "window_id",
-    ]);
+    const activeAppointmentIndex = getTableConfig(
+      schema.appointment
+    ).indexes.find((index) => index.config.name === "appointment_active_uq_1");
+    expect(
+      activeAppointmentIndex?.config.columns.map((column) =>
+        "name" in column ? column.name : null
+      )
+    ).toEqual(["patient_id", "window_id"]);
     expect(
       getTableConfig(schema.appointment).indexes.filter(
         (i) => i.config.unique && i.config.where
@@ -64,8 +69,9 @@ describe("database model contract", () => {
       const name = getTableConfig(table).name;
       expect(
         text.includes(`CREATE TABLE "clinzo"."${name}"`) ||
-        text.includes(`CREATE TABLE clinzo.${name}`) ||
-        (name === "online_message" && text.includes("CREATE TABLE public.online_message"))
+          text.includes(`CREATE TABLE clinzo.${name}`) ||
+          (name === "online_message" &&
+            text.includes("CREATE TABLE public.online_message"))
       ).toBe(true);
     }
     expect(text).toContain("CREATE EXTENSION IF NOT EXISTS postgis");

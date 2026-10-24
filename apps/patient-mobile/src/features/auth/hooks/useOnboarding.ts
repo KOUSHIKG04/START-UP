@@ -7,6 +7,7 @@ import {
   useMobileSession,
 } from "../../../services/supabase";
 import { savePatientProfilePhoto } from "../../../services/profile-photo";
+
 export function useOnboarding() {
   const { session } = useMobileSession();
   const saveProfile = async (details: ProfileDetails) => {

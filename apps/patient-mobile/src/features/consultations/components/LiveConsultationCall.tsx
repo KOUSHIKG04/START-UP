@@ -112,6 +112,7 @@ export function LiveConsultationCall({
     />
   );
 }
+
 const styles = StyleSheet.create({
   placeholder: {
     flex: 1,

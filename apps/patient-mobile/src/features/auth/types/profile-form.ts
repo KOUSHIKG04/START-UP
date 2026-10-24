@@ -1,5 +1,6 @@
 import type { ProfileDetails } from "./profile";
 import type { PatientAddress } from "./address";
+
 export type ProfileFormProps = {
   family?: boolean;
   initialEmail?: string;

@@ -1,4 +1,5 @@
 import type { Database as HostedDatabase } from "./supabase.types";
+import type { Json } from "./supabase.types";
 export type { Json } from "./supabase.types";
 
 // PostgreSQL introspection does not report RPC argument nullability. Keep the
@@ -58,6 +59,56 @@ type WireFunctions = {
 export type Database = Omit<HostedDatabase, "public"> & {
   public: Omit<HostedDatabase["public"], "Functions"> & {
     Functions: WireFunctions & {
+      list_appointment_reschedule_options: {
+        Args: { p_appointment_id: string };
+        Returns: Json;
+      };
+      reschedule_appointment: {
+        Args: {
+          p_appointment_id: string;
+          p_expected_version: number;
+          p_target_window_id: string;
+          p_reason: string;
+          p_idempotency_key: string;
+        };
+        Returns: Json;
+      };
+      request_appointment_review: {
+        Args: {
+          p_appointment_id: string;
+          p_expected_version: number;
+          p_reason: string;
+        };
+        Returns: string;
+      };
+      resolve_appointment_attendance: {
+        Args: {
+          p_appointment_id: string;
+          p_expected_version: number;
+          p_outcome: string;
+          p_note: string;
+        };
+        Returns: string;
+      };
+      decide_appointment_recovery: {
+        Args: {
+          p_request_id: string;
+          p_expected_version: number;
+          p_approve: boolean;
+          p_note: string;
+        };
+        Returns: Json;
+      };
+      set_appointment_recovery_policy: {
+        Args: {
+          p_practice_id: string;
+          p_expected_version: number;
+          p_online_grace_minutes: number;
+          p_reschedule_cutoff_minutes: number;
+          p_max_self_reschedules: number;
+        };
+        Returns: Json;
+      };
       // Local migration; replace with hosted introspection after deployment.
       book_portal_walk_in_appointment: {
         Args: {

@@ -6,6 +6,7 @@ import { Pressable } from "react-native";
 import { FadedScrollView } from "@startup/mobile-ui";
 import { Label } from "../../../components/DoctorScreen";
 import { palette } from "../../../components/theme";
+
 export function WorkingDaysPanel({
   selectedDays,
   onToggleDay,

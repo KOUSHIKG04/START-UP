@@ -4,6 +4,7 @@ import type {
   BookingTimeSlot,
   MonthOption,
 } from "../types/booking-calendar";
+
 export type {
   ProfileTab,
   BookingDate,

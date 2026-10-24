@@ -1,5 +1,6 @@
 import type { RecordVitalInput } from "@startup/contracts";
 import type { Meal } from "../types/consultation";
+
 export const vitalUnits: Record<RecordVitalInput["code"], string> = {
   temperature_c: "°C",
   pulse_bpm: "bpm",
@@ -28,6 +29,7 @@ export const consultationSteps = [
   "Follow-up",
   "Sign assessment",
 ];
+
 export const mealRelations = [
   "before",
   "with",

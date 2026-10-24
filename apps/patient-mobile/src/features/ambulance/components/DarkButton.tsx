@@ -4,6 +4,7 @@ import { s } from "./SosEmergency.styles";
 import { AppText as Text } from "@startup/mobile-ui";
 
 import { Pressable } from "react-native";
+
 export function DarkButton({ label, icon, onPress, compact }: DarkButtonProps) {
   return (
     <Pressable

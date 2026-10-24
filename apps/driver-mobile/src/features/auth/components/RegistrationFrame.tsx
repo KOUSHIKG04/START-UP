@@ -11,6 +11,7 @@ import { SafeAreaView } from "@startup/mobile-ui";
 import { StatusBar } from "expo-status-bar";
 import { ArrowLeft } from "lucide-react-native";
 import { s } from "./Registration.styles";
+
 function Header({ title, onBack }: { title: string; onBack?: () => void }) {
   return (
     <View style={s.header}>

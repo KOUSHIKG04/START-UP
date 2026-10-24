@@ -1,4 +1,5 @@
 "use client";
+
 import { useAcceptPendingAppointment } from "../hooks/useAcceptPendingAppointment";
 
 import type { AcceptPendingAppointmentButtonProps } from "../types/acceptPendingAppointmentButton";

@@ -1,4 +1,5 @@
 "use client";
+
 import type { LiveFacilityUpdatesProps } from "../types/liveFacilityUpdates";
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -6,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { subscribeAppChanges, type AppLiveChange } from "@startup/data-access";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { toast } from "@startup/web-ui/components/ui/toast";
+
 export function useLiveFacilityUpdates({
   facilityIds,
 }: LiveFacilityUpdatesProps) {

@@ -1,18 +1,22 @@
 import type { Schedule } from "../../../types/doctor";
 import { scheduleBlocksError } from "@startup/contracts";
+
 export function minutes(value: string): number {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return NaN;
   const [hour, minute] = value.split(":").map(Number);
   return hour * 60 + minute;
 }
 /** 24:00 is only a valid exclusive end boundary, never a slot start. */
+
 export function endMinutes(value: string): number {
   return value === "24:00" ? 24 * 60 : minutes(value);
 }
+
 export function formatTime(value: number) {
   const hour = Math.floor(value / 60);
   return `${String(hour % 12 || 12).padStart(2, "0")}:${String(value % 60).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
 }
+
 export function scheduleError(
   schedule: Schedule,
   mode: "clinic" | "online" | "home" = "clinic"
@@ -86,6 +90,7 @@ export function scheduleError(
   )
     return "Enter a positive home-visit travel radius in km.";
 }
+
 export function previewSlots(schedule: Schedule): string[] {
   return previewTimeBlock(schedule.start, schedule.end, schedule.duration);
 }

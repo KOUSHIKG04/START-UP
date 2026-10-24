@@ -10,6 +10,7 @@ import {
 import { useToastFeedback, useToast } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import type { ProfileScreenProps } from "../types/profile";
+
 export function usePatientProfile({ onBackPress }: ProfileScreenProps) {
   const { showToast } = useToast();
   const { profile } = useMobileSession();

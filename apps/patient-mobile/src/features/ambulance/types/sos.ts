@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+
 export type SosEmergencyScreenProps = {
   onCancel: () => void;
   onCallEmergency: () => void;

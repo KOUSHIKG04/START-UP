@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { uuidSchema } from "./validation";
+import { appointmentRecoverySchema } from "./appointment-recovery";
 
 export const clinicBookingSchema = z
   .object({
@@ -32,6 +33,7 @@ export const portalWalkInBookingSchema = z
     idempotencyKey: uuidSchema,
   })
   .strict();
+
 export type PortalWalkInBookingInput = z.infer<
   typeof portalWalkInBookingSchema
 >;
@@ -53,6 +55,7 @@ export const publishDoctorServiceSessionSchema =
   publishClinicSessionSchema.extend({
     mode: z.enum(["clinic", "online", "home"]),
   });
+
 export type PublishDoctorServiceSessionInput = z.infer<
   typeof publishDoctorServiceSessionSchema
 >;
@@ -66,6 +69,7 @@ export const publishSelectedDoctorSlotsSchema = publishClinicSessionSchema
       .min(1)
       .max(100),
   });
+
 export type PublishSelectedDoctorSlotsInput = z.infer<
   typeof publishSelectedDoctorSlotsSchema
 >;
@@ -146,6 +150,7 @@ export const portalClinicDaySchema = z.object({
     })
   ),
 });
+
 export type PortalClinicDay = z.infer<typeof portalClinicDaySchema>;
 
 export const clinicPracticeSchema = z.object({
@@ -212,6 +217,7 @@ export const revokeClinicUnavailabilitySchema = z
   .strict();
 
 export const clinicAppointmentSchema = z.object({
+  recovery: appointmentRecoverySchema.optional(),
   id: uuidSchema,
   practice_id: uuidSchema.nullish(),
   practice_service_id: uuidSchema.nullish(),
@@ -272,21 +278,31 @@ export const clinicAppointmentSchema = z.object({
 });
 
 export type ClinicBookingInput = z.infer<typeof clinicBookingSchema>;
+
 export type PublishClinicSessionInput = z.infer<
   typeof publishClinicSessionSchema
 >;
+
 export type ClinicTransitionInput = z.infer<typeof clinicTransitionSchema>;
+
 export type ClinicAppointment = z.infer<typeof clinicAppointmentSchema>;
+
 export type ClinicPractice = z.infer<typeof clinicPracticeSchema>;
+
 export type ClinicSession = z.infer<typeof clinicSessionSchema>;
+
 export type ClinicSlot = z.infer<typeof clinicSlotSchema>;
+
 export type SetClinicAutoConfirmLimitInput = z.infer<
   typeof setClinicAutoConfirmLimitSchema
 >;
+
 export type ClinicUnavailability = z.infer<typeof clinicUnavailabilitySchema>;
+
 export type AddClinicUnavailabilityInput = z.infer<
   typeof addClinicUnavailabilitySchema
 >;
+
 export type RevokeClinicUnavailabilityInput = z.infer<
   typeof revokeClinicUnavailabilitySchema
 >;

@@ -1,7 +1,11 @@
 import type { AppointmentDetailProps } from "../types/upcoming-appointment-card";
+
 export type { AppointmentDetailProps } from "../types/upcoming-appointment-card";
+
 import type { UpcomingAppointmentCardProps } from "../types/upcoming-appointment";
+
 export type { UpcomingAppointmentCardProps } from "../types/upcoming-appointment";
+
 import { AppText as Text } from "@startup/mobile-ui";
 
 import { StyleSheet, View } from "react-native";

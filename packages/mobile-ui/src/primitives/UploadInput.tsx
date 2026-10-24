@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Upload } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { UploadInputProps } from "../types/uploadInput";
+
 export type { UploadInputProps } from "../types/uploadInput";
 
 export function UploadInput({

@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@startup/design-tokens";
 import type { FadedScrollViewProps } from "../types/fadedScrollView";
+
 export type { FadedScrollViewProps } from "../types/fadedScrollView";
 
 export const DEFAULT_FADED_EDGE_COLOR = colors.ui.fade;

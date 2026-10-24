@@ -13,6 +13,7 @@ import {
 import { palette, ui } from "../../../components/theme";
 import { useDriverTrip } from "../hooks/useDriverTrip";
 import { tripStageLabels, tripNextActions } from "../utils/tripConstants";
+
 export function TripScreen() {
   const {
     showToast,

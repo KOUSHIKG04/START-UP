@@ -4,6 +4,7 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { parseDisplayDate, driverAddressSchema } from "@startup/contracts";
 import type { DriverProfile } from "../types/registration";
+
 export function useRegistrationDetails({
   initialProfile,
   profile,

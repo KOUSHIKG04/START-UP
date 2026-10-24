@@ -1,6 +1,7 @@
 import { SEARCH_DIRECTORY } from "./homeSearchConstants";
 import type { SearchItem } from "../types/home";
 import type { Href } from "expo-router";
+
 export function filterSearchDirectory(query: string): SearchItem[] {
   const trimmed = query.trim().toLowerCase();
   if (!trimmed) return [];

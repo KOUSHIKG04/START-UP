@@ -106,6 +106,10 @@ export const appointment = clinzo
         { onDelete: "restrict" }
       ),
       decision_reason: text("decision_reason"),
+      recovery_outcome: text("recovery_outcome", {
+        enum: ["rescheduled", "doctor_unavailable"],
+      }),
+      reschedule_count: integer("reschedule_count").notNull().default(0),
       replaces_appointment_id: uuid("replaces_appointment_id").references(
         (): AnyPgColumn => appointment.id,
         { onDelete: "restrict" }
@@ -122,6 +126,14 @@ export const appointment = clinzo
     },
     (table) => [
       uniqueIndex("appointment_uq_1").on(table.public_code),
+      check(
+        "appointment_recovery_outcome_check",
+        sql`${table.recovery_outcome} in ('rescheduled','doctor_unavailable')`
+      ),
+      check(
+        "appointment_reschedule_count_check",
+        sql`${table.reschedule_count} >= 0`
+      ),
       uniqueIndex("appointment_uq_2").on(table.replaces_appointment_id),
       uniqueIndex("appointment_active_uq_1")
         .on(table.patient_id, table.window_id)
@@ -159,7 +171,7 @@ export const appointment = clinzo
       check(
         "appointment_ck_3",
         sql.raw(
-          "capacity_released_at IS NULL OR (status='cancelled' AND confirmed_at IS NOT NULL)"
+          "capacity_released_at IS NULL OR (status IN ('cancelled','no_show') AND confirmed_at IS NOT NULL)"
         )
       ),
       check(
@@ -198,8 +210,70 @@ export const appointment = clinzo
     ]
   )
   .enableRLS();
+
 export type Appointment = typeof appointment.$inferSelect;
+
 export type NewAppointment = typeof appointment.$inferInsert;
+
+export const appointmentRecoveryRequest = clinzo
+  .table(
+    "appointment_recovery_request",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      appointment_id: uuid("appointment_id")
+        .notNull()
+        .references(() => appointment.id),
+      kind: text("kind", { enum: ["reschedule", "review"] }).notNull(),
+      target_window_id: uuid("target_window_id").references(
+        () => appointmentWindow.id
+      ),
+      reason: text("reason").notNull(),
+      status: text("status", {
+        enum: ["pending", "approved", "rejected", "withdrawn"],
+      })
+        .notNull()
+        .default("pending"),
+      requested_by: uuid("requested_by")
+        .notNull()
+        .references(() => identity.id),
+      decided_by: uuid("decided_by").references(() => identity.id),
+      decision_note: text("decision_note"),
+      replacement_id: uuid("replacement_id").references(() => appointment.id),
+      created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+        .notNull()
+        .defaultNow(),
+      decided_at: timestamp("decided_at", { withTimezone: true, mode: "date" }),
+      row_version: bigint("row_version", { mode: "bigint" })
+        .notNull()
+        .default(sql`1`),
+    },
+    (table) => [
+      uniqueIndex("appointment_recovery_request_pending_uq")
+        .on(table.appointment_id)
+        .where(sql`${table.status}='pending'`),
+      index("appointment_recovery_request_appointment_idx").on(
+        table.appointment_id,
+        table.created_at.desc()
+      ),
+      check(
+        "appointment_recovery_request_kind_check",
+        sql`${table.kind} in ('reschedule','review')`
+      ),
+      check(
+        "appointment_recovery_request_reason_check",
+        sql`length(btrim(${table.reason})) between 2 and 1000`
+      ),
+      check(
+        "appointment_recovery_request_status_check",
+        sql`${table.status} in ('pending','approved','rejected','withdrawn')`
+      ),
+      check(
+        "appointment_recovery_request_check",
+        sql`(${table.kind}='reschedule')=(${table.target_window_id} is not null)`
+      ),
+    ]
+  )
+  .enableRLS();
 
 export const checkinToken = clinzo
   .table(
@@ -239,7 +313,9 @@ export const checkinToken = clinzo
     ]
   )
   .enableRLS();
+
 export type CheckinToken = typeof checkinToken.$inferSelect;
+
 export type NewCheckinToken = typeof checkinToken.$inferInsert;
 
 export const appointmentCheckin = clinzo
@@ -284,5 +360,7 @@ export const appointmentCheckin = clinzo
     ]
   )
   .enableRLS();
+
 export type AppointmentCheckin = typeof appointmentCheckin.$inferSelect;
+
 export type NewAppointmentCheckin = typeof appointmentCheckin.$inferInsert;

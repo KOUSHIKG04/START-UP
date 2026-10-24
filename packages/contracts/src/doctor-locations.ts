@@ -2,6 +2,7 @@ export {
   savedPatientLocationInputSchema as savedDoctorLocationInputSchema,
   savedPatientLocationSchema as savedDoctorLocationSchema,
 } from "./patient-locations";
+
 export type {
   SavedPatientLocationInput as SavedDoctorLocationInput,
   SavedPatientLocation as SavedDoctorLocation,
@@ -24,6 +25,7 @@ export const doctorPersonalAddressInputSchema =
         "Complete your personal address, locality, city, state and pincode.",
     }
   );
+
 export type DoctorPersonalAddressInput = z.infer<
   typeof doctorPersonalAddressInputSchema
 >;

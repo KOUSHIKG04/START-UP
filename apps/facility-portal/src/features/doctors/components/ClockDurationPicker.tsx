@@ -1,4 +1,5 @@
 "use client";
+
 import type { ClockDurationPickerProps } from "../types/clockDurationPicker";
 
 import { useState } from "react";
@@ -12,7 +13,9 @@ import {
 } from "@startup/web-ui/components/ui/dialog";
 
 const size = 260;
+
 const center = size / 2;
+
 const radius = center - 32;
 
 export function ClockDurationPicker({

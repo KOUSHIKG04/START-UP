@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SosEmergencyScreenProps } from "../types/sos";
+
 export function useSosEmergency({
   onCancel,
   onCallEmergency,

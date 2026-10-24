@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 function load(file, mocks) {
@@ -215,6 +220,18 @@ test("card actions are separate from the summary press and overflow never opens 
 });
 
 function bookingsView(rows, { cancelPending = false } = {}) {
+  const z = require("../../../packages/contracts/node_modules/zod").z;
+  const recovery = load(
+    "../../../packages/contracts/src/appointment-recovery.ts",
+    { zod: { z }, "./validation": { uuidSchema: z.string().uuid() } }
+  );
+  rows = rows.map((item) =>
+    Object.assign(item, {
+      starts_at: item.starts_at ?? new Date(Date.now() + 600000).toISOString(),
+      ends_at: item.ends_at ?? new Date(Date.now() + 1500000).toISOString(),
+      timezone: item.timezone ?? "Asia/Kolkata",
+    })
+  );
   let menuId = null;
   const cancelled = [],
     routes = [];
@@ -222,6 +239,10 @@ function bookingsView(rows, { cancelPending = false } = {}) {
   const { AppointmentsScreen } = load(
     "../src/features/appointments/screens/AppointmentsScreen.tsx",
     {
+      "@startup/contracts": recovery,
+      "../components/AppointmentRecoveryActions": {
+        AppointmentRecoveryActions: "RecoveryActions",
+      },
       "react/jsx-runtime": { jsx, jsxs: jsx },
       react: {
         useState: () => [
@@ -355,7 +376,11 @@ test("each booking opens its visit page while cancellation stays in its menu", (
     ["Join consultation"]
   );
   assert.equal(cards[2].props.onMorePress, undefined);
-  assert.equal(cards[3].props.footer, undefined);
+  assert.ok(
+    nodesOf(cards[3].props.footer).some(
+      (node) => node.type === "RecoveryActions"
+    )
+  );
   assert.equal(actions(cards[4])[0].props.label, "Rate doctor");
   const thankYou = nodesOf(cards[4].props.footer).find(
     (node) => node.type === "Text" && node.props.children === "Thank you"

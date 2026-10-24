@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 import { spawn, spawnSync } from "node:child_process";
 
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
+
 const require = createRequire(import.meta.url);
+
 const [mode, ...args] = process.argv.slice(2);
 
 function androidBridge() {

@@ -7,6 +7,7 @@ import { colors, typography } from "@startup/design-tokens";
 import { appBackgrounds, type HeaderApp } from "../utils/headerBackground";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import type { HeaderProps } from "../types/header";
+
 export type { HeaderProps } from "../types/header";
 
 export type { HeaderApp } from "../utils/headerBackground";

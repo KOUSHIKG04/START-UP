@@ -1,4 +1,5 @@
 "use client";
+
 import { useFacilityLocationMap } from "../hooks/useFacilityLocationMap";
 
 import type { FacilityLocationMapProps } from "../types/facilityLocationMap";

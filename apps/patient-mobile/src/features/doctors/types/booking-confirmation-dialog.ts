@@ -1,4 +1,5 @@
 import type { useDoctorBooking } from "../hooks/useDoctorBooking";
+
 export type Props = Pick<
   ReturnType<typeof useDoctorBooking>,
   | "confirmation"

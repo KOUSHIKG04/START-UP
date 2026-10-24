@@ -1,7 +1,9 @@
 "use client";
+
 import { useEffect } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import { useDoctorDirectory } from "./useDoctorDirectory";
+
 export function useDoctorManagement() {
   const {
     searchTerm,

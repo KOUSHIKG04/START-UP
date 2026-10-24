@@ -17,6 +17,7 @@ import { supabase } from "../../../services/supabase";
 import { useToast } from "@startup/mobile-ui";
 import { useLocationDraft } from "../stores/locationDraft";
 import { resolvePatientAddress } from "../services/resolveAddress";
+
 export function useMapPicker() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();

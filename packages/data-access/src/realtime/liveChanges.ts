@@ -12,20 +12,26 @@ export type AppChangeKind =
   | "directory"
   | "profile"
   | "clinical";
+
 export type AppLiveChange = { kind: AppChangeKind; topic: string };
+
 type Listener = {
   onChange: (change: AppLiveChange) => void;
   onConnected?: (topic: string) => void;
   onError?: () => void;
 };
+
 type Entry = {
   listeners: Set<Listener>;
   channel?: RealtimeChannel;
   connected: boolean;
   warned: boolean;
 };
+
 const clients = new WeakMap<AppSupabaseClient, Map<string, Entry>>();
+
 const closing = new WeakMap<AppSupabaseClient, Map<string, Promise<void>>>();
+
 const kinds = new Set<AppChangeKind>([
   "appointments",
   "notifications",

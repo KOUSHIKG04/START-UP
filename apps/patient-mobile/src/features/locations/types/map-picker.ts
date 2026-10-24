@@ -1,4 +1,5 @@
 import type { Point } from "./location";
+
 export type { Point } from "./location";
 
 export type PlaceDetails = {

@@ -6,6 +6,7 @@ import { View } from "react-native";
 import { Clock3, CreditCard } from "lucide-react-native";
 import { colors, radius } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
+
 export function PaymentOptions() {
   const [payment, setPayment] = useState<"now" | "later">("later");
 

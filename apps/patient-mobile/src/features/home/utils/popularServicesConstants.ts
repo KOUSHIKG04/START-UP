@@ -1,5 +1,6 @@
 import type { PopularService } from "../types/home";
 import { Accessibility, Heart, Hospital, Pill } from "lucide-react-native";
+
 export const defaultServices: readonly PopularService[] = [
   {
     key: "hospital",

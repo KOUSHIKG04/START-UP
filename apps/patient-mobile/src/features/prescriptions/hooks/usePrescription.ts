@@ -8,6 +8,7 @@ import type { ClinicalRecord } from "@startup/contracts";
 import { useToastFeedback } from "@startup/mobile-ui";
 import type { PrescriptionScreenProps } from "../types/prescription";
 import { supabase } from "../../../services/supabase";
+
 export function usePrescription({
   appointment,
   appointmentId,

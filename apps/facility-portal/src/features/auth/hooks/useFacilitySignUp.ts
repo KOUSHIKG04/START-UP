@@ -1,6 +1,8 @@
 "use client";
+
 import { useState, type FormEvent } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+
 export function useFacilitySignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -2,6 +2,7 @@ import type {
   loadPortalWalkInPractices,
   loadPortalWalkInSlots,
 } from "../server/actions";
+
 export type Practice = Awaited<
   ReturnType<typeof loadPortalWalkInPractices>
 >[number];

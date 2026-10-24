@@ -21,6 +21,7 @@ import {
   COLLAPSE_DISTANCE,
   getHeaderAnimationStyles,
 } from "../../../utils/headerConstants";
+
 export function useHomeScreen({ onNotificationPress }: HomeScreenProps = {}) {
   useEffect(() => {
     router.prefetch("/select-location");

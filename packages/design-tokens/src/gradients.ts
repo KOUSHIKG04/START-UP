@@ -24,5 +24,7 @@ export const gradients = {
 } as const;
 
 export const patientBannerGradient = gradients.patientBanner;
+
 export const adminBannerGradient = gradients.adminBanner;
+
 export const sosHeaderGradient = gradients.sosHeader;

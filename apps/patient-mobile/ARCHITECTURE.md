@@ -240,3 +240,44 @@ blocks and may exceed the number of physical times that fit in a shorter day.
 Existing appointments retain their IDs, times and queue sessions. This integration
 is deployed in `20261022071502_multi_block_service_schedules.sql` (2026-10-22);
 rollback tests confirm the patient-visible clinic times match split availability.
+
+## Appointment attendance and recovery
+
+`features/appointments` owns recovery actions in My Bookings and appointment
+details, the `AppointmentRecovery` adapter, and `hooks/useAppointmentRecovery.ts`.
+The hook composes validated `@startup/data-access` clinic operations and retains
+the appointment/slot cache invalidations and one idempotency key per dialog.
+`@startup/contracts` owns `appointmentRecoveryView`; `@startup/mobile-ui` owns the
+presentation-only `AppointmentRecoveryDialog`. Existing routes, patient selection
+and consultation owners remain the integration points.
+
+The shared view distinguishes expired requests, time passed, checked-in patients
+waiting for the doctor, patient no-show, doctor unavailability and replacements.
+The list and detail clocks update every 30 seconds without writing attendance.
+Clinic review follows the session end; other visits use the booked end plus the
+configured grace. Confirmed online visits cannot first join after that deadline;
+an active consultation can still be rejoined. Time passing never completes a visit.
+Checked-in patients retain visible queue access until staff resolve attendance.
+
+Rescheduling lists future times for the same practice, service and visit mode.
+Eligible early changes commit directly; late confirmed changes and patient
+no-shows request staff review. Requested times are not held until approval.
+Doctor-unavailable recovery does not consume the patient's move allowance.
+Replacement links retain the original booking history; a new clinic queue entry
+starts awaiting arrival, without copying check-in or QR state. Verified patient
+access, including existing family/delegate access, is enforced in the backend;
+UI eligibility does not grant access.
+
+Recovery requests/decisions update the appointment version and explicitly invoke
+the existing `emit_appointment_change` private emitter. The existing live-update
+bridge refreshes `patient-clinic-appointments`; no recovery-table subscription is
+added. Failed mutations refresh the booking before retry. Operational defaults are
+15 minutes of grace, a zero-minute cutoff and one patient move per replacement
+chain; authorized Doctor/Facility schedule editors can change them.
+
+This is local source implementation in
+`20261023075921_appointment_recovery_and_rescheduling.sql`; rollback-only backend
+workflow checks passed, while shared-database deployment awaits explicit approval. Native recovery dialogs, keyboard behavior,
+queue navigation and cross-device updates have not been verified on a device.
+Consultation payment carry-over, credits and refunds require the separate
+[payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).

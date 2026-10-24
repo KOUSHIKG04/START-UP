@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useToast } from "@startup/mobile-ui";
 import { signOutWithPushCleanup } from "../../notifications/services/deviceNotifications";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
+
 export function useDoctorSettings() {
   const [logout, setLogout] = useState(false);
   const [signingOut, setSigningOut] = useState(false);

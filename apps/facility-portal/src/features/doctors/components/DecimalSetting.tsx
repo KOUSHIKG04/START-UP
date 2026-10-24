@@ -1,7 +1,9 @@
 "use client";
+
 import type { DecimalSettingProps } from "../types/decimalSetting";
 import { useState } from "react";
 import { Input } from "@startup/web-ui/components/ui/input";
+
 export function DecimalSetting({
   id,
   label,

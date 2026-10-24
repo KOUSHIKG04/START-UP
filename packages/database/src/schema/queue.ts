@@ -63,7 +63,9 @@ export const sessionQueue = clinzo
     ]
   )
   .enableRLS();
+
 export type SessionQueue = typeof sessionQueue.$inferSelect;
+
 export type NewSessionQueue = typeof sessionQueue.$inferInsert;
 
 export const queueEntry = clinzo
@@ -133,5 +135,7 @@ export const queueEntry = clinzo
     ]
   )
   .enableRLS();
+
 export type QueueEntry = typeof queueEntry.$inferSelect;
+
 export type NewQueueEntry = typeof queueEntry.$inferInsert;

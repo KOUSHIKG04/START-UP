@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
+
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white, overflow: "hidden" },
   topCrop: {

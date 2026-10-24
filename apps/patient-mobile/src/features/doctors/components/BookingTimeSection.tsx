@@ -1,5 +1,7 @@
 import type { Props } from "../types/booking-time-section";
+
 export type { Props } from "../types/booking-time-section";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { TimeSlot } from "@startup/mobile-ui";

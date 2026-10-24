@@ -5,7 +5,9 @@ import { type ViewStyle } from "react-native";
 import type { AmbulanceType } from "../utils/ambulanceConstants";
 
 import type { AmbulanceHospital } from "@startup/contracts";
+
 export type HospitalItem = AmbulanceHospital;
+
 import type { GoogleHospital, PublicHospital } from "@startup/contracts";
 
 export type AmbulanceBookingFormProps = {

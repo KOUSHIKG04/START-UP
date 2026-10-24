@@ -40,6 +40,7 @@ export default function ReviewStatus() {
     </OnboardingShell>
   );
 }
+
 const styles = StyleSheet.create({
   body: { flex: 1, alignItems: "center", paddingTop: 75, paddingBottom: 30 },
   image: { width: "100%", height: 240, maxWidth: 361 },

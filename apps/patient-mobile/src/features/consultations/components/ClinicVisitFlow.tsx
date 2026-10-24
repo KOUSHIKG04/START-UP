@@ -1,5 +1,7 @@
 import type { ClinicVisitFlowProps } from "../types/visit-session";
+
 export type { ClinicVisitFlowProps } from "../types/visit-session";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";

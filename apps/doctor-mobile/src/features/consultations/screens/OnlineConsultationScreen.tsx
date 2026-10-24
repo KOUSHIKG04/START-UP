@@ -10,6 +10,7 @@ import { registerGlobals } from "@livekit/react-native";
 import { useOnlineVisit } from "../hooks/useOnlineVisit";
 
 registerGlobals();
+
 export function OnlineConsultationScreen({
   initialChat = false,
 }: OnlineConsultationScreenProps = {}) {

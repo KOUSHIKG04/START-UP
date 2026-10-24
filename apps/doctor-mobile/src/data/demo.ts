@@ -7,6 +7,7 @@ import type {
 
 // Fixtures reproduce the supplied designs. Never use these values as clinical guidance.
 export const demoDate = "2026-08-05";
+
 export const patients: Patient[] = [
   {
     id: "CLZ-0001",
@@ -46,6 +47,7 @@ export const patients: Patient[] = [
     pin: "3456",
   },
 ];
+
 export const appointments: Appointment[] = [
   {
     id: "clinic-meera",
@@ -84,6 +86,7 @@ export const appointments: Appointment[] = [
     status: "completed",
   },
 ];
+
 export function createConsultation(patientId: string): Consultation {
   return {
     notes:
@@ -114,6 +117,7 @@ export function createConsultation(patientId: string): Consultation {
     completed: false,
   };
 }
+
 export const initialSchedule: Schedule = {
   days: [0, 1, 2, 3],
   start: "09:00",
@@ -131,6 +135,7 @@ export const initialSchedule: Schedule = {
   clinicFee: "700",
   homeFee: "1500",
 };
+
 export const modeLabels = {
   clinic: "Clinic",
   online: "Online",

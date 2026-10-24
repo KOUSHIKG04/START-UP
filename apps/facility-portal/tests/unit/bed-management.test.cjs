@@ -1,9 +1,11 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict"),
   fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript"),
   path = require("node:path");
+
 const defer = () => {
   let resolve, reject;
   const promise = new Promise((yes, no) => {
@@ -12,6 +14,7 @@ const defer = () => {
   });
   return { promise, resolve, reject };
 };
+
 const row = (id, occupied = 3, version = "1") => ({
   facilityId: "facility",
   bedTypeId: id,
@@ -24,6 +27,7 @@ const row = (id, occupied = 3, version = "1") => ({
   rowVersion: version,
   configured: true,
 });
+
 function fixture() {
   let index = 0;
   const slots = [],
@@ -110,6 +114,7 @@ function fixture() {
     },
   };
 }
+
 test("bed rows save independently and duplicate saves for one row are blocked", async () => {
   const f = fixture(),
     api = f.render();
@@ -132,6 +137,7 @@ test("bed rows save independently and duplicate saves for one row are blocked", 
   assert.equal(result.totalOccupied, 6);
   assert.equal(result.pendingIds.size, 0);
 });
+
 test("a failed bed save keeps confirmed counts and releases only its own row", async () => {
   const f = fixture(),
     api = f.render(),
@@ -142,6 +148,7 @@ test("a failed bed save keeps confirmed counts and releases only its own row", a
   assert.equal(f.render().pendingIds.size, 0);
   assert.equal(f.messages[0].type, "error");
 });
+
 test("conflicting versions reload real counts before a retry", async () => {
   const f = fixture(),
     save = f.render().handleSetCount("a", "occupied", 5);
@@ -155,6 +162,7 @@ test("conflicting versions reload real counts before a retry", async () => {
   f.requests[1].resolve(row("a", 2, "9"));
   await retry;
 });
+
 test("older action responses cannot replace newer inventory props", async () => {
   const f = fixture(),
     save = f.render().handleSetCount("a", "occupied", 5);

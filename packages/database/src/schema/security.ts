@@ -89,7 +89,9 @@ export const auditLog = clinzo
     ]
   )
   .enableRLS();
+
 export type AuditLog = typeof auditLog.$inferSelect;
+
 export type NewAuditLog = typeof auditLog.$inferInsert;
 
 export const clinicalAccessGrant = clinzo
@@ -135,5 +137,7 @@ export const clinicalAccessGrant = clinzo
     ]
   )
   .enableRLS();
+
 export type ClinicalAccessGrant = typeof clinicalAccessGrant.$inferSelect;
+
 export type NewClinicalAccessGrant = typeof clinicalAccessGrant.$inferInsert;

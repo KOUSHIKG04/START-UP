@@ -1,7 +1,9 @@
 "use client";
+
 import type { ScheduleSectionProps } from "../types/scheduleSection";
 
 import { card } from "../utils/facilityScheduleEditorConstants";
+
 export function ScheduleSection({ title, children }: ScheduleSectionProps) {
   return (
     <section className="space-y-2">

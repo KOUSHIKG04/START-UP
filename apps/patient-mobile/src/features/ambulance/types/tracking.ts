@@ -2,6 +2,7 @@ import type { ActiveAmbulanceTracking } from "@startup/contracts";
 
 import type { TrackingStage } from "./ambulance";
 import type { MyAmbulanceBooking } from "@startup/contracts";
+
 export type TrackingProps = {
   stage: TrackingStage;
   emergency: boolean;

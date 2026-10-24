@@ -35,6 +35,7 @@ export function practiceSlotIso(
     throw new Error("This local time does not exist in the practice timezone.");
   return new Date(actual).toISOString();
 }
+
 export function previewClocks(
   start: string,
   end: string,

@@ -30,6 +30,8 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "prettier --write .",
+    "spacing:check": "node scripts/declaration-spacing.mjs --check",
+    "spacing:fix": "node scripts/declaration-spacing.mjs --write",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "test:e2e": "pnpm --filter facility-portal exec playwright test",

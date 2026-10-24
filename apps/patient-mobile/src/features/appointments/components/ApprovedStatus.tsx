@@ -4,6 +4,7 @@ import { styles } from "./BookingStatus.styles";
 import { CheckCircle2 } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
 import { Button } from "@startup/mobile-ui";
+
 export function ApprovedStatus({
   label,
   style,

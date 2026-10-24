@@ -1,4 +1,5 @@
 "use client";
+
 import { useDoctorManagement } from "../hooks/useDoctorManagement";
 
 import type { DoctorManagementScreenProps } from "../types/doctorManagementScreen";

@@ -1,5 +1,7 @@
 import type { DriverMapLocation } from "../types/location-draft";
+
 export type { DriverMapLocation } from "../types/location-draft";
+
 import { create } from "zustand";
 
 // Map selection is a draft. Existing onboarding APIs persist it on Save Profile.

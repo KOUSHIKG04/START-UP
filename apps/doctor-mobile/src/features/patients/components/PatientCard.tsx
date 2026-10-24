@@ -1,4 +1,5 @@
 import type { PatientCardProps } from "../types/patient-card";
+import { appointmentRecoveryView } from "@startup/contracts";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight, User } from "lucide-react-native";
 import { Button } from "@startup/mobile-ui";
@@ -8,6 +9,7 @@ import { Heading, Label } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 
 export function PatientCard({
+  now,
   appointment,
   home = false,
   onOpen,
@@ -15,6 +17,7 @@ export function PatientCard({
   actionLabel,
 }: PatientCardProps) {
   const completed = appointment.status === "completed";
+  const recovery = appointmentRecoveryView(appointment, now);
   const expiredRequest =
     appointment.status === "pending" &&
     Date.parse(appointment.request_expires_at ?? appointment.starts_at) <=
@@ -33,7 +36,7 @@ export function PatientCard({
     <View style={styles.card}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${appointment.patient_name}, ${consultationLabel}, ${appointment.status.replaceAll("_", " ")}. Open appointment`}
+        accessibilityLabel={`${appointment.patient_name}, ${consultationLabel}, ${recovery.staffStatus}. Open appointment`}
         onPress={onOpen}
         style={({ pressed }) => [ui.row, pressed && { opacity: 0.88 }]}
       >
@@ -61,15 +64,15 @@ export function PatientCard({
                 ? "REQUEST EXPIRED"
                 : completed
                   ? "COMPLETED"
-                  : (appointment.visit_mode === "clinic"
-                      ? (appointment.queue_state ?? appointment.status)
-                      : appointment.status
-                    )
-                      .replaceAll("_", " ")
-                      .toUpperCase()
-              : appointment.visit_mode === "online"
-                ? "ONLINE"
-                : "CLINIC VISIT"}
+                  : recovery.staffStatus.toUpperCase()
+              : recovery.needsReview ||
+                  recovery.bookAgain ||
+                  appointment.recovery?.outcome ||
+                  appointment.status === "in_consultation"
+                ? recovery.staffStatus
+                : appointment.visit_mode === "online"
+                  ? "ONLINE"
+                  : "CLINIC VISIT"}
           </Label>
         </View>
         {!home ? (

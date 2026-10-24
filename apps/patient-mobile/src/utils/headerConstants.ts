@@ -1,10 +1,15 @@
 import { Animated } from "react-native";
 
 export const EXPANDED_HEADER_HEIGHT = 165;
+
 export const COLLAPSED_HEADER_HEIGHT = 88;
+
 export const SEARCH_HEIGHT = 48;
+
 export const SEARCH_OVERLAP = 22;
+
 export const COLLAPSE_DISTANCE = 64;
+
 export const CONTENT_TOP =
   EXPANDED_HEADER_HEIGHT - SEARCH_OVERLAP + SEARCH_HEIGHT + 18;
 

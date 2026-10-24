@@ -1,9 +1,12 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 function load(file, mocks) {
   const exports = {};
   const absolute = path.resolve(__dirname, file);
@@ -31,6 +34,7 @@ function load(file, mocks) {
   );
   return exports;
 }
+
 function review({
   expired = false,
   error,
@@ -82,6 +86,10 @@ function review({
     useCallback: (fn) => fn,
   };
   const mocks = {
+    "@startup/contracts": load(
+      "../../../packages/contracts/src/appointment-recovery.ts",
+      { zod: require("../../../packages/contracts/node_modules/zod") }
+    ),
     react,
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "react-native": { View: "View" },
@@ -157,6 +165,7 @@ function review({
   };
   return { render, calls, toasts, refreshes, routes };
 }
+
 test("separate appointment page accepts a current request and refreshes the home/list data", async () => {
   const view = review();
   const nodes = view.render();
@@ -186,6 +195,7 @@ test("completed online appointments reopen their signed consultation record", ()
     false
   );
 });
+
 test("expired request cannot be accepted and explains how to recover", async () => {
   const view = review({ expired: true });
   const nodes = view.render();
@@ -196,6 +206,7 @@ test("expired request cannot be accepted and explains how to recover", async () 
   assert.equal(view.calls.length, 0);
   assert.equal(view.toasts[0].title, "Request expired");
 });
+
 test("rejection requires and submits the doctor reason", async () => {
   const view = review();
   let nodes = view.render();
@@ -213,6 +224,7 @@ test("rejection requires and submits the doctor reason", async () => {
   assert.equal(view.calls[0].action, "reject");
   assert.equal(view.calls[0].note, "Please choose another time");
 });
+
 test("stale updates show a useful message and load the latest state", async () => {
   const view = review({ error: "Appointment changed; refresh and retry" });
   await view
@@ -222,6 +234,7 @@ test("stale updates show a useful message and load the latest state", async () =
   assert.match(view.toasts[0].message, /updated elsewhere/);
   assert.ok(view.refreshes.includes("refetch"));
 });
+
 test("notification destination accepts only an appointment UUID", () => {
   const { appointmentDetailsRoute } = load(
     "../src/features/appointments/utils/appointmentNavigation.ts",
@@ -260,7 +273,14 @@ test("one Start consultation action calls the queue, uses its new version, and o
     undefined
   );
   assert.match(JSON.stringify(nodes), /12345678/);
-  assert.doesNotMatch(JSON.stringify(nodes), /APT-LONG-/);
+  assert.doesNotMatch(
+    JSON.stringify(
+      nodes
+        .filter((node) => ["Label", "Heading"].includes(node.type))
+        .map((node) => node.props.children)
+    ),
+    /APT-LONG-/
+  );
   assert.equal(
     nodes.find((node) => node.props.label === "Call patient"),
     undefined

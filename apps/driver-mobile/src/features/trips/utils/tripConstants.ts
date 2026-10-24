@@ -2,6 +2,7 @@ import type {
   MyDriverTrip,
   TransitionDriverTripInput,
 } from "@startup/contracts";
+
 export const tripStageLabels: Record<
   Exclude<MyDriverTrip["status"], "cancelled">,
   string

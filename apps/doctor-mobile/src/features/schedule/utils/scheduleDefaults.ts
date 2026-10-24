@@ -1,4 +1,5 @@
 import type { Schedule } from "../../../types/doctor";
+
 export function initialSchedule(mode: "clinic" | "online" | "home"): Schedule {
   return {
     days: [],

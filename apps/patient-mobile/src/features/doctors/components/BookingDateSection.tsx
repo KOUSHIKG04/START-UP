@@ -1,5 +1,7 @@
 import type { Props } from "../types/booking-date-section";
+
 export type { Props } from "../types/booking-date-section";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { Button, Chip, FadedScrollView } from "@startup/mobile-ui";

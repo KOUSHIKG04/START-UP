@@ -1,4 +1,5 @@
 import { type AmbulanceFlowStep } from "./ambulanceConstants";
+
 export function getHeaderTitle(step: AmbulanceFlowStep) {
   if (step === "pickup") return "Set pickup on map";
   if (

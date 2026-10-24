@@ -9,10 +9,13 @@ import {
 } from "../../../components/DoctorScreen";
 import { ui } from "../../../components/theme";
 import { useAppointmentReview } from "../hooks/useAppointmentReview";
+import { appointmentRecoveryView } from "@startup/contracts";
+import { AppointmentRecoveryPanel } from "../components/AppointmentRecoveryPanel";
 
 export function AppointmentDetailScreen() {
   const {
     appointmentId,
+    now,
     notes,
     setNotes,
     appointments,
@@ -68,7 +71,7 @@ export function AppointmentDetailScreen() {
             </Label>
             <Label muted>
               Booking {item.public_code.slice(-8)} ·{" "}
-              {item.status.replaceAll("_", " ")}
+              {appointmentRecoveryView(item, now).staffStatus}
             </Label>
             {item.visit_mode === "clinic" && item.queue_state ? (
               <Label muted>
@@ -122,6 +125,7 @@ export function AppointmentDetailScreen() {
             ) : null}
             {item.visit_mode === "online" &&
             ["confirmed", "in_consultation"].includes(item.status) &&
+            appointmentRecoveryView(item, now).canJoin &&
             item.can_consult ? (
               <View style={ui.row}>
                 <Button
@@ -229,7 +233,7 @@ export function AppointmentDetailScreen() {
             item.can_consult ? (
               <Button
                 theme="doctor"
-                label="Continue consultation"
+                label="Finish consultation"
                 onPress={() =>
                   router.push({
                     pathname: "/clinical-notes",
@@ -247,7 +251,7 @@ export function AppointmentDetailScreen() {
             item.can_consult ? (
               <Button
                 theme="doctor"
-                label="Continue consultation"
+                label="Finish consultation"
                 onPress={() =>
                   router.push({
                     pathname: "/clinical-notes",
@@ -277,6 +281,7 @@ export function AppointmentDetailScreen() {
               />
             ) : null}
           </Panel>
+          <AppointmentRecoveryPanel item={item} now={now} />
         </>
       )}
     </DoctorScreen>

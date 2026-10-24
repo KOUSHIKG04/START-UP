@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listMyDriverTrips } from "@startup/data-access";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useDriverEarnings({ history = false }: EarningsScreenProps) {
   const { profile } = useMobileSession();
 

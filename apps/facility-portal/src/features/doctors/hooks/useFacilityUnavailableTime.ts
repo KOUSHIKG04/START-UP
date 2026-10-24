@@ -1,4 +1,5 @@
 "use client";
+
 import type { FormEvent } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
 import {
@@ -13,6 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { loadFacilityDoctorSchedule } from "../server/scheduleActions";
 import { unavailableServiceOptions as scopes } from "../utils/facilityScheduleEditorConstants";
+
 export function useFacilityUnavailableTime({
   practiceId,
 }: FacilityUnavailableTimeProps) {

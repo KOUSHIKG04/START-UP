@@ -145,3 +145,43 @@ remain per clinic session. The migration
 `20261022071502_multi_block_service_schedules.sql` was deployed on 2026-10-22;
 rollback integration tests verify the mixed calendar and booking protection.
 Native Doctor layout and live device booking verification remain separate.
+
+## Appointment attendance and recovery
+
+`features/appointments` owns `AppointmentRecoveryPanel` and
+`hooks/useAppointmentRecovery.ts`; appointment details compose the panel and keep
+the existing consultation actions. The shared contract view supplies staff labels
+and action eligibility. List status clocks update every 30 seconds and the detail
+review clock every 15 seconds; neither timer changes stored attendance or completes
+a consultation.
+
+Practice managers can record patient no-show after the attendance deadline, record
+doctor unavailability with a reason, arrange a replacement, and approve or decline
+recovery requests. These require backend `can_manage_practice` authorization.
+No-show and doctor unavailability are separate recorded outcomes. Approving an
+attendance review resolves that request; attendance still requires its explicit
+action. Approving a reschedule revalidates and reserves its target transactionally.
+Requested times are not held while awaiting review. Active/signed consultations
+cannot be rescheduled, and active online consultations can still be rejoined after
+the configured attendance deadline.
+
+`features/schedule/components/AppointmentRecoveryPolicy.tsx` extends the existing
+Schedule screen with a separate versioned `set_appointment_recovery_policy` save.
+The practice-wide defaults are 15 minutes after the booked end, zero minutes of
+self-reschedule notice and one patient move per replacement chain. Their allowed
+ranges are 0–180 minutes, 0–10080 minutes and 0–10 moves. Schedule-edit permission
+is checked separately from appointment management. A policy save does not publish
+new slots; stale edits require loading the latest policy before editing again.
+
+Shared contracts and clinic operations own validation and calls. Review requests
+and decisions explicitly call the existing private `emit_appointment_change` emitter
+after updating the appointment version; the existing live-update bridge observes
+those invalidations. The feature hook invalidates appointment/slot queries after
+successful changes. Replacement bookings preserve source allocation and history,
+retain confirmed versus unaccepted state, and receive fresh clinic arrival state.
+Staff-arranged and doctor-unavailable moves preserve the patient's move allowance.
+
+The recovery migration is local source with rollback-only workflow checks passed;
+shared-database deployment awaits explicit approval. Native layout, keyboard, consultation rejoin and cross-device recovery
+have not been verified on a device. Payments/refunds remain deferred under the
+[payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).

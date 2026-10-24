@@ -84,6 +84,7 @@ export default function VerifyOtpScreen() {
     </OnboardingShell>
   );
 }
+
 const styles = StyleSheet.create({
   body: { alignItems: "center", paddingTop: 24 },
   title: { fontFamily: fontFamilies.medium, fontSize: 24, color: colors.black },

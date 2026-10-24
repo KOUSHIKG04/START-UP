@@ -1,4 +1,5 @@
 import { Building2, House, Video } from "lucide-react";
+
 export const scheduleServices = [
   [
     "clinic",

@@ -22,6 +22,7 @@ export default function SetupScreen() {
     </OnboardingShell>
   );
 }
+
 const styles = StyleSheet.create({
   body: {
     flex: 1,

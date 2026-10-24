@@ -256,6 +256,7 @@ export function PersonalAddressField({
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   field: { gap: 7 },
   label: {

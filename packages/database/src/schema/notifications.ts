@@ -103,7 +103,9 @@ export const reminderSchedule = clinzo
     ]
   )
   .enableRLS();
+
 export type ReminderSchedule = typeof reminderSchedule.$inferSelect;
+
 export type NewReminderSchedule = typeof reminderSchedule.$inferInsert;
 
 export const reminderOccurrence = clinzo
@@ -149,7 +151,9 @@ export const reminderOccurrence = clinzo
     ]
   )
   .enableRLS();
+
 export type ReminderOccurrence = typeof reminderOccurrence.$inferSelect;
+
 export type NewReminderOccurrence = typeof reminderOccurrence.$inferInsert;
 
 export const notificationPreference = clinzo
@@ -205,7 +209,9 @@ export const notificationPreference = clinzo
     ]
   )
   .enableRLS();
+
 export type NotificationPreference = typeof notificationPreference.$inferSelect;
+
 export type NewNotificationPreference =
   typeof notificationPreference.$inferInsert;
 
@@ -252,7 +258,9 @@ export const notificationEndpoint = clinzo
     ]
   )
   .enableRLS();
+
 export type NotificationEndpoint = typeof notificationEndpoint.$inferSelect;
+
 export type NewNotificationEndpoint = typeof notificationEndpoint.$inferInsert;
 
 export const notificationIntent = clinzo
@@ -293,7 +301,9 @@ export const notificationIntent = clinzo
     ]
   )
   .enableRLS();
+
 export type NotificationIntent = typeof notificationIntent.$inferSelect;
+
 export type NewNotificationIntent = typeof notificationIntent.$inferInsert;
 
 export const notificationRead = clinzo
@@ -382,5 +392,7 @@ export const notificationDelivery = clinzo
     ]
   )
   .enableRLS();
+
 export type NotificationDelivery = typeof notificationDelivery.$inferSelect;
+
 export type NewNotificationDelivery = typeof notificationDelivery.$inferInsert;

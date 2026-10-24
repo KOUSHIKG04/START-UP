@@ -1,10 +1,12 @@
 "use client";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   formatDisplayDate,
   type VerificationQueueItem,
 } from "@startup/contracts";
 import { StatusBadge } from "./status-badge";
+
 export const columns: ColumnDef<VerificationQueueItem, unknown>[] = [
   {
     accessorKey: "subject_name",

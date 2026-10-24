@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+
 export const teal = colors.driver.primary;
 
 export const documentTypes: {
@@ -48,6 +49,7 @@ export const registrationBenefits = [
     body: "Emergency coordination team",
   },
 ];
+
 export const vehicleClassOptions = [
   { id: "BLS", label: "Basic", icon: Shield },
   { id: "ALS", label: "Advanced", icon: Activity },

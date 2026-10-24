@@ -87,7 +87,9 @@ export const driverLocationLatest = clinzo
     ]
   )
   .enableRLS();
+
 export type DriverLocationLatest = typeof driverLocationLatest.$inferSelect;
+
 export type NewDriverLocationLatest = typeof driverLocationLatest.$inferInsert;
 
 export const tripLocation = clinzo
@@ -156,7 +158,9 @@ export const tripLocation = clinzo
     ]
   )
   .enableRLS();
+
 export type TripLocation = typeof tripLocation.$inferSelect;
+
 export type NewTripLocation = typeof tripLocation.$inferInsert;
 
 export const trackingShare = clinzo
@@ -210,5 +214,7 @@ export const trackingShare = clinzo
     ]
   )
   .enableRLS();
+
 export type TrackingShare = typeof trackingShare.$inferSelect;
+
 export type NewTrackingShare = typeof trackingShare.$inferInsert;

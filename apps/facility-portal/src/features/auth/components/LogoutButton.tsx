@@ -1,4 +1,5 @@
 "use client";
+
 import { useLogout } from "../hooks/useLogout";
 
 import { LoaderCircle, LogOut } from "lucide-react";

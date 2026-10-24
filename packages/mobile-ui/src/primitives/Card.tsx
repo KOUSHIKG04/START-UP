@@ -12,6 +12,7 @@ import type {
   CardDescriptionProps,
   CardSeparatorProps,
 } from "../types/card";
+
 export type {
   CardVariant,
   CardOrientation,

@@ -145,7 +145,9 @@ export const ambulanceBooking = clinzo
     ]
   )
   .enableRLS();
+
 export type AmbulanceBooking = typeof ambulanceBooking.$inferSelect;
+
 export type NewAmbulanceBooking = typeof ambulanceBooking.$inferInsert;
 
 export const bookingCapability = clinzo
@@ -182,7 +184,9 @@ export const bookingCapability = clinzo
     ]
   )
   .enableRLS();
+
 export type BookingCapability = typeof bookingCapability.$inferSelect;
+
 export type NewBookingCapability = typeof bookingCapability.$inferInsert;
 
 export const bookingDestinationChange = clinzo
@@ -220,7 +224,9 @@ export const bookingDestinationChange = clinzo
     ]
   )
   .enableRLS();
+
 export type BookingDestinationChange =
   typeof bookingDestinationChange.$inferSelect;
+
 export type NewBookingDestinationChange =
   typeof bookingDestinationChange.$inferInsert;

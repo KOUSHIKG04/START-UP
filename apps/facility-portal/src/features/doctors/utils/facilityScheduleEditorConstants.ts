@@ -25,8 +25,10 @@ export const initialSettings: DoctorScheduleSettings = {
   clinicFeeMinor: 0,
   homeFeeMinor: 0,
 };
+
 export const card =
   "rounded-2xl border border-[#e2e8f0] bg-white p-6 space-y-5";
+
 export const unavailableServiceOptions = [
   ["all", "All"],
   ["online", "Online"],

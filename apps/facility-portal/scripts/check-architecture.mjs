@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
+
 const sourceRoot = path.join(appRoot, "src");
 
 export function inspectArchitecture(files) {

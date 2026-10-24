@@ -1,5 +1,6 @@
 import type { Href } from "expo-router";
 import type { ConsultationType } from "../../appointments/types/appointment";
+
 export function getDoctorResultsRoute(
   symptom: string,
   consultationType: ConsultationType
@@ -11,6 +12,7 @@ export function getDoctorResultsRoute(
 }
 
 import type { DoctorResult } from "../types/doctor-results";
+
 export function getDoctorProfileRoute(
   doctor: DoctorResult,
   consultationType: ConsultationType

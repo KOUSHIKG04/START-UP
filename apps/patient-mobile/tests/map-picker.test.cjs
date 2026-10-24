@@ -1,9 +1,12 @@
 const assert = require("node:assert/strict");
+
 const { test } = require("node:test");
+
 const fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript"),
   path = require("node:path");
+
 function picker(sourcePath) {
   const cameras = [];
   const updates = [],
@@ -173,6 +176,7 @@ function picker(sourcePath) {
     frame: nodes.find((n) => n.props.onTouchStart),
   };
 }
+
 for (const [label, sourcePath] of [
   [
     "Patient",

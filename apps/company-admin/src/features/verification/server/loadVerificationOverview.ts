@@ -1,6 +1,7 @@
 import "server-only";
 import { listCompanyVerificationCases } from "@startup/data-access";
 import { requireReviewer } from "@/lib/reviewer";
+
 export async function loadVerificationOverview() {
   const client = await requireReviewer();
   const cases = await listCompanyVerificationCases(client);

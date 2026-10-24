@@ -2,6 +2,7 @@ import { styles } from "./OnboardingShell.styles";
 import type { OnboardingButtonProps } from "../types/onboarding-button";
 import { Text } from "react-native";
 import { Button } from "@startup/mobile-ui";
+
 export function OnboardingButton({
   label,
   onPress,

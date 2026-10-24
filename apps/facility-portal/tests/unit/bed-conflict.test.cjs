@@ -1,9 +1,12 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 function load(relative, mocks) {
   const exports = {};
   const source = fs.readFileSync(
@@ -31,6 +34,7 @@ function load(relative, mocks) {
   );
   return exports;
 }
+
 test("PT409 from inventory RPC is preserved by the server action", async () => {
   const action = load("features/facilities/server/actions.ts", {
     "@startup/contracts": {
@@ -65,6 +69,7 @@ test("PT409 from inventory RPC is preserved by the server action", async () => {
   assert.equal(result.code, "PT409");
   assert.match(result.error, /counts changed/);
 });
+
 test("inventory PATCH returns HTTP 409 once for a stale version", async () => {
   let saves = 0;
   const route = load("app/api/bed-inventory/route.ts", {

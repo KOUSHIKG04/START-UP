@@ -2,6 +2,7 @@ import type { ProfileDetailProps } from "../types/profile-detail";
 import { styles } from "./ProfileScreen.styles";
 
 import { Text, View } from "react-native";
+
 export function ProfileDetail({ icon, label, value }: ProfileDetailProps) {
   return (
     <View style={styles.contactRow}>

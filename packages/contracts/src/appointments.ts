@@ -7,8 +7,10 @@ export type AppointmentStatus =
   | "rejected"
   | "cancelled"
   | "no_show";
+
 export type AppointmentSource =
   "patient_online" | "reception_walk_in" | "staff_booking" | "offline_sync";
+
 export type QueueState =
   | "awaiting_arrival"
   | "waiting"
@@ -30,6 +32,7 @@ export interface ReserveAppointmentInput {
   reason: string;
   idempotencyKey: string;
 }
+
 export interface AppointmentProjection {
   id: string;
   reference: string;

@@ -17,6 +17,7 @@ import { resolveDriverAddress } from "../services/resolveAddress";
 import type { Point, PlaceDetails } from "../types/map-picker";
 import { first, validPoint } from "../utils/mapPicker";
 import { emptyDetails } from "../utils/mapPickerConstants";
+
 export function useSavedLocationPicker() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();

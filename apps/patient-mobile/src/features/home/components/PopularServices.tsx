@@ -1,6 +1,8 @@
 import { defaultServices } from "../utils/popularServicesConstants";
 import type { PopularService, PopularServicesProps } from "../types/home";
+
 export type { PopularService, PopularServicesProps } from "../types/home";
+
 import { StyleSheet, View } from "react-native";
 
 import { colors, fontFamilies } from "@startup/design-tokens";

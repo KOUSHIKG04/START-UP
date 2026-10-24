@@ -1,5 +1,7 @@
 import type { ClinicMapLocation } from "../types/clinic-location-draft";
+
 export type { ClinicMapLocation } from "../types/clinic-location-draft";
+
 import { create } from "zustand";
 
 // Map selection is a draft. Existing onboarding APIs persist it on Save Profile.

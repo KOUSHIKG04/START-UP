@@ -1,4 +1,5 @@
 import type { DoctorRecord } from "./doctorManagement";
+
 export interface DoctorFilters {
   page?: number;
   pageSize?: number;

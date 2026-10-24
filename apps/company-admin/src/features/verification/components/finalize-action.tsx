@@ -1,9 +1,11 @@
 "use client";
+
 import { Field } from "./review-field";
 
 import { useFinalizeReview } from "../hooks/useFinalizeReview";
 import type { FinalizeActionProps } from "../types/finalize-action";
 import { Button } from "@startup/web-ui/components/ui/button";
+
 export function FinalizeAction({ caseId, subjectType }: FinalizeActionProps) {
   const { action, pending } = useFinalizeReview({ caseId, subjectType });
   return (

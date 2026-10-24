@@ -56,4 +56,5 @@ export const publicPracticeSchema = z.object({
 });
 
 export type PracticeSearchInput = z.input<typeof practiceSearchInputSchema>;
+
 export type PublicPractice = z.infer<typeof publicPracticeSchema>;

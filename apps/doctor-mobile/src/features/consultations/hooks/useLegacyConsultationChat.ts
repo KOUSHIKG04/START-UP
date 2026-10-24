@@ -15,6 +15,7 @@ import { useVisit } from "./useVisit";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
 import { useMobileSession } from "../../../services/supabase";
 import { useOnlineVisit } from "./useOnlineVisit";
+
 export function useLegacyConsultationChat() {
   const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
   const live = useOnlineVisit(appointmentId);

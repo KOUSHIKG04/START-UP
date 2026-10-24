@@ -61,7 +61,15 @@ export default function BookingCard({
   const statusTone =
     displayedStatus.toLowerCase() === "pending"
       ? styles.pendingStatus
-      : ["cancelled", "no show"].includes(displayedStatus.toLowerCase())
+      : [
+            "cancelled",
+            "no show",
+            "missed appointment",
+            "doctor unavailable",
+            "request expired",
+            "appointment time passed",
+            "rescheduled",
+          ].includes(displayedStatus.toLowerCase())
         ? styles.inactiveStatus
         : styles.confirmedStatus;
 

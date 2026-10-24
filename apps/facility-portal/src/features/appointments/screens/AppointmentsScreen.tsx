@@ -1,4 +1,8 @@
 "use client";
+
+import { useState } from "react";
+import type { ClinicAppointment } from "@startup/contracts";
+import { AppointmentRecoveryDialog } from "../components/AppointmentRecoveryDialog";
 import { appointmentStatuses } from "../utils/appointmentsConstants";
 
 import { useAppointments } from "../hooks/useAppointments";
@@ -16,6 +20,10 @@ export default function AppointmentsScreen({
   appointments,
   loadError,
 }: AppointmentsScreenProps) {
+  const [managedId, setManagedId] = useState<string | null>(null);
+  const managed = appointments.find(
+    (item: ClinicAppointment) => item.id === managedId
+  );
   const {
     pending,
     search,
@@ -165,6 +173,7 @@ export default function AppointmentsScreen({
 
       {/* Recent Bookings Card & Table */}
       <AppointmentsTable
+        onManage={(item) => setManagedId(item.id)}
         now={now}
         pageRows={pageRows}
         pending={pending}
@@ -176,6 +185,13 @@ export default function AppointmentsScreen({
         onFilterPeriodChange={setFilterPeriod}
         bookingDateLabel={bookingDateLabel}
       />
+      {managed ? (
+        <AppointmentRecoveryDialog
+          key={managed.id}
+          item={managed}
+          onClose={() => setManagedId(null)}
+        />
+      ) : null}
     </div>
   );
 }

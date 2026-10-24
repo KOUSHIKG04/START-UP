@@ -1,9 +1,12 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript"),
   path = require("node:path");
+
 function resolver(
   role,
   {
@@ -67,7 +70,9 @@ function resolver(
   );
   return { lookup: exports[`resolve${role}Address`], calls };
 }
+
 const point = { latitude: 12.9, longitude: 77.5 };
+
 const address = {
   formattedAddress: "10 Main Street, Bengaluru",
   streetNumber: "10",
@@ -77,6 +82,7 @@ const address = {
   region: "Karnataka",
   postalCode: "560010",
 };
+
 for (const role of ["Doctor", "Patient", "Driver"]) {
   test(
     role +

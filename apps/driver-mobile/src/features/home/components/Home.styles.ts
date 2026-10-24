@@ -1,6 +1,7 @@
 import { colors, fontFamilies, shadows } from "@startup/design-tokens";
 import { StyleSheet } from "react-native";
 import { palette, ui } from "../../../components/theme";
+
 export const styles = StyleSheet.create({
   header: { backgroundColor: palette.primary },
   headerRow: {

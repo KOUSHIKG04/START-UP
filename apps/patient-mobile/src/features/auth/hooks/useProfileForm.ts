@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import type { ProfileDetails, ProfileFormValues } from "../types/profile";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
+
 export function useProfileForm({
   family = false,
   initialEmail = "",

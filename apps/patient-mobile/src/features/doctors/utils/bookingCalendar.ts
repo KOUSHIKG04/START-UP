@@ -1,5 +1,6 @@
 import { months } from "./doctorProfileConstants";
 import type { BookingDate } from "../types/booking-calendar";
+
 export function getDatesForMonth(
   monthIndex: number,
   year: number = 2026

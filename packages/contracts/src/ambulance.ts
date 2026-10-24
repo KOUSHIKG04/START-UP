@@ -5,8 +5,10 @@ export type AmbulanceBookingStatus =
   | "fulfilled"
   | "cancelled"
   | "unfulfilled";
+
 export type DispatchOfferStatus =
   "pending" | "accepted" | "rejected" | "expired" | "withdrawn";
+
 export type TripStatus =
   | "heading_to_pickup"
   | "arrived_at_pickup"
@@ -14,4 +16,5 @@ export type TripStatus =
   | "arrived_at_destination"
   | "completed"
   | "cancelled";
+
 export type TripStartAuthorization = "driver_confirmed" | "emergency_override";

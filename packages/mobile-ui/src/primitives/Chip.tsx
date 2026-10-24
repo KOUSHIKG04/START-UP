@@ -3,6 +3,7 @@ import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { ChipVariant, ChipProps } from "../types/chip";
+
 export type { ChipVariant, ChipProps } from "../types/chip";
 
 export function Chip({

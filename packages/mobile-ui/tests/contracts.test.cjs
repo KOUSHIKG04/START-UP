@@ -1,14 +1,21 @@
 const assert = require("node:assert/strict");
+
 const { test } = require("node:test");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 // Contract tests execute real component functions with lightweight native hosts.
 // They verify props/styles/context; they do not emulate native layout or gestures.
 const cache = new Map();
+
 const jsx = (type, props) => ({ type, props: props ?? {} });
+
 const react = {
   createElement: (type, props, ...children) =>
     jsx(type, { ...props, children }),
@@ -25,6 +32,7 @@ const react = {
   useRef: (value) => ({ current: value }),
   forwardRef: (fn) => (props) => fn(props, null),
 };
+
 const native = {
   StyleSheet: {
     create: (value) => value,
@@ -34,6 +42,7 @@ const native = {
   },
   useWindowDimensions: () => ({ width: 390, height: 844 }),
 };
+
 for (const name of [
   "View",
   "Text",
@@ -114,16 +123,21 @@ function render(element, nodes = []) {
   }
   return nodes;
 }
+
 const component = (name) =>
   load(path.resolve(__dirname, `../src/primitives/${name}.tsx`))[name];
+
 const { MobileThemeProvider } = load(
   path.resolve(__dirname, "../src/theme/MobileThemeProvider.tsx")
 );
+
 const { mobileThemes, surfaces } = load(
   path.resolve(__dirname, "../../design-tokens/src/index.ts")
 );
+
 const flatten = (style) =>
   Object.assign({}, ...[style].flat(Infinity).filter(Boolean));
+
 const themed = (theme, element) =>
   render(jsx(MobileThemeProvider, { theme, children: element }));
 

@@ -1,9 +1,11 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict"),
   fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 function compile(file, mocks) {
   const absolute = path.resolve(__dirname, "../../src", file),
     exports = {};
@@ -36,10 +38,12 @@ function compile(file, mocks) {
   );
   return exports;
 }
+
 const { incomingDoctorRequests } = compile(
   "features/doctors/utils/incomingDoctorRequests.ts",
   {}
 );
+
 const request = (
   id,
   status = "pending",
@@ -53,6 +57,7 @@ const request = (
   doctor_name: "Test Doctor",
   facility_name: "Test Clinic",
 });
+
 test("dashboard includes incoming associations only, newest first", () => {
   const rows = [
     request("old"),
@@ -65,6 +70,7 @@ test("dashboard includes incoming associations only, newest first", () => {
     ["new", "old"]
   );
 });
+
 test("dashboard alerts once for a new incoming request and keeps its query facility-scoped", () => {
   let data = [request("old")],
     index = 0;

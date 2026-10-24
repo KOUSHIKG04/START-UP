@@ -66,6 +66,7 @@ export const familyProfileListSchema = z.array(
     profile_photo_path: z.string().nullable().optional(),
   })
 );
+
 export const patientProfileDetailSchema = z.object({
   id: z.uuid(),
   full_name: z.string(),
@@ -79,5 +80,7 @@ export const patientProfileDetailSchema = z.object({
   address: patientAddressSchema.nullable(),
   profile_photo_path: z.string().nullable().optional(),
 });
+
 export type PatientProfileInput = z.input<typeof patientProfileInputSchema>;
+
 export type FamilyProfileInput = z.input<typeof familyProfileInputSchema>;

@@ -1,9 +1,11 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict"),
   fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript"),
   path = require("node:path");
+
 test("private request channels refresh on events/reconnect, coalesce bursts and unsubscribe", async () => {
   const channels = [],
     removed = [],

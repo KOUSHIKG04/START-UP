@@ -25,6 +25,7 @@ type DoctorState = {
   setNotifications: (value: boolean) => void;
   reset: () => void;
 };
+
 const initial = () => ({
   available: true,
   consultations: Object.fromEntries(
@@ -43,6 +44,7 @@ const initial = () => ({
     .map((a) => a.id),
   notifications: true,
 });
+
 export const useDoctorStore = create<DoctorState>((set) => ({
   ...initial(),
   setAvailable: (available) => set({ available }),

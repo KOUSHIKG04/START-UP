@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { StyleSheet, View } from "react-native";
 import { listClinicAppointments } from "@startup/data-access";
 import type { ClinicAppointment } from "@startup/contracts";
+import { appointmentRecoveryView } from "@startup/contracts";
+import { AppointmentRecoveryActions } from "../../../features/appointments/components/AppointmentRecoveryActions";
+import { useAppointmentClock } from "../../../features/appointments/hooks/useAppointmentClock";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import {
   Card,
@@ -22,6 +25,7 @@ import {
 import { supabase } from "../../../services/supabase";
 
 export default function AppointmentDetailsRoute() {
+  const now = useAppointmentClock();
   const { id } = useLocalSearchParams<{ id: string }>();
   const appointments = useQuery<ClinicAppointment[]>({
     queryKey: ["patient-clinic-appointments"],
@@ -61,8 +65,9 @@ export default function AppointmentDetailsRoute() {
           <>
             <BookingCard
               appointment={card}
-              statusLabel={item.status.replaceAll("_", " ")}
+              statusLabel={appointmentRecoveryView(item, now).patientStatus}
             />
+            <AppointmentRecoveryActions item={item} now={now} />
             <Card theme="patient" backgroundColor={colors.white} gap={12}>
               <Text variant="sectionHeading" style={styles.sectionTitle}>
                 Appointment details
@@ -104,7 +109,7 @@ export default function AppointmentDetailsRoute() {
                 />
               </View>
             ) : null}
-            {canOpenClinicVisit(item) ? (
+            {canOpenClinicVisit(item, new Date(now)) ? (
               <Button
                 label={
                   item.queue_state === "awaiting_arrival"

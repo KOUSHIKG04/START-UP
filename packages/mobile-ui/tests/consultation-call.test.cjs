@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 function harness() {
@@ -140,6 +145,7 @@ function harness() {
     },
   };
 }
+
 function nodes(tree, result = []) {
   if (!tree || typeof tree !== "object") return result;
   if (Array.isArray(tree)) tree.forEach((item) => nodes(item, result));
@@ -149,6 +155,7 @@ function nodes(tree, result = []) {
   }
   return result;
 }
+
 const props = {
   theme: "patient",
   name: "Doctor",
@@ -169,6 +176,7 @@ const props = {
   onBack() {},
   onEnd() {},
 };
+
 test("both themes wire four controls and chat stays inside the call surface", () => {
   for (const theme of ["patient", "doctor"]) {
     const h = harness(),
@@ -201,6 +209,7 @@ test("both themes wire four controls and chat stays inside the call surface", ()
     );
   }
 });
+
 test("chat toasts ignore history and own messages, deduplicate, and stay quiet in chat", () => {
   const h = harness();
   const message = (id, sender = "other") => ({
@@ -227,6 +236,7 @@ test("chat toasts ignore history and own messages, deduplicate, and stay quiet i
   h.render({ ...props, messages: [message("while-chat-open")] });
   assert.equal(h.toasts.length, 1);
 });
+
 test("preview movement is bounded to the visible call area after keyboard/layout changes", () => {
   const { clampCallPreview } = harness();
   const outside = clampCallPreview(900, -90, 390, 600, 132, 172);

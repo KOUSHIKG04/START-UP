@@ -1,5 +1,7 @@
 import type { Point, Address } from "../types/resolve-address";
+
 export type { Point, Address } from "../types/resolve-address";
+
 import * as Location from "expo-location";
 import { Platform } from "react-native";
 import { resolveMapAddress } from "@startup/data-access";
@@ -12,6 +14,7 @@ const pending = new Map<
 >();
 // Android geocoder requests are not cancellable. Share duplicate requests and
 // serialize different points so dragging cannot overload the native service.
+
 let tail: Promise<unknown> = Promise.resolve();
 
 export function resolveDoctorAddress(

@@ -25,6 +25,7 @@ export const activeAmbulanceTrackingSchema = z.object({
 export type UpdateDriverLocationInput = z.infer<
   typeof updateDriverLocationSchema
 >;
+
 export type ActiveAmbulanceTracking = z.infer<
   typeof activeAmbulanceTrackingSchema
 >;

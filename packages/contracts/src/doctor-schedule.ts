@@ -9,7 +9,9 @@ export const doctorTimeBlockSchema = z
   .refine((block) => block.end > block.start, {
     message: "Each time block must end after it starts.",
   });
+
 export type DoctorTimeBlock = z.infer<typeof doctorTimeBlockSchema>;
+
 export function scheduleBlocksError(
   blocks: DoctorTimeBlock[],
   duration: number,
@@ -135,6 +137,9 @@ export const doctorScheduleSettingsSchema = z
   );
 
 export const doctorSchedulePreferencesSchema = z.object({
+  online_grace_minutes: z.number().int().optional(),
+  reschedule_cutoff_minutes: z.number().int().optional(),
+  max_self_reschedules: z.number().int().optional(),
   practice_id: z.uuid(),
   working_days: z.array(z.number().int()),
   online_working_days: z.array(z.number().int()).optional(),

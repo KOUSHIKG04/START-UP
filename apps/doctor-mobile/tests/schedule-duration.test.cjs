@@ -25,17 +25,23 @@ function load(file, mocks) {
   );
   return exports;
 }
+
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 const exportsForSchedule = {};
+
 const scheduleContracts = load(
   "../../../packages/contracts/src/doctor-schedule.ts",
   { zod: { z: require("zod") } }
 );
+
 vm.runInNewContext(
   ts.transpileModule(
     fs.readFileSync(
@@ -54,6 +60,7 @@ vm.runInNewContext(
     },
   }
 );
+
 const { suggestConsultationDuration, slotStartTimes, scheduleError } =
   exportsForSchedule;
 

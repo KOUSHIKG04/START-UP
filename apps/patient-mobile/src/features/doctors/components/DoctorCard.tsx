@@ -1,5 +1,7 @@
 import type { DoctorCardProps } from "../types/doctor-card";
+
 export type { DoctorCardProps } from "../types/doctor-card";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { useRef, type ReactNode } from "react";
 import { type GestureResponderEvent, StyleSheet, View } from "react-native";

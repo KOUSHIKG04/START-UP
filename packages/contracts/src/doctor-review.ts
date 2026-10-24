@@ -15,4 +15,5 @@ export const myDoctorReviewSchema = z.object({
 });
 
 export type DoctorReviewInput = z.infer<typeof doctorReviewInputSchema>;
+
 export type MyDoctorReview = z.infer<typeof myDoctorReviewSchema>;

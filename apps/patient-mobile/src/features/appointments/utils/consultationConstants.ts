@@ -1,5 +1,7 @@
 import type { ConsultationFlow } from "../types/consultation-flow";
+
 export type { ConsultationFlow } from "../types/consultation-flow";
+
 import type { ConsultationType } from "../types/appointment";
 
 export const consultationFlows: Record<ConsultationType, ConsultationFlow> = {

@@ -3,7 +3,9 @@ import { HospitalCard } from "./HospitalCard";
 import { s } from "./AmbulanceBookingForm.styles";
 import type { AmbulanceBookingFormProps } from "../types/ambulance-booking-form";
 import type { HospitalItem } from "../types/ambulance-booking-form";
+
 export type { HospitalItem } from "../types/ambulance-booking-form";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { useCallback } from "react";
 import { FlatList, ScrollView, View } from "react-native";

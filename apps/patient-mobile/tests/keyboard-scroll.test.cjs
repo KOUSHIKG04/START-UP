@@ -1,10 +1,17 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const ts = require("typescript");
+
 const vm = require("node:vm");
+
 const moduleResult = { exports: {} };
+
 const code = ts.transpileModule(
   fs.readFileSync(
     path.join(__dirname, "../src/features/auth/utils/keyboardScroll.ts"),
@@ -14,7 +21,9 @@ const code = ts.transpileModule(
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }
 ).outputText;
+
 vm.runInNewContext(code, { exports: moduleResult.exports });
+
 const { keyboardScrollAdjustment } = moduleResult.exports;
 
 test("covered input scrolls above the keyboard with the header offset included", () => {
@@ -29,6 +38,7 @@ test("covered input scrolls above the keyboard with the header offset included",
     68
   );
 });
+
 test("a resized form uses its own lower boundary", () => {
   assert.equal(
     keyboardScrollAdjustment({
@@ -41,6 +51,7 @@ test("a resized form uses its own lower boundary", () => {
     48
   );
 });
+
 test("already visible inputs do not move", () => {
   assert.equal(
     keyboardScrollAdjustment({
@@ -53,6 +64,7 @@ test("already visible inputs do not move", () => {
     0
   );
 });
+
 test("switching to an input above the viewport scrolls upward", () => {
   assert.equal(
     keyboardScrollAdjustment({

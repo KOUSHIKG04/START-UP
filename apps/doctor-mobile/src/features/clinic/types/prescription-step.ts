@@ -1,4 +1,5 @@
 import type { useConsultationForm } from "../hooks/useConsultationForm";
+
 export type PrescriptionStepProps = Pick<
   ReturnType<typeof useConsultationForm>,
   | "setStep"

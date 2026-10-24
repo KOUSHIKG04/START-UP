@@ -1,5 +1,6 @@
 import type { Appointment } from "./appointment";
 import type { ReactNode } from "react";
+
 export type BookingCardProps = {
   appointment: Appointment;
   onPress?: () => void;

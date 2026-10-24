@@ -6,6 +6,7 @@ import {
 } from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 import { mapFunctionError } from "./functionErrors";
+
 async function invokeMapFunction(
   client: AppSupabaseClient,
   name: string,
@@ -21,6 +22,7 @@ async function invokeMapFunction(
   }
   return result;
 }
+
 export async function searchMapPlaces(
   client: AppSupabaseClient,
   input: { query: string; latitude?: number; longitude?: number }

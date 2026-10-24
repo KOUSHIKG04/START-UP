@@ -11,6 +11,7 @@ import type {
 } from "@startup/contracts";
 import { useToast, useToastFeedback } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useDriverTrip() {
   const { profile } = useMobileSession();
   const { showToast } = useToast();

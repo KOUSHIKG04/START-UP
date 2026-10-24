@@ -1,4 +1,5 @@
 import { FacilityDoctorScheduleScreen } from "@/features/doctors";
+
 export default async function ManageDoctorSchedulePage({
   params,
 }: {

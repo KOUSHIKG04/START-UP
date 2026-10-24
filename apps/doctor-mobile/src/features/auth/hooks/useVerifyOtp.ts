@@ -4,6 +4,7 @@ import { TextInput } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { sendPhoneOtp, verifyPhoneOtp } from "@startup/data-access";
 import { supabase } from "../../../services/supabase";
+
 export function useVerifyOtp() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
   const [code, setCode] = useState("");

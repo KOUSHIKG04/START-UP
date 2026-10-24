@@ -1,5 +1,7 @@
 import type { DevEmailAuthFormProps } from "../types/dev-email-auth-form";
+
 export type { DevEmailAuthFormProps } from "../types/dev-email-auth-form";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { Button } from "@startup/mobile-ui";
 import { Input } from "@startup/mobile-ui";

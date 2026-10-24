@@ -4,6 +4,7 @@ import { styles } from "./ProfileFormLayout.styles";
 import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { ProfilePhotoButton } from "@startup/mobile-ui";
+
 export function ProfileHeader({
   family,
   photoUrl,

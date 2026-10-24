@@ -2,6 +2,7 @@ import { z } from "zod";
 import { uuidSchema } from "./validation";
 
 export const ambulanceCapabilityCodeSchema = z.enum(["BLS", "ALS", "NICU"]);
+
 export const publicHospitalSchema = z.object({
   id: uuidSchema,
   name: z.string(),
@@ -80,13 +81,17 @@ export const driverOfferSchema = z.object({
 });
 
 export type PublicHospital = z.infer<typeof publicHospitalSchema>;
+
 export type RequestAmbulanceBookingInput = z.infer<
   typeof requestAmbulanceBookingSchema
 >;
+
 export type MyAmbulanceBooking = z.infer<typeof myAmbulanceBookingSchema>;
+
 export type CancelAmbulanceBookingInput = z.infer<
   typeof cancelAmbulanceBookingSchema
 >;
+
 export type DriverOffer = z.infer<typeof driverOfferSchema>;
 
 export const googleHospitalSchema = z.object({
@@ -102,6 +107,7 @@ export const googleHospitalSchema = z.object({
     .array(z.object({ provider: z.string(), uri: z.url().optional() }))
     .default([]),
 });
+
 export const googleHospitalSearchSchema = z
   .object({
     latitude: z.number().min(-90).max(90),
@@ -109,10 +115,12 @@ export const googleHospitalSearchSchema = z
     query: z.string().trim().max(160).default(""),
   })
   .strict();
+
 export const googleHospitalSearchResultSchema = z.object({
   configured: z.boolean(),
   places: googleHospitalSchema.array(),
 });
+
 export const requestGoogleAmbulanceBookingSchema = requestAmbulanceBookingSchema
   .omit({ destinationFacilityId: true })
   .extend({
@@ -123,8 +131,11 @@ export const requestGoogleAmbulanceBookingSchema = requestAmbulanceBookingSchema
       .max(300),
   })
   .strict();
+
 export type GoogleHospital = z.infer<typeof googleHospitalSchema>;
+
 export type AmbulanceHospital = PublicHospital | GoogleHospital;
+
 export type RequestGoogleAmbulanceBookingInput = z.infer<
   typeof requestGoogleAmbulanceBookingSchema
 >;

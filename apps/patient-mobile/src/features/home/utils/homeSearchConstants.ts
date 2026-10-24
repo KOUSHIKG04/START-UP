@@ -1,4 +1,5 @@
 import type { SearchItem } from "../types/home";
+
 export type { SearchItem } from "../types/home";
 
 export const DEFAULT_SEARCH_CITY = "Bangalore";

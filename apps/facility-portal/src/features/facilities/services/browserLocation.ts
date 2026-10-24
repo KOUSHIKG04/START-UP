@@ -1,5 +1,7 @@
 "use client";
+
 import type { FacilityLocation } from "../types/facilityVerificationForm";
+
 export function getFacilityLocation(): Promise<FacilityLocation> {
   if (!navigator.geolocation)
     return Promise.reject(

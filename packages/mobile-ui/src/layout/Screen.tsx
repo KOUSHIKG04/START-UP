@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@startup/design-tokens";
 import { cn } from "cn";
 import type { ScreenProps } from "../types/screen";
+
 export type { ScreenProps } from "../types/screen";
 
 export function Screen({

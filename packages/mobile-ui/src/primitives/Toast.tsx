@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { ToastType, ToastInput } from "../types/toast";
+
 export type { ToastType, ToastInput } from "../types/toast";
 
 type ToastContextValue = {

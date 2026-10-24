@@ -12,6 +12,7 @@ export function visitRoute(screen: string, appointment: Appointment): Href {
     },
   } as Href;
 }
+
 export function openAppointment(appointment: Appointment) {
   router.push(
     visitRoute(

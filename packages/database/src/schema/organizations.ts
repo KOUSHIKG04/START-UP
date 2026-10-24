@@ -62,7 +62,9 @@ export const organization = clinzo
     ]
   )
   .enableRLS();
+
 export type Organization = typeof organization.$inferSelect;
+
 export type NewOrganization = typeof organization.$inferInsert;
 
 export const facility = clinzo
@@ -129,7 +131,9 @@ export const facility = clinzo
     ]
   )
   .enableRLS();
+
 export type Facility = typeof facility.$inferSelect;
+
 export type NewFacility = typeof facility.$inferInsert;
 
 export const organizationMember = clinzo
@@ -199,7 +203,9 @@ export const organizationMember = clinzo
     ]
   )
   .enableRLS();
+
 export type OrganizationMember = typeof organizationMember.$inferSelect;
+
 export type NewOrganizationMember = typeof organizationMember.$inferInsert;
 
 export const memberDoctorScope = clinzo
@@ -241,5 +247,7 @@ export const memberDoctorScope = clinzo
     ]
   )
   .enableRLS();
+
 export type MemberDoctorScope = typeof memberDoctorScope.$inferSelect;
+
 export type NewMemberDoctorScope = typeof memberDoctorScope.$inferInsert;

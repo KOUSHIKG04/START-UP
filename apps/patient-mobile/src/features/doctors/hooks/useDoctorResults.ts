@@ -16,6 +16,7 @@ import {
 } from "../utils/doctorSearch";
 import type { DoctorResultsScreenProps } from "../types/doctor-results";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useDoctorResults({
   symptom,
   consultationType,

@@ -101,7 +101,9 @@ export const driver = clinzo
     ]
   )
   .enableRLS();
+
 export type Driver = typeof driver.$inferSelect;
+
 export type NewDriver = typeof driver.$inferInsert;
 
 // Pending evidence from the `main` driver onboarding UI. Approval creates a
@@ -170,6 +172,7 @@ export const driverRegistrationApplication = clinzo
     ]
   )
   .enableRLS();
+
 export type DriverRegistrationApplication =
   typeof driverRegistrationApplication.$inferSelect;
 
@@ -206,7 +209,9 @@ export const vehicle = clinzo
     ]
   )
   .enableRLS();
+
 export type Vehicle = typeof vehicle.$inferSelect;
+
 export type NewVehicle = typeof vehicle.$inferInsert;
 
 export const driverDocument = clinzo
@@ -247,7 +252,9 @@ export const driverDocument = clinzo
     ]
   )
   .enableRLS();
+
 export type DriverDocument = typeof driverDocument.$inferSelect;
+
 export type NewDriverDocument = typeof driverDocument.$inferInsert;
 
 export const capability = clinzo
@@ -273,7 +280,9 @@ export const capability = clinzo
     ]
   )
   .enableRLS();
+
 export type Capability = typeof capability.$inferSelect;
+
 export type NewCapability = typeof capability.$inferInsert;
 
 export const vehicleCapability = clinzo
@@ -317,7 +326,9 @@ export const vehicleCapability = clinzo
     ]
   )
   .enableRLS();
+
 export type VehicleCapability = typeof vehicleCapability.$inferSelect;
+
 export type NewVehicleCapability = typeof vehicleCapability.$inferInsert;
 
 export const vehicleReviewRequest = clinzo
@@ -394,7 +405,9 @@ export const vehicleReviewRequest = clinzo
     ]
   )
   .enableRLS();
+
 export type VehicleReviewRequest = typeof vehicleReviewRequest.$inferSelect;
+
 export type NewVehicleReviewRequest = typeof vehicleReviewRequest.$inferInsert;
 
 export const driverShift = clinzo
@@ -463,5 +476,7 @@ export const driverShift = clinzo
     ]
   )
   .enableRLS();
+
 export type DriverShift = typeof driverShift.$inferSelect;
+
 export type NewDriverShift = typeof driverShift.$inferInsert;

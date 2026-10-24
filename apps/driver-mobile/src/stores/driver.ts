@@ -7,8 +7,10 @@ export type Profile = {
   city: string;
   photo?: string;
 };
+
 export type TripStage =
   "idle" | "request" | "pickup" | "arrived" | "progress" | "complete";
+
 export type Trip = {
   id: string;
   patient: string;
@@ -19,6 +21,7 @@ export type Trip = {
   duration: string;
   completedAt: number;
 };
+
 export const emergency = {
   id: "CLZ-1042",
   patient: "Rajesh Kumar",
@@ -28,12 +31,14 @@ export const emergency = {
   distance: "8.2 km",
   duration: "14 mins",
 };
+
 export type Message = {
   id: string;
   text: string;
   incoming: boolean;
   time: string;
 };
+
 const initialMessages: Message[] = [
   {
     id: "1",
@@ -60,6 +65,7 @@ const initialMessages: Message[] = [
     time: "9:44 AM",
   },
 ];
+
 type DriverState = {
   profile: Profile;
   submitted: boolean;
@@ -84,6 +90,7 @@ type DriverState = {
 };
 // Local preview adapter. Replace these actions with authenticated dispatch APIs.
 // Verification is deliberately explicit; submitting documents never approves a driver.
+
 export const useDriver = create<DriverState>((set, get) => ({
   profile: { name: "", mobile: "", dob: "", city: "" },
   submitted: false,

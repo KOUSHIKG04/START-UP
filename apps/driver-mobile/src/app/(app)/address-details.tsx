@@ -30,6 +30,7 @@ import { supabase, useMobileSession } from "../../services/supabase";
 import { useLocationDraft } from "../../features/locations/stores/savedLocationDraft";
 
 type Kind = "house" | "office" | "other";
+
 const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 

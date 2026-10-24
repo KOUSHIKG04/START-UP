@@ -51,6 +51,51 @@ query keys, invalidation and subscription ownership remain app-local.
 live in `utils/dates.ts`. Language mappings live in `utils/languageConstants.ts`.
 Compatibility modules must contain re-exports or adapters, not copied logic.
 
+## Appointment recovery integration
+
+`contracts/src/appointment-recovery.ts` owns portable recovery schemas, policy
+validation and `appointmentRecoveryView`. Appointment projection fields include
+attendance deadline, management permission, replacement lineage, patient move
+count and the latest review request. Optional recovery data preserves compatibility
+with older appointment responses. Display clocks belong to consuming app hooks;
+the pure view derives labels/action eligibility without changing stored attendance.
+
+`data-access/src/clinic/recovery.ts` owns validated operations for listing replacement
+times, rescheduling, requesting/deciding reviews, recording attendance and saving
+operational policy. Operations receive the app-configured client and use authenticated
+RPCs; hooks, query keys, retries and live-update lifecycle stay app-local. The private
+request table is exposed only through authorized projections/RPCs. Request changes
+update the appointment version and explicitly invoke the existing private
+`clinzo.emit_appointment_change` emitter. The incumbent row broadcaster ignores
+updates limited to `updated_at`/`row_version`, so a version touch alone is insufficient.
+Existing patient, doctor and facility topics carry kind-only cache invalidations;
+no public channel or extra app subscription is introduced.
+
+`mobile-ui/src/components/AppointmentRecoveryDialog.tsx` is the Patient/Doctor
+presentation owner. It composes existing `ModalSurface`, themed buttons, inputs,
+dropdowns, loader and shared tokens. It accepts choices, copy, loading/error state
+and callbacks, with local date/time/reason draft state. Scroll, safe-area and keyboard
+handling belong to this presentation component; it imports no app feature or backend
+client. Facility Portal composes its existing web dialog primitives locally.
+
+The local recovery migration serializes moves using the existing doctor lock and
+ordered source/target session locks before appointment/window/queue operations.
+Capacity release, replacement reservation, history and queue changes commit together;
+an unavailable target rolls back the original release. Same-day moves reuse daily
+capacity and keep the original app/reception source. `replaces_appointment_id` retains
+lineage with one replacement per source. Staff/doctor-unavailable moves do not consume
+the patient's self-service count; other patient moves carry an incremented count down
+the chain. Appointment/request/settings versions and move idempotency protect retries.
+
+Practice-wide defaults are 15 minutes of attendance grace, a zero-minute notice
+cutoff and one patient move, editable through a separate versioned policy RPC.
+Clinic attendance uses session end; other modes use booked end plus grace. No-show
+and doctor-unavailable outcomes require explicit authorized decisions. Timers never
+complete consultations. An active online consultation remains rejoinable after its
+deadline. Final backend/deployment and native verification remain separate from
+source and host tests. See the
+[recovery and payment boundary](../APPOINTMENT_RECOVERY_PAYMENTS.md).
+
 ## Upcoming functionality
 
 The locations below describe future ownership, not implemented payment endpoints.

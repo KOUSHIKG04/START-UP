@@ -3,6 +3,7 @@ import { useNotificationDrawer } from "../hooks/useNotificationDrawer";
 import type { NotificationDrawerProps } from "../types/notifications";
 
 export type { NotificationDrawerProps } from "../types/notifications";
+
 export type { NotificationItem } from "@startup/mobile-ui";
 
 export function NotificationDrawer({

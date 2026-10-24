@@ -2,10 +2,12 @@ import type {
   ChosenMapLocation,
   LocationDraftState,
 } from "../types/location-draft";
+
 export type {
   ChosenMapLocation,
   LocationDraftState,
 } from "../types/location-draft";
+
 import { create } from "zustand";
 
 // Temporary navigation state only. An address is persisted by Save Address.

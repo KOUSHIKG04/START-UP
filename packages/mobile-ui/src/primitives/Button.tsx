@@ -11,6 +11,7 @@ import {
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { appThemeColors, type AppTheme } from "../utils/appTheme";
 import type { ButtonVariant, ButtonProps } from "../types/button";
+
 export type { ButtonVariant, ButtonProps } from "../types/button";
 
 type ButtonPalette = {

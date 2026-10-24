@@ -1,6 +1,8 @@
 import { useOnlineVisit } from "../hooks/useOnlineVisit";
 import type { OnlineVisitFlowProps } from "../types/visit-session";
+
 export type { OnlineVisitFlowProps } from "../types/visit-session";
+
 import { AppText as Text } from "@startup/mobile-ui";
 
 import { View, StyleSheet } from "react-native";
@@ -94,6 +96,7 @@ export function OnlineVisitFlow({
     </LiveKitRoom>
   );
 }
+
 const styles = StyleSheet.create({
   wait: {
     flex: 1,

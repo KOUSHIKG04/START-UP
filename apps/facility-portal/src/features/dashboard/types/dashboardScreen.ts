@@ -3,6 +3,7 @@ import type {
   BedInventoryProjection,
   ClinicAppointment,
 } from "@startup/contracts";
+
 export type DashboardScreenProps = {
   doctorAction: ReactNode;
   doctorRequests?: ReactNode;

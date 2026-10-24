@@ -1,12 +1,19 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const { createRequire } = require("node:module");
+
 const ts = require("typescript");
 
 const cache = new Map();
+
 function load(file) {
   file = path.resolve(file);
   if (cache.has(file)) return cache.get(file).exports;
@@ -37,10 +44,21 @@ function load(file) {
   });
   return module.exports;
 }
+
 const api = load(path.join(__dirname, "../src/clinic/operations.ts"));
+
 const schedules = load(path.join(__dirname, "../src/doctors/schedule.ts"));
+
 const clinical = load(path.join(__dirname, "../src/clinical/operations.ts"));
+
+const recovery = load(path.join(__dirname, "../src/clinic/recovery.ts"));
+
+const recoveryContracts = load(
+  path.join(__dirname, "../../contracts/src/appointment-recovery.ts")
+);
+
 const id = "c1bbd5a5-b9eb-4c72-86fd-790269cab1cb";
+
 function fixture(respond = () => id) {
   const calls = [];
   return {
@@ -53,6 +71,104 @@ function fixture(respond = () => id) {
     },
   };
 }
+
+test("overdue presentation distinguishes expiry, clinic delay, missed attendance and active visits", () => {
+  const now = Date.parse("2026-10-23T12:00:00Z");
+  const item = {
+    status: "confirmed",
+    visit_mode: "online",
+    starts_at: "2026-10-23T10:00:00Z",
+    ends_at: "2026-10-23T10:15:00Z",
+    request_expires_at: null,
+    decision_reason: null,
+    timezone: "Asia/Kolkata",
+    queue_state: null,
+    recovery: {
+      attendance_deadline: "2026-10-23T10:30:00Z",
+      can_manage: true,
+      reschedule_count: 0,
+      max_self_reschedules: 1,
+      reschedule_cutoff_minutes: 0,
+      request: null,
+    },
+  };
+  let view = recoveryContracts.appointmentRecoveryView(item, now);
+  assert.equal(view.patientStatus, "Appointment time passed");
+  assert.equal(view.staffStatus, "Needs review");
+  assert.equal(view.canJoin, false);
+  assert.equal(view.canCancel, false);
+  assert.equal(view.canMarkNoShow, true);
+  view = recoveryContracts.appointmentRecoveryView(
+    { ...item, visit_mode: "clinic", queue_state: "waiting" },
+    now
+  );
+  assert.equal(view.patientStatus, "Waiting for doctor");
+  assert.equal(view.canShowQueue, true);
+  assert.equal(view.canShowQr, false);
+  view = recoveryContracts.appointmentRecoveryView(
+    { ...item, status: "in_consultation" },
+    now
+  );
+  assert.equal(view.patientStatus, "Consultation in progress");
+  assert.equal(view.canJoin, true);
+  assert.equal(view.canMarkNoShow, false);
+  view = recoveryContracts.appointmentRecoveryView(
+    { ...item, status: "pending" },
+    now
+  );
+  assert.equal(view.patientStatus, "Request expired");
+  assert.equal(view.bookAgain, true);
+  view = recoveryContracts.appointmentRecoveryView(
+    { ...item, status: "no_show" },
+    now
+  );
+  assert.equal(view.patientStatus, "Missed appointment");
+  assert.equal(view.staffStatus, "Patient no-show");
+  view = recoveryContracts.appointmentRecoveryView(
+    {
+      ...item,
+      status: "cancelled",
+      recovery: { ...item.recovery, outcome: "doctor_unavailable" },
+    },
+    now
+  );
+  assert.equal(view.patientStatus, "Doctor unavailable");
+  assert.equal(view.canReschedule, true);
+  view = recoveryContracts.appointmentRecoveryView(
+    {
+      ...item,
+      status: "cancelled",
+      recovery: { ...item.recovery, outcome: "rescheduled" },
+    },
+    now
+  );
+  assert.equal(view.patientStatus, "Rescheduled");
+  assert.equal(view.canReschedule, false);
+});
+
+test("recovery operations forward optimistic versions and retry keys; invalid inputs do not call RPCs", async () => {
+  const f = fixture(() => ({ kind: "rescheduled", id }));
+  await recovery.rescheduleAppointment(f.client, {
+    appointmentId: id,
+    expectedVersion: 7,
+    targetWindowId: id,
+    reason: "  Change time  ",
+    idempotencyKey: id,
+  });
+  assert.equal(f.calls[0].args.p_expected_version, 7);
+  assert.equal(f.calls[0].args.p_idempotency_key, id);
+  assert.equal(f.calls[0].args.p_reason, "Change time");
+  await assert.rejects(
+    recovery.rescheduleAppointment(f.client, {
+      appointmentId: id,
+      expectedVersion: 0,
+      targetWindowId: id,
+      reason: "",
+      idempotencyKey: id,
+    })
+  );
+  assert.equal(f.calls.length, 1);
+});
 
 test("availability preserves the live daily allowance alongside time choices", async () => {
   const f = fixture(() => [

@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { CheckCheck } from "lucide-react-native";
 import { Copy } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
+
 export const DriverMessageBubble = memo(function DriverMessageBubble({
   message,
 }: DriverMessageBubbleProps) {

@@ -22,6 +22,7 @@ import {
 } from "../../practices/services/selectedPractice";
 import { selectedPracticeQueryKey } from "../../practices/utils/practiceQueryKeys";
 import { practiceTimeIso } from "../utils/unavailableTime";
+
 export function useUnavailableTimeManager() {
   const client = useQueryClient();
   const { showToast } = useToast();

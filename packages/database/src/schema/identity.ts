@@ -57,7 +57,9 @@ export const identity = clinzo
     ]
   )
   .enableRLS();
+
 export type Identity = typeof identity.$inferSelect;
+
 export type NewIdentity = typeof identity.$inferInsert;
 
 export const patient = clinzo
@@ -92,7 +94,9 @@ export const patient = clinzo
     ]
   )
   .enableRLS();
+
 export type Patient = typeof patient.$inferSelect;
+
 export type NewPatient = typeof patient.$inferInsert;
 
 export const patientAccess = clinzo
@@ -142,7 +146,9 @@ export const patientAccess = clinzo
     ]
   )
   .enableRLS();
+
 export type PatientAccess = typeof patientAccess.$inferSelect;
+
 export type NewPatientAccess = typeof patientAccess.$inferInsert;
 
 export const patientContact = clinzo
@@ -177,5 +183,7 @@ export const patientContact = clinzo
     ]
   )
   .enableRLS();
+
 export type PatientContact = typeof patientContact.$inferSelect;
+
 export type NewPatientContact = typeof patientContact.$inferInsert;

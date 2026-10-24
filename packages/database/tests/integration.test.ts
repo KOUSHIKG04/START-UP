@@ -2,6 +2,7 @@ import { afterAll, expect, test } from "bun:test";
 import postgres from "postgres";
 
 const url = process.env.TEST_DATABASE_URL;
+
 const enabled =
   !!url &&
   process.env.ALLOW_DATABASE_TESTS ===
@@ -9,9 +10,11 @@ const enabled =
 
 const db = enabled ? postgres(url!, { max: 1, prepare: false }) : undefined;
 // Apply migrations with Supabase CLI before running this opt-in suite.
+
 afterAll(async () => {
   await db?.end();
 });
+
 test.skipIf(!enabled)(
   "solo doctor permissions, tenant boundaries and immutable history in PostgreSQL",
   async () => {

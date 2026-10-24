@@ -1,5 +1,7 @@
 import type { DriverOfferDialogProps } from "../types/driver-offer-dialog";
+
 export type { DriverOfferDialogProps } from "../types/driver-offer-dialog";
+
 import { ModalSurface } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { CircleAlert, User } from "lucide-react-native";
@@ -88,6 +90,7 @@ export function DriverOfferDialog({
     </ModalSurface>
   );
 }
+
 function Address({ label, text }: { label: string; text: string }) {
   return (
     <View style={styles.address}>

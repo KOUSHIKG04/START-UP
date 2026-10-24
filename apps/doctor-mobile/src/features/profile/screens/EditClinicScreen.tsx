@@ -111,6 +111,7 @@ export function EditClinicScreen() {
     </DoctorScreen>
   );
 }
+
 const styles = StyleSheet.create({
   input: { height: 54, minHeight: 54, borderRadius: 12 },
   label: { color: palette.text, fontSize: 13 },

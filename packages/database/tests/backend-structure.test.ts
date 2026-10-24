@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
+
 const smokeRoot = join(root, "supabase/tests/smoke");
+
 const runner = readFileSync(
   join(root, "packages/database/tooling/verify-disposable.ps1"),
   "utf8"

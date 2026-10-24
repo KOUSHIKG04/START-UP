@@ -1,4 +1,5 @@
 "use client";
+
 import type { FacilityDoctorScheduleEditorProps } from "../types/facilityDoctorScheduleEditor";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ import {
   previewClocks,
   suggestConsultationDuration,
 } from "../utils/scheduleEditor";
+
 export function useFacilityDoctorSchedule({
   practiceId,
   mode,

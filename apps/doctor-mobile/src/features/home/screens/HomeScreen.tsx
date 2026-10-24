@@ -206,6 +206,7 @@ export function HomeScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   header: {
     backgroundColor: palette.primary,

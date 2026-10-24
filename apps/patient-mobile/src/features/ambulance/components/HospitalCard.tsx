@@ -6,6 +6,7 @@ import { memo } from "react";
 import { Pressable, View } from "react-native";
 import { Check, MapPin } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+
 export const HospitalCard = memo(function HospitalCard({
   hospital,
   selected,

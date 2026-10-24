@@ -83,7 +83,9 @@ export const doctor = clinzo
     ]
   )
   .enableRLS();
+
 export type Doctor = typeof doctor.$inferSelect;
+
 export type NewDoctor = typeof doctor.$inferInsert;
 
 export const specialty = clinzo
@@ -110,7 +112,9 @@ export const specialty = clinzo
     ]
   )
   .enableRLS();
+
 export type Specialty = typeof specialty.$inferSelect;
+
 export type NewSpecialty = typeof specialty.$inferInsert;
 
 export const symptom = clinzo
@@ -137,7 +141,9 @@ export const symptom = clinzo
     ]
   )
   .enableRLS();
+
 export type Symptom = typeof symptom.$inferSelect;
+
 export type NewSymptom = typeof symptom.$inferInsert;
 
 export const symptomSpecialty = clinzo
@@ -174,7 +180,9 @@ export const symptomSpecialty = clinzo
     ]
   )
   .enableRLS();
+
 export type SymptomSpecialty = typeof symptomSpecialty.$inferSelect;
+
 export type NewSymptomSpecialty = typeof symptomSpecialty.$inferInsert;
 
 export const doctorSpecialty = clinzo
@@ -209,7 +217,9 @@ export const doctorSpecialty = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorSpecialty = typeof doctorSpecialty.$inferSelect;
+
 export type NewDoctorSpecialty = typeof doctorSpecialty.$inferInsert;
 
 export const doctorLanguage = clinzo
@@ -241,7 +251,9 @@ export const doctorLanguage = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorLanguage = typeof doctorLanguage.$inferSelect;
+
 export type NewDoctorLanguage = typeof doctorLanguage.$inferInsert;
 
 export const doctorFacility = clinzo
@@ -279,7 +291,9 @@ export const doctorFacility = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorFacility = typeof doctorFacility.$inferSelect;
+
 export type NewDoctorFacility = typeof doctorFacility.$inferInsert;
 
 export const doctorFacilityRequest = clinzo
@@ -324,6 +338,7 @@ export const doctorFacilityRequest = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorFacilityRequest = typeof doctorFacilityRequest.$inferSelect;
 
 export const doctorPresence = clinzo
@@ -387,6 +402,15 @@ export const doctorSchedulePreferences = clinzo
       home_travel_buffer_minutes: integer("home_travel_buffer_minutes")
         .notNull()
         .default(0),
+      online_grace_minutes: integer("online_grace_minutes")
+        .notNull()
+        .default(15),
+      reschedule_cutoff_minutes: integer("reschedule_cutoff_minutes")
+        .notNull()
+        .default(0),
+      max_self_reschedules: integer("max_self_reschedules")
+        .notNull()
+        .default(1),
       slot_minutes: smallint("slot_minutes").notNull(),
       online_slot_minutes: smallint("online_slot_minutes").notNull(),
       home_slot_minutes: smallint("home_slot_minutes").notNull(),
@@ -424,6 +448,18 @@ export const doctorSchedulePreferences = clinzo
       check(
         "schedule_home_travel_buffer_check",
         sql`${table.home_travel_buffer_minutes} between 0 and 180`
+      ),
+      check(
+        "doctor_schedule_preferences_online_grace_minutes_check",
+        sql`${table.online_grace_minutes} between 0 and 180`
+      ),
+      check(
+        "doctor_schedule_preferences_reschedule_cutoff_minutes_check",
+        sql`${table.reschedule_cutoff_minutes} between 0 and 10080`
+      ),
+      check(
+        "doctor_schedule_preferences_max_self_reschedules_check",
+        sql`${table.max_self_reschedules} between 0 and 10`
       ),
       check(
         "schedule_service_hours_check",
@@ -481,5 +517,7 @@ export const practiceService = clinzo
     ]
   )
   .enableRLS();
+
 export type PracticeService = typeof practiceService.$inferSelect;
+
 export type NewPracticeService = typeof practiceService.$inferInsert;

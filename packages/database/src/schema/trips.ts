@@ -123,5 +123,7 @@ export const trip = clinzo
     ]
   )
   .enableRLS();
+
 export type Trip = typeof trip.$inferSelect;
+
 export type NewTrip = typeof trip.$inferInsert;

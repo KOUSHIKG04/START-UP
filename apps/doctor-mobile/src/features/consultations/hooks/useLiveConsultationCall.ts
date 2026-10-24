@@ -17,6 +17,7 @@ import {
   subscribeOnlineMessages,
 } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useLiveConsultationCall({
   appointmentId,
   name,

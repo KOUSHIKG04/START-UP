@@ -1,4 +1,5 @@
 import type { useConsultationForm } from "../hooks/useConsultationForm";
+
 export type FollowupStepProps = Pick<
   ReturnType<typeof useConsultationForm>,
   | "setStep"

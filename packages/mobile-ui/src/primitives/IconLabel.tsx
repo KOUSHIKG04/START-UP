@@ -3,6 +3,7 @@ import { useMobileTheme } from "../theme/MobileThemeProvider";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
+
 export type { IconLabelIconProps, IconLabelProps } from "../types/iconLabel";
 
 export function IconLabel({

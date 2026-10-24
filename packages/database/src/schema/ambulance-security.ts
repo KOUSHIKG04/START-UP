@@ -76,7 +76,9 @@ export const patientAmbulancePin = clinzo
     ]
   )
   .enableRLS();
+
 export type PatientAmbulancePin = typeof patientAmbulancePin.$inferSelect;
+
 export type NewPatientAmbulancePin = typeof patientAmbulancePin.$inferInsert;
 
 export const pinAttempt = clinzo
@@ -111,5 +113,7 @@ export const pinAttempt = clinzo
     ]
   )
   .enableRLS();
+
 export type PinAttempt = typeof pinAttempt.$inferSelect;
+
 export type NewPinAttempt = typeof pinAttempt.$inferInsert;

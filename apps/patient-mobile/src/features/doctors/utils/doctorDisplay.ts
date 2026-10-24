@@ -1,4 +1,5 @@
 export { doctorLanguageName } from "@startup/contracts";
+
 import type { PublicPractice } from "@startup/contracts";
 
 export function practiceAvailabilityLabel(

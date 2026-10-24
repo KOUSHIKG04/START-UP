@@ -1,11 +1,17 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 const root = path.resolve(__dirname, "../../..");
+
 const notification = (id, read = false) => ({
   id,
   template_key: "appointment.requested",
@@ -15,6 +21,7 @@ const notification = (id, read = false) => ({
   is_important: false,
   is_emergency: false,
 });
+
 function wrapper(
   app,
   data = [notification("unread"), notification("read", true)]

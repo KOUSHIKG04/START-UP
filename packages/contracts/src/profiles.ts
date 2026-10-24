@@ -1,4 +1,5 @@
 export type CredentialStatus = "pending" | "verified" | "suspended";
+
 export type OrganizationRole =
   | "owner"
   | "receptionist"
@@ -13,5 +14,6 @@ export interface MembershipProjection {
   role: OrganizationRole;
   doctorPracticeIds: string[];
 }
+
 export type DriverEnrollment =
   { kind: "independent" } | { kind: "invited"; invitationToken: string };

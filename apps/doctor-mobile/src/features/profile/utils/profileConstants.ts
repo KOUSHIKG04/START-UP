@@ -5,6 +5,7 @@ import {
   Star,
   Settings,
 } from "lucide-react-native";
+
 export const rows = [
   {
     title: "Edit profile",

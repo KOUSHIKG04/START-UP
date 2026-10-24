@@ -33,6 +33,7 @@ export function Label({
     </Text>
   );
 }
+
 export function Heading({
   children,
   style,
@@ -43,6 +44,7 @@ export function Heading({
     </Text>
   );
 }
+
 export function IconButton({
   children,
   label,
@@ -72,6 +74,7 @@ export function IconButton({
     </Pressable>
   );
 }
+
 export function DoctorHeader({
   title,
   trailing,
@@ -149,6 +152,7 @@ export function DoctorScreen({
     </KeyboardAvoidingView>
   );
 }
+
 export function MissingPatient() {
   return (
     <DoctorScreen title="Patient not found">
@@ -164,12 +168,14 @@ export function MissingPatient() {
     </DoctorScreen>
   );
 }
+
 export function Panel({
   children,
   style,
 }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   return <View style={[ui.panel, style]}>{children}</View>;
 }
+
 export function Choice({
   label,
   selected,

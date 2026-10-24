@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Filter } from "lucide-react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 export type {
   NotificationItem,
   NotificationDrawerProps,

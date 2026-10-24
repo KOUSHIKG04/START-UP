@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 function load(name) {
@@ -21,7 +26,9 @@ function load(name) {
   });
   return module.exports;
 }
+
 const { calculateMenuPosition } = load("dropdownPosition");
+
 test("dropdown opens below when there is room and above near the bottom edge", () => {
   const base = {
     triggerPosition: { x: 20, y: 100, width: 180, height: 44 },

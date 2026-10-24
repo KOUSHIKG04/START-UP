@@ -10,6 +10,7 @@ import { styles } from "./BookSlots.styles";
 import { BookingDateSection } from "./BookingDateSection";
 import { BookingTimeSection } from "./BookingTimeSection";
 import { BookingPatientSection } from "./BookingPatientSection";
+
 export function BookSlots({
   address,
   consultationType,

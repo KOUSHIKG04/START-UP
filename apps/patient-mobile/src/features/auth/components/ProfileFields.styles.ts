@@ -3,6 +3,7 @@ import { colors, fontFamilies } from "@startup/design-tokens";
 
 // One control size for profile fields, dropdowns, and the address drawer.
 export const PROFILE_FIELD_HEIGHT = 54;
+
 export const PROFILE_PLACEHOLDER_COLOR = "#9CA3AF";
 
 export const profileFormStyles = StyleSheet.create({

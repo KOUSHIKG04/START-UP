@@ -1,4 +1,5 @@
 import type { Point } from "../types/pick-location-screen";
+
 export const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 

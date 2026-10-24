@@ -5,6 +5,7 @@ import { Input } from "@startup/mobile-ui";
 import { Minus, Plus } from "lucide-react-native";
 import { Label } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
+
 export function NumberSetting({
   title,
   value,

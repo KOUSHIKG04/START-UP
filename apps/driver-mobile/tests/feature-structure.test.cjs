@@ -1,10 +1,15 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const ts = require("typescript");
 
 const root = path.resolve(__dirname, "../src/features");
+
 const files = (dir) =>
   fs
     .readdirSync(dir, { withFileTypes: true })
@@ -13,7 +18,9 @@ const files = (dir) =>
         ? files(path.join(dir, entry.name))
         : [path.join(dir, entry.name)]
     );
+
 const sources = files(root).filter((file) => /\.tsx?$/.test(file));
+
 const parse = (file) =>
   ts.createSourceFile(
     file,

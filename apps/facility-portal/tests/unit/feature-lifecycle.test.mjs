@@ -4,12 +4,14 @@ import { fileURLToPath } from "node:url";
 import { loadTestModule } from "../../scripts/load-test-module.mjs";
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
+
 function load(file, mocks, globals) {
   return loadTestModule(
     fileURLToPath(new URL(`../../src/features/${file}`, import.meta.url)),
     { mocks, globals }
   );
 }
+
 function hooks() {
   const effects = [],
     refs = [],

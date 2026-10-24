@@ -119,9 +119,13 @@ export const clinicalRecordSchema = z.object({
 });
 
 export type RecordVitalInput = z.infer<typeof recordVitalSchema>;
+
 export type ClinicalRecord = z.infer<typeof clinicalRecordSchema>;
+
 export type RecordDiagnosisInput = z.infer<typeof recordDiagnosisSchema>;
+
 export type IssuePrescriptionInput = z.infer<typeof issuePrescriptionSchema>;
+
 export type RecommendFollowupInput = z.infer<typeof recommendFollowupSchema>;
 
 export const consultationIntakeSchema = z
@@ -140,6 +144,7 @@ export const consultationIntakeSchema = z
       value.vitals.length,
     { message: "Choose each vital once." }
   );
+
 export type ConsultationIntakeInput = z.infer<typeof consultationIntakeSchema>;
 
 export const doctorConsultationDraftSchema = z.object({

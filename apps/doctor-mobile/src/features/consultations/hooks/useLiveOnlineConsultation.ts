@@ -9,6 +9,7 @@ import {
 import { useToast, useToastFeedback } from "@startup/mobile-ui";
 import { useOnlineVisit } from "./useOnlineVisit";
 import { supabase } from "../../../services/supabase";
+
 export function useLiveOnlineConsultation({
   appointmentId,
   initialChat,

@@ -1,5 +1,7 @@
 import type { FeedbackBottomSheetProps } from "../types/feedback-bottom-sheet";
+
 export type { FeedbackBottomSheetProps } from "../types/feedback-bottom-sheet";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { ModalSurface } from "@startup/mobile-ui";
 import { useState } from "react";

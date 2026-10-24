@@ -1,4 +1,5 @@
 import type { PrescriptionMedicine } from "../types/prescription";
+
 export type { PrescriptionMedicine } from "../types/prescription";
 
 export const prescriptionMedicines: PrescriptionMedicine[] = [

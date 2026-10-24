@@ -25,6 +25,7 @@ import {
   BOTTOM_NAV_BAR_WIDTH_TOLERANCE,
 } from "../utils/bottomNavBarConstants";
 import type { NavItem, BottomNavBarProps } from "../types/bottomNavBar";
+
 export type { NavItem, BottomNavBarProps } from "../types/bottomNavBar";
 
 export function BottomNavBar({

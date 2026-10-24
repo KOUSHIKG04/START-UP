@@ -17,6 +17,7 @@ import { palette, ui } from "../../../components/theme";
 import { useDriverHome } from "../hooks/useDriverHome";
 import { styles } from "../components/Home.styles";
 import { DriverOfferDialog } from "../components/DriverOfferDialog";
+
 export function HomeScreen() {
   const {
     greeting,

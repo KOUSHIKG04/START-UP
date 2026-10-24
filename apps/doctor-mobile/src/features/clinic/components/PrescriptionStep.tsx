@@ -1,5 +1,7 @@
 import type { PrescriptionStepProps } from "../types/prescription-step";
+
 export type { PrescriptionStepProps } from "../types/prescription-step";
+
 import { mealRelations } from "../utils/consultationConstants";
 import { Text, View } from "react-native";
 import { Button, DatePicker, Input } from "@startup/mobile-ui";

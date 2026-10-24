@@ -1,5 +1,7 @@
 import type { Props } from "../types/booking-confirmation-dialog";
+
 export type { Props } from "../types/booking-confirmation-dialog";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { Button, ModalSurface } from "@startup/mobile-ui";

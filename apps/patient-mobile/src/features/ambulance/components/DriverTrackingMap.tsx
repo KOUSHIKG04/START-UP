@@ -1,5 +1,7 @@
 import type { Props } from "../types/driver-tracking-map";
+
 export type { Props } from "../types/driver-tracking-map";
+
 import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
 import { Image, Platform } from "react-native";

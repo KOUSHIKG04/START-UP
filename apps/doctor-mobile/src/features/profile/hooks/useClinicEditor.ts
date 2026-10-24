@@ -9,6 +9,7 @@ import {
 } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
 import { useClinicLocationDraft } from "../../locations/stores/clinicLocationDraft";
+
 export function useClinicEditor() {
   const { facilityId } = useLocalSearchParams<{ facilityId: string }>();
   const { profile: sessionProfile } = useMobileSession();

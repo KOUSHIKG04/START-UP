@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
+
 export const styles = StyleSheet.create({
   body: {
     paddingVertical: 24,

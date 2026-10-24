@@ -8,7 +8,9 @@ export const bloodGroups = [
   "AB+",
   "AB−",
 ] as const;
+
 export const genders = ["Male", "Female", "Other / Prefer not to say"] as const;
+
 export const relations = [
   "Son",
   "Daughter",

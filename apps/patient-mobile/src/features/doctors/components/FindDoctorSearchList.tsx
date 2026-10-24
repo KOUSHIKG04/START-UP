@@ -1,6 +1,8 @@
 import type { FindDoctorSearchListProps } from "../types/find-doctor-search-list";
 import type { CategoryItem } from "../types/find-doctor-search-list";
+
 export type { CategoryItem } from "../types/find-doctor-search-list";
+
 import { AppText as Text, Chip } from "@startup/mobile-ui";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";

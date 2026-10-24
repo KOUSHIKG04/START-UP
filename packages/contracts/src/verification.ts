@@ -6,11 +6,13 @@ export const verificationStatusSchema = z.enum([
   "needs_resubmission",
   "verified",
 ]);
+
 export const verificationSubjectSchema = z.enum([
   "doctor",
   "facility",
   "driver",
 ]);
+
 export const verificationDocumentSchema = z.object({
   id: z.uuid(),
   kind: z.string(),
@@ -22,6 +24,7 @@ export const verificationDocumentSchema = z.object({
   submitted_at: z.string(),
   reviewed_at: z.string().nullable(),
 });
+
 export const verificationQueueItemSchema = z.object({
   id: z.uuid(),
   status: verificationStatusSchema,
@@ -33,6 +36,7 @@ export const verificationQueueItemSchema = z.object({
   document_count: z.number().int(),
   rejected_count: z.number().int(),
 });
+
 export const verificationCaseSchema = z.object({
   id: z.uuid(),
   status: verificationStatusSchema,
@@ -52,6 +56,7 @@ export const verificationCaseSchema = z.object({
     })
   ),
 });
+
 export const verificationDecisionSchema = z.discriminatedUnion("decision", [
   z.object({ decision: z.literal("approved"), reason: z.null().optional() }),
   z.object({
@@ -59,8 +64,11 @@ export const verificationDecisionSchema = z.discriminatedUnion("decision", [
     reason: z.string().trim().min(10).max(1000),
   }),
 ]);
+
 export type VerificationQueueItem = z.infer<typeof verificationQueueItemSchema>;
+
 export type VerificationCase = z.infer<typeof verificationCaseSchema>;
+
 export const companyDoctorFacilityRequestSchema = z.object({
   facility_name: z.string(),
   facility_kind: z.enum(["hospital", "clinic"]),
@@ -69,6 +77,7 @@ export const companyDoctorFacilityRequestSchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
   practice_active: z.boolean(),
 });
+
 export type CompanyDoctorFacilityRequest = z.infer<
   typeof companyDoctorFacilityRequestSchema
 >;

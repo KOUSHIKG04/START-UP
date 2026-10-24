@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const uuidSchema = z.string().uuid();
+
 export const phoneSchema = z
   .string()
   .regex(/^\+[1-9][0-9]{7,14}$/, "Use an international phone number");

@@ -51,7 +51,9 @@ export const prescription = clinzo
     ]
   )
   .enableRLS();
+
 export type Prescription = typeof prescription.$inferSelect;
+
 export type NewPrescription = typeof prescription.$inferInsert;
 
 export const prescriptionRevision = clinzo
@@ -109,7 +111,9 @@ export const prescriptionRevision = clinzo
     ]
   )
   .enableRLS();
+
 export type PrescriptionRevision = typeof prescriptionRevision.$inferSelect;
+
 export type NewPrescriptionRevision = typeof prescriptionRevision.$inferInsert;
 
 export const prescriptionItem = clinzo
@@ -148,7 +152,9 @@ export const prescriptionItem = clinzo
     ]
   )
   .enableRLS();
+
 export type PrescriptionItem = typeof prescriptionItem.$inferSelect;
+
 export type NewPrescriptionItem = typeof prescriptionItem.$inferInsert;
 
 export const medicationPhase = clinzo
@@ -215,7 +221,9 @@ export const medicationPhase = clinzo
     ]
   )
   .enableRLS();
+
 export type MedicationPhase = typeof medicationPhase.$inferSelect;
+
 export type NewMedicationPhase = typeof medicationPhase.$inferInsert;
 
 export const medicationTiming = clinzo
@@ -264,7 +272,9 @@ export const medicationTiming = clinzo
     ]
   )
   .enableRLS();
+
 export type MedicationTiming = typeof medicationTiming.$inferSelect;
+
 export type NewMedicationTiming = typeof medicationTiming.$inferInsert;
 
 export const patientRoutine = clinzo
@@ -301,5 +311,7 @@ export const patientRoutine = clinzo
     ]
   )
   .enableRLS();
+
 export type PatientRoutine = typeof patientRoutine.$inferSelect;
+
 export type NewPatientRoutine = typeof patientRoutine.$inferInsert;

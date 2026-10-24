@@ -1,4 +1,5 @@
 import { type DoctorPersonalAddressInput } from "@startup/contracts";
+
 export const emptyPersonalAddress: DoctorPersonalAddressInput = {
   label: "Home",
   kind: "house",

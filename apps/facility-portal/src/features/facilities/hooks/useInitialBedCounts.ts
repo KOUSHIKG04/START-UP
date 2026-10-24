@@ -1,4 +1,5 @@
 "use client";
+
 import type { InitialBedCountsFormProps } from "../types/initialBedCountsForm";
 import { useTransition } from "react";
 import { toast } from "@startup/web-ui/components/ui/toast";
@@ -7,6 +8,7 @@ import {
   reloadBedCounts,
   BedSaveError,
 } from "../client/bedInventory";
+
 export function useInitialBedCounts({
   row,
   onSaved,

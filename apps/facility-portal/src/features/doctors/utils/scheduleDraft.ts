@@ -2,6 +2,7 @@ import type {
   DoctorScheduleSettings,
   DoctorSchedulePreferences,
 } from "@startup/contracts";
+
 export function settingsDraft(
   saved: DoctorSchedulePreferences
 ): DoctorScheduleSettings {

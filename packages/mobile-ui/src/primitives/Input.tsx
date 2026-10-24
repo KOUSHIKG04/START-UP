@@ -4,6 +4,7 @@ import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import { StyleSheet, View } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import type { InputProps } from "../types/input";
+
 export type { InputProps } from "../types/input";
 
 export function Input({

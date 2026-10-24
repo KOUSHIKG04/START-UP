@@ -4,6 +4,7 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { ShieldCheck } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+
 export function SafetyCard() {
   return (
     <View style={styles.wellnessBanner}>

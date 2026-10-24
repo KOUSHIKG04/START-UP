@@ -7,6 +7,8 @@ import { router } from "expo-router";
 import { LiveKitRoom } from "@livekit/react-native";
 import { Button, Loader } from "@startup/mobile-ui";
 import { Heading, Label, DoctorScreen } from "../../../components/DoctorScreen";
+import { appointmentRecoveryView } from "@startup/contracts";
+
 export function LiveOnlineConsultation({
   appointmentId,
   initialChat,
@@ -62,6 +64,29 @@ export function LiveOnlineConsultation({
           variant="outline"
           label="Back to appointments"
           onPress={() => router.replace("/appointments")}
+        />
+      </DoctorScreen>
+    );
+  if (
+    appointment.status === "confirmed" &&
+    !appointmentRecoveryView(appointment).canJoin
+  )
+    return (
+      <DoctorScreen title="Appointment time passed" bottomNav={false}>
+        <Heading>{appointment.patient_name}</Heading>
+        <Label>
+          Attendance needs review. Open the appointment to record the outcome or
+          arrange a new time.
+        </Label>
+        <Button
+          theme="doctor"
+          label="Review appointment"
+          onPress={() =>
+            router.replace({
+              pathname: "/appointment-details",
+              params: { appointmentId },
+            })
+          }
         />
       </DoctorScreen>
     );

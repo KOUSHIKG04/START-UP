@@ -1,7 +1,9 @@
 import { AppText as Text } from "../primitives/AppText";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { SectionHeaderProps } from "../types/sectionHeader";
+
 export type { SectionHeaderProps } from "../types/sectionHeader";
+
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { fontFamilies } from "@startup/design-tokens";

@@ -1,5 +1,7 @@
 import type { HomeVisitFlowProps } from "../types/visit-session";
+
 export type { HomeVisitFlowProps } from "../types/visit-session";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Info } from "lucide-react-native";

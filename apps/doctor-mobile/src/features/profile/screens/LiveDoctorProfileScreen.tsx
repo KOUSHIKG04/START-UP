@@ -111,6 +111,7 @@ export function LiveDoctorProfileScreen() {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 20, paddingBottom: 120, gap: 16 },

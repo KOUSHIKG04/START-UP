@@ -6,6 +6,7 @@ import {
   register,
   openNotification,
 } from "../services/deviceNotifications";
+
 const Notifications = notificationModule;
 
 export function useDeviceNotifications(

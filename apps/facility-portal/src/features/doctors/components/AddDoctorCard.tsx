@@ -1,4 +1,5 @@
 "use client";
+
 import type { AddDoctorCardProps } from "../types/addDoctorCard";
 
 import { useEffect } from "react";

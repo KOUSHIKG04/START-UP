@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
+
 export const s = StyleSheet.create({
   screen: { flex: 1, borderWidth: 1, borderColor: "rgba(255,255,255,0.06)" },
   safeArea: { flex: 1, justifyContent: "space-between" },

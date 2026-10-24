@@ -81,7 +81,9 @@ export const dispatchRound = clinzo
     ]
   )
   .enableRLS();
+
 export type DispatchRound = typeof dispatchRound.$inferSelect;
+
 export type NewDispatchRound = typeof dispatchRound.$inferInsert;
 
 export const dispatchOffer = clinzo
@@ -138,7 +140,9 @@ export const dispatchOffer = clinzo
     ]
   )
   .enableRLS();
+
 export type DispatchOffer = typeof dispatchOffer.$inferSelect;
+
 export type NewDispatchOffer = typeof dispatchOffer.$inferInsert;
 
 export const ambulanceAssignment = clinzo
@@ -226,5 +230,7 @@ export const ambulanceAssignment = clinzo
     ]
   )
   .enableRLS();
+
 export type AmbulanceAssignment = typeof ambulanceAssignment.$inferSelect;
+
 export type NewAmbulanceAssignment = typeof ambulanceAssignment.$inferInsert;

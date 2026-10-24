@@ -1,4 +1,5 @@
 "use server";
+
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -24,9 +25,12 @@ import {
   listClinicUnavailability,
   addClinicUnavailability,
   revokeClinicUnavailability,
+  setAppointmentRecoveryPolicy,
 } from "@startup/data-access";
+import { recoveryPolicySchema } from "@startup/contracts";
 import { requireApprovedFacility } from "@/server/auth/facilityAccess";
 import { createClient } from "@/lib/supabase/server";
+
 async function authorizedPractice(practiceId: string) {
   uuidSchema.parse(practiceId);
   await requireApprovedFacility();
@@ -46,6 +50,19 @@ async function authorizedPractice(practiceId: string) {
   const settings = await getMySchedulePreferences(client, practiceId);
   return { client, doctor, settings };
 }
+
+export async function loadFacilityRecoveryPolicy(practiceId: string) {
+  return (await authorizedPractice(practiceId)).settings;
+}
+
+export async function saveFacilityRecoveryPolicy(input: unknown) {
+  const parsed = recoveryPolicySchema.parse(input);
+  const { client } = await authorizedPractice(parsed.practiceId);
+  const settings = await setAppointmentRecoveryPolicy(client, parsed);
+  revalidatePath("/doctor-schedules");
+  return settings;
+}
+
 export async function loadFacilityDoctorSchedule(
   practiceId: string,
   localDay?: string
@@ -166,6 +183,7 @@ export async function removeFacilityDoctorUnavailability(
     };
   }
 }
+
 export async function saveFacilityDoctorSchedule(
   practiceId: string,
   settings: DoctorScheduleSettings,
@@ -199,6 +217,7 @@ export async function saveFacilityDoctorSchedule(
     };
   }
 }
+
 export async function publishFacilityDoctorSlots(
   input: PublishSelectedDoctorSlotsInput
 ) {

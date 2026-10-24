@@ -46,7 +46,9 @@ export const setDriverAvailabilitySchema = z
 export type RegisterAmbulanceVehicleInput = z.infer<
   typeof registerAmbulanceVehicleSchema
 >;
+
 export type MyAmbulanceFleet = z.infer<typeof myAmbulanceFleetSchema>;
+
 export type SetDriverAvailabilityInput = z.infer<
   typeof setDriverAvailabilitySchema
 >;

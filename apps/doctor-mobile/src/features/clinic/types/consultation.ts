@@ -1,6 +1,7 @@
 import type { getDoctorConsultationDraft } from "@startup/data-access";
 import { type ReactNode } from "react";
 import type { IssuePrescriptionInput } from "@startup/contracts";
+
 export type Medicine = IssuePrescriptionInput["items"][number];
 
 export type DraftMedicine = Medicine & { draftId: string };

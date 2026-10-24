@@ -9,6 +9,7 @@ import { colors } from "@startup/design-tokens";
 import { Button, Header, Input } from "@startup/mobile-ui";
 
 import { styles } from "../components/LocationPicker.styles";
+
 export default function DriverLocationScreen() {
   const {
     insets,

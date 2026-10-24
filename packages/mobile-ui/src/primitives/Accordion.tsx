@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { ChevronDown } from "lucide-react-native";
 import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
 import type { AccordionVariant, AccordionProps } from "../types/accordion";
+
 export type { AccordionVariant, AccordionProps } from "../types/accordion";
 
 export function Accordion({

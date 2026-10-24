@@ -1,4 +1,5 @@
 "use client";
+
 import type { NewAppointmentDialogProps } from "../types/newAppointmentDialog";
 import type { Practice, Slot } from "../types/newAppointmentDialog";
 import * as React from "react";
@@ -9,6 +10,7 @@ import {
   loadPortalWalkInPractices,
   loadPortalWalkInSlots,
 } from "../server/actions";
+
 export function useNewAppointment({ onCreated }: NewAppointmentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);

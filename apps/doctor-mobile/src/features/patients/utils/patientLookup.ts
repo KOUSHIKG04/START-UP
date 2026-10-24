@@ -1,4 +1,5 @@
 import { patients } from "../../../data/demo";
+
 export function lookupPatient(value: string) {
   const clean = value.trim();
   let id = clean;

@@ -1,4 +1,5 @@
 "use client";
+
 import { getFacilityLocation } from "../services/browserLocation";
 import type { FacilityVerificationFormProps } from "../types/facilityVerificationForm";
 import type {
@@ -15,6 +16,7 @@ import {
 } from "@startup/data-access";
 import type { BedTypeCatalogItem } from "@startup/contracts";
 import { useRouter } from "next/navigation";
+
 export function useFacilityVerification({
   facilities,
 }: FacilityVerificationFormProps) {

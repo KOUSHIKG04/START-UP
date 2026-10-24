@@ -26,6 +26,7 @@ import { WorkingDaysPanel } from "../components/WorkingDaysPanel";
 import { ClinicHoursPanel } from "../components/ClinicHoursPanel";
 import { NumberSetting } from "../components/NumberSetting";
 import { useScheduleEditor } from "../hooks/useScheduleEditor";
+import { AppointmentRecoveryPolicy } from "../components/AppointmentRecoveryPolicy";
 
 export function ScheduleScreen({ mode }: ScheduleScreenProps) {
   const {
@@ -373,6 +374,12 @@ export function ScheduleScreen({ mode }: ScheduleScreenProps) {
         }
         onPress={() => void save()}
       />
+      {selectedPracticeId && saved.data ? (
+        <AppointmentRecoveryPolicy
+          key={selectedPracticeId}
+          practiceId={selectedPracticeId}
+        />
+      ) : null}
       <ModalSurface
         visible={showAutoBookingHelp}
         onClose={() => setShowAutoBookingHelp(false)}

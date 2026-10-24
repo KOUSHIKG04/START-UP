@@ -58,7 +58,9 @@ export const driverVehicleSubmissionSchema = z
   .strict();
 
 export type DriverProfileInput = z.input<typeof driverProfileInputSchema>;
+
 export type DriverDocumentKind = z.infer<typeof driverDocumentKindSchema>;
+
 export type DriverVehicleSubmission = z.input<
   typeof driverVehicleSubmissionSchema
 >;
@@ -100,6 +102,7 @@ export const driverRegistrationSubmissionSchema = z
 export type DriverRegistrationDetails = z.input<
   typeof driverRegistrationDetailsSchema
 >;
+
 export type DriverRegistrationSubmission = z.input<
   typeof driverRegistrationSubmissionSchema
 >;

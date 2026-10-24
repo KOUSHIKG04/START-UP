@@ -2,6 +2,7 @@ import { useToastFeedback } from "@startup/mobile-ui";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { mobileSession, useMobileSession } from "../../../services/supabase";
+
 export function useAccountSetup() {
   const auth = useMobileSession();
   const [error, setError] = useState("");

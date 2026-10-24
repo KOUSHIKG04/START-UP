@@ -68,6 +68,7 @@ import {
 } from "../../services/supabase";
 
 const genders = ["Male", "Female", "Other / Prefer not to say"];
+
 const specialties = [
   "General Physician",
   "Cardiologist",
@@ -81,6 +82,7 @@ const specialties = [
   "Psychiatrist",
   "Other",
 ];
+
 const languages = [
   "English",
   "Hindi",
@@ -90,6 +92,7 @@ const languages = [
   "Malayalam",
   "Other",
 ];
+
 const languageCodes: Record<string, string> = {
   English: "en",
   Hindi: "hi",
@@ -1133,6 +1136,7 @@ export default function DoctorOnboarding() {
     </OnboardingShell>
   );
 }
+
 const styles = StyleSheet.create({
   body: {
     alignSelf: "center",

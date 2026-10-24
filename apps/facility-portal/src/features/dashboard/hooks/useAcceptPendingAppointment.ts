@@ -1,8 +1,10 @@
 "use client";
+
 import { toast } from "@startup/web-ui/components/ui/toast";
 import type { AcceptPendingAppointmentButtonProps } from "../types/acceptPendingAppointmentButton";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+
 export function useAcceptPendingAppointment({
   appointmentId,
   expectedVersion,

@@ -1,5 +1,6 @@
 import type { ClinicAppointment } from "@startup/contracts";
 import { clinicAppointmentCard } from "./clinicAppointmentCard";
+import { appointmentRecoveryView } from "@startup/contracts";
 
 export function isClinicDay(item: ClinicAppointment, now = new Date()) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -12,12 +13,8 @@ export function isClinicDay(item: ClinicAppointment, now = new Date()) {
 }
 
 export function canOpenClinicVisit(item: ClinicAppointment, now = new Date()) {
-  return (
-    item.visit_mode === "clinic" &&
-    ["confirmed", "in_consultation"].includes(item.status) &&
-    Boolean(item.queue_state) &&
-    (item.queue_state !== "awaiting_arrival" || isClinicDay(item, now))
-  );
+  const recovery = appointmentRecoveryView(item, now.getTime());
+  return recovery.canShowQr || recovery.canShowQueue;
 }
 
 export function clinicVisitRoute(item: ClinicAppointment) {

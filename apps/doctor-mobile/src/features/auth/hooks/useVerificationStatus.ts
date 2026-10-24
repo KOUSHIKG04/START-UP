@@ -13,6 +13,7 @@ import {
 } from "@startup/data-access";
 import { mobileSession, supabase } from "../../../services/supabase";
 import { useDoctorVerification } from "./useDoctorVerification";
+
 export function useVerificationStatus() {
   const { submitted, profile, review, error, loading, refreshing, refresh } =
     useDoctorVerification({ refreshSession: false });

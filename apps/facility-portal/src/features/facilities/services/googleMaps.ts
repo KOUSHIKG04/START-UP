@@ -1,5 +1,7 @@
 "use client";
+
 import type { MapsNamespace, MapWindow } from "../types/facilityLocationMap";
+
 export let mapsPromise: Promise<MapsNamespace> | null = null;
 
 export function loadMaps(apiKey: string): Promise<MapsNamespace> {

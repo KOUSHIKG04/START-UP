@@ -4,6 +4,7 @@ import { Check } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { useMobileTheme } from "../theme/MobileThemeProvider";
 import type { CheckboxProps } from "../types/checkbox";
+
 export type { CheckboxProps } from "../types/checkbox";
 
 export function Checkbox({

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listClinicAppointments,
@@ -11,10 +12,16 @@ import type {
   BookingFilter,
 } from "../types/appointments";
 import { supabase } from "../../../services/supabase";
+
 export function useAppointments({ onBackPress }: AppointmentsScreenProps) {
   const { showToast } = useToast();
   const [filter, setFilter] = useState<BookingFilter>("All");
   const [error, setError] = useState("");
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
   const queryClient = useQueryClient();
   const appointments = useQuery<ClinicAppointment[]>({
     queryKey: ["patient-clinic-appointments"],
@@ -54,5 +61,10 @@ export function useAppointments({ onBackPress }: AppointmentsScreenProps) {
         (filter === "Home Visit" && item.visit_mode === "home")
     ) ?? [];
 
-  return { filter, setFilter, appointments, cancel, visible };
+  useFocusEffect(
+    useCallback(() => {
+      void appointments.refetch();
+    }, [appointments.refetch])
+  );
+  return { filter, setFilter, appointments, cancel, visible, now };
 }

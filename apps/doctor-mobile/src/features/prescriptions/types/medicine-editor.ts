@@ -1,4 +1,5 @@
 import type { Medicine } from "../../../types/doctor";
+
 export type MedicineEditorProps = {
   isEditingExisting: boolean;
   medicine: Medicine;

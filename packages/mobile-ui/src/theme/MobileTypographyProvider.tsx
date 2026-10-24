@@ -6,6 +6,7 @@ import {
 
 const TypographyContext = createContext(false);
 /** Explicit opt-in keeps Doctor and Driver unchanged while Patient trials the scale. */
+
 export function MobileTypographyProvider({
   enabled = true,
   children,
@@ -19,9 +20,11 @@ export function MobileTypographyProvider({
     </TypographyContext.Provider>
   );
 }
+
 export function useReadableTypography() {
   return useContext(TypographyContext);
 }
+
 export function useMobileTypography(role: MobileTypographyRole) {
   return useReadableTypography() ? mobileTypography[role] : undefined;
 }

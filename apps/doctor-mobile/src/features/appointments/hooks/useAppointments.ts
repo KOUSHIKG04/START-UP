@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listMyPracticeAppointments } from "@startup/data-access";
 import type { VisitMode } from "../../../types/doctor";
 import { supabase } from "../../../services/supabase";
+
 export function useAppointments() {
   const { appointmentId } = useLocalSearchParams<{ appointmentId?: string }>();
   const openedFromHome = useRef<string | null>(null);
@@ -14,6 +15,11 @@ export function useAppointments() {
   const datesRef = useRef<ScrollView>(null);
   const pendingScrollDate = useRef<string | null>(date);
   const [filter, setFilter] = useState<"all" | VisitMode>("all");
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   const appointments = useQuery({
     queryKey: ["doctor-clinic-appointments", "all"],
@@ -118,6 +124,7 @@ export function useAppointments() {
     ) ?? [];
 
   return {
+    now,
     appointmentId,
     date,
     month,

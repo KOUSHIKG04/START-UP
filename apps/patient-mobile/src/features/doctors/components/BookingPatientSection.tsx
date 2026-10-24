@@ -1,5 +1,7 @@
 import type { Props } from "../types/booking-patient-section";
+
 export type { Props } from "../types/booking-patient-section";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { View } from "react-native";
 import { Chip, FadedScrollView } from "@startup/mobile-ui";

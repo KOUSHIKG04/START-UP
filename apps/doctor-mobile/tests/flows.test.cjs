@@ -1,8 +1,12 @@
 const assert = require("node:assert/strict");
+
 const { test } = require("node:test");
+
 const fs = require("node:fs");
+
 const ts = require("typescript");
 // Compile only this app's TypeScript for Node's test runner, without adding a test runtime.
+
 require.extensions[".ts"] = (module, filename) => {
   const result = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
     compilerOptions: {
@@ -13,9 +17,21 @@ require.extensions[".ts"] = (module, filename) => {
   });
   module._compile(result.outputText, filename);
 };
+
 const { initialSchedule } = require("../src/data/demo.ts");
-const { endMinutes, minutes, scheduleError, previewSlots, slotStartTimes } = require("../src/features/schedule/utils/schedule.ts");
-const { lookupPatient } = require("../src/features/patients/utils/patientLookup.ts");
+
+const {
+  endMinutes,
+  minutes,
+  scheduleError,
+  previewSlots,
+  slotStartTimes,
+} = require("../src/features/schedule/utils/schedule.ts");
+
+const {
+  lookupPatient,
+} = require("../src/features/patients/utils/patientLookup.ts");
+
 const { useDoctorStore } = require("../src/stores/useDoctorStore.ts");
 
 test("slots fit fully inside working hours and change with duration", () => {
@@ -32,6 +48,7 @@ test("slots fit fully inside working hours and change with duration", () => {
   );
   assert.equal(previewSlots({ ...initialSchedule, duration: 60 }).length, 8);
 });
+
 test("invalid times, fees and no working days are rejected", () => {
   assert.ok(scheduleError({ ...initialSchedule, end: "08:00" }));
   assert.ok(scheduleError({ ...initialSchedule, start: "25:00" }));
@@ -43,11 +60,20 @@ test("invalid times, fees and no working days are rejected", () => {
 test("24:00 is an end-of-day boundary, never a start time", () => {
   assert.equal(endMinutes("24:00"), 1440);
   assert.ok(Number.isNaN(minutes("24:00")));
-  assert.equal(scheduleError({ ...initialSchedule, start: "23:00", end: "24:00", duration: 30 }), undefined);
+  assert.equal(
+    scheduleError({
+      ...initialSchedule,
+      start: "23:00",
+      end: "24:00",
+      duration: 30,
+    }),
+    undefined
+  );
   assert.deepEqual(slotStartTimes("23:00", "24:00", 30), ["23:00", "23:30"]);
   assert.deepEqual(slotStartTimes("24:00", "24:00", 30), []);
   assert.ok(scheduleError({ ...initialSchedule, end: "24:01" }));
 });
+
 test("QR lookup accepts supported IDs and refuses arbitrary payloads", () => {
   assert.equal(lookupPatient(" clz-0001 ").name, "Meera Sharma");
   assert.equal(lookupPatient('{"patientId":"CLZ-0002"}').name, "Akashadeepa");
@@ -60,14 +86,13 @@ test("QR lookup accepts supported IDs and refuses arbitrary payloads", () => {
   ])
     assert.equal(lookupPatient(invalid), undefined);
 });
+
 test("notes and prescriptions remain isolated by visit, including the same patient", () => {
   useDoctorStore.getState().reset();
-  useDoctorStore
-    .getState()
-    .updateConsultation("clinic-meera", "CLZ-0001", {
-      notes: "Clinic draft",
-      signed: true,
-    });
+  useDoctorStore.getState().updateConsultation("clinic-meera", "CLZ-0001", {
+    notes: "Clinic draft",
+    signed: true,
+  });
   const state = useDoctorStore.getState();
   assert.equal(state.consultations["clinic-meera"].notes, "Clinic draft");
   assert.equal(state.consultations["clinic-meera"].signed, true);
@@ -75,6 +100,7 @@ test("notes and prescriptions remain isolated by visit, including the same patie
   assert.equal(state.consultations["home-meera"].signed, false);
   assert.equal(state.consultations["online-akasha"].notes, "");
 });
+
 test("completion is idempotent and new lookup visits are initialized", () => {
   useDoctorStore.getState().reset();
   const state = useDoctorStore.getState();
@@ -91,6 +117,7 @@ test("completion is idempotent and new lookup visits are initialized", () => {
     true
   );
 });
+
 test("messages stay in their own conversation and reset clears session changes", () => {
   useDoctorStore.getState().reset();
   useDoctorStore.getState().sendMessage("home-meera", "On my way");

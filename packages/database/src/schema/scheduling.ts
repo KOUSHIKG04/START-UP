@@ -127,7 +127,9 @@ export const scheduleRule = clinzo
     ]
   )
   .enableRLS();
+
 export type ScheduleRule = typeof scheduleRule.$inferSelect;
+
 export type NewScheduleRule = typeof scheduleRule.$inferInsert;
 
 export const scheduleBreak = clinzo
@@ -159,7 +161,9 @@ export const scheduleBreak = clinzo
     ]
   )
   .enableRLS();
+
 export type ScheduleBreak = typeof scheduleBreak.$inferSelect;
+
 export type NewScheduleBreak = typeof scheduleBreak.$inferInsert;
 
 export const scheduleException = clinzo
@@ -217,7 +221,9 @@ export const scheduleException = clinzo
     ]
   )
   .enableRLS();
+
 export type ScheduleException = typeof scheduleException.$inferSelect;
+
 export type NewScheduleException = typeof scheduleException.$inferInsert;
 
 export const doctorBookingDay = clinzo
@@ -256,7 +262,9 @@ export const doctorBookingDay = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorBookingDay = typeof doctorBookingDay.$inferSelect;
+
 export type NewDoctorBookingDay = typeof doctorBookingDay.$inferInsert;
 
 export const session = clinzo
@@ -338,7 +346,9 @@ export const session = clinzo
     ]
   )
   .enableRLS();
+
 export type Session = typeof session.$inferSelect;
+
 export type NewSession = typeof session.$inferInsert;
 
 export const sessionService = clinzo
@@ -377,7 +387,9 @@ export const sessionService = clinzo
     ]
   )
   .enableRLS();
+
 export type SessionService = typeof sessionService.$inferSelect;
+
 export type NewSessionService = typeof sessionService.$inferInsert;
 
 export const appointmentWindow = clinzo
@@ -427,5 +439,7 @@ export const appointmentWindow = clinzo
     ]
   )
   .enableRLS();
+
 export type AppointmentWindow = typeof appointmentWindow.$inferSelect;
+
 export type NewAppointmentWindow = typeof appointmentWindow.$inferInsert;

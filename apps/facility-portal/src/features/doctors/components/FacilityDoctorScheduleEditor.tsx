@@ -1,4 +1,5 @@
 "use client";
+
 import { workingDayLabels } from "../utils/facilityDoctorScheduleEditorConstants";
 
 import { ScheduleSection } from "./ScheduleSection";
@@ -20,9 +21,11 @@ import {
   DialogTitle,
 } from "@startup/web-ui/components/ui/dialog";
 import { ClockTimePicker } from "./ClockTimePicker";
+import { AppointmentRecoveryPolicy } from "./AppointmentRecoveryPolicy";
 import { ClockDurationPicker } from "./ClockDurationPicker";
 import { UnavailableDatePicker } from "./UnavailableDatePicker";
 import { card } from "../utils/facilityScheduleEditorConstants";
+
 export function FacilityDoctorScheduleEditor({
   practiceId,
   mode,
@@ -477,6 +480,7 @@ export function FacilityDoctorScheduleEditor({
           appointments are respected.
         </p>
       </HelpDialog>
+      <AppointmentRecoveryPolicy key={practiceId} practiceId={practiceId} />
       <Dialog
         open={suggestedDuration !== null}
         onOpenChange={(open: boolean) => {

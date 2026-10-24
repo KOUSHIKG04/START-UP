@@ -8,10 +8,12 @@ export interface AppointmentsPaginationData {
 
 import type { ClinicAppointment } from "@startup/contracts";
 import type { AppointmentPeriod } from "./appointments";
+
 export type AppointmentsTableProps = {
   now: number;
   pageRows: ClinicAppointment[];
   pending: boolean;
+  onManage: (item: ClinicAppointment) => void;
   onAct: (
     item: ClinicAppointment,
     action:

@@ -56,7 +56,9 @@ export const savedPatientLocationSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
 });
+
 export type SavedPatientLocationInput = z.input<
   typeof savedPatientLocationInputSchema
 >;
+
 export type SavedPatientLocation = z.infer<typeof savedPatientLocationSchema>;

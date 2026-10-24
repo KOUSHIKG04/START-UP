@@ -1,4 +1,5 @@
 "use client";
+
 import { useBedManagementScreen } from "../hooks/useBedManagementScreen";
 
 import type { BedManagementScreenProps } from "../types/bedManagementScreen";

@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
+
 export const s = StyleSheet.create({
   googleAttribution: {
     color: "#5E5E5E",

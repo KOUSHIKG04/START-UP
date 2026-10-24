@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+
 export type OnboardingShellProps = {
   children: ReactNode;
   onBack?: () => void;

@@ -9,6 +9,7 @@ test("driver cannot go online before verification; submission never grants appro
   assert.equal(useDriver.getState().verified, false);
   assert.equal(useDriver.getState().online, false);
 });
+
 test("expired requests cannot be accepted", () => {
   useDriver.getState().previewVerified();
   useDriver.getState().setOnline(true);
@@ -17,6 +18,7 @@ test("expired requests cannot be accepted", () => {
   useDriver.getState().accept();
   assert.equal(useDriver.getState().stage, "idle");
 });
+
 test("trip requires acceptance, arrival and matching PIN; completion pays once", () => {
   const d = useDriver.getState();
   d.request();
@@ -35,6 +37,7 @@ test("trip requires acceptance, arrival and matching PIN; completion pays once",
   d.finish();
   assert.equal(useDriver.getState().stage, "idle");
 });
+
 test("messages require an active trip and preserve previous conversation", () => {
   const d = useDriver.getState();
   const before = useDriver.getState().messages.length;

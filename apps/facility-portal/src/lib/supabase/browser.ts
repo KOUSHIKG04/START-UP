@@ -1,4 +1,5 @@
 "use client";
+
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@startup/data-access";
 import { getSupabaseConfig } from "./config";

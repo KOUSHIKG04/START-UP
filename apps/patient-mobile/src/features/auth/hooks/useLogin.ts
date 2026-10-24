@@ -6,6 +6,7 @@ import {
   signUpWithDevPassword,
 } from "@startup/data-access";
 import { supabase } from "../../../services/supabase";
+
 export function useLogin() {
   const [mode, setMode] = useState<"dev" | "prod">("dev");
   const [emailMode, setEmailMode] = useState<"signin" | "signup">("signin");

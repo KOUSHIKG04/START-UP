@@ -73,6 +73,7 @@ export default function DriverPhone() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "white", padding: 24, paddingTop: 58 },
   back: { color: colors.driver.primary, fontSize: 17 },

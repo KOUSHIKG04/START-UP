@@ -4,6 +4,7 @@ export const scheduleTabs = [
   "This Week",
   "Custom",
 ] as const;
+
 export const scheduleTimeLabels = [
   "00:00",
   "04:00",
@@ -12,6 +13,7 @@ export const scheduleTimeLabels = [
   "16:00",
   "20:00",
 ] as const;
+
 export const shiftStyles = {
   "on-duty": "bg-muted text-primary border-l-4 border-primary",
   surgery: "bg-destructive/10 text-destructive border-l-4 border-destructive",

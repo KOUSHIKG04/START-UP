@@ -25,6 +25,7 @@ import {
   MissingPatient,
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
+
 export function LegacyChatScreen() {
   const {
     send,

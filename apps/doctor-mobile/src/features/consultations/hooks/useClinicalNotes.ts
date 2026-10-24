@@ -10,6 +10,7 @@ import { uuidSchema } from "@startup/contracts";
 import { useVisit } from "./useVisit";
 import { useDoctorStore } from "../../../stores/useDoctorStore";
 import { supabase } from "../../../services/supabase";
+
 export function useClinicalNotes() {
   const params = useLocalSearchParams<{
     appointmentId?: string;

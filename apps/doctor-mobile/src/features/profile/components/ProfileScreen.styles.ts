@@ -1,6 +1,7 @@
 import { fontFamilies, surfaces } from "@startup/design-tokens";
 import { StyleSheet } from "react-native";
 import { palette } from "../../../components/theme";
+
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: palette.white },
   profileCard: {

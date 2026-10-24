@@ -2,11 +2,14 @@ import { afterAll, expect, test } from "bun:test";
 import postgres from "postgres";
 
 const url = process.env.TEST_DATABASE_URL;
+
 const enabled =
   !!url &&
   process.env.ALLOW_DATABASE_TESTS ===
     "I_UNDERSTAND_THIS_IS_A_DISPOSABLE_DATABASE";
+
 const db = enabled ? postgres(url!, { max: 1, prepare: false }) : undefined;
+
 afterAll(async () => {
   await db?.end();
 });
@@ -139,18 +142,22 @@ test.skipIf(!enabled)(
           );
         };
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'approve')`;
-        await expect(tx.savepoint(async (sp) => {
-          await sp`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'check_in')`;
-        })).rejects.toMatchObject({ code: "22023" });
+        await expect(
+          tx.savepoint(async (sp) => {
+            await sp`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'check_in')`;
+          })
+        ).rejects.toMatchObject({ code: "22023" });
         await tx`reset role`;
         await tx`set local role authenticated`;
         await tx`select set_config('request.jwt.claim.sub',${patientAuthId},true)`;
-        const [issued] = await tx`select public.issue_clinic_checkin_token(${appointmentId}::uuid) as token`;
+        const [issued] =
+          await tx`select public.issue_clinic_checkin_token(${appointmentId}::uuid) as token`;
         expect(issued?.token).toBeTruthy();
         await tx`reset role`;
         await tx`set local role authenticated`;
         await tx`select set_config('request.jwt.claim.sub',${doctorAuthId},true)`;
-        const [redeemed] = await tx`select public.redeem_clinic_checkin_token(${issued.token}::text) as appointment_id`;
+        const [redeemed] =
+          await tx`select public.redeem_clinic_checkin_token(${issued.token}::text) as appointment_id`;
         expect(redeemed?.appointment_id).toBe(appointmentId);
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'call')`;
         await tx`select public.transition_clinic_appointment(${appointmentId}::uuid,${await projectedVersion()}::bigint,'start')`;

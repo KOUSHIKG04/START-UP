@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import ts from "typescript";
 import vm from "node:vm";
+
 const source = fs.readFileSync(
   new URL(
     "../../src/features/doctors/utils/scheduleEditor.ts",
@@ -10,7 +11,9 @@ const source = fs.readFileSync(
   ),
   "utf8"
 );
+
 const moduleHost = { exports: {} };
+
 vm.runInNewContext(
   ts.transpileModule(source, {
     compilerOptions: {
@@ -20,8 +23,10 @@ vm.runInNewContext(
   }).outputText,
   { exports: moduleHost.exports, module: moduleHost, Intl, Date, Error, Number }
 );
+
 const { practiceSlotIso, previewClocks, suggestConsultationDuration } =
   moduleHost.exports;
+
 test("practice timezone is independent of browser timezone", () => {
   assert.equal(
     practiceSlotIso("2026-10-20", "09:00", "Asia/Kolkata"),
@@ -32,11 +37,13 @@ test("practice timezone is independent of browser timezone", () => {
     "2026-10-20T13:00:00.000Z"
   );
 });
+
 test("nonexistent DST times are rejected", () =>
   assert.throws(
     () => practiceSlotIso("2026-03-08", "02:30", "America/New_York"),
     /does not exist/
   ));
+
 test("24:00 closes the day; incomplete slots and invalid windows are excluded", () => {
   assert.equal(
     JSON.stringify(previewClocks("23:00", "24:00", 30)),

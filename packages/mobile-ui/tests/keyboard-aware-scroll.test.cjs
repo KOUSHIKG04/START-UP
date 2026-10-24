@@ -1,9 +1,12 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   vm = require("node:vm"),
   ts = require("typescript"),
   path = require("node:path");
+
 function fixture({
   viewportTop = 100,
   viewportHeight = 700,
@@ -115,6 +118,7 @@ function fixture({
     cleanup: () => cleanups.forEach((fn) => fn?.()),
   };
 }
+
 test("an overlay keyboard supplies scroll room and reveals a lower schedule input", () => {
   const f = fixture();
   f.show();
@@ -122,12 +126,14 @@ test("an overlay keyboard supplies scroll room and reveals a lower schedule inpu
   assert.equal(f.scrolls.at(-1).y, 268);
   assert.equal(f.scrolls.at(-1).animated, true);
 });
+
 test("a resized Android viewport does not add the keyboard height twice", () => {
   const f = fixture({ viewportHeight: 350, inputTop: 400 });
   f.show();
   assert.equal(f.insets.at(-1), 24);
   assert.equal(f.scrolls.at(-1).y, 18);
 });
+
 test("switching fields with the keyboard already open reveals the next field from the current offset", () => {
   const f = fixture({ inputTop: 250 });
   f.show();
@@ -138,6 +144,7 @@ test("switching fields with the keyboard already open reveals the next field fro
   f.flush();
   assert.equal(f.scrolls.at(-1).y, 338);
 });
+
 test("closing the keyboard restores padding and unmounted callbacks cannot scroll", () => {
   const f = fixture();
   f.show();

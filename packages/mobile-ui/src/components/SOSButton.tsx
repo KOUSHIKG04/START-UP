@@ -4,6 +4,7 @@ import { StyleSheet, View, Pressable } from "react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { getSOSButtonDimensions } from "../utils/sosButtonDimensions";
 import type { SOSButtonProps } from "../types/sosButton";
+
 export type { SOSButtonProps } from "../types/sosButton";
 
 export function SOSButton({

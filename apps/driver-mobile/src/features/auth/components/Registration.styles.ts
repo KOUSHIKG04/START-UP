@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { teal } from "../utils/registrationConstants";
+
 export const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
   headerSafeArea: { flex: 1, backgroundColor: teal },

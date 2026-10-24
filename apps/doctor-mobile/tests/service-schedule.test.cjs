@@ -1,10 +1,17 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
+
 const jsx = (type, props) => ({ type, props });
+
 function load(file, mocks) {
   const absolute = path.resolve(__dirname, file),
     exports = {};
@@ -34,12 +41,14 @@ function load(file, mocks) {
   );
   return exports;
 }
+
 function nodes(tree) {
   if (!tree) return [];
   if (Array.isArray(tree)) return tree.flatMap(nodes);
   if (typeof tree !== "object") return [];
   return [tree, ...nodes(tree.props?.children)];
 }
+
 const components = Object.fromEntries(
   [
     "Button",
@@ -52,6 +61,7 @@ const components = Object.fromEntries(
     "ModalSurface",
   ].map((name) => [name, name])
 );
+
 const base = {
   "react/jsx-runtime": { jsx, jsxs: jsx },
   "react-native": { View: "View", Switch: "Switch", Pressable: "Pressable" },
@@ -65,6 +75,7 @@ const base = {
   },
   "../../../components/theme": { palette: {}, ui: {} },
 };
+
 for (const mode of ["clinic", "online", "home"]) {
   test(`${mode} editor publishes through its own controller`, () => {
     let receivedMode,
@@ -73,6 +84,9 @@ for (const mode of ["clinic", "online", "home"]) {
       "../src/features/schedule/screens/ScheduleScreen.tsx",
       {
         ...base,
+        "../components/AppointmentRecoveryPolicy": {
+          AppointmentRecoveryPolicy: "AppointmentRecoveryPolicy",
+        },
         "lucide-react-native": { Calendar: "Calendar", Check: "Check" },
         "../../../components/DatePicker": { DatePicker: "DatePicker" },
         "../components/NumberSetting": { NumberSetting: "NumberSetting" },

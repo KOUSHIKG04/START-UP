@@ -97,9 +97,13 @@ export const colors = {
 
 // Convenient direct shortcuts
 export const patientColors = colors.patient;
+
 export const doctorColors = colors.doctor;
+
 export const driverColors = colors.driver;
+
 export const adminColors = colors.admin;
+
 export const sosColors = colors.patient.sos;
 
 export type Colors = typeof colors;

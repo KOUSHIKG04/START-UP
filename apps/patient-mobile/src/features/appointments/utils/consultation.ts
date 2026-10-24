@@ -1,4 +1,5 @@
 import type { ConsultationType } from "../types/appointment";
+
 export function parseConsultationType(
   value?: string | string[]
 ): ConsultationType {

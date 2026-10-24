@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { BackHandler, FlatList, useWindowDimensions } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { parseConsultationType } from "../../appointments/utils/consultation";
+
 export function useBookingGuide() {
   const { consultationType } = useLocalSearchParams<{
     consultationType?: string | string[];

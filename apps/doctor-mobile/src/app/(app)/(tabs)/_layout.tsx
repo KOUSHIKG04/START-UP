@@ -4,12 +4,14 @@ import { Home, Calendar, Calendars, User, ScanLine } from "lucide-react-native";
 import { BottomNavBar, type NavItem } from "@startup/mobile-ui";
 import { IconButton } from "../../../components/DoctorScreen";
 import { palette } from "../../../components/theme";
+
 const items: NavItem[] = [
   { key: "index", label: "Home", icon: Home },
   { key: "appointments", label: "Appointments", icon: Calendar },
   { key: "schedule", label: "Schedules", icon: Calendars },
   { key: "profile", label: "Profile", icon: User },
 ];
+
 const fullScreen = [
   "clinical-notes",
   "prescription",
@@ -18,6 +20,7 @@ const fullScreen = [
   "home-visit",
   "scan-qr",
 ];
+
 export default function TabsLayout() {
   return (
     <View style={styles.container}>
@@ -79,6 +82,7 @@ export default function TabsLayout() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1, width: "100%", maxWidth: 600, alignSelf: "center" },
   scan: {

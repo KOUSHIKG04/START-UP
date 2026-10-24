@@ -6,5 +6,7 @@ import {
 
 // Compatibility aliases for existing app imports.
 export type AppTheme = MobileThemeName;
+
 export type AppThemeColors = MobileThemeColors;
+
 export const appThemeColors = mobileThemes;

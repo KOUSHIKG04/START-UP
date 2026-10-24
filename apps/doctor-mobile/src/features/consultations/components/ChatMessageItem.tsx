@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { Check } from "lucide-react-native";
 import { Label } from "../../../components/DoctorScreen";
 import { palette } from "../../../components/theme";
+
 export const ChatMessageItem = memo(function ChatMessageItem({
   message,
 }: ChatMessageItemProps) {

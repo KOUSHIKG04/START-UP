@@ -15,4 +15,5 @@ export function createSupabaseClient(
   }
   return createClient<Database>(url, publishableKey, options);
 }
+
 export type AppSupabaseClient = ReturnType<typeof createSupabaseClient>;

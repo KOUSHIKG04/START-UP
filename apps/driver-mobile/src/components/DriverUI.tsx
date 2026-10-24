@@ -15,6 +15,7 @@ import { palette, ui } from "./theme";
 export function Copy({ style, ...props }: TextProps) {
   return <Text {...props} style={[ui.copy, style]} />;
 }
+
 export function Heading({ children }: { children: ReactNode }) {
   return (
     <Copy accessibilityRole="header" style={ui.heading}>
@@ -22,9 +23,11 @@ export function Heading({ children }: { children: ReactNode }) {
     </Copy>
   );
 }
+
 export function Card({ children }: { children: ReactNode }) {
   return <View style={ui.card}>{children}</View>;
 }
+
 export function PageHeader({
   title,
   right,
@@ -55,6 +58,7 @@ export function PageHeader({
     </SafeAreaView>
   );
 }
+
 export function Body({ children }: { children: ReactNode }) {
   return (
     <ScrollView
@@ -65,6 +69,7 @@ export function Body({ children }: { children: ReactNode }) {
     </ScrollView>
   );
 }
+
 export function Metrics({ items }: { items: [string, string][] }) {
   return (
     <Card>

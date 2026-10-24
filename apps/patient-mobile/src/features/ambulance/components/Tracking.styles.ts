@@ -6,6 +6,7 @@ import {
   spacing,
   surfaces,
 } from "@startup/design-tokens";
+
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   content: {

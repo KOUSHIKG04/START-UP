@@ -23,4 +23,5 @@ export const onlineTokenSchema = z.object({
 });
 
 export type OnlineMessage = z.infer<typeof onlineMessageSchema>;
+
 export type OnlineJoinContext = z.infer<typeof onlineJoinContextSchema>;

@@ -4,6 +4,7 @@ import type {
   SortingState,
   OnChangeFn,
 } from "@tanstack/react-table";
+
 export interface DoctorTableProps {
   data: DoctorRecord[];
   isLoading?: boolean;

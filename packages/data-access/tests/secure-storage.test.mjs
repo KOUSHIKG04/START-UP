@@ -6,8 +6,12 @@ test("secure session storage splits, restores, replaces and removes a large sess
   const values = new Map();
   const storage = createSecureSessionStorage({
     getItemAsync: async (key) => values.get(key) ?? null,
-    setItemAsync: async (key, value) => { values.set(key, value); },
-    deleteItemAsync: async (key) => { values.delete(key); },
+    setItemAsync: async (key, value) => {
+      values.set(key, value);
+    },
+    deleteItemAsync: async (key) => {
+      values.delete(key);
+    },
   });
   const longSession = "jwt-refresh-token:".repeat(500);
   await storage.setItem("sb-project-auth-token", longSession);

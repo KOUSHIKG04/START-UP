@@ -10,6 +10,7 @@ import {
 import { clinicCheckinTokenSchema } from "@startup/contracts";
 import type { ClinicAppointment } from "@startup/contracts";
 import { supabase } from "../../../services/supabase";
+
 export function usePatientQrScan() {
   const [permission, requestPermission] = useCameraPermissions();
   const [focused, setFocused] = useState(false);

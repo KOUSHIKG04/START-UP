@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ambulance } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+
 export function ActivatingSos() {
   return (
     <LinearGradient colors={["#F23F47", "#C9161D"]} style={s.activation}>

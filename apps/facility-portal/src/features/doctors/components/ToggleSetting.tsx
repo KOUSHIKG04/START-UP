@@ -1,4 +1,5 @@
 "use client";
+
 import type { ToggleSettingProps } from "../types/toggleSetting";
 
 export function ToggleSetting({

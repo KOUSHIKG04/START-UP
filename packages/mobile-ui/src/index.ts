@@ -1,17 +1,23 @@
 export { cn } from "cn";
+
 export { AppText, AppTextInput, type AppTextProps } from "./primitives/AppText";
+
 export {
   MobileTypographyProvider,
   useMobileTypography,
   useReadableTypography,
 } from "./theme/MobileTypographyProvider";
+
 export { useKeyboardAwareScroll } from "./hooks/useKeyboardAwareScroll";
+
 export {
   SafeAreaProvider,
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
 export * from "./components";
+
 export {
   ToastProvider,
   useToast,
@@ -19,20 +25,28 @@ export {
   type ToastInput,
   type ToastType,
 } from "./primitives/Toast";
+
 export { Loader } from "./primitives/Loader";
+
 export { Skeleton } from "./primitives/Skeleton";
+
 export {
   ModalSurface,
   type ModalSurfaceProps,
 } from "./primitives/ModalSurface";
+
 export { ProfilePhotoButton } from "./primitives/ProfilePhotoButton";
+
 export { PhoneOtpForm } from "./components/PhoneOtpForm";
+
 export { Screen, type ScreenProps } from "./layout/Screen";
+
 export {
   Button,
   type ButtonProps,
   type ButtonVariant,
 } from "./primitives/Button";
+
 export {
   Card,
   CardAction,
@@ -51,53 +65,72 @@ export {
   type CardTitleProps,
   type CardVariant,
 } from "./primitives/Card";
+
 export { Chip, type ChipProps, type ChipVariant } from "./primitives/Chip";
+
 export {
   appThemeColors,
   type AppTheme,
   type AppThemeColors,
 } from "./utils/appTheme";
+
 export {
   IconLabel,
   type IconLabelIconProps,
   type IconLabelProps,
 } from "./primitives/IconLabel";
+
 export { Input, type InputProps } from "./primitives/Input";
+
 export {
   Dropdown,
   type DropdownOption,
   type DropdownProps,
 } from "./primitives/Dropdown";
+
 export { SearchInput, type SearchInputProps } from "./primitives/SearchInput";
+
 export { TextArea, type TextAreaProps } from "./primitives/TextArea";
+
 export {
   FadedScrollView,
   DEFAULT_FADED_EDGE_COLOR,
   type FadedScrollViewProps,
 } from "./primitives/FadedScrollView";
+
 export { TimeSlot, type TimeSlotProps } from "./primitives/TimeSlot";
+
 export {
   ClockTimePicker,
   type ClockTimePickerProps,
 } from "./primitives/ClockTimePicker";
+
 export { Calendar, type CalendarProps } from "./primitives/Calendar";
+
 export { DatePicker, type DatePickerProps } from "./primitives/DatePicker";
+
 export {
   CalendarField,
   type CalendarFieldProps,
 } from "./primitives/CalendarField";
+
 export {
   ClockDurationPicker,
   type ClockDurationPickerProps,
 } from "./primitives/ClockDurationPicker";
+
 export { UploadInput, type UploadInputProps } from "./primitives/UploadInput";
+
 export { StatusBadge, type StatusBadgeProps } from "./primitives/StatusBadge";
+
 export {
   Accordion,
   type AccordionProps,
   type AccordionVariant,
 } from "./primitives/Accordion";
+
 export * from "./utils/notchedBarPath";
+
 export { interFonts, albertSansFonts } from "./utils/fonts";
 
 export {
@@ -107,9 +140,15 @@ export {
 } from "./theme/MobileThemeProvider";
 
 export * from "./primitives/Checkbox";
+
 export { useTimeGreeting } from "./hooks/useTimeGreeting";
 
 export {
   ConsultationCall,
   type CallMessage,
 } from "./components/ConsultationCall";
+
+export {
+  AppointmentRecoveryDialog,
+  type RecoveryTimeChoice,
+} from "./components/AppointmentRecoveryDialog";

@@ -15,6 +15,7 @@ import {
 } from "@startup/data-access";
 import type { RequestAmbulanceBookingInput } from "@startup/contracts";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useLiveAmbulanceBooking({
   onBackPress,
 }: LiveAmbulanceBookingScreenProps) {

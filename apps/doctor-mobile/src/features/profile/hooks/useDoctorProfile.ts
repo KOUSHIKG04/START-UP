@@ -6,6 +6,7 @@ import {
   getMyDoctorProfile,
 } from "@startup/data-access";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useDoctorProfile() {
   const insets = useSafeAreaInsets();
   const { session, profile: sessionProfile } = useMobileSession();

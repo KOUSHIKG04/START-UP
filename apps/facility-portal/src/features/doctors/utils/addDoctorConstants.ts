@@ -6,6 +6,7 @@ export const initialDoctorForm: AddDoctorFormData = {
   specialization: "",
   phone: "",
 };
+
 export const addDoctorPlaceholders = {
   name: "Enter doctor's full name",
   clinzoId: "e.g. CLZ-DOC-2024-001",

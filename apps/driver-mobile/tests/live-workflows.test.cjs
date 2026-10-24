@@ -1,8 +1,13 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs");
+
 const path = require("node:path");
+
 const vm = require("node:vm");
+
 const ts = require("typescript");
 
 function load(file, mocks, globals = {}) {
@@ -518,6 +523,7 @@ function locationReporter({ lateWatch = false, shiftId = "shift-1" } = {}) {
     },
   };
 }
+
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 test("tracking keeps its stream sequence and removes foreground/background work on unmount", async () => {

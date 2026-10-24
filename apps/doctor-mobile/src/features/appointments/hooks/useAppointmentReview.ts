@@ -126,6 +126,7 @@ export function useAppointmentReview() {
   };
   return {
     appointmentId,
+    now,
     notes,
     setNotes,
     appointments,

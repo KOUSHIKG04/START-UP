@@ -13,6 +13,7 @@ import {
 import { supabase, useMobileSession } from "../../../services/supabase";
 import { setSelectedPracticeId } from "../../practices/services/selectedPractice";
 import { selectedPracticeQueryKey } from "../../practices/utils/practiceQueryKeys";
+
 export function useHospitalSettings() {
   const { showToast } = useToast();
   const client = useQueryClient();

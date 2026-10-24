@@ -3,6 +3,7 @@ import { types, statuses } from "../utils/verificationFilterConstants";
 import type { VerificationQueueProps } from "../types/verification-queue";
 import { listCompanyVerificationCases } from "@startup/data-access";
 import { requireReviewer } from "@/lib/reviewer";
+
 export async function loadVerificationQueue({
   searchParams,
 }: VerificationQueueProps) {

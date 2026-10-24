@@ -2,6 +2,7 @@ import type { CompletionViewProps } from "../types/visit-session";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { House, Monitor, Stethoscope } from "lucide-react-native";
+
 export function useConsultationCompletion({
   appointment,
   onGoHome,

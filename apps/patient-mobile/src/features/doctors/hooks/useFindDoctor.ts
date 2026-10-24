@@ -25,6 +25,7 @@ import {
   categories,
 } from "../utils/findDoctorConstants";
 import type { FindDoctorScreenProps } from "../types/find-doctor";
+
 export function useFindDoctor({
   consultationType,
   onBackPress,

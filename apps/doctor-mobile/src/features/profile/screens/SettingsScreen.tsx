@@ -137,6 +137,7 @@ export function SettingsScreen() {
     </DoctorScreen>
   );
 }
+
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   action: { padding: 16, borderRadius: 12 },

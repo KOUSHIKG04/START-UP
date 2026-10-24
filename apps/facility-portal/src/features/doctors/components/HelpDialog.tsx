@@ -1,4 +1,5 @@
 "use client";
+
 import type { HelpDialogProps } from "../types/helpDialog";
 
 import { Button } from "@startup/web-ui/components/ui/button";
@@ -8,6 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@startup/web-ui/components/ui/dialog";
+
 export function HelpDialog({
   open,
   title,

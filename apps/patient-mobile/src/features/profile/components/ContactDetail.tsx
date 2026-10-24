@@ -4,6 +4,7 @@ import { styles } from "./ProfileScreen.styles";
 import { AppText as Text } from "@startup/mobile-ui";
 
 import { View } from "react-native";
+
 export function ContactDetail({ icon, label, value }: ContactDetailProps) {
   return (
     <View style={styles.contactRow}>

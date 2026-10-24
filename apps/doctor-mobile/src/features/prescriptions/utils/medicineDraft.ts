@@ -1,4 +1,5 @@
 import type { Medicine } from "../../../types/doctor";
+
 export const emptyMedicine = (): Medicine => ({
   id: `medicine-${Date.now()}`,
   name: "",

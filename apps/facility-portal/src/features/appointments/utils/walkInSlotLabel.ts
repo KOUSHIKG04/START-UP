@@ -1,5 +1,7 @@
 "use client";
+
 import type { Slot } from "../types/newAppointmentDialog";
+
 export function slotLabel(slot: Slot) {
   const date = new Intl.DateTimeFormat("en-IN", {
     timeZone: slot.timezone,

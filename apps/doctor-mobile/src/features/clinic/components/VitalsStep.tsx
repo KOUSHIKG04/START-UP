@@ -1,5 +1,7 @@
 import type { VitalsStepProps } from "../types/vitals-step";
+
 export type { VitalsStepProps } from "../types/vitals-step";
+
 import { View } from "react-native";
 import type { RecordVitalInput } from "@startup/contracts";
 import { Button, Input } from "@startup/mobile-ui";

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useVisit } from "./useVisit";
+
 export function useDemoOnlineConsultation() {
   const { patient, appointment } = useVisit();
   const [muted, setMuted] = useState(false);

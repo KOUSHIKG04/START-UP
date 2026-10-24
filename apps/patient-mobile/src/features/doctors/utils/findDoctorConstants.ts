@@ -1,12 +1,17 @@
 import type { DoctorCategory } from "../types/find-doctor";
+
 export type { DoctorCategory } from "../types/find-doctor";
 
 import { SEARCH_HEIGHT } from "../../../utils/headerConstants";
 
 export const EXPANDED_HEADER_HEIGHT = 147;
+
 export const SEARCH_OVERLAP = 24;
+
 export const COLLAPSED_HEADER_H = 74; // gives comfortable ~19px padding below search bar
+
 export const SEARCH_END_TOP_OFFSET = 11;
+
 export const CONTENT_TOP =
   EXPANDED_HEADER_HEIGHT - SEARCH_OVERLAP + SEARCH_HEIGHT + 14;
 

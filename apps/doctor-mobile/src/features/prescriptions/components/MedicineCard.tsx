@@ -3,7 +3,9 @@ import {
   medicineCardItems2,
 } from "../utils/medicineCardConstants";
 import type { MedicineCardProps } from "../types/medicine-card";
+
 export type { MedicineCardProps } from "../types/medicine-card";
+
 import { View } from "react-native";
 import { Button } from "@startup/mobile-ui";
 import { Heading, Label, Panel } from "../../../components/DoctorScreen";

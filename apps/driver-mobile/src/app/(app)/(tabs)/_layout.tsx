@@ -2,11 +2,13 @@ import { Tabs, router, type Href, Redirect } from "expo-router";
 import { Home, Navigation, User } from "lucide-react-native";
 import { BottomNavBar, type NavItem } from "@startup/mobile-ui";
 import { useMobileSession } from "../../../services/supabase";
+
 const items: NavItem[] = [
   { key: "home", label: "Home", icon: Home },
   { key: "trip", label: "Trip", icon: Navigation },
   { key: "profile", label: "Profile", icon: User },
 ];
+
 export default function TabsLayout() {
   const hasDriver = Boolean(useMobileSession().profile?.driver?.id);
   if (!hasDriver) return <Redirect href="/onboarding" />;

@@ -8,6 +8,7 @@ import { styles } from "./ConsultationForm.styles";
 import { VitalsStep } from "./VitalsStep";
 import { PrescriptionStep } from "./PrescriptionStep";
 import { FollowupStep } from "./FollowupStep";
+
 export function ConsultationWizard({
   appointmentId,
   patientName,

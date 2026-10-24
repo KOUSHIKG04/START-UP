@@ -22,6 +22,7 @@ import { palette, ui } from "../../../components/theme";
 
 export function AppointmentsScreen() {
   const {
+    now,
     appointmentId,
     date,
     month,
@@ -105,6 +106,7 @@ export function AppointmentsScreen() {
       ) : null}
       {visible.map((item) => (
         <PatientCard
+          now={now}
           key={item.id}
           appointment={item}
           onOpen={() =>

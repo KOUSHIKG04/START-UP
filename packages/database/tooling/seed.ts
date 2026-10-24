@@ -17,9 +17,13 @@ if (!process.argv.includes("--demo") || process.env.NODE_ENV === "production") {
     "Demo seed requires --demo and a non-production environment; use a development Supabase project only"
   );
 }
+
 const url = process.env.MIGRATION_DATABASE_URL;
+
 if (!url) throw new Error("Set MIGRATION_DATABASE_URL");
+
 const connection = createDatabase(url);
+
 try {
   await connection.db.transaction(async (tx) => {
     // Stable IDs and do-nothing conflicts make repeats safe without overwriting local edits.

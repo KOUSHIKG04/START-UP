@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { palette } from "../../../components/theme";
+
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#CFEDEA", padding: 16 },
   liveScreen: { flex: 1, backgroundColor: "#CFEDEA" },

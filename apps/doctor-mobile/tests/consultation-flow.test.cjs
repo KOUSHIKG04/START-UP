@@ -1,10 +1,14 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict");
+
 const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 const { z } = require("zod");
+
 function load(file, mocks) {
   const exports = {};
   const absolute = path.resolve(__dirname, file);
@@ -32,11 +36,14 @@ function load(file, mocks) {
   );
   return exports;
 }
+
 const schemas = load("../../../packages/contracts/src/clinical.ts", {
   zod: { z },
   "./validation": { uuidSchema: z.string().uuid() },
 });
+
 const aid = "87b71030-d331-4c06-85a5-81dde98a8c38";
+
 function flow({
   initial = {
     vitals: [],

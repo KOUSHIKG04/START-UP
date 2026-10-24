@@ -2,6 +2,7 @@ import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@startup/design-tokens";
 import type { ModalSurfaceProps } from "../types/modalSurface";
+
 export type { ModalSurfaceProps } from "../types/modalSurface";
 
 /** Shared native modal lifecycle and neutral backdrop. Custom layouts retain their own drawers/animations. */

@@ -133,6 +133,7 @@ async function ambulancePlacesRequest(
   }
   return data;
 }
+
 export async function searchGoogleAmbulanceHospitals(
   client: AppSupabaseClient,
   input: { latitude: number; longitude: number; query?: string }
@@ -144,6 +145,7 @@ export async function searchGoogleAmbulanceHospitals(
     })
   );
 }
+
 export async function requestGoogleAmbulanceBooking(
   client: AppSupabaseClient,
   input: RequestGoogleAmbulanceBookingInput

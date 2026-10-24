@@ -1,6 +1,7 @@
 import { LegacyChatScreen } from "../components/LegacyChatScreen";
 
 export type { MessageItem } from "../types/chat-screen";
+
 import { uuidSchema } from "@startup/contracts";
 import { OnlineConsultationScreen } from "./OnlineConsultationScreen";
 

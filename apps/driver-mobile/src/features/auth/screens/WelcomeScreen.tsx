@@ -6,6 +6,7 @@ import { ArrowRight, Check, Shield } from "lucide-react-native";
 import { s } from "../components/Registration.styles";
 import { teal } from "../utils/registrationConstants";
 import { registrationBenefits } from "../utils/registrationConstants";
+
 export function WelcomeScreen({ onNext }: WelcomeScreenProps) {
   return (
     <SafeAreaView style={s.headerSafeArea} edges={["top"]}>

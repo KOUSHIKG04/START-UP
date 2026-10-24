@@ -9,11 +9,13 @@ export const doctorBirthDateSchema = z.iso.date().refine((value) => {
 }, "Doctor age must be between 18 and 100.");
 
 export const doctorQualificationSchema = z.string().trim().min(2).max(160);
+
 export const doctorContactEmailSchema = z
   .string()
   .trim()
   .max(254)
   .regex(/^\S+@\S+\.\S+$/, "Enter a valid email address.");
+
 export const doctorSpecialtiesSchema = z
   .array(
     z
@@ -97,9 +99,11 @@ export const ownedClinicLocationSchema = z.object({
 });
 
 export type DoctorProfile = z.infer<typeof doctorProfileSchema>;
+
 export type UpdateDoctorProfileInput = z.infer<
   typeof updateDoctorProfileSchema
 >;
+
 export type OwnedClinicLocationInput = z.infer<
   typeof ownedClinicLocationSchema
 >;

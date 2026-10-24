@@ -65,6 +65,7 @@ export default function PhoneScreen() {
     </OnboardingShell>
   );
 }
+
 const styles = StyleSheet.create({
   body: { alignItems: "center", paddingTop: 24 },
   title: {

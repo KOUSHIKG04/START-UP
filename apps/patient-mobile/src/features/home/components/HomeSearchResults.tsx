@@ -1,6 +1,8 @@
 import type { HomeSearchResultsProps } from "../types/home";
 import type { SearchResultItem } from "../types/home-search-results";
+
 export type { SearchResultItem } from "../types/home-search-results";
+
 import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Search } from "lucide-react-native";

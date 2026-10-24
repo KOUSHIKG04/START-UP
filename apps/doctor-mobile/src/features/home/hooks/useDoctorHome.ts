@@ -11,6 +11,7 @@ import {
 } from "@startup/data-access";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { supabase, useMobileSession } from "../../../services/supabase";
+
 export function useDoctorHome() {
   const greeting = useTimeGreeting();
   const insets = useSafeAreaInsets();

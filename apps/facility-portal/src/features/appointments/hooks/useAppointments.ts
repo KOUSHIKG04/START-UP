@@ -1,9 +1,11 @@
 "use client";
+
 import type { AppointmentsScreenProps } from "../types/appointmentsScreen";
 import * as React from "react";
 import type { IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 import type { ClinicAppointment } from "@startup/contracts";
+import { appointmentRecoveryView } from "@startup/contracts";
 import {
   changePortalAppointment,
   redeemPortalCheckinToken,
@@ -14,6 +16,7 @@ import {
   defaultAppointmentPeriod,
   appointmentsDateFormatter,
 } from "../utils/appointmentsConstants";
+
 export function useAppointments({
   appointments,
   loadError,
@@ -63,7 +66,9 @@ export function useAppointments({
         (filterPeriod === "This Week" && dayOffset >= 0 && dayOffset < 7);
 
       const statusMatch =
-        statusFilter === "All" || item.status === statusFilter.toLowerCase();
+        statusFilter === "All" ||
+        item.status === statusFilter.toLowerCase() ||
+        appointmentRecoveryView(item, now).staffStatus === statusFilter;
 
       const needle = search.trim().toLowerCase();
 
@@ -80,7 +85,7 @@ export function useAppointments({
           ].some((value) => value.toLowerCase().includes(needle)))
       );
     });
-  }, [appointments, filterPeriod, search, statusFilter]);
+  }, [appointments, filterPeriod, search, statusFilter, now]);
 
   const appointmentsSummary = React.useMemo(
     () => ({

@@ -90,4 +90,5 @@ export const facilityBedInventory = clinzo
   .enableRLS();
 
 export type FacilityBedInventory = typeof facilityBedInventory.$inferSelect;
+
 export type NewFacilityBedInventory = typeof facilityBedInventory.$inferInsert;

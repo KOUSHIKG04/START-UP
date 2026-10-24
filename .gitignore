@@ -21,6 +21,7 @@ dist/
 .turbo/
 .expo/
 .vercel/
+.impeccable/
 
 # Testing
 coverage/
@@ -34,6 +35,9 @@ packages/database/tests/*
 
 # Scripts
 scripts/
+# !/scripts/
+# /scripts/*
+# !/scripts/declaration-spacing.mjs
 !scripts/run-e2e.mjs
 !apps/patient-mobile/scripts/
 apps/patient-mobile/scripts/*
@@ -109,6 +113,7 @@ apps/driver-mobile/tests/*
 !apps/driver-mobile/tests/feature-structure.test.cjs
 !packages/mobile-ui/tests/
 packages/mobile-ui/tests/*
+!packages/mobile-ui/tests/appointment-recovery.test.cjs
 !packages/mobile-ui/tests/notification-drawer.test.cjs
 !packages/mobile-ui/tests/consultation-call.test.cjs
 !packages/mobile-ui/tests/contracts.test.cjs

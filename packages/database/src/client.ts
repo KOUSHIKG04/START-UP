@@ -19,4 +19,5 @@ export function createDatabase(url: string) {
     close: () => client.end({ timeout: 5 }),
   };
 }
+
 export type Database = ReturnType<typeof createDatabase>["db"];

@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { ui } from "../../../components/theme";
+
 export const styles = StyleSheet.create({
   listContent: {
     padding: 16,

@@ -1,5 +1,7 @@
 import type { AppointmentParams } from "../types/appointment-params";
+
 export type { AppointmentParams } from "../types/appointment-params";
+
 import type { Appointment } from "../types/appointment";
 import { parseConsultationType } from "./consultation";
 

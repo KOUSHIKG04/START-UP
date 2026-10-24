@@ -6,6 +6,7 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { Pressable, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { colors } from "@startup/design-tokens";
+
 export function ProfileAction({
   icon,
   title,

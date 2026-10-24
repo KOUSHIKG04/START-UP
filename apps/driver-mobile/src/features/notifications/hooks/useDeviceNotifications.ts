@@ -6,7 +6,9 @@ import {
   register,
   openNotification,
 } from "../services/deviceNotifications";
+
 const Notifications = notificationModule;
+
 export function useDeviceNotifications(
   identityId: string | undefined,
   showToast: (input: ToastInput) => void

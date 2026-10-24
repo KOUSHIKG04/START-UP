@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+
 export const styles = StyleSheet.create({
   group: { gap: 10, marginTop: 8 },
   heading: { fontSize: 18, fontWeight: "600", marginTop: 12 },

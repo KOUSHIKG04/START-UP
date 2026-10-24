@@ -10,6 +10,7 @@ import { Frame } from "../components/RegistrationFrame";
 import { teal, documentTypes } from "../utils/registrationConstants";
 
 import { vehicleClassOptions } from "../utils/registrationConstants";
+
 export function DocumentsScreen({
   onSubmit,
   onBack,

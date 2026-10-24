@@ -1,6 +1,7 @@
 import { colors } from "./colors";
 
 export type MobileThemeName = "patient" | "doctor" | "driver";
+
 export type MobileThemeColors = {
   primary: string;
   primaryText: string;

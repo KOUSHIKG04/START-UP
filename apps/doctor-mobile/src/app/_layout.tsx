@@ -21,16 +21,20 @@ import { useDeviceNotifications } from "../features/notifications/hooks/useDevic
 import { mobileSession, useMobileSession } from "../services/supabase";
 
 void SplashScreen.preventAutoHideAsync();
+
 export const unstable_settings = { initialRouteName: "(app)" };
+
 function DeviceNotificationsBridge({ identityId }: { identityId?: string }) {
   const { showToast } = useToast();
   useDeviceNotifications(identityId, showToast);
   return null;
 }
+
 function SessionFeedback({ error }: { error: string | null }) {
   useToastFeedback({ error: error ?? "" });
   return null;
 }
+
 export default function RootLayout() {
   const [loaded, error] = useFonts(interFonts);
   const auth = useMobileSession();
@@ -124,6 +128,7 @@ export default function RootLayout() {
     </MobileThemeProvider>
   );
 }
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#FFFFFF" },
   scene: { flex: 1, backgroundColor: "#FFFFFF" },

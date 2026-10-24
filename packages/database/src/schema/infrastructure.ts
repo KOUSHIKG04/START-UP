@@ -66,7 +66,9 @@ export const domainEvent = clinzo
     ]
   )
   .enableRLS();
+
 export type DomainEvent = typeof domainEvent.$inferSelect;
+
 export type NewDomainEvent = typeof domainEvent.$inferInsert;
 
 export const eventDelivery = clinzo
@@ -117,7 +119,9 @@ export const eventDelivery = clinzo
     ]
   )
   .enableRLS();
+
 export type EventDelivery = typeof eventDelivery.$inferSelect;
+
 export type NewEventDelivery = typeof eventDelivery.$inferInsert;
 
 export const idempotencyRecord = clinzo
@@ -157,5 +161,7 @@ export const idempotencyRecord = clinzo
     ]
   )
   .enableRLS();
+
 export type IdempotencyRecord = typeof idempotencyRecord.$inferSelect;
+
 export type NewIdempotencyRecord = typeof idempotencyRecord.$inferInsert;

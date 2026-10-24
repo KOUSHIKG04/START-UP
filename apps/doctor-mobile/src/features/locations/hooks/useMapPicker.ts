@@ -18,6 +18,7 @@ import { useToast } from "@startup/mobile-ui";
 import { useLocationDraft } from "../stores/locationDraft";
 import { resolveDoctorAddress } from "../services/resolveAddress";
 import { getDoctorDeviceLocation } from "../services/deviceLocation";
+
 export function useMapPicker() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();

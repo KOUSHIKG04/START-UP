@@ -1,9 +1,11 @@
 const { test } = require("node:test");
+
 const assert = require("node:assert/strict"),
   fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm"),
   ts = require("typescript");
+
 function fixture() {
   let draft,
     committed = [],
@@ -60,6 +62,7 @@ function fixture() {
       }).props.children,
   };
 }
+
 test("manual bed entry saves once on blur and arrows adjust the entered number", () => {
   const f = fixture();
   f.render()[1].props.onChange({ target: { value: "7" } });
@@ -75,6 +78,7 @@ test("manual bed entry saves once on blur and arrows adjust the entered number",
   assert.equal(prevented, true);
   assert.deepEqual(f.committed, [7, 6]);
 });
+
 test("invalid and out-of-capacity bed counts never reach persistence", () => {
   const f = fixture();
   f.render()[1].props.onChange({ target: { value: "11" } });
@@ -85,6 +89,7 @@ test("invalid and out-of-capacity bed counts never reach persistence", () => {
   f.render()[1].props.onKeyDown({ key: "Enter", preventDefault() {} });
   assert.equal(f.committed.length, 0);
 });
+
 test("saving disables both arrows and the number input in that row", () => {
   const children = fixture().render({ disabled: true });
   assert.equal(children[0].props.disabled, true);

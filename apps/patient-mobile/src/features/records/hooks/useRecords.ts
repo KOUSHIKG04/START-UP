@@ -5,6 +5,7 @@ import { listMyClinicalRecords } from "@startup/data-access";
 import { useToastFeedback } from "@startup/mobile-ui";
 import { supabase } from "../../../services/supabase";
 import type { RecordsScreenProps } from "../types/records";
+
 export function useRecords({ onBackPress, onViewRecord }: RecordsScreenProps) {
   const records = useQuery({
     queryKey: ["my-clinical-records"],

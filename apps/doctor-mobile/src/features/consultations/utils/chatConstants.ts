@@ -1,4 +1,5 @@
 import type { MessageItem } from "../types/chat-screen";
+
 export const homeThread: MessageItem[] = [
   {
     id: "1",

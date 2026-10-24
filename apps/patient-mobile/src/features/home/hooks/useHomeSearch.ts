@@ -15,6 +15,7 @@ import {
   type SearchItem,
 } from "../utils/homeSearchConstants";
 import type { HomeSearchOverlayProps } from "../types/home";
+
 export function useHomeSearch({
   visible,
   onClose,

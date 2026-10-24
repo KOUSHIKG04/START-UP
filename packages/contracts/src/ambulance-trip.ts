@@ -48,7 +48,9 @@ export const completeDriverTripSchema = z
   .strict();
 
 export type MyDriverTrip = z.infer<typeof myDriverTripSchema>;
+
 export type TransitionDriverTripInput = z.infer<
   typeof transitionDriverTripSchema
 >;
+
 export type CompleteDriverTripInput = z.infer<typeof completeDriverTripSchema>;

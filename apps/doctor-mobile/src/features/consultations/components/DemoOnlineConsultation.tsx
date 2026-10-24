@@ -21,6 +21,7 @@ import {
 } from "../../../components/DoctorScreen";
 import { palette, ui } from "../../../components/theme";
 import { visitRoute } from "../utils/consultationRoutes";
+
 export function DemoOnlineConsultation() {
   const {
     patient,

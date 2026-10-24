@@ -3,6 +3,7 @@ import type { Ref as ReactRef } from "react";
 import { mobileTypography } from "@startup/design-tokens";
 import { useReadableTypography } from "../theme/MobileTypographyProvider";
 import type { AppTextProps } from "../types/appText";
+
 export type { AppTextProps } from "../types/appText";
 
 export function AppText({ variant = "body", style, ...props }: AppTextProps) {

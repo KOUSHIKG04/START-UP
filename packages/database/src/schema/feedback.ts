@@ -72,7 +72,9 @@ export const doctorReview = clinzo
     ]
   )
   .enableRLS();
+
 export type DoctorReview = typeof doctorReview.$inferSelect;
+
 export type NewDoctorReview = typeof doctorReview.$inferInsert;
 
 export const platformFeedback = clinzo
@@ -114,7 +116,9 @@ export const platformFeedback = clinzo
     ]
   )
   .enableRLS();
+
 export type PlatformFeedback = typeof platformFeedback.$inferSelect;
+
 export type NewPlatformFeedback = typeof platformFeedback.$inferInsert;
 
 export const ambulanceReview = clinzo
@@ -162,5 +166,7 @@ export const ambulanceReview = clinzo
     ]
   )
   .enableRLS();
+
 export type AmbulanceReview = typeof ambulanceReview.$inferSelect;
+
 export type NewAmbulanceReview = typeof ambulanceReview.$inferInsert;

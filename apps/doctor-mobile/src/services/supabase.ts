@@ -9,6 +9,7 @@ import {
 } from "@startup/data-access";
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+
 const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export const devPasswordLoginEnabled =

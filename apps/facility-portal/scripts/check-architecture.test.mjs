@@ -11,6 +11,7 @@ test("detects duplicate URLs across route groups", () => {
     /duplicate route/
   );
 });
+
 test("rejects cross-feature imports through aliases and relative paths", () => {
   for (const target of [
     "@/features/doctors/components/Form",
@@ -24,6 +25,7 @@ test("rejects cross-feature imports through aliases and relative paths", () => {
     );
   }
 });
+
 test("requires a client boundary for interactive hooks", () => {
   assert.match(
     inspectArchitecture({
@@ -33,6 +35,7 @@ test("requires a client boundary for interactive hooks", () => {
     /client boundary/
   );
 });
+
 test("allows routes to compose public feature APIs", () => {
   assert.deepEqual(
     inspectArchitecture({
@@ -61,6 +64,7 @@ test("allows an explicit server entry while rejecting a server implementation im
     /feature public index/
   );
 });
+
 test("keeps shared modules and screen data in their proper layers", () => {
   const errors = inspectArchitecture({
     "components/admin/Shell.tsx":
