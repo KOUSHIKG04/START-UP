@@ -55,6 +55,18 @@ export function useLiveFacilityUpdates({
             { cancelRefetch: false }
           );
           void queryClient.invalidateQueries(
+            { queryKey: ["facility-recovery-policy"] },
+            { cancelRefetch: false }
+          );
+          void queryClient.invalidateQueries(
+            { queryKey: ["appointment-billing"] },
+            { cancelRefetch: false }
+          );
+          void queryClient.invalidateQueries(
+            { queryKey: ["portal-reschedule-options"] },
+            { cancelRefetch: false }
+          );
+          void queryClient.invalidateQueries(
             { queryKey: ["doctors", "directory"] },
             { cancelRefetch: false }
           );

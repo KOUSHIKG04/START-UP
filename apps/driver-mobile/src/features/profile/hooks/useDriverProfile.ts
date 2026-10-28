@@ -100,6 +100,13 @@ export function useDriverProfile() {
   }
 
   return {
+    refresh: () => [
+      driver.refetch({ throwOnError: true }),
+      fleet.refetch({ throwOnError: true }),
+      ...(driver.data?.profile_photo_path
+        ? [photo.refetch({ throwOnError: true })]
+        : []),
+    ],
     profile,
     support,
     setSupport,

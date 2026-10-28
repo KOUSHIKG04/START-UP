@@ -19,6 +19,7 @@ import {
   Button,
   Header,
   useKeyboardAwareScroll,
+  type PullToRefreshProps,
 } from "@startup/mobile-ui";
 import { palette, ui } from "./theme";
 
@@ -108,6 +109,7 @@ export function DoctorScreen({
   contentStyle,
   onBackPress,
   scrollResetKey,
+  onRefresh,
 }: PropsWithChildren<{
   title: string;
   background?: string;
@@ -115,6 +117,7 @@ export function DoctorScreen({
   contentStyle?: StyleProp<ViewStyle>;
   onBackPress?: () => void;
   scrollResetKey?: number;
+  onRefresh?: PullToRefreshProps["onRefresh"];
 }>) {
   const insets = useSafeAreaInsets();
   const { scrollRef, keyboardInset, revealFocusedInput, onScroll } =
@@ -130,6 +133,8 @@ export function DoctorScreen({
     >
       <DoctorHeader title={title} onBackPress={onBackPress} />
       <FadedScrollView
+        onRefresh={onRefresh}
+        refreshTheme="doctor"
         ref={scrollRef}
         edgeColor={background}
         keyboardShouldPersistTaps="handled"

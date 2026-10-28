@@ -163,6 +163,16 @@ export function useLiveAmbulanceBooking({
   });
 
   return {
+    refresh: () => [
+      bookings.refetch({ throwOnError: true }),
+      ...(pickup ? [hospitals.refetch({ throwOnError: true })] : []),
+      ...(activeBooking?.status === "assigned"
+        ? [tracking.refetch({ throwOnError: true })]
+        : []),
+      ...(pinVisible && profile?.patient_id
+        ? [verificationPin.refetch({ throwOnError: true })]
+        : []),
+    ],
     pickup,
     pickupAddress,
     setPickupAddress,

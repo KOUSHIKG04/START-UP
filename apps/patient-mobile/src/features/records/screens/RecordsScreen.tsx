@@ -25,6 +25,8 @@ export function RecordsScreen({
     <View style={styles.screen}>
       <Header title="Records" app="patient" onBackPress={onBackPress} />
       <FadedScrollView
+        onRefresh={() => records.refetch({ throwOnError: true })}
+        refreshTheme="patient"
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >

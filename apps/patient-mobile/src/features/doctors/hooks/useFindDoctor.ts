@@ -196,6 +196,10 @@ export function useFindDoctor({
   const searchActivePaddingTop = collapsedHeight + 8;
 
   return {
+    refresh:
+      isSearchActive && debouncedQuery.length >= 2 && supabase
+        ? () => doctorQuery.refetch({ throwOnError: true })
+        : undefined,
     isSearchActive,
     searchQuery,
     setSearchQuery,

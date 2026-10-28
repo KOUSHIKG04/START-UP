@@ -125,6 +125,13 @@ export function useAppointmentReview() {
     return transition.mutate({ item, action });
   };
   return {
+    refresh: () => [
+      appointments.refetch({ throwOnError: true }),
+      queryClient.refetchQueries(
+        { queryKey: ["appointment-billing"], type: "active" },
+        { throwOnError: true }
+      ),
+    ],
     appointmentId,
     now,
     notes,

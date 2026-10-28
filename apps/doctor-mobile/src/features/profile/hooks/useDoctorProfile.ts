@@ -41,6 +41,10 @@ export function useDoctorProfile() {
     .toUpperCase();
 
   return {
+    refresh: () => [
+      profile.refetch({ throwOnError: true }),
+      personalAddress.refetch({ throwOnError: true }),
+    ],
     insets,
     session,
     profile,

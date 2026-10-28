@@ -96,6 +96,32 @@ export function appointmentRecoveryView(
 ) {
   const r = item.recovery;
 
+  if (item.confirmation_payment_pending) {
+    const holding =
+      item.status === "pending" &&
+      Date.parse(item.request_expires_at ?? "") > now;
+    return {
+      patientStatus: holding ? "Awaiting payment" : "Booking not confirmed",
+      staffStatus: holding
+        ? "Awaiting patient payment"
+        : "Booking not confirmed",
+      message: holding
+        ? "Complete payment in Appointment Details before the reservation expires."
+        : "The payment reservation ended. Any verified payment remains available for refund review.",
+      needsReview: false,
+      canReschedule: false,
+      requiresApproval: false,
+      canCancel: holding,
+      canJoin: false,
+      canShowQr: false,
+      canShowQueue: false,
+      canMarkNoShow: false,
+      canMarkDoctorUnavailable: false,
+      canReview: false,
+      bookAgain: !holding,
+    };
+  }
+
   const started = Date.parse(item.starts_at);
 
   const expired =

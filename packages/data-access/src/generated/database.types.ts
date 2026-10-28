@@ -1,5 +1,6 @@
 import type { Database as HostedDatabase } from "./supabase.types";
 import type { Json } from "./supabase.types";
+
 export type { Json } from "./supabase.types";
 
 // PostgreSQL introspection does not report RPC argument nullability. Keep the
@@ -37,7 +38,9 @@ type NullableRpcArguments = {
   set_my_profile_photo: "p_facility_id";
   review_company_verification_document: "p_reason";
 };
+
 type HostedFunctions = HostedDatabase["public"]["Functions"];
+
 type WireArgs<Name, Args> = {
   [Key in keyof Args]: Name extends "finalize_company_verification"
     ? Key extends "p_driver_details"
@@ -51,14 +54,104 @@ type WireArgs<Name, Args> = {
           : Args[Key]
         : Args[Key];
 };
+
 type WireFunctions = {
   [Name in keyof HostedFunctions]: Omit<HostedFunctions[Name], "Args"> & {
     Args: WireArgs<Name, HostedFunctions[Name]["Args"]>;
   };
 };
+
 export type Database = Omit<HostedDatabase, "public"> & {
   public: Omit<HostedDatabase["public"], "Functions"> & {
     Functions: WireFunctions & {
+      get_appointment_booking_options: {
+        Args: { p_window_id: string; p_practice_service_id: string };
+        Returns: Json;
+      };
+      prepare_home_visit_booking: {
+        Args: {
+          p_patient_id: string;
+          p_window_id: string;
+          p_practice_service_id: string;
+          p_reason: string;
+          p_idempotency_key: string;
+          p_location_id: string;
+        };
+        Returns: Json;
+      };
+      prepare_appointment_booking: {
+        Args: {
+          p_patient_id: string;
+          p_window_id: string;
+          p_practice_service_id: string;
+          p_reason: string;
+          p_idempotency_key: string;
+          p_payment_method: string;
+        };
+        Returns: Json;
+      };
+      release_appointment_booking: {
+        Args: { p_appointment_id: string };
+        Returns: undefined;
+      };
+      has_company_finance_access: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      get_company_payment_setup: { Args: Record<string, never>; Returns: Json };
+      list_payout_entries: {
+        Args: { p_appointment_id: string | null; p_before_id: string | null };
+        Returns: Json;
+      };
+      manage_company_payments: {
+        Args: { p_action: string; p_data: Json };
+        Returns: Json;
+      };
+      get_ambulance_billing: { Args: { p_booking_id: string }; Returns: Json };
+      record_ambulance_cash: {
+        Args: {
+          p_booking_id: string;
+          p_quote_id: string;
+          p_expected_amount: number;
+          p_note: string;
+        };
+        Returns: string;
+      };
+      get_appointment_billing: {
+        Args: { p_appointment_id: string };
+        Returns: Json;
+      };
+      record_appointment_cash: {
+        Args: {
+          p_appointment_id: string;
+          p_expected_due: number;
+          p_note: string;
+        };
+        Returns: string;
+      };
+      confirm_appointment_cash_refund: {
+        Args: { p_refund_id: string; p_note: string };
+        Returns: undefined;
+      };
+      request_appointment_refund: {
+        Args: {
+          p_appointment_id: string;
+          p_kind: string;
+          p_reason: string;
+          p_expected_amount: number;
+          p_expected_deduction: number;
+        };
+        Returns: string;
+      };
+      decide_appointment_refund: {
+        Args: {
+          p_refund_id: string;
+          p_expected_version: number;
+          p_approve: boolean;
+          p_note: string;
+        };
+        Returns: string;
+      };
       list_appointment_reschedule_options: {
         Args: { p_appointment_id: string };
         Returns: Json;

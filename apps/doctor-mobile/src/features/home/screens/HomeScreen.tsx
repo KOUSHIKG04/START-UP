@@ -23,6 +23,7 @@ import { locationHeadline } from "../../locations/utils/locationDisplay";
 
 export function HomeScreen() {
   const {
+    refresh,
     greeting,
     insets,
     showNotifications,
@@ -80,6 +81,8 @@ export function HomeScreen() {
         </Pressable>
       </View>
       <FadedScrollView
+        onRefresh={refresh}
+        refreshTheme="doctor"
         edgeColor="white"
         contentContainerStyle={[
           styles.content,
@@ -149,7 +152,11 @@ export function HomeScreen() {
             appointment={item}
             home
             actionLabel={
-              item.status === "pending" ? "Review request" : "View appointment"
+              item.confirmation_payment_pending
+                ? "View payment status"
+                : item.status === "pending"
+                  ? "Review request"
+                  : "View appointment"
             }
             onOpen={() =>
               router.navigate({

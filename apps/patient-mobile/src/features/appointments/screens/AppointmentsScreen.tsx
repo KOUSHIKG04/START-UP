@@ -39,6 +39,8 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
     <View style={styles.screen}>
       <Header title="My Bookings" app="patient" onBackPress={onBackPress} />
       <FadedScrollView
+        onRefresh={() => appointments.refetch({ throwOnError: true })}
+        refreshTheme="patient"
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -121,6 +123,21 @@ export function AppointmentsScreen({ onBackPress }: AppointmentsScreenProps) {
               footer={
                 hasFooter ? (
                   <View style={styles.cardActions}>
+                    {item.confirmation_payment_pending &&
+                    item.status === "pending" &&
+                    Date.parse(item.request_expires_at ?? "") > now ? (
+                      <Button
+                        label="Complete payment"
+                        onPress={() =>
+                          router.push({
+                            pathname: "/appointment-details/[id]",
+                            params: { id: item.id },
+                          } as Href)
+                        }
+                        style={styles.actionButton}
+                        labelStyle={styles.actionLabel}
+                      />
+                    ) : null}
                     <AppointmentRecoveryActions
                       item={item}
                       now={now}

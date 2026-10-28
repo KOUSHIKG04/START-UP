@@ -28,7 +28,7 @@ export const steps = [
     imageScale: 0.92,
     title: "Check your booking status",
     description:
-      "Submit your booking. It may confirm immediately or need approval. Follow its status in My Bookings.",
+      "For auto-accepted appointments, pay to confirm or choose reception payment for clinic visits. Otherwise, request an appointment and pay after the doctor accepts. Follow its status in My Bookings.",
     note: "For app-booked clinic visits, show your QR when you arrive.",
   },
 ] as const;

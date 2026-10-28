@@ -41,6 +41,7 @@ function review({
   status = "pending",
   queueState = null,
   visitMode = "clinic",
+  paymentPending = false,
 } = {}) {
   const state = [];
   let cursor = 0;
@@ -57,6 +58,7 @@ function review({
     patient_gender: "Male",
     row_version: "7",
     status,
+    confirmation_payment_pending: paymentPending,
     can_consult: true,
     visit_mode: visitMode,
     starts_at: new Date(
@@ -165,6 +167,16 @@ function review({
   };
   return { render, calls, toasts, refreshes, routes };
 }
+
+test("payment reservations show their payment state without manual Accept or Reject", () => {
+  const nodes = review({ paymentPending: true, visitMode: "online" }).render();
+  assert.match(JSON.stringify(nodes), /Awaiting patient payment/);
+  assert.ok(
+    !nodes.some((node) =>
+      ["Accept", "Reject", "Start consultation"].includes(node.props.label)
+    )
+  );
+});
 
 test("separate appointment page accepts a current request and refreshes the home/list data", async () => {
   const view = review();

@@ -33,6 +33,7 @@ import { palette, ui } from "../../../components/theme";
 
 export function ProfileScreen() {
   const {
+    refresh,
     insets,
     session,
     profile,
@@ -107,6 +108,8 @@ export function ProfileScreen() {
         )}
       </Card>
       <FadedScrollView
+        onRefresh={refresh}
+        refreshTheme="doctor"
         edgeColor={palette.white}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"

@@ -40,6 +40,12 @@ export function AppointmentRecoveryPolicy({
       setAppointmentRecoveryPolicy(supabase!, { practiceId, ...draft }),
     onSuccess: (data) => {
       client.setQueryData(["my-doctor-schedule", practiceId], data);
+      void client.invalidateQueries({
+        queryKey: ["doctor-clinic-appointments"],
+      });
+      void client.invalidateQueries({
+        queryKey: ["doctor-reschedule-options"],
+      });
       setEdits(null);
       showToast({ title: "Recovery policy saved", type: "success" });
     },

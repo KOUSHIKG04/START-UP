@@ -2,12 +2,10 @@ import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Navigation } from "lucide-react-native";
 import { colors, fontFamilies, radius, surfaces } from "@startup/design-tokens";
-import { Button, Card, Input } from "@startup/mobile-ui";
+import { Button, Card } from "@startup/mobile-ui";
 import type { HomeVisitAddressProps } from "../types/doctor-profile";
 
 export function HomeVisitAddress({
-  address,
-  onAddressChange,
   onConfirm,
   verifiedAddress,
 }: HomeVisitAddressProps) {
@@ -20,19 +18,6 @@ export function HomeVisitAddress({
       padding={14}
       style={styles.addressCard}
     >
-      <Input
-        accessibilityLabel="Home visit address"
-        label="Your address"
-        placeholder="Enter your address here..."
-        value={address}
-        onChangeText={onAddressChange}
-      />
-      <Button
-        label="Update your location"
-        disabled={!address.trim()}
-        onPress={onConfirm}
-        style={styles.locationButton}
-      />
       <View style={styles.pinnedLocation}>
         <Navigation
           color={colors.patient.primaryDark}
@@ -41,17 +26,24 @@ export function HomeVisitAddress({
         />
         <View style={styles.pinnedLocationCopy}>
           <Text variant="cardHeading" style={styles.pinnedLocationTitle}>
-            Verified visit location
+            Home visit address
           </Text>
           <Text
             variant="body"
             numberOfLines={2}
             style={styles.pinnedLocationAddress}
           >
-            {verifiedAddress || "Add an address for the doctor’s visit"}
+            {verifiedAddress || "Choose a saved address with a map pin"}
           </Text>
         </View>
       </View>
+      <Button
+        label={
+          verifiedAddress ? "Change visit address" : "Choose visit address"
+        }
+        onPress={onConfirm}
+        style={styles.locationButton}
+      />
     </Card>
   );
 }

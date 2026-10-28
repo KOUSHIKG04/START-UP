@@ -117,7 +117,10 @@ export default function RootLayout() {
                         !auth.profile.patient_profile_complete
                       }
                     >
-                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen
+                        name="(auth)"
+                        options={{ statusBarStyle: "dark" }}
+                      />
                     </Stack.Protected>
                   </Stack>
                 </View>

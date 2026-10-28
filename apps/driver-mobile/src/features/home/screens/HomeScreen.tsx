@@ -20,6 +20,7 @@ import { DriverOfferDialog } from "../components/DriverOfferDialog";
 
 export function HomeScreen() {
   const {
+    refresh,
     greeting,
     insets,
     showNotifications,
@@ -78,7 +79,7 @@ export function HomeScreen() {
           <Bell size={20} strokeWidth={1.9} color={palette.primary} />
         </Pressable>
       </View>
-      <Body>
+      <Body onRefresh={refresh}>
         <View style={ui.between}>
           <Heading>{online ? "Available" : "Offline"}</Heading>
           <Switch

@@ -34,6 +34,7 @@ const react = {
 };
 
 const native = {
+  Platform: { OS: "android" },
   StyleSheet: {
     create: (value) => value,
     absoluteFill: {},
@@ -52,6 +53,7 @@ for (const name of [
   "ScrollView",
   "Modal",
   "ActivityIndicator",
+  "KeyboardAvoidingView",
 ])
   native[name] = name;
 
@@ -599,5 +601,54 @@ test("SectionHeader inherits all app palettes, preserves actions and allows over
   assert.equal(
     flatten(override.find((n) => n.type === "Text").props.style).color,
     "custom"
+  );
+});
+
+test("themed dialogs preserve confirmation and dismissal actions and lock dismissal while busy", () => {
+  const { AppDialog } = load(
+    path.resolve(__dirname, "../src/components/AppDialog.tsx")
+  );
+  let closed = 0,
+    confirmed = 0;
+  const props = {
+    visible: true,
+    title: "Save a visit address",
+    description: "Review the address first.",
+    confirmLabel: "Edit profile",
+    onClose: () => closed++,
+    onConfirm: () => confirmed++,
+    theme: "patient",
+  };
+  const nodes = themed("patient", jsx(AppDialog, props));
+  nodes
+    .find(
+      (n) =>
+        n.type === "Pressable" && n.props.accessibilityLabel === "Edit profile"
+    )
+    .props.onPress();
+  assert.equal(confirmed, 1);
+  assert.equal(closed, 0);
+  nodes
+    .find(
+      (n) => n.type === "Pressable" && n.props.accessibilityLabel === "Cancel"
+    )
+    .props.onPress();
+  assert.equal(closed, 1);
+  nodes.find((n) => n.type === "Modal").props.onRequestClose();
+  assert.equal(closed, 2);
+  const busy = themed("patient", jsx(AppDialog, { ...props, busy: true }));
+  assert.equal(
+    busy.find((n) => n.type === "Modal").props.onRequestClose,
+    undefined
+  );
+  assert.ok(
+    busy
+      .filter((n) => n.type === "Pressable")
+      .every((n) => n.props.disabled === true)
+  );
+  assert.ok(busy.some((n) => n.props.accessibilityViewIsModal === true));
+  assert.equal(
+    busy.find((n) => n.type === "ScrollView").props.keyboardShouldPersistTaps,
+    "handled"
   );
 });

@@ -181,6 +181,9 @@ export function useFacilityDoctorSchedule({
       await client.invalidateQueries({
         queryKey: ["facility-practice-schedule", practiceId],
       });
+      await client.invalidateQueries({
+        queryKey: ["facility-recovery-policy", practiceId],
+      });
       router.refresh();
       toast.add({
         title: response.settings.published_modes?.includes(mode)

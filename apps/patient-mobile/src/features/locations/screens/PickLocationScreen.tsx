@@ -14,7 +14,11 @@ import { LocateFixed, MapPin } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { Button, Header, Input } from "@startup/mobile-ui";
 
-export default function PickLocationScreen() {
+export default function PickLocationScreen({
+  statusBarStyle = "light",
+}: {
+  statusBarStyle?: "light" | "dark";
+} = {}) {
   const {
     insets,
     point,
@@ -41,7 +45,7 @@ export default function PickLocationScreen() {
   } = useMapPicker();
   return (
     <View style={styles.screen}>
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
       <Header
         title="Choose Location"
         app="patient"

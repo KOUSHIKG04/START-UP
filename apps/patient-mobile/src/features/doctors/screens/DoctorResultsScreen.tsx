@@ -30,6 +30,7 @@ export function DoctorResultsScreen({
   onBackPress,
 }: DoctorResultsScreenProps) {
   const {
+    refresh,
     isOnline,
     filter,
     setFilter,
@@ -122,6 +123,8 @@ export function DoctorResultsScreen({
         </View>
       </View>
       <FadedScrollView
+        onRefresh={refresh}
+        refreshTheme="patient"
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >

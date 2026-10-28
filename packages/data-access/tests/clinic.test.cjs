@@ -72,6 +72,115 @@ function fixture(respond = () => id) {
   };
 }
 
+test("unpaid reservations cannot show consultation, QR, rescheduling or approval-ready states", () => {
+  const now = Date.now();
+  const item = {
+    confirmation_payment_pending: true,
+    status: "pending",
+    request_expires_at: new Date(now + 60000).toISOString(),
+  };
+  const held = recoveryContracts.appointmentRecoveryView(item, now);
+  assert.equal(held.patientStatus, "Awaiting payment");
+  assert.equal(held.staffStatus, "Awaiting patient payment");
+  for (const action of [
+    "canJoin",
+    "canShowQr",
+    "canReschedule",
+    "canMarkNoShow",
+  ])
+    assert.equal(held[action], false);
+  const expired = recoveryContracts.appointmentRecoveryView(item, now + 61000);
+  assert.equal(expired.patientStatus, "Booking not confirmed");
+  assert.equal(expired.bookAgain, true);
+});
+
+test("booking payment options remain server-owned and patient preparation requires online payment", async () => {
+  const f = fixture((name) =>
+    name === "get_appointment_booking_options"
+      ? {
+          auto_accept: true,
+          requires_payment: true,
+          can_pay_reception: true,
+          policy_version: "v1",
+          policy_text: "Terms",
+          hold_minutes: 10,
+          mode: "test",
+        }
+      : {
+          appointment_id: id,
+          status: "pending",
+          requires_payment: true,
+          reservation_expires_at: "2026-11-01T10:10:00Z",
+        }
+  );
+  const options = await api.getAppointmentBookingOptions(f.client, id, id);
+  assert.equal(options.auto_accept, true);
+  const request = {
+    patientId: id,
+    windowId: id,
+    practiceServiceId: id,
+    reason: "  Review  ",
+    idempotencyKey: id,
+    paymentMethod: "online",
+  };
+  await api.prepareAppointmentBooking(f.client, request);
+  assert.equal(f.calls[1].args.p_payment_method, "online");
+  assert.equal(f.calls[1].args.p_reason, "Review");
+  assert.equal(f.calls[1].args.p_idempotency_key, id);
+  await assert.rejects(
+    api.prepareAppointmentBooking(f.client, { ...request, feeMinor: 1 })
+  );
+  await assert.rejects(
+    api.prepareAppointmentBooking(f.client, {
+      ...request,
+      paymentMethod: "reception",
+    })
+  );
+  assert.equal(f.calls.length, 2);
+});
+
+test("home booking forwards only a saved location ID and rejects reception payment", async () => {
+  const f = fixture(() => ({
+    appointment_id: id,
+    status: "pending",
+    requires_payment: true,
+    reservation_expires_at: null,
+  }));
+  const request = {
+    patientId: id,
+    windowId: id,
+    practiceServiceId: id,
+    reason: "Visit",
+    idempotencyKey: id,
+    paymentMethod: "online",
+    locationId: id,
+  };
+  await api.prepareAppointmentBooking(f.client, request);
+  assert.equal(f.calls[0].name, "prepare_home_visit_booking");
+  assert.equal(f.calls[0].args.p_location_id, id);
+  assert.equal(f.calls[0].args.p_payment_method, undefined);
+  await assert.rejects(
+    api.prepareAppointmentBooking(f.client, {
+      ...request,
+      paymentMethod: "reception",
+    })
+  );
+  await assert.rejects(
+    api.prepareAppointmentBooking(f.client, {
+      ...request,
+      locationId: "invalid",
+    })
+  );
+  await assert.rejects(
+    api.prepareAppointmentBooking(f.client, {
+      ...request,
+      latitude: 12,
+      longitude: 80,
+    })
+  );
+  assert.equal(f.calls.length, 1);
+});
+
 test("overdue presentation distinguishes expiry, clinic delay, missed attendance and active visits", () => {
   const now = Date.parse("2026-10-23T12:00:00Z");
   const item = {

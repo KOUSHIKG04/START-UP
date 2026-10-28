@@ -4,14 +4,66 @@ import {
   clinicTransitionSchema,
   clinicAppointmentSchema,
   uuidSchema,
+  appointmentBookingOptionsSchema,
+  preparedAppointmentBookingSchema,
+  appointmentBookingRequestSchema,
 } from "@startup/contracts";
 import type {
   ClinicBookingInput,
   PortalWalkInBookingInput,
   ClinicTransitionInput,
+  AppointmentBookingRequest,
 } from "@startup/contracts";
 import type { AppSupabaseClient } from "../client/createSupabaseClient";
 import { listMyPractices } from "./practices";
+
+export async function getAppointmentBookingOptions(
+  client: AppSupabaseClient,
+  windowId: string,
+  practiceServiceId: string
+) {
+  const { data, error } = await client.rpc("get_appointment_booking_options", {
+    p_window_id: uuidSchema.parse(windowId),
+    p_practice_service_id: uuidSchema.parse(practiceServiceId),
+  });
+  if (error) throw error;
+  return appointmentBookingOptionsSchema.parse(data);
+}
+
+export async function prepareAppointmentBooking(
+  client: AppSupabaseClient,
+  input: AppointmentBookingRequest
+) {
+  const request = appointmentBookingRequestSchema.parse(input);
+  const args = {
+    p_patient_id: request.patientId,
+    p_window_id: request.windowId,
+    p_practice_service_id: request.practiceServiceId,
+    p_reason: request.reason,
+    p_idempotency_key: request.idempotencyKey,
+  };
+  const { data, error } = request.locationId
+    ? await client.rpc("prepare_home_visit_booking", {
+        ...args,
+        p_location_id: request.locationId,
+      })
+    : await client.rpc("prepare_appointment_booking", {
+        ...args,
+        p_payment_method: request.paymentMethod,
+      });
+  if (error) throw error;
+  return preparedAppointmentBookingSchema.parse(data);
+}
+
+export async function releaseAppointmentBooking(
+  client: AppSupabaseClient,
+  appointmentId: string
+) {
+  const { error } = await client.rpc("release_appointment_booking", {
+    p_appointment_id: uuidSchema.parse(appointmentId),
+  });
+  if (error) throw error;
+}
 
 export async function bookClinicAppointment(
   client: AppSupabaseClient,

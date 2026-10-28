@@ -46,7 +46,8 @@ enabled = false
 enabled = false
 
 [functions.process-payment]
-enabled = false
+enabled = true
+verify_jwt = true
 
 [functions.send-notification]
 enabled = true
@@ -67,3 +68,25 @@ verify_jwt = true
 [functions.resolve-map-address]
   enabled = true
   verify_jwt = true
+
+[functions.razorpay-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/razorpay-webhook/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/razorpay-webhook/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/razorpay-webhook/*.html" ]
+
+[functions.payment-reconcile]
+enabled = true
+verify_jwt = false
+import_map = "./functions/payment-reconcile/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/payment-reconcile/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/payment-reconcile/*.html" ]

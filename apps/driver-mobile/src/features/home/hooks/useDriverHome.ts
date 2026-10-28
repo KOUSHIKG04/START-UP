@@ -204,6 +204,13 @@ export function useDriverHome() {
     }
   }
   return {
+    refresh: () => [
+      driverProfile.refetch({ throwOnError: true }),
+      fleet.refetch({ throwOnError: true }),
+      offers.refetch({ throwOnError: true }),
+      trips.refetch({ throwOnError: true }),
+      locations.refetch({ throwOnError: true }),
+    ],
     greeting,
     insets,
     showNotifications,

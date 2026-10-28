@@ -37,7 +37,12 @@ export function useLiveOnlineConsultation({
   });
   useToastFeedback({
     error: start.isError
-      ? "Could not start consultation. Check its scheduled time and status."
+      ? start.error &&
+        typeof start.error === "object" &&
+        "message" in start.error &&
+        String(start.error.message).includes("Pay the consultation fee")
+        ? "Awaiting patient payment. Ask the patient to pay in Appointment Details before starting."
+        : "Could not start consultation. Check its payment, scheduled time and status."
       : token.error instanceof Error
         ? token.error.message
         : "",

@@ -1,5 +1,14 @@
 # Driver mobile architecture
 
+## Manual refresh
+
+Home, earnings/trip history, current trip, profile and notifications support
+pull-to-refresh using existing feature queries. `DriverUI.Body` accepts an
+optional refresh callback; profile and notification scroll views use the same
+shared themed indicator. Manual refresh preserves period selections, availability
+actions and trip PIN input and does not request location permissions or change
+tracking subscriptions. Native Android/iOS gesture verification remains pending.
+
 Follow the repository [ownership map](../../ARCHITECTURE.md) and
 [working rules](../../AGENTS.md). Existing integrations must be inspected before
 implementing new Driver functionality.
@@ -77,3 +86,37 @@ remains a root-layout side-effect import, with its module-level registration and
 original task name. Location services and the two independent navigation draft
 stores live under `locations/services` and `locations/stores`. Notification SDK
 setup and the listener hook live under their feature services and hooks.
+
+## Trip payments, commission and earnings
+
+`features/earnings/hooks/useDriverEarnings.ts` reads the driver's paginated payout
+ledger through `list_payout_entries`, separately from the existing trip-history
+query. `EarningsScreen` shows actual receipts, company commission, provider share,
+recipient and payout status. The current page window is refreshed periodically;
+loading more uses the shared cursor API. Income is not inferred from a new fare
+formula or fabricated trip totals.
+
+`trip-payment/[id]` composes `features/trips/screens/TripPaymentScreen.tsx` and its
+`TripPayment` panel. The completed-trip history provides a route back to billing.
+Company finance must set the final fare after completion; Driver can then confirm
+cash actually received, with a note and the current expected amount. Shared
+ambulance contracts/data-access own backend calls. Payment does not gate emergency
+dispatch or trip care. An unresolved Checkout order blocks duplicate cash
+collection; closing Checkout does not cancel it. Historical cash receipts remain
+readable after billing is disabled.
+
+Company finance configures commissions and the legally agreed driver/operator
+payee through Dashboard-assisted Route onboarding. Driver collects no bank/KYC
+details or provider secrets. Cash makes company commission receivable; finance
+separately records commission received using a unique receipt. There is no automatic
+cash split/debit. Gateway payouts require completed care, the configured release
+delay, verified Route activation and server/database gates. Rates and recipients
+are frozen per captured receipt; UI status does not promise a settlement date.
+
+Ambulance refunds currently reconcile provider Dashboard refunds, with no in-app
+self-service refund workflow. Both new payment migrations and updated functions
+are deployed, including the follow-up ambulance worker alias fix. Marketplace
+collections and Route transfers remain disabled in test mode. Mocked provider and rollback
+SQL checks do not verify native UI, provider sandbox or actual transfers. Follow
+the [payment guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md) for activation and the
+guarded verification runner.

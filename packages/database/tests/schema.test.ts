@@ -14,7 +14,7 @@ const tables = Object.values(schema).filter((value) => is(value, PgTable));
 
 describe("database model contract", () => {
   test("domain tables use RLS and only online chat is public for Realtime", () => {
-    expect(tables).toHaveLength(98);
+    expect(tables).toHaveLength(112);
     for (const table of tables) {
       const config = getTableConfig(table);
       expect(config.schema ?? "public").toBe(

@@ -1,0 +1,33 @@
+/** Native equivalents of the reference toast's surface and semantic CSS tokens. */
+export const toastTokens = {
+  light: {
+    background: "#FFFFFF",
+    text: "#0C2434",
+    muted: "#465B64",
+    error: "#B4232C",
+    errorSoft: "#FDECEE",
+    warning: "#825000",
+    warningSoft: "#FFF3D6",
+    track: "#E5EFEE",
+  },
+  dark: {
+    accent: "#84DAD0",
+    background: "#142B32",
+    text: "#F1F8F8",
+    muted: "#BED0D4",
+    error: "#FFADB4",
+    errorSoft: "#482A32",
+    warning: "#F3CB7C",
+    warningSoft: "#443A25",
+    track: "#385158",
+  },
+  minHeight: 48,
+  radius: 18,
+  maxWidth: 380,
+  gap: 8,
+  peek: 10,
+  shrink: 0.03,
+  depth: 3,
+  fade: 0.15,
+  motionDuration: 300,
+} as const;

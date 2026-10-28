@@ -2,7 +2,7 @@ import type { SortBy } from "../types/doctor-results";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import * as Location from "expo-location";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listMyPatientLocations,
   searchPublicPractices,
@@ -23,6 +23,7 @@ export function useDoctorResults({
   onBackPress,
 }: DoctorResultsScreenProps) {
   const { showToast } = useToast();
+  const client = useQueryClient();
   const { profile } = useMobileSession();
   const isOnline = consultationType === "Online";
   const [filter, setFilter] = useState<SortBy>(
@@ -95,7 +96,7 @@ export function useDoctorResults({
   useToastFeedback({
     error:
       locationError ||
-      (isError ? "Could not search doctors. Reopen this page to retry." : ""),
+      (isError ? "Could not search doctors. Pull down to retry." : ""),
   });
   useFocusEffect(
     useCallback(() => {
@@ -206,6 +207,22 @@ export function useDoctorResults({
   };
 
   return {
+    refresh: async () => {
+      if (!isOnline) return query.refetch({ throwOnError: true });
+      const firstPage = await client.fetchQuery({
+        queryKey: ["public-online-practices", symptom, 0],
+        queryFn: () =>
+          searchPublicPractices(supabase!, {
+            ...resolveDoctorSearch(symptom),
+            serviceMode: "online",
+            offset: 0,
+            limit: 50,
+          }),
+        staleTime: 0,
+      });
+      setOnlineOffset(0);
+      setOnlineRows(firstPage);
+    },
     isOnline,
     filter,
     setFilter,

@@ -1,3 +1,20 @@
+import type { ClinicAppointment } from "@startup/contracts";
+
+export type AppointmentAction =
+  | "approve"
+  | "reject"
+  | "check_in"
+  | "call"
+  | "hold"
+  | "resume"
+  | "no_show"
+  | "cancel";
+
+export type AppointmentReasonRequest = {
+  item: ClinicAppointment;
+  action: "hold" | "reject";
+};
+
 export interface AppointmentRecord {
   id: string;
   queueNo: string;

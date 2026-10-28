@@ -2,6 +2,10 @@ import type { ClinicAppointment } from "@startup/contracts";
 import { appointmentRecoveryView } from "@startup/contracts";
 import { AppointmentRecoveryDialog } from "@startup/mobile-ui";
 import { useAppointmentRecovery } from "../hooks/useAppointmentRecovery";
+import { useQuery } from "@tanstack/react-query";
+import { getAppointmentBilling } from "@startup/data-access";
+import { appointmentMoney } from "@startup/contracts";
+import { supabase } from "../../../services/supabase";
 
 export function AppointmentRecovery({
   item,
@@ -13,6 +17,11 @@ export function AppointmentRecovery({
   onClose: () => void;
 }) {
   const recovery = useAppointmentRecovery(item, intent, onClose);
+  const billing = useQuery({
+    queryKey: ["appointment-billing", item.id],
+    queryFn: () => getAppointmentBilling(supabase!, item.id),
+    enabled: intent === "reschedule",
+  });
   const view = appointmentRecoveryView(item);
   return (
     <AppointmentRecoveryDialog
@@ -28,7 +37,7 @@ export function AppointmentRecovery({
           ? "Describe what happened. The clinic will review attendance before deciding the outcome."
           : view.requiresApproval
             ? "Choose a preferred time. The clinic must approve this change; the time is not reserved yet."
-            : "Choose a new available time. Your original booking changes only after confirmation."
+            : "Choose a new available time. Your original booking changes only after confirmation. Any verified payment follows the new booking. A higher fee requires an additional payment; unused credit is refundable."
       }
       actionLabel={
         intent === "review"
@@ -53,10 +62,18 @@ export function AppointmentRecovery({
                 hour: "numeric",
                 minute: "2-digit",
               }),
-              fee: new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency: slot.currency,
-              }).format(Number(slot.fee_minor) / 100),
+              fee:
+                new Intl.NumberFormat("en-IN", {
+                  style: "currency",
+                  currency: slot.currency,
+                }).format(Number(slot.fee_minor) / 100) +
+                (billing.data?.charge_id
+                  ? Number(slot.fee_minor) > billing.data.credit_minor
+                    ? ` · ${appointmentMoney(Number(slot.fee_minor) - billing.data.credit_minor)} additional payment`
+                    : Number(slot.fee_minor) < billing.data.credit_minor
+                      ? ` · ${appointmentMoney(billing.data.credit_minor - Number(slot.fee_minor))} unused credit`
+                      : " · Paid credit covers this fee"
+                  : ""),
             }))
           : undefined
       }

@@ -1,4 +1,5 @@
 import type { Ref } from "react";
+import type { PullToRefreshProps } from "./pullToRefresh";
 import type {
   ScrollView,
   ScrollViewProps,
@@ -7,6 +8,9 @@ import type {
 } from "react-native";
 
 export type FadedScrollViewProps = ScrollViewProps & {
+  onRefresh?: PullToRefreshProps["onRefresh"];
+  refreshTheme?: PullToRefreshProps["theme"];
+  refreshOffset?: number;
   containerStyle?: StyleProp<ViewStyle>;
   edgeColor?: string;
   edgeSize?: number;

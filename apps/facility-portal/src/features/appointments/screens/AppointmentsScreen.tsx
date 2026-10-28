@@ -11,6 +11,13 @@ import type { AppointmentsScreenProps } from "../types/appointmentsScreen";
 
 import { Search, Calendar, ChevronDown, ScanLine } from "lucide-react";
 import { Button } from "@startup/web-ui/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@startup/web-ui/components/ui/dialog";
 
 import { AppointmentsSummaryCards } from "../components/AppointmentsSummaryCards";
 import { AppointmentsTable } from "../components/AppointmentsTable";
@@ -26,6 +33,12 @@ export default function AppointmentsScreen({
   );
   const {
     pending,
+    reasonRequest,
+    actionReason,
+    setActionReason,
+    actionError,
+    submitReason,
+    closeReason,
     search,
     setSearch,
     statusFilter,
@@ -185,6 +198,74 @@ export default function AppointmentsScreen({
         onFilterPeriodChange={setFilterPeriod}
         bookingDateLabel={bookingDateLabel}
       />
+      <Dialog
+        open={Boolean(reasonRequest)}
+        onOpenChange={(open) => {
+          if (!open) closeReason();
+        }}
+      >
+        <DialogContent
+          showCloseButton={!pending}
+          className="max-h-[85dvh] overflow-y-auto sm:max-w-md"
+        >
+          <DialogTitle>
+            {reasonRequest?.action === "hold"
+              ? "Reason for holding this patient"
+              : "Reason for rejecting this appointment"}
+          </DialogTitle>
+          <DialogDescription>
+            {reasonRequest?.item.patient_name} · Appointment{" "}
+            {reasonRequest?.item.public_code.slice(-8)}
+          </DialogDescription>
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitReason();
+            }}
+          >
+            <label className="block space-y-2 text-sm">
+              <span>Reason</span>
+              <textarea
+                autoFocus
+                required
+                disabled={pending}
+                maxLength={1000}
+                value={actionReason}
+                onChange={(event) => setActionReason(event.target.value)}
+                className="border-border bg-background focus-visible:outline-ring min-h-28 w-full rounded-lg border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+              />
+            </label>
+            {actionError ? (
+              <p role="alert" className="text-destructive text-sm">
+                {actionError}
+              </p>
+            ) : null}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending}
+                onClick={closeReason}
+                className="min-h-11"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={pending || !actionReason.trim()}
+                className="min-h-11"
+              >
+                {pending
+                  ? "Updating…"
+                  : reasonRequest?.action === "hold"
+                    ? "Hold patient"
+                    : "Reject appointment"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       {managed ? (
         <AppointmentRecoveryDialog
           key={managed.id}

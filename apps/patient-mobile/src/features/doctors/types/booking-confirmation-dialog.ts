@@ -9,4 +9,7 @@ export type Props = Pick<
   | "practiceId"
   | "serviceMode"
   | "slots"
+  | "bookingOptions"
+  | "acceptedPolicy"
+  | "setAcceptedPolicy"
 >;

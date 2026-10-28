@@ -1,11 +1,12 @@
 import { AppText as Text } from "@startup/mobile-ui";
 import { useLocalSearchParams, router, type Href } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StyleSheet, View } from "react-native";
 import { listClinicAppointments } from "@startup/data-access";
 import type { ClinicAppointment } from "@startup/contracts";
 import { appointmentRecoveryView } from "@startup/contracts";
 import { AppointmentRecoveryActions } from "../../../features/appointments/components/AppointmentRecoveryActions";
+import { AppointmentPayment } from "../../../features/appointments/components/AppointmentPayment";
 import { useAppointmentClock } from "../../../features/appointments/hooks/useAppointmentClock";
 import { colors, fontFamilies, spacing } from "@startup/design-tokens";
 import {
@@ -25,6 +26,7 @@ import {
 import { supabase } from "../../../services/supabase";
 
 export default function AppointmentDetailsRoute() {
+  const client = useQueryClient();
   const now = useAppointmentClock();
   const { id } = useLocalSearchParams<{ id: string }>();
   const appointments = useQuery<ClinicAppointment[]>({
@@ -50,6 +52,14 @@ export default function AppointmentDetailsRoute() {
         onBackPress={() => router.back()}
       />
       <FadedScrollView
+        onRefresh={() => [
+          appointments.refetch({ throwOnError: true }),
+          client.refetchQueries(
+            { queryKey: ["appointment-billing", id], type: "active" },
+            { throwOnError: true }
+          ),
+        ]}
+        refreshTheme="patient"
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -68,6 +78,7 @@ export default function AppointmentDetailsRoute() {
               statusLabel={appointmentRecoveryView(item, now).patientStatus}
             />
             <AppointmentRecoveryActions item={item} now={now} />
+            <AppointmentPayment key={item.id} item={item} />
             <Card theme="patient" backgroundColor={colors.white} gap={12}>
               <Text variant="sectionHeading" style={styles.sectionTitle}>
                 Appointment details
@@ -83,6 +94,12 @@ export default function AppointmentDetailsRoute() {
                 <Detail label="Location" value={card.location} />
               ) : null}
               <Detail label="Consultation fee" value={card.fee} />
+              {item.home_visit_details?.instructions ? (
+                <Detail
+                  label="Visit instructions"
+                  value={item.home_visit_details.instructions}
+                />
+              ) : null}
               {card.experience ? (
                 <Detail label="Doctor experience" value={card.experience} />
               ) : null}

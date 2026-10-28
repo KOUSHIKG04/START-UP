@@ -36,6 +36,18 @@ export function LiveOnlineConsultation({
         />
       </DoctorScreen>
     );
+  if (appointment.confirmation_payment_pending)
+    return (
+      <DoctorScreen title="Awaiting patient payment" bottomNav={false}>
+        <Heading>{appointment.patient_name}</Heading>
+        <Label>{appointmentRecoveryView(appointment).message}</Label>
+        <Button
+          theme="doctor"
+          label="Back to appointments"
+          onPress={() => router.replace("/appointments")}
+        />
+      </DoctorScreen>
+    );
   if (appointment.status === "completed")
     return (
       <DoctorScreen

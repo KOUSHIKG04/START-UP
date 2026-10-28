@@ -70,3 +70,7 @@ export * from "./drivers/locations";
 export * from "./locations/search";
 
 export * from "./realtime/liveChanges";
+
+export * from "./clinic/payouts";
+
+export * from "./ambulance/payments";

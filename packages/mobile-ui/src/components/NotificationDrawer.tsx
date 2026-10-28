@@ -10,6 +10,7 @@ import {
   notificationPalette,
 } from "./NotificationDrawer.styles";
 import { useMobileThemeName } from "../theme/MobileThemeProvider";
+import { PullToRefresh } from "../primitives/PullToRefresh";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -43,6 +44,7 @@ export function NotificationDrawer({
   onNotificationPress,
   onDelete,
   onVisibilityChange,
+  onRefresh,
 }: NotificationDrawerProps) {
   const app = useMobileThemeName(theme);
   const styles = useMemo(() => createNotificationStyles(app), [app]);
@@ -215,6 +217,12 @@ export function NotificationDrawer({
           </View>
 
           <ScrollView
+            alwaysBounceVertical={onRefresh ? true : undefined}
+            refreshControl={
+              onRefresh ? (
+                <PullToRefresh theme={app} onRefresh={onRefresh} />
+              ) : undefined
+            }
             style={styles.list}
             contentContainerStyle={[
               styles.listContent,

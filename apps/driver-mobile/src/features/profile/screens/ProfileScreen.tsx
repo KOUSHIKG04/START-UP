@@ -12,7 +12,7 @@ import {
   User,
 } from "lucide-react-native";
 
-import { Button, Card } from "@startup/mobile-ui";
+import { Button, Card, PullToRefresh } from "@startup/mobile-ui";
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
 import { Copy, Heading, PageHeader } from "../../../components/DriverUI";
 import { palette, ui } from "../../../components/theme";
@@ -21,6 +21,7 @@ import { signOutWithPushCleanup } from "../../notifications/services/deviceNotif
 
 export function ProfileScreen() {
   const {
+    refresh,
     profile,
     support,
     setSupport,
@@ -35,6 +36,8 @@ export function ProfileScreen() {
     <View style={ui.screen}>
       <PageHeader title="Profile" />
       <ScrollView
+        alwaysBounceVertical
+        refreshControl={<PullToRefresh theme="driver" onRefresh={refresh} />}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >

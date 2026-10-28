@@ -8,6 +8,7 @@ export default function GroupLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
+          statusBarStyle: "dark",
           animation: "none",
           contentStyle: { backgroundColor: "#FFFFFF" },
         }}

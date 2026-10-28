@@ -123,6 +123,7 @@ function harness({
         "ModalSurface",
         "Dropdown",
         "Header",
+        "PullToRefresh",
       ])
         if (id.endsWith("/" + name)) return { [name]: name };
       const target = path.resolve(path.dirname(file), id);
@@ -339,5 +340,23 @@ test("drawer inherits or overrides its theme and preserves each app's icon color
         .props.app,
       "doctor"
     );
+  }
+});
+
+test("empty notification lists forward the refresh action and app theme", async () => {
+  for (const theme of ["patient", "doctor", "driver"]) {
+    const h = harness({ theme });
+    let refreshed = false;
+    const onRefresh = async () => {
+      refreshed = true;
+    };
+    const scroll = h
+      .nodes(h.render({ onRefresh }))
+      .find((node) => node.type === "ScrollView");
+    assert.equal(scroll.props.alwaysBounceVertical, true);
+    assert.equal(scroll.props.refreshControl.type, "PullToRefresh");
+    assert.equal(scroll.props.refreshControl.props.theme, theme);
+    await scroll.props.refreshControl.props.onRefresh();
+    assert.equal(refreshed, true);
   }
 });

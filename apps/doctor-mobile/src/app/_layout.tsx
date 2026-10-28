@@ -113,7 +113,10 @@ export default function RootLayout() {
                     !auth.session || auth.profile?.doctor?.status !== "verified"
                   }
                 >
-                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{ statusBarStyle: "dark" }}
+                  />
                 </Stack.Protected>
               </Stack>
               <StatusBar

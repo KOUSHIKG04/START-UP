@@ -14,6 +14,8 @@ export * from "./typography";
 
 export * from "./themes";
 
+export * from "./toast";
+
 export * from "./web-colors";
 
 import { colors } from "./colors";

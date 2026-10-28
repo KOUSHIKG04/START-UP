@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 import { colors, fontFamilies } from "@startup/design-tokens";
 import { palette, ui } from "./theme";
+import { PullToRefresh, type PullToRefreshProps } from "@startup/mobile-ui";
 
 export function Copy({ style, ...props }: TextProps) {
   return <Text {...props} style={[ui.copy, style]} />;
@@ -59,9 +60,21 @@ export function PageHeader({
   );
 }
 
-export function Body({ children }: { children: ReactNode }) {
+export function Body({
+  children,
+  onRefresh,
+}: {
+  children: ReactNode;
+  onRefresh?: PullToRefreshProps["onRefresh"];
+}) {
   return (
     <ScrollView
+      alwaysBounceVertical={onRefresh ? true : undefined}
+      refreshControl={
+        onRefresh ? (
+          <PullToRefresh theme="driver" onRefresh={onRefresh} />
+        ) : undefined
+      }
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={ui.body}
     >

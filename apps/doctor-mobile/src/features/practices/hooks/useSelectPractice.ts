@@ -36,7 +36,7 @@ export function useSelectPractice() {
   useToastFeedback({
     error:
       practices.isError || doctorProfile.isError || selected.isError
-        ? "Could not load your practice locations. Reopen this page to retry."
+        ? "Could not load your practice locations. Pull down to retry."
         : "",
   });
 
@@ -83,6 +83,10 @@ export function useSelectPractice() {
   }
 
   return {
+    refresh: () => [
+      practices.refetch({ throwOnError: true }),
+      doctorProfile.refetch({ throwOnError: true }),
+    ],
     search,
     setSearch,
     saving,

@@ -6,7 +6,12 @@ import { useToast } from "@startup/mobile-ui";
 import { mobileSession, supabase } from "./supabase";
 
 const queryKeys: Partial<Record<AppChangeKind, string[]>> = {
-  appointments: ["doctor-clinic-appointments", "doctor-clinic-sessions"],
+  appointments: [
+    "doctor-clinic-appointments",
+    "doctor-clinic-sessions",
+    "appointment-billing",
+    "doctor-reschedule-options",
+  ],
   notifications: ["my-notifications"],
   schedule: [
     "my-practices",
@@ -16,6 +21,8 @@ const queryKeys: Partial<Record<AppChangeKind, string[]>> = {
     "doctor-clinic-sessions",
     "doctor-daily-slot-usage",
     "doctor-clinic-unavailability",
+    "doctor-clinic-appointments",
+    "doctor-reschedule-options",
   ],
   profile: [
     "my-doctor-profile",

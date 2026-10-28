@@ -23,6 +23,7 @@ export function BookSlots({
   busy,
   openingConfirmation,
   timeZone,
+  homeLocationReady,
 }: BookSlotsProps) {
   const {
     selectedTime,
@@ -141,7 +142,7 @@ export function BookSlots({
             busy ||
             !selectedSlot ||
             !selectedPatientIsVerified ||
-            consultationType === "Home Visit"
+            (consultationType === "Home Visit" && !homeLocationReady)
           }
           onPress={() => {
             if (busy || !selectedSlot) return;

@@ -11,4 +11,6 @@ export * from "./appointments";
 
 export * from "./recovery";
 
+export * from "./payments";
+
 export * from "./checkin";

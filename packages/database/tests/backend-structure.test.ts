@@ -49,11 +49,7 @@ describe("shared backend structure", () => {
       expect(existsSync(entry)).toBe(true);
       expect(statSync(entry).size).toBeGreaterThan(0);
     }
-    for (const name of [
-      "process-payment",
-      "dispatch-ambulance",
-      "reserve-appointment",
-    ]) {
+    for (const name of ["dispatch-ambulance", "reserve-appointment"]) {
       const settings = functions.find(
         ([, candidate]) => candidate === name
       )?.[2];

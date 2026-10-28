@@ -11,6 +11,7 @@ import {
   Input,
   Loader,
   SafeAreaView,
+  PullToRefresh,
 } from "@startup/mobile-ui";
 
 import { LiveAmbulanceRequestsList } from "../components/LiveAmbulanceRequestsList";
@@ -19,6 +20,7 @@ export function LiveAmbulanceBookingScreen({
   onBackPress,
 }: LiveAmbulanceBookingScreenProps) {
   const {
+    refresh,
     pickup,
     pickupAddress,
     setPickupAddress,
@@ -43,7 +45,11 @@ export function LiveAmbulanceBookingScreen({
   return (
     <SafeAreaView style={styles.screen}>
       <Header title="Ambulance" app="patient" onBackPress={onBackPress} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        alwaysBounceVertical
+        refreshControl={<PullToRefresh theme="patient" onRefresh={refresh} />}
+        contentContainerStyle={styles.content}
+      >
         <Text variant="cardHeading" style={styles.title}>
           Request an ambulance
         </Text>

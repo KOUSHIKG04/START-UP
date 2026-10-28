@@ -122,6 +122,7 @@ export function AppointmentsTable({
                 clinicDayFormatter.format(start) ===
                 clinicDayFormatter.format(new Date(now));
               const expiredPending =
+                !item.confirmation_payment_pending &&
                 item.status === "pending" &&
                 (start.getTime() <= now ||
                   (item.request_expires_at !== null &&
@@ -263,12 +264,19 @@ export function AppointmentsTable({
                   </td>
                   {/* Status */}
                   <td className="px-3 py-3.5">
-                    {row.status === "Pending" && !expiredPending && (
-                      <span className="bg-muted text-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
-                        <span className="bg-primary size-1.5 rounded-full" />
-                        Pending
+                    {item.confirmation_payment_pending ? (
+                      <span className="bg-muted text-foreground inline-flex rounded-full px-2.5 py-1 text-xs font-medium">
+                        {appointmentRecoveryView(item, now).staffStatus}
                       </span>
-                    )}
+                    ) : null}
+                    {row.status === "Pending" &&
+                      !expiredPending &&
+                      !item.confirmation_payment_pending && (
+                        <span className="bg-muted text-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
+                          <span className="bg-primary size-1.5 rounded-full" />
+                          Pending
+                        </span>
+                      )}
                     {expiredPending && (
                       <span className="bg-muted text-foreground inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium">
                         Expired request
@@ -280,24 +288,24 @@ export function AppointmentsTable({
                         Confirmed
                       </span>
                     )}
-                    {row.status === "Rejected" && (
-                      <span className="bg-destructive/10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-red-600">
-                        <span className="size-1.5 rounded-full bg-red-600" />
-                        Rejected
-                      </span>
-                    )}
-                    {row.status === "Cancelled" && (
-                      <span className="bg-destructive/10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-red-600">
-                        <span className="size-1.5 rounded-full bg-red-600" />
-                        Cancelled
-                      </span>
-                    )}
-                    {![
-                      "Pending",
-                      "Confirmed",
-                      "Rejected",
-                      "Cancelled",
-                    ].includes(row.status) ? (
+                    {row.status === "Rejected" &&
+                      !item.confirmation_payment_pending && (
+                        <span className="bg-destructive/10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-red-600">
+                          <span className="size-1.5 rounded-full bg-red-600" />
+                          Rejected
+                        </span>
+                      )}
+                    {row.status === "Cancelled" &&
+                      !item.confirmation_payment_pending && (
+                        <span className="bg-destructive/10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-red-600">
+                          <span className="size-1.5 rounded-full bg-red-600" />
+                          Cancelled
+                        </span>
+                      )}
+                    {!item.confirmation_payment_pending &&
+                    !["Pending", "Confirmed", "Rejected", "Cancelled"].includes(
+                      row.status
+                    ) ? (
                       <span className="bg-muted text-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
                         {row.status.replaceAll("_", " ")}
                       </span>
@@ -371,26 +379,28 @@ export function AppointmentsTable({
                             ))}
                         </div>
                       ) : null}
-                      {row.status === "Pending" && !expiredPending && (
-                        <>
-                          <button
-                            disabled={pending}
-                            onClick={() => onAct(item, "approve")}
-                            className="bg-primary text-primary-foreground hover:bg-primary flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold shadow-2xs transition-colors"
-                          >
-                            <Check className="size-3.5 stroke-2" />
-                            <span>Accept</span>
-                          </button>
-                          <button
-                            disabled={pending}
-                            onClick={() => onAct(item, "reject")}
-                            className="bg-destructive text-primary-foreground hover:bg-destructive flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold shadow-2xs transition-colors"
-                          >
-                            <X className="size-3.5 stroke-2" />
-                            <span>Reject</span>
-                          </button>
-                        </>
-                      )}
+                      {row.status === "Pending" &&
+                        !expiredPending &&
+                        !item.confirmation_payment_pending && (
+                          <>
+                            <button
+                              disabled={pending}
+                              onClick={() => onAct(item, "approve")}
+                              className="bg-primary text-primary-foreground hover:bg-primary flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold shadow-2xs transition-colors"
+                            >
+                              <Check className="size-3.5 stroke-2" />
+                              <span>Accept</span>
+                            </button>
+                            <button
+                              disabled={pending}
+                              onClick={() => onAct(item, "reject")}
+                              className="bg-destructive text-primary-foreground hover:bg-destructive flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold shadow-2xs transition-colors"
+                            >
+                              <X className="size-3.5 stroke-2" />
+                              <span>Reject</span>
+                            </button>
+                          </>
+                        )}
                       <button
                         aria-label="More actions"
                         className="text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer rounded p-1 transition-colors"

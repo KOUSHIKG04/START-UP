@@ -1,5 +1,10 @@
 # Facility portal architecture
 
+Manage appointment displays a home visit's booked address, instructions and optional
+receiver contact from the shared authorized appointment projection. Home payment
+reservations use the existing awaiting-payment and approval controls. Hosted web
+deployment and native checkout verification remain separate from source changes.
+
 The admin uses Next.js App Router with feature-based modules. Routes compose
 features; features own business UI and admin-specific server operations. The
 dashboard is available at `/` and `/dashboard`. Appointments and login have their
@@ -218,6 +223,15 @@ channel and total exhaustion, demographics, retries, queue creation and access
 denial. Browser component previews use synthetic data; authenticated reception
 and native mobile device verification remain separate.
 
+## Payment reservation display
+
+Appointment rows distinguish unpaid auto-accept reservations using the shared
+`confirmation_payment_pending` projection. They display **Awaiting patient payment**
+and do not expose Accept/Reject request actions or count as approval requests.
+Backend capture/expiry owns confirmation and capacity; reception payment remains
+an explicit clinic booking choice. This source change does not establish a hosted
+web deployment or native checkout verification.
+
 ## Mixed visit time blocks
 
 The existing Doctor Schedule editor supports multiple time blocks for each visit
@@ -245,6 +259,12 @@ authorization. Web component screenshots use synthetic data and mocked actions;
 authenticated live UI verification remains separate.
 
 ## Appointment attendance and recovery
+
+Schedule publication shares the deployed
+`20261027143412_schedule_publication_performance.sql` optimization with Doctor
+mobile. Repeated/quota-only saves preserve the grid and changed grids reuse already
+validated timezone metadata. Version checks, authorization, existing appointments
+and the eight-second API timeout are unchanged; no web action arguments changed.
 
 `features/appointments` owns the Manage appointment dialog,
 `hooks/useAppointmentRecovery.ts`, recovery display types and its Server Actions.
@@ -280,10 +300,81 @@ the respective ranges are 0–180, 0–10080 and 0–10. The policy applies to t
 across visit types and does not publish slots. Reloading stale settings starts from
 the latest saved version.
 
-Recovery is locally implemented in
-`20261023075921_appointment_recovery_and_rescheduling.sql`; rollback-only backend
-workflow checks passed, while shared-database deployment awaits explicit approval. Desktop and narrow-width synthetic component
+The existing facility live-update bridge invalidates both the schedule and recovery
+policy caches on schedule/appointment changes and reconnects. It also reloads open
+reschedule options. Doctor saves therefore refresh the Portal policy without a page
+reload; unsaved local edits remain intact and retain their original version for
+conflict detection. Publishing a schedule also invalidates the policy's shared row
+version before its next save.
+
+Recovery migration
+`20261023075921_appointment_recovery_and_rescheduling.sql` was deployed to the
+linked backend on 2026-10-24 with explicit approval. Post-deployment rollback-only
+workflow checks passed, and the security advisor reported no error-level findings.
+Desktop and narrow-width synthetic component
 previews are captured in `.impeccable/review/recovery-desktop.png` and
 `recovery-mobile.png` at the repository root. They do not establish authenticated
-live workflow or native Patient/Doctor verification. Consultation billing is deferred
-under the [payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).
+live workflow or native Patient/Doctor verification. Consultation billing has a
+separate local implementation and deployment boundary below.
+
+## Consultation payment management
+
+Payment presentation composes the shared web `PaymentSummary` and status label;
+feature-owned controls, queries and Server Actions retain the financial workflow.
+`useAppointments` owns the Hold/Reject reason draft, pending state and error
+feedback. `AppointmentsScreen` composes the existing web `Dialog` primitives for
+this flow in place of the browser-native prompt. Cancellation performs no write;
+confirmation submits the same appointment ID, row version, action and note.
+
+The appointment review dialog composes its feature-owned `AppointmentPaymentPanel`.
+Billing reads and mutations use `features/appointments/server/paymentActions.ts`,
+which validates authenticated inputs and delegates to shared operations. Client
+state and the `appointment-billing` query stay in the feature. The existing private
+facility live-update bridge invalidates that cache alongside appointment queries.
+
+The panel uses existing web controls and dialog layout to show fee, captured and
+refunded amounts, balance, policy, provider references and request status. Staff
+with both practice-management and schedule-edit permission can confirm clinic cash
+received, approve/decline refunds, process/reconcile gateway work and confirm cash
+returned. Notes, accepted terms, versions and current amounts are checked. Queue
+access alone is insufficient. An unresolved online order blocks duplicate cash
+collection; refund approval differs from actual provider/cash return.
+
+Clinic patients retain online or reception payment. Native Checkout belongs to
+Patient; the Portal stores no provider keys in browser configuration and adds no
+checkout route. Billing uses separate appointment-specific tables rather than
+ambulance payment foreign keys. Payment migrations/functions are deployed and
+consultation billing is enabled in test mode with zero deduction. Read-only provider
+and endpoint probes passed; actual captures/refunds remain unverified.
+Authenticated browser, native and cross-device financial flows remain unverified.
+See [payment setup and activation](../../APPOINTMENT_RECOVERY_PAYMENTS.md).
+
+Portal tests passed 43/43 plus architecture validation; final typecheck and scoped
+changed-file ESLint passed. Full Portal lint retains 43 unrelated errors and one
+warning. Billing SQL workflow passed within a
+rolled-back transaction, without deploying billing or retaining fixture charges.
+
+## Consultation commission and payouts
+
+The existing appointment payment panel and `server/paymentActions.ts` also read
+authorized `list_payout_entries` through shared clinic data access. They show the
+captured receipt, company commission, provider share, legal recipient and payout
+status inside the incumbent dialog. Practice-management plus schedule-edit
+permission remains required. Portal does not collect provider keys or bank/KYC
+information and does not own company fee configuration.
+
+Company Admin finance selects the doctor or facility payee according to the
+business agreement and records the already onboarded Route identifiers. Terms are
+frozen per captured receipt. Transfers require completed care, the company release
+delay and verified Route eligibility/configuration; transfer state is distinct
+from provider settlement. Gateway/Route fees and taxes are currently absorbed by
+the company. Clinic cash makes company commission receivable; finance records its
+separate receipt, without an automatic cash split or debit. Appointment refunds
+reverse transferred provider liability before patient return; request decisions,
+provider returns and physical cash returns keep separate states.
+
+Both payment migrations, the ambulance worker alias follow-up and three payment
+Edge Functions were deployed on 2026-10-24 with user approval. Marketplace/Route
+remain disabled/test and rates unconfigured.
+The SQL/mocked-provider checks do not establish authenticated browser behavior,
+native checkout or actual transfers. See the [payment guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md).

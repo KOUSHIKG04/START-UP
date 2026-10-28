@@ -89,6 +89,7 @@ apps/company-admin/tests/unit/*
 !apps/doctor-mobile/tests/
 apps/doctor-mobile/tests/*
 !apps/doctor-mobile/tests/appointment-review.test.cjs
+!apps/doctor-mobile/tests/live-recovery-sync.test.cjs
 !apps/doctor-mobile/tests/qr-scan.test.cjs
 !apps/doctor-mobile/tests/schedule-duration.test.cjs
 !apps/doctor-mobile/tests/feature-structure.test.cjs
@@ -98,6 +99,8 @@ apps/doctor-mobile/tests/*
 !apps/patient-mobile/tests/
 apps/patient-mobile/tests/*
 !apps/patient-mobile/tests/verified-directory.test.cjs
+!apps/patient-mobile/tests/manual-refresh.test.cjs
+!apps/patient-mobile/tests/payment-booking-flow.test.cjs
 !apps/patient-mobile/tests/appointment-cards.test.cjs
 !apps/patient-mobile/tests/notifications.test.cjs
 !apps/patient-mobile/tests/keyboard-scroll.test.cjs
@@ -117,6 +120,8 @@ packages/mobile-ui/tests/*
 !packages/mobile-ui/tests/notification-drawer.test.cjs
 !packages/mobile-ui/tests/consultation-call.test.cjs
 !packages/mobile-ui/tests/contracts.test.cjs
+!packages/mobile-ui/tests/pull-to-refresh.test.cjs
+!packages/mobile-ui/tests/toast.test.cjs
 !packages/mobile-ui/tests/greeting.test.cjs
 !packages/mobile-ui/tests/keyboard-aware-scroll.test.cjs
 !packages/mobile-ui/tests/mobile-typography.test.cjs
@@ -128,6 +133,7 @@ packages/web-ui/tests/*
 packages/data-access/tests/*
 !packages/data-access/tests/chat-live.test.cjs
 !packages/data-access/tests/clinic.test.cjs
+!packages/data-access/tests/appointment-payments.test.cjs
 !packages/data-access/tests/live-changes.test.cjs
 !packages/data-access/tests/map-search.test.cjs
 !packages/data-access/tests/mobile-session.test.mjs

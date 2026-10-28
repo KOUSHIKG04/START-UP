@@ -12,6 +12,7 @@ import {
   DialogDescription,
 } from "@startup/web-ui/components/ui/dialog";
 import { useAppointmentRecovery } from "../hooks/useAppointmentRecovery";
+import { AppointmentPaymentPanel } from "./AppointmentPaymentPanel";
 
 export function AppointmentRecoveryDialog({
   item,
@@ -58,6 +59,21 @@ export function AppointmentRecoveryDialog({
           {item.public_code.slice(-8)}
         </DialogDescription>
         {view.message ? <p className="text-sm">{view.message}</p> : null}
+        {item.home_visit_details ? (
+          <div className="space-y-1 text-sm">
+            <p className="font-medium">Home visit address</p>
+            <p>{item.home_visit_details.address}</p>
+            {item.home_visit_details.instructions ? (
+              <p>{item.home_visit_details.instructions}</p>
+            ) : null}
+            {item.home_visit_details.receiver_name ? (
+              <p>
+                {item.home_visit_details.receiver_name} ·{" "}
+                {item.home_visit_details.receiver_phone}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {request ? (
           <div className="space-y-2 text-sm">
             <p>
@@ -233,6 +249,7 @@ export function AppointmentRecoveryDialog({
             </Button>
           </div>
         )}
+        <AppointmentPaymentPanel key={item.id} item={item} />
         <Button variant="outline" disabled={pending} onClick={onClose}>
           Close
         </Button>

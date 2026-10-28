@@ -11,9 +11,11 @@ import { ui } from "../../../components/theme";
 import { useAppointmentReview } from "../hooks/useAppointmentReview";
 import { appointmentRecoveryView } from "@startup/contracts";
 import { AppointmentRecoveryPanel } from "../components/AppointmentRecoveryPanel";
+import { AppointmentPaymentPanel } from "../components/AppointmentPaymentPanel";
 
 export function AppointmentDetailScreen() {
   const {
+    refresh,
     appointmentId,
     now,
     notes,
@@ -25,7 +27,11 @@ export function AppointmentDetailScreen() {
     act,
   } = useAppointmentReview();
   return (
-    <DoctorScreen title="Appointment details" bottomNav={false}>
+    <DoctorScreen
+      title="Appointment details"
+      bottomNav={false}
+      onRefresh={refresh}
+    >
       {appointments.isLoading ? (
         <Loader theme="doctor" />
       ) : appointments.isError ? (
@@ -80,7 +86,22 @@ export function AppointmentDetailScreen() {
               </Label>
             ) : null}
             {item.reason ? <Label muted>Reason: {item.reason}</Label> : null}
-            {item.status === "pending" ||
+            {item.home_visit_details ? (
+              <View>
+                <Label>Home visit: {item.home_visit_details.address}</Label>
+                {item.home_visit_details.instructions ? (
+                  <Label muted>{item.home_visit_details.instructions}</Label>
+                ) : null}
+                {item.home_visit_details.receiver_name ? (
+                  <Label>
+                    Contact: {item.home_visit_details.receiver_name} ·{" "}
+                    {item.home_visit_details.receiver_phone}
+                  </Label>
+                ) : null}
+              </View>
+            ) : null}
+            {(item.status === "pending" &&
+              !item.confirmation_payment_pending) ||
             (!item.can_consult &&
               ["waiting", "called"].includes(item.queue_state ?? "")) ? (
               <Input
@@ -96,7 +117,7 @@ export function AppointmentDetailScreen() {
                 multiline
               />
             ) : null}
-            {item.status === "pending" ? (
+            {item.status === "pending" && !item.confirmation_payment_pending ? (
               <View style={ui.row}>
                 <Button
                   loading={
@@ -282,6 +303,7 @@ export function AppointmentDetailScreen() {
             ) : null}
           </Panel>
           <AppointmentRecoveryPanel item={item} now={now} />
+          <AppointmentPaymentPanel key={item.id} item={item} />
         </>
       )}
     </DoctorScreen>

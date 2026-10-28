@@ -36,6 +36,8 @@ export const appointment = clinzo
     "appointment",
     {
       id: uuid("id").primaryKey().defaultRandom(),
+      home_visit_location_id: uuid("home_visit_location_id"),
+      home_visit_details: jsonb("home_visit_details").$type<JsonValue>(),
       created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
         .notNull()
         .defaultNow(),
@@ -86,6 +88,14 @@ export const appointment = clinzo
         { onDelete: "restrict" }
       ),
       reason: text("reason"),
+      confirmation_payment_pending: boolean("confirmation_payment_pending")
+        .notNull()
+        .default(false),
+      booking_payment_method: text("booking_payment_method", {
+        enum: ["online", "reception"],
+      })
+        .notNull()
+        .default("online"),
       visit_mode: text("visit_mode", { enum: ["clinic", "online", "home"] })
         .notNull()
         .default("clinic"),
@@ -155,6 +165,12 @@ export const appointment = clinzo
       ),
       check("appointment_ck_1", sql.raw("fee_minor >= 0")),
       check(
+        "appointment_home_visit_details_check",
+        sql.raw(
+          "home_visit_details IS NULL OR jsonb_typeof(home_visit_details)='object'"
+        )
+      ),
+      check(
         "appointment_visit_mode_ck",
         sql.raw("visit_mode IN ('clinic','online','home')")
       ),
@@ -181,6 +197,10 @@ export const appointment = clinzo
         )
       ),
       check("appointment_ck_5", sql.raw("row_version > 0")),
+      check(
+        "appointment_booking_payment_method_check",
+        sql.raw("booking_payment_method IN ('online','reception')")
+      ),
       check(
         "appointment_ck_6",
         sql.raw(

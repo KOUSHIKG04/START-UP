@@ -11,7 +11,11 @@ import {
   redeemPortalCheckinToken,
 } from "../server/actions";
 import { toast } from "@startup/web-ui/components/ui/toast";
-import type { AppointmentPeriod } from "../types/appointments";
+import type {
+  AppointmentAction,
+  AppointmentPeriod,
+  AppointmentReasonRequest,
+} from "../types/appointments";
 import {
   defaultAppointmentPeriod,
   appointmentsDateFormatter,
@@ -28,6 +32,10 @@ export function useAppointments({
   const [now, setNow] = React.useState(() => Date.now());
   const [showScanner, setShowScanner] = React.useState(false);
   const [checkinToken, setCheckinToken] = React.useState("");
+  const [reasonRequest, setReasonRequest] =
+    React.useState<AppointmentReasonRequest | null>(null);
+  const [actionReason, setActionReason] = React.useState("");
+  const [actionError, setActionError] = React.useState("");
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const scannerControlsRef = React.useRef<IScannerControls | null>(null);
   const scanningRef = React.useRef(false);
@@ -95,6 +103,7 @@ export function useAppointments({
       pending: appointments.filter(
         (item) =>
           item.status === "pending" &&
+          !item.confirmation_payment_pending &&
           new Date(item.starts_at).getTime() > now &&
           (item.request_expires_at === null ||
             new Date(item.request_expires_at).getTime() > now)
@@ -126,27 +135,34 @@ export function useAppointments({
     lastPage,
   };
 
-  function act(
+  function act(item: ClinicAppointment, action: AppointmentAction) {
+    if (action === "reject" || action === "hold") {
+      setReasonRequest({ item, action });
+      setActionReason("");
+      setActionError("");
+      return;
+    }
+    commitAction(item, action, null);
+  }
+
+  function submitReason() {
+    if (!reasonRequest || !actionReason.trim() || pending) return;
+    commitAction(reasonRequest.item, reasonRequest.action, actionReason);
+  }
+
+  function closeReason() {
+    if (pending) return;
+    setReasonRequest(null);
+    setActionReason("");
+    setActionError("");
+  }
+
+  function commitAction(
     item: ClinicAppointment,
-    action:
-      | "approve"
-      | "reject"
-      | "check_in"
-      | "call"
-      | "hold"
-      | "resume"
-      | "no_show"
-      | "cancel"
+    action: AppointmentAction,
+    note: string | null
   ) {
-    const note =
-      action === "reject" || action === "hold"
-        ? window.prompt(
-            action === "hold"
-              ? "Reason for holding this patient"
-              : "Reason for rejecting this appointment"
-          )
-        : null;
-    if ((action === "reject" || action === "hold") && !note?.trim()) return;
+    setActionError("");
     startTransition(async () => {
       try {
         const result = await changePortalAppointment({
@@ -155,17 +171,21 @@ export function useAppointments({
           action,
           note,
         });
-        if (result.error)
+        if (result.error) {
+          setActionError(result.error);
           toast.add({
             title: "Could not update appointment",
             description: result.error,
             type: "error",
           });
-        else {
+        } else {
+          setReasonRequest(null);
+          setActionReason("");
           toast.add({ title: "Appointment updated", type: "success" });
           router.refresh();
         }
       } catch {
+        setActionError("Check your connection and try again.");
         toast.add({
           title: "Could not update appointment",
           description: "Check your connection and try again.",
@@ -261,6 +281,12 @@ export function useAppointments({
 
   return {
     pending,
+    reasonRequest,
+    actionReason,
+    setActionReason,
+    actionError,
+    submitReason,
+    closeReason,
     search,
     setSearch,
     statusFilter,

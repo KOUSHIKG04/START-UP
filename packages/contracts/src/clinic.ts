@@ -12,6 +12,11 @@ export const clinicBookingSchema = z
   })
   .strict();
 
+export const appointmentBookingRequestSchema = clinicBookingSchema.extend({
+  paymentMethod: z.literal("online"),
+  locationId: uuidSchema.optional(),
+});
+
 export const portalWalkInBookingSchema = z
   .object({
     practiceId: uuidSchema,
@@ -217,6 +222,18 @@ export const revokeClinicUnavailabilitySchema = z
   .strict();
 
 export const clinicAppointmentSchema = z.object({
+  home_visit_details: z
+    .object({
+      address: z.string(),
+      latitude: z.number(),
+      longitude: z.number(),
+      instructions: z.string().nullable(),
+      receiver_name: z.string().nullable(),
+      receiver_phone: z.string().nullable(),
+    })
+    .nullish(),
+  confirmation_payment_pending: z.boolean().optional(),
+  booking_payment_method: z.enum(["online", "reception"]).optional(),
   recovery: appointmentRecoverySchema.optional(),
   id: uuidSchema,
   practice_id: uuidSchema.nullish(),
@@ -278,6 +295,10 @@ export const clinicAppointmentSchema = z.object({
 });
 
 export type ClinicBookingInput = z.infer<typeof clinicBookingSchema>;
+
+export type AppointmentBookingRequest = z.infer<
+  typeof appointmentBookingRequestSchema
+>;
 
 export type PublishClinicSessionInput = z.infer<
   typeof publishClinicSessionSchema

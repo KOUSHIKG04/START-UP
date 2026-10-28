@@ -1,9 +1,31 @@
 # Doctor mobile architecture
 
+Home-visit appointment details display the server's booked address, instructions
+and optional receiver contact. This snapshot is shared with Patient and Facility
+views; saved-address edits do not redirect an existing visit. Payment reservations
+retain the same awaiting-payment rules as video/clinic bookings.
+
+## Manual refresh
+
+Home, appointments/details, profile, practice selection and notifications support
+pull-to-refresh through their existing feature queries. `DoctorScreen` accepts an
+optional refresh callback; screens without that callback retain their existing
+behavior. Filters and appointment action drafts are preserved. Schedule editors,
+clinical forms, maps and active calls do not acquire refresh gestures. Shared
+`mobile-ui` owns refresh presentation and request completion; native gesture
+verification remains pending.
+
 Follow the repository [ownership map](../../ARCHITECTURE.md) and
 [working rules](../../AGENTS.md). Folder structure should reflect implemented code.
 
 ## Current ownership
+
+Booking projections distinguish payment reservations with
+`confirmation_payment_pending`. Appointment details and online consultation
+screens show the shared awaiting-payment state; these are not requests the doctor
+can approve. Home request counts exclude payment reservations. Existing manual
+approval continues to allow payment after acceptance, and online start errors
+identify the patient-payment requirement.
 
 - `src/app`: Expo Router layouts, auth/verification routing, route adapters, and tabs.
 - `features/auth`: login, OTP, onboarding, and verification UI.
@@ -124,6 +146,13 @@ remain unchanged; the current request asked for advice on those controls.
 
 ## Multiple daily time blocks
 
+The shared publication RPC was optimized by
+`20261027143412_schedule_publication_performance.sql` (deployed 2026-10-27).
+Unchanged grids and quota-only edits preserve existing window IDs. Repeated
+timezone validation no longer dominates changed-grid generation; the API's
+eight-second limit is retained. The same backend fix serves Facility Portal
+publication, without changing editor drafts, mutation arguments or invalidation.
+
 The existing per-service schedule editor supports one to eight time blocks on its
 selected working days. `ClinicHoursPanel` owns the add/remove/time controls; the
 existing editor hook owns the draft and versioned publication. Clinic, online and
@@ -173,6 +202,10 @@ ranges are 0–180 minutes, 0–10080 minutes and 0–10 moves. Schedule-edit pe
 is checked separately from appointment management. A policy save does not publish
 new slots; stale edits require loading the latest policy before editing again.
 
+Schedule live events also invalidate appointment details and open reschedule
+options, since a Facility Portal policy edit changes attendance deadlines and
+reschedule eligibility. Appointment events invalidate open replacement options too.
+
 Shared contracts and clinic operations own validation and calls. Review requests
 and decisions explicitly call the existing private `emit_appointment_change` emitter
 after updating the appointment version; the existing live-update bridge observes
@@ -181,7 +214,61 @@ successful changes. Replacement bookings preserve source allocation and history,
 retain confirmed versus unaccepted state, and receive fresh clinic arrival state.
 Staff-arranged and doctor-unavailable moves preserve the patient's move allowance.
 
-The recovery migration is local source with rollback-only workflow checks passed;
-shared-database deployment awaits explicit approval. Native layout, keyboard, consultation rejoin and cross-device recovery
-have not been verified on a device. Payments/refunds remain deferred under the
-[payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).
+The recovery migration was deployed to the linked backend on 2026-10-24 with
+explicit approval. Post-deployment rollback-only workflow checks passed, and the
+security advisor reported no error-level findings. Native layout, keyboard,
+consultation rejoin and cross-device recovery
+have not been verified on a device. Consultation billing has a separate local
+implementation and deployment boundary below.
+
+## Consultation payment management
+
+Appointment Details composes `features/appointments/components/AppointmentPaymentPanel.tsx`.
+It reads authorized billing through shared contracts/data-access, displays fee,
+capture, refund and balance state, and owns note/action state. Financial permission
+requires practice management and schedule-edit permission in the backend; queue
+access alone cannot approve financial actions.
+
+Authorized staff can record clinic cash actually received, approve/decline a
+versioned refund request, process/reconcile gateway jobs and separately confirm cash
+physically returned. Pending online orders must reconcile before cash collection.
+Refund approval reserves money and differs from verified provider return. Payment
+state is independent of attendance and consultation status. Existing private live
+events and mutation invalidations refresh `appointment-billing` across clients.
+
+This is an extension of existing Doctor panels, theme and controls. Checkout stays
+in the Patient native app; no provider keys are stored in Doctor client settings.
+Payment migrations/functions are deployed and consultation billing is enabled for
+test mode with zero deduction. Read-only provider and endpoint probes passed;
+actual captures/refunds, native layout and cross-device financial updates
+remain unverified. See the [setup guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md).
+
+Doctor focused checks passed 10/10 and final typecheck passed. Billing SQL checks
+passed with transient schema/fixtures rolled back, including capture, replacement,
+refund and cash authorization/idempotency. Real
+provider/native payment operations remain unverified. Hosted deployment has since
+completed as described above.
+
+## Consultation commission and payouts
+
+The existing `AppointmentPaymentPanel` also reads `list_payout_entries` through the
+shared `clinic/payouts.ts` data-access owner. It shows the authorized appointment's
+captured amount, company commission, provider share, selected recipient and payout
+status using existing Doctor cards and controls. Backend access retains both
+practice-management and schedule-edit permission. Doctor does not configure
+company rates, legal payees, bank details or provider secrets.
+
+Company finance owns fee settings and Dashboard-assisted onboarding of the doctor
+or facility that the business agreement names as payee. Each captured receipt
+freezes its recipient/rate. Payout requires completed care and the editable company
+release delay; no advance payout or settlement date is implied. Cash collection
+creates a company commission receivable and requires finance's separate receipt
+confirmation; it does not trigger an automatic split or debit. Appointment refunds
+reverse any transferred provider liability before returning patient funds, with
+cash return and request approval remaining separate actions.
+
+The marketplace migration and updated functions are deployed, including the
+ambulance worker alias fix. Marketplace/Route activation remains disabled/test,
+with commission rates unconfigured. Provider/security mocks and rollback SQL checks cover
+rules, not actual Route transfers, native layout or cross-device behavior. See
+the [payment guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md) for setup and limits.

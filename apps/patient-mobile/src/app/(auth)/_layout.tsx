@@ -9,6 +9,7 @@ export default function AuthLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
+          statusBarStyle: "dark",
           animation: "fade",
           animationDuration: 350,
           contentStyle: { backgroundColor: colors.patient.background },

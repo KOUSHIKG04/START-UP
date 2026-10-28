@@ -38,7 +38,10 @@ export function AppointmentsScreen() {
     visible,
   } = useAppointments();
   return (
-    <DoctorScreen title="Appointments">
+    <DoctorScreen
+      title="Appointments"
+      onRefresh={() => appointments.refetch({ throwOnError: true })}
+    >
       <View style={styles.monthRow}>
         <Heading style={styles.dateHeading}>Select date</Heading>
         <Dropdown
@@ -100,7 +103,7 @@ export function AppointmentsScreen() {
       {appointments.isError ? (
         <Panel>
           <Label style={ui.error}>
-            Could not load appointments. Reopen this tab to retry.
+            Could not load appointments. Pull down to retry.
           </Label>
         </Panel>
       ) : null}

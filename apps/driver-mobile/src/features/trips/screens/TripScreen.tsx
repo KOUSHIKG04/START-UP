@@ -13,6 +13,7 @@ import {
 import { palette, ui } from "../../../components/theme";
 import { useDriverTrip } from "../hooks/useDriverTrip";
 import { tripStageLabels, tripNextActions } from "../utils/tripConstants";
+import { TripPayment } from "../components/TripPayment";
 
 export function TripScreen() {
   const {
@@ -30,7 +31,7 @@ export function TripScreen() {
     return (
       <View style={ui.screen}>
         <PageHeader title="Current trip" />
-        <Body>
+        <Body onRefresh={() => trips.refetch({ throwOnError: true })}>
           {trips.isLoading ? (
             <Loader theme="driver" style={{ minHeight: 96 }} />
           ) : (
@@ -50,7 +51,7 @@ export function TripScreen() {
   return (
     <View style={ui.screen}>
       <PageHeader title={title} />
-      <Body>
+      <Body onRefresh={() => trips.refetch({ throwOnError: true })}>
         {trip.status !== "completed" ? (
           <>
             <Image
@@ -239,12 +240,8 @@ export function TripScreen() {
                   <Copy style={{ fontWeight: "600" }}>{value}</Copy>
                 </View>
               ))}
-              <View style={ui.divider} />
-              <View style={ui.between}>
-                <Heading>Total Fare</Heading>
-                <Copy style={ui.metricValue}>Pending</Copy>
-              </View>
             </Card>
+            <TripPayment bookingId={trip.booking_id} />
             <Button
               theme="driver"
               label="Back to Home"

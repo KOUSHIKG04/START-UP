@@ -32,6 +32,7 @@ import {
 
 export function HomeScreen({ onNotificationPress }: HomeScreenProps = {}) {
   const {
+    refresh,
     greeting,
     selectedLocation,
     scrollY,
@@ -102,6 +103,9 @@ export function HomeScreen({ onNotificationPress }: HomeScreenProps = {}) {
       </Animated.View>
 
       <FadedScrollView
+        onRefresh={isSearchActive ? undefined : refresh}
+        refreshTheme="patient"
+        refreshOffset={CONTENT_TOP}
         contentContainerStyle={[
           styles.content,
           isSearchActive && { paddingTop: searchActivePaddingTop },

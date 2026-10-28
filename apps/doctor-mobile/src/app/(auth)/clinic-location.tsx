@@ -363,7 +363,7 @@ export default function ClinicLocationScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Header
         title="Choose Location"
         app="doctor"

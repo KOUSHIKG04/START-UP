@@ -8,6 +8,7 @@ import { mobileSession, supabase } from "./supabase";
 const queryKeys: Partial<Record<AppChangeKind, string[]>> = {
   appointments: [
     "patient-clinic-appointments",
+    "appointment-billing",
     "clinic-slots",
     "public-practice",
     "my-clinical-records",

@@ -31,8 +31,6 @@ export type ProfileTabsProps = {
 };
 
 export type HomeVisitAddressProps = {
-  address: string;
-  onAddressChange: (address: string) => void;
   onConfirm: () => void;
   verifiedAddress: string;
 };
@@ -49,6 +47,7 @@ export type AboutDoctorProps = {
 };
 
 export type BookSlotsProps = {
+  homeLocationReady?: boolean;
   timeZone?: string;
   address?: string;
   consultationType: ConsultationType;

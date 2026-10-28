@@ -178,6 +178,10 @@ export function useHomeScreen({ onNotificationPress }: HomeScreenProps = {}) {
   const searchActivePaddingTop = topInset + 68 + 4;
 
   return {
+    refresh: () => [
+      appointments.refetch({ throwOnError: true }),
+      savedLocations.refetch({ throwOnError: true }),
+    ],
     greeting,
     selectedLocation,
     scrollY,

@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@startup/design-tokens";
 import type { FadedScrollViewProps } from "../types/fadedScrollView";
+import { PullToRefresh } from "./PullToRefresh";
 
 export type { FadedScrollViewProps } from "../types/fadedScrollView";
 
@@ -28,6 +29,9 @@ export function FadedScrollView({
   scrollEventThrottle = 16,
   style,
   ref,
+  onRefresh,
+  refreshTheme,
+  refreshOffset,
   ...props
 }: FadedScrollViewProps) {
   const viewportWidthRef = useRef(0);
@@ -109,6 +113,16 @@ export function FadedScrollView({
       <ScrollView
         ref={ref}
         horizontal={horizontal}
+        alwaysBounceVertical={onRefresh ? !horizontal : undefined}
+        refreshControl={
+          onRefresh && !horizontal ? (
+            <PullToRefresh
+              onRefresh={onRefresh}
+              theme={refreshTheme}
+              progressViewOffset={refreshOffset}
+            />
+          ) : undefined
+        }
         {...props}
         onContentSizeChange={handleContentSizeChange}
         onLayout={handleLayout}

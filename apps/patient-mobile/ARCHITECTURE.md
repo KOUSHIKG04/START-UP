@@ -1,5 +1,16 @@
 # Patient mobile architecture
 
+## Manual refresh
+
+Home, bookings and appointment details, doctor results/details, records, profile,
+ambulance requests/history/payments, and notifications support pull-to-refresh.
+Feature owners refresh their existing queries; filters, booking selections and
+drafts stay local. Online doctor results reload the first page and replace the
+previous accumulated results so removed doctors do not remain in the list.
+`mobile-ui` owns the themed indicator, request completion and safe error feedback.
+Static screens, editable forms, maps and active calls do not acquire refresh
+gestures. Native Android/iOS gesture verification remains pending.
+
 Follow the repository [ownership map](../../ARCHITECTURE.md) and
 [working rules](../../AGENTS.md). Create subfolders only for real code.
 
@@ -73,6 +84,43 @@ stubs have been removed. The abandoned `(app)/clinic` directory has also been
 removed; working route paths and groups are preserved.
 
 ## Booking composition
+
+The booking controller loads `get_appointment_booking_options` for the selected
+confirmation slot. Auto-accepted prepaid bookings use `prepare_appointment_booking`
+and the shared native `services/paymentCheckout.ts` orchestration; **Pay & Book**
+confirms only after verified capture. Approval-required bookings remain request,
+doctor acceptance, then online payment in Appointment Details. Patient app bookings
+always use online payment; reception collection remains a staff walk-in workflow. Missing native checkout is detected before a reservation is
+created. The booking dialog owns policy consent; recovery projections
+label unpaid reservations without offering consultation/approval actions. Reservation
+expiry/cancellation and final confirmation remain backend-owned.
+
+Patient-only online payment was deployed on 2026-10-27 in
+`20261027170816_patient_booking_online_payment_only.sql`. Booking options no longer
+offer reception, and the canonical patient booking function rejects reception
+requests before creating or retrying a booking. Existing reception bookings keep
+their history. Staff walk-in registration and cash collection are unchanged.
+Rollback checks covered capture-gated clinic/video booking, manual approval,
+free visits, rejected reception bypasses, and staff channel capacity/registration.
+Native Razorpay and screen transitions still require device verification.
+
+`BookingProgress` covers the Doctor Details page while a booking is being prepared,
+Razorpay is opening, payment is being verified/reconciled, and the appointment list
+is refreshed before navigation. It uses a native View instead of a second Modal so
+the Razorpay activity can appear above it. `paymentCheckout.ts` reports stages to
+the existing booking controller; errors and completed navigation clear the cover.
+The confirmation dialog closes before the native checkout request starts. Booking
+arguments, capture/reconciliation rules and destination routes remain unchanged.
+Host tests cover delayed responses and cancellation cleanup; native activity
+presentation and transition appearance still require device verification.
+
+Home visits select an existing saved location through `/select-location`. A map
+pin, building and city are required. `prepareAppointmentBooking` forwards its ID
+to `prepare_home_visit_booking`; the shared backend booking owner checks access
+and practice travel-radius coverage before creating the same payment reservation
+or approval request. The confirmation shows the visit destination; appointment
+details use the server's immutable address/instruction snapshot. Coverage uses the
+saved pin, not device fallback coordinates. Native map/checkout verification is pending.
 
 Booking-time headers show the server's remaining daily booking allowance, bounded
 by the number of eligible time choices for the selected date. They no longer
@@ -275,9 +323,85 @@ added. Failed mutations refresh the booking before retry. Operational defaults a
 15 minutes of grace, a zero-minute cutoff and one patient move per replacement
 chain; authorized Doctor/Facility schedule editors can change them.
 
-This is local source implementation in
-`20261023075921_appointment_recovery_and_rescheduling.sql`; rollback-only backend
-workflow checks passed, while shared-database deployment awaits explicit approval. Native recovery dialogs, keyboard behavior,
+Recovery migration
+`20261023075921_appointment_recovery_and_rescheduling.sql` was deployed to the
+linked backend on 2026-10-24 with explicit approval. Post-deployment rollback-only
+workflow checks passed, and the security advisor reported no error-level findings.
+Native recovery dialogs, keyboard behavior,
 queue navigation and cross-device updates have not been verified on a device.
-Consultation payment carry-over, credits and refunds require the separate
-[payment integration plan](../../APPOINTMENT_RECOVERY_PAYMENTS.md).
+Consultation billing now has a local implementation described below; its deployment
+and provider verification remain separate from recovery deployment.
+
+## Consultation payments
+
+Payment panels compose the shared `PaymentSummary` presentation components.
+Refund requests use `AppDialog` for their amount/deduction preview and reason,
+while their existing query, mutation and invalidation ownership stays local.
+The Doctor Profile address prompt and ambulance contact/location alerts also
+compose `AppDialog`; their actions and routes are unchanged. No app-owned native
+`Alert` calls remain. OS permissions, sharing and Razorpay Checkout remain managed
+by the OS/provider. Native layout and keyboard behavior still need device checks.
+
+Appointment Details composes `features/appointments/components/AppointmentPayment.tsx`.
+It owns the billing query, accepted-policy state, payment/refund actions and cache
+invalidation. Shared contracts and `data-access/src/clinic/payments.ts` own validated
+RPC/Edge calls. The existing private appointment live-update bridge also invalidates
+`appointment-billing`; it adds no public billing subscription.
+
+`src/services/paymentCheckout.ts` owns native Razorpay Checkout through
+`react-native-razorpay` 3.0.0. It verifies platform/native-module availability before
+requesting a server order, dynamically loads the SDK and uses the Patient primary
+color. A new native build is required; web and old builds show an actionable error.
+The app receives public checkout values only, never provider secrets.
+
+An undeployed billing RPC (`PGRST202`) omits the payment surface; other failures
+retain retry states. Patient reschedule previews show exact top-up or unused credit
+from verified `billing.credit_minor`, rather than assuming the replacement fee.
+
+The themed payment card shows fee, captured/refunded amounts, balance, accepted
+terms, attempts, refund calculations and provider references. Patient app bookings
+use online checkout; staff-registered walk-ins can pay at reception. Verified credit follows replacement bookings; higher
+fees need top-up and unused credit can be requested back. Cancellation refunds and
+surplus refunds are distinct staff-reviewed requests. Test mode is visibly labeled.
+Billing changes retain the current route and existing appointment/recovery owners.
+
+The payment migrations and three functions were deployed on 2026-10-24 with user
+approval. Consultation billing is enabled in test mode with zero deduction;
+test credentials and signed webhook/server-worker probes passed. Live payments,
+Route and marketplace/ambulance collections remain disabled.
+Native Checkout and cross-device financial updates remain unverified. Follow the
+[payment setup and activation guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md) for
+server-only credentials, webhook configuration, rebuilding and test activation.
+
+Billing SQL workflow and recovery compatibility checks passed inside rollback-only
+transactions. Provider mocks passed 8/8 and shared clinic/data-access regressions
+12/12. Patient typecheck retains the unchanged ambulance-hook `TS18048` baseline
+at `useAmbulanceBooking.ts:398`; these checks do not establish native/provider coverage.
+
+## Ambulance payment extension
+
+`features/ambulance/components/AmbulancePayment.tsx` and `hooks/useAmbulancePayment.ts`
+own completed-trip billing, native checkout and status refresh. Completion composes
+this panel; `ambulance/payments` lists past completed trips and
+`ambulance/payment/[id]` reopens one trip's payment. Their route adapters compose
+`AmbulancePaymentsScreen`; `useAmbulancePaymentHistory` owns history reads. Existing
+ambulance UI, themed controls and navigation retain their owners. Payment never
+blocks emergency dispatch or care.
+
+The final fare is set by company finance after trip completion, not calculated
+from a new client pricing rule. Patient can review and pay that saved fare; Driver
+can confirm cash actually received. Shared marketplace contracts and ambulance
+data-access operations own validation and calls. Appointment and ambulance use the
+same app-wide native Checkout service; it keeps the native-build/platform guard
+and receives no server secrets. Closing Checkout keeps its online order reserved
+and blocks cash; no automatic conversion to cash is available. Historical cash
+receipts remain readable after billing is disabled.
+
+Ambulance refunds currently reconcile provider Dashboard refunds; self-service
+ambulance refund requests are not implemented. Consultation refund/recovery credit
+continues through the existing appointment owner. Both payment migrations and
+updated functions are deployed, including the follow-up ambulance worker alias fix.
+Ambulance/Route activation remains off. Mock and rollback SQL verification does not
+establish native Checkout, actual provider captures/refunds or
+cross-device behavior. See the [payment guide](../../APPOINTMENT_RECOVERY_PAYMENTS.md)
+for setup, Route limits and the verification runner.

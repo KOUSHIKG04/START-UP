@@ -11,6 +11,7 @@ import { palette, ui } from "../../../components/theme";
 
 export function SelectPracticeScreen() {
   const {
+    refresh,
     search,
     setSearch,
     saving,
@@ -23,6 +24,7 @@ export function SelectPracticeScreen() {
   } = useSelectPractice();
   return (
     <DoctorScreen
+      onRefresh={saving ? undefined : refresh}
       title="Select Your Location"
       bottomNav={false}
       contentStyle={styles.content}

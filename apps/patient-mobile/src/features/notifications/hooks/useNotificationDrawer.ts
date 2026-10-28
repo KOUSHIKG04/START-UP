@@ -98,6 +98,7 @@ export function useNotificationDrawer({
   );
 
   return {
+    onRefresh: () => notificationsQuery.refetch({ throwOnError: true }),
     onVisibilityChange: setShowModal,
     notifications,
     loading: notificationsQuery.isLoading,

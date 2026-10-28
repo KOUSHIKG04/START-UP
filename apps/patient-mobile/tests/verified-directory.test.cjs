@@ -320,12 +320,15 @@ test("switching locations resets slot state and confirms the selected location a
       },
       useEffect: () => {},
       useCallback: (fn) => fn,
+      useRef: (value) => ({ current: value }),
     },
     "react/jsx-runtime": { jsx, jsxs: jsx, Fragment: "Fragment" },
     "react-native": {
       View: "View",
       Pressable: "Pressable",
       Alert: { alert: (...args) => alerts.push(args) },
+      ScrollView: "ScrollView",
+      useWindowDimensions: () => ({ height: 844 }),
       StyleSheet: { create: (value) => value },
     },
     "expo-router": { router: { back: () => {} }, useFocusEffect: () => {} },
@@ -343,9 +346,11 @@ test("switching locations resets slot state and confirms the selected location a
               ? locations
               : kind === "clinic-slots"
                 ? slots(options.queryKey[1])
-                : kind === "my-family-profiles"
-                  ? []
-                  : undefined,
+                : kind === "appointment-booking-options"
+                  ? { auto_accept: false, requires_payment: false }
+                  : kind === "my-family-profiles"
+                    ? []
+                    : undefined,
         };
       },
       useMutation: (options) => ({
@@ -357,8 +362,13 @@ test("switching locations resets slot state and confirms the selected location a
       }),
     },
     "@startup/data-access": {
-      bookClinicAppointment: async (_client, args) => {
+      prepareAppointmentBooking: async (_client, args) => {
         bookings.push(args);
+        return {
+          appointment_id: "appointment",
+          status: "pending",
+          requires_payment: false,
+        };
       },
     },
     "@startup/design-tokens": {
@@ -435,7 +445,9 @@ test("switching locations resets slot state and confirms the selected location a
   const booking = nodes.find((node) => node.type === "BookSlots");
   assert.equal(booking.key, "b:clinic");
   assert.equal(booking.props.slots[0].window_id, "window-b");
-  assert.equal(requests.at(-1)[0], "practice-bio");
+  assert.ok(
+    requests.some((key) => key[0] === "practice-bio" && key[1] === "b")
+  );
   booking.props.onBookAppointment({
     patientId: "patient",
     time: "window-a",
@@ -464,7 +476,8 @@ test("switching locations resets slot state and confirms the selected location a
     true
   );
   assert.equal(
-    nodes.find((node) => node.props.label === "Confirm booking").props.loading,
+    nodes.find((node) => node.props.label === "Request appointment").props
+      .loading,
     false
   );
   modal.props.onShow();
@@ -475,20 +488,15 @@ test("switching locations resets slot state and confirms the selected location a
   );
   await nodes
     .find(
-      (node) => node.type === "Button" && node.props.label === "Confirm booking"
+      (node) =>
+        node.type === "Button" && node.props.label === "Request appointment"
     )
     .props.onPress();
   assert.equal(bookings[0].practiceServiceId, "service-b");
   assert.equal(bookings[0].windowId, "window-b");
   nodes = render();
-  assert.equal(
-    nodes.find((node) => node.props.label === "Confirm booking").props.loading,
-    true
-  );
-  assert.equal(
-    nodes.find((node) => node.props.label === "Cancel").props.disabled,
-    true
-  );
+  assert.ok(nodes.some((node) => node.props.testID === "booking-progress"));
+  assert.ok(!nodes.some((node) => node.props.label === "Request appointment"));
   assert.equal(
     nodes.find((node) => node.type === "BookSlots").props.busy,
     true

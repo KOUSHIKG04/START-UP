@@ -34,6 +34,7 @@ export function FindDoctorScreen({
   onBackPress,
 }: FindDoctorScreenProps) {
   const {
+    refresh,
     isSearchActive,
     searchQuery,
     setSearchQuery,
@@ -179,6 +180,9 @@ export function FindDoctorScreen({
       </Animated.View>
 
       <FadedScrollView
+        onRefresh={refresh}
+        refreshTheme="patient"
+        refreshOffset={collapsedHeight}
         contentContainerStyle={[
           styles.content,
           isSearchActive && { paddingTop: searchActivePaddingTop },

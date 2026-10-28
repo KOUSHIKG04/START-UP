@@ -1,5 +1,34 @@
 # Shared Supabase backend
 
+## Schedule publication performance
+
+`20261027143412_schedule_publication_performance.sql` was deployed to the linked
+project on 2026-10-27. A reproduced Doctor-02 publication took about nine seconds,
+exceeding the authenticated eight-second statement timeout. Transaction profiling
+attributed about 8.4 seconds to 178 repeated timezone-catalog validations.
+
+The existing validator now accepts unchanged validated values without re-enumerating
+the catalog. Generated sessions/booking days can prove their timezone against an
+already-validated private schedule rule. New or changed unproven values retain the
+catalog check, including rejection of invalid timezones. Generated sessions reuse
+existing booking days. An identical published grid, including all blocks, preserves
+rule/window IDs and changes only quotas/auto-accept settings; changed days, times,
+duration, fee, travel buffer or effective rule coverage retain the established
+regeneration path. Authorization, optimistic versions, booking protection, live
+events and the thirty-day horizon retain their existing owners. The global/API
+timeout is unchanged; the Doctor app and Facility Portal share the same fixed RPC.
+
+The dedicated rollback fixture runs unchanged, quota-only, fee, duration and
+eight-block publications together under an eight-second statement timeout. In the
+predeployment run those cases took about 21 ms, 9 ms, 924 ms, 1.38 s and 2.71 s.
+Mixed-service and same-day smoke checks also passed. The mixed-service fixture was
+scoped to Doctor-02 because its default practice selection can choose another
+doctor with an already overlapping second practice. The older duration fixture
+still has stale app/walk-in quota inputs; its full legacy sequence was not reported
+as passing. The dedicated fixture separately verifies duration changes and unchanged
+appointment/window snapshots. All fixture writes roll back. App/device confirmation
+and concurrent production-load timing remain separate from database verification.
+
 Patient, Doctor, Driver, Facility Portal and Company Admin use the same Supabase
 project within an environment. Supabase provides Auth, PostgreSQL, RPCs, RLS,
 Realtime, Storage and Edge Functions. There is no separate deployed Bun API.
@@ -46,9 +75,16 @@ That is a local inventory, not evidence that every migration is applied anywhere
 Use the intended environment's migration list and review pending changes before
 promotion. Older dated audit/test notes may describe a different deployment state.
 
-Five functions have local implementations: `send-notification`,
+Eight functions have implementations: `send-notification`,
 `online-video-token`, `ambulance-hospitals`, `search-map-places` and
-`resolve-map-address`. See [function ownership](functions/README.md). Source
+`resolve-map-address`, `process-payment`, `razorpay-webhook` and
+`payment-reconcile`. The payment migrations/functions were deployed on 2026-10-24
+with user authorization, including a follow-up ambulance worker alias fix.
+Consultation billing is enabled in test mode; live payments, marketplace collections
+and Route transfers remain disabled. Signed webhook and server-worker probes passed;
+native Checkout and real payment/refund flows remain unverified. See the
+[current setup guide](../APPOINTMENT_RECOVERY_PAYMENTS.md) and
+[function ownership](functions/README.md). Source
 presence does not prove deployment, configured provider secrets or device behavior.
 
 ## Development workflow
@@ -106,7 +142,7 @@ This cleanup does not regenerate types or query a hosted database.
 
 ## Upcoming integrations
 
-Payments, optional reservation orchestration and automatic dispatch orchestration
+Optional reservation orchestration and automatic dispatch orchestration
 are documented in [functions/README.md](functions/README.md). Their empty handlers
 were removed; their existing local configuration entries remain disabled.
 Create code with its first working implementation instead of reserving folders.

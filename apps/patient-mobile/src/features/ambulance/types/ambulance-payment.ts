@@ -1,3 +1,3 @@
 export type AmbulancePaymentProps = {
-  onPaymentComplete: () => void;
+  bookingId: string;
 };

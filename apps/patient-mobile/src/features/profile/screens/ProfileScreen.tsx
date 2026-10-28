@@ -42,6 +42,7 @@ import type { ProfileScreenProps } from "../types/profile";
 
 export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
   const {
+    refresh,
     showToast,
     detail,
     profilePhoto,
@@ -132,6 +133,8 @@ export function ProfileScreen({ onBackPress }: ProfileScreenProps) {
           )}
         </Card>
         <FadedScrollView
+          onRefresh={refresh}
+          refreshTheme="patient"
           contentContainerStyle={styles.content}
           edgeColor={colors.white}
           showsVerticalScrollIndicator={false}

@@ -14,6 +14,7 @@ export type NotificationItem = {
 export type NotificationDrawerProps = {
   visible: boolean;
   onClose: () => void;
+  onRefresh?: () => Promise<unknown>;
   theme?: AppTheme;
   notifications: readonly NotificationItem[];
   loading?: boolean;

@@ -6,7 +6,8 @@ import { Keyboard, StyleSheet, View } from "react-native";
 import * as Crypto from "expo-crypto";
 
 import { colors, fontFamilies, surfaces } from "@startup/design-tokens";
-import { Header } from "@startup/mobile-ui";
+import { Button, Header } from "@startup/mobile-ui";
+import { router } from "expo-router";
 
 import type { AmbulanceBookingScreenProps } from "../types/ambulance";
 import {
@@ -67,6 +68,14 @@ export function AmbulanceBookingScreen({
         onBackPress={onHeaderBack}
         centered={step === "hospital" || step === "complete"}
       />
+      {step === "booking" ? (
+        <Button
+          theme="patient"
+          label="Past trips & payments"
+          variant="outline"
+          onPress={() => router.push("/ambulance/payments")}
+        />
+      ) : null}
       {step === "pickup" ? (
         <PickupMap
           destination={destination}

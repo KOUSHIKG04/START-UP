@@ -60,6 +60,7 @@ export function useDoctorHome() {
   const pendingRequests = (appointments.data ?? []).filter(
     (item) =>
       item.status === "pending" &&
+      !item.confirmation_payment_pending &&
       Date.parse(item.request_expires_at ?? item.starts_at) > Date.now() &&
       Date.parse(item.starts_at) > Date.now()
   );
@@ -88,6 +89,12 @@ export function useDoctorHome() {
   }
 
   return {
+    refresh: () => [
+      appointments.refetch({ throwOnError: true }),
+      doctorProfile.refetch({ throwOnError: true }),
+      presence.refetch({ throwOnError: true }),
+      locations.refetch({ throwOnError: true }),
+    ],
     greeting,
     insets,
     showNotifications,

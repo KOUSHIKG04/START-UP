@@ -1,6 +1,6 @@
 import type { DoctorProfileScreenProps } from "../types/doctor-profile-screen";
 import { AppText as Text } from "@startup/mobile-ui";
-import { Alert, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { router, type Href } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { FadedScrollView, Header, Skeleton } from "@startup/mobile-ui";
@@ -20,6 +20,7 @@ import {
 import { useDoctorBooking } from "../hooks/useDoctorBooking";
 import { styles } from "../components/DoctorProfile.styles";
 import { BookingConfirmationDialog } from "../components/BookingConfirmationDialog";
+import { BookingProgress } from "../components/BookingProgress";
 
 export function DoctorProfileScreen({
   practiceId: initialPracticeId,
@@ -27,6 +28,11 @@ export function DoctorProfileScreen({
   consultationType,
 }: DoctorProfileScreenProps) {
   const {
+    bookingStage,
+    bookingOptions,
+    acceptedPolicy,
+    setAcceptedPolicy,
+    refresh,
     setSelectedPracticeId,
     profile,
     activeTab,
@@ -35,9 +41,8 @@ export function DoctorProfileScreen({
     selectedConsultationType,
     isOnline,
     serviceMode,
-    addressDraft,
-    setAddressDraft,
     homeAddress,
+    homeLocationReady,
     setIdempotencyKey,
     confirmation,
     setConfirmation,
@@ -77,6 +82,8 @@ export function DoctorProfileScreen({
         }
       />
       <FadedScrollView
+        onRefresh={book.isPending || confirmation ? undefined : refresh}
+        refreshTheme="patient"
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -187,23 +194,8 @@ export function DoctorProfileScreen({
             ) : null}
             {consultationFlows[selectedConsultationType].requiresAddress ? (
               <HomeVisitAddress
-                address={addressDraft}
-                onAddressChange={setAddressDraft}
-                onConfirm={() =>
-                  Alert.alert(
-                    "Save a visit address",
-                    "Add or update your structured address in Profile. Home-visit booking is awaiting service setup.",
-                    [
-                      { text: "Cancel", style: "cancel" },
-                      {
-                        text: "Edit profile",
-                        onPress: () =>
-                          router.push("/(app)/edit-profile" as Href),
-                      },
-                    ]
-                  )
-                }
-                verifiedAddress={homeAddress}
+                onConfirm={() => router.push("/(app)/select-location" as Href)}
+                verifiedAddress={selectedLocation ? homeAddress : ""}
               />
             ) : null}
             <View style={styles.tabSection}>
@@ -224,12 +216,13 @@ export function DoctorProfileScreen({
                   <>
                     {selectedConsultationType === "Home Visit" ? (
                       <Text variant="body" style={styles.message}>
-                        Home-visit slots are shown below when published. Booking
-                        requires verified address coverage and is not enabled
-                        yet.
+                        {homeLocationReady
+                          ? "Your saved address will be checked against the doctor’s travel radius before booking."
+                          : "Choose a saved address with a map pin, building and city to book a home visit."}
                       </Text>
                     ) : null}
                     <BookSlots
+                      homeLocationReady={homeLocationReady}
                       key={`${practiceId}:${serviceMode}`}
                       timeZone={practice.timezone}
                       address={
@@ -283,7 +276,13 @@ export function DoctorProfileScreen({
                           mode: serviceMode,
                           doctor: practice.doctor_name,
                           facility: practice.facility_name,
-                          address: practice.address,
+                          address:
+                            serviceMode === "home"
+                              ? homeAddress
+                              : practice.address,
+                          ...(serviceMode === "home"
+                            ? { locationId: selectedLocation?.id }
+                            : {}),
                           startsAt: slot.starts_at,
                           timezone: slot.timezone,
                           fee: formatConsultationFee(
@@ -301,6 +300,9 @@ export function DoctorProfileScreen({
         ) : null}
       </FadedScrollView>
       <BookingConfirmationDialog
+        bookingOptions={bookingOptions}
+        acceptedPolicy={acceptedPolicy}
+        setAcceptedPolicy={setAcceptedPolicy}
         confirmation={confirmation}
         setOpeningConfirmation={setOpeningConfirmation}
         setConfirmation={setConfirmation}
@@ -309,6 +311,7 @@ export function DoctorProfileScreen({
         serviceMode={serviceMode}
         slots={slots}
       />
+      <BookingProgress stage={bookingStage} />
     </View>
   );
 }

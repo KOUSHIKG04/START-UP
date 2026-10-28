@@ -9,7 +9,6 @@ import {
   Building2,
   CheckCircle2,
   ClipboardList,
-  ReceiptText,
   ShieldCheck,
   UserRound,
 } from "lucide-react-native";
@@ -21,6 +20,7 @@ import {
   surfaces,
 } from "@startup/design-tokens";
 import { Button, Card } from "@startup/mobile-ui";
+import { AmbulancePayment } from "./AmbulancePayment";
 
 export function AmbulanceCompletion({
   onGoHome,
@@ -121,21 +121,10 @@ export function AmbulanceCompletion({
               {booking.capability_code}
             </Text>
           </View>
-
-          <View style={styles.summaryRowLast}>
-            <View style={styles.summaryLabel}>
-              <ReceiptText color={colors.patient.primaryDark} size={18} />
-              <Text variant="body" style={styles.secondaryText}>
-                Total Fare
-              </Text>
-            </View>
-            <Text variant="bodyEmphasis" style={styles.summaryValueTotal}>
-              Fare pending
-            </Text>
-          </View>
         </Card>
       </View>
 
+      <AmbulancePayment bookingId={booking.id} />
       <View style={styles.bottomSection}>
         {/* Experience Rating Card matching CompletionView */}
         <Card

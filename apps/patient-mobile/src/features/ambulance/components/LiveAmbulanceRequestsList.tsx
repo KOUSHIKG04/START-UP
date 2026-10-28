@@ -2,6 +2,7 @@ import type { LiveAmbulanceRequestsListProps } from "../types/live-ambulance-req
 import { AppText as Text } from "@startup/mobile-ui";
 import { StyleSheet, View } from "react-native";
 import { Button, Loader, useToastFeedback } from "@startup/mobile-ui";
+import { router } from "expo-router";
 
 export function LiveAmbulanceRequestsList({
   bookings,
@@ -44,6 +45,19 @@ export function LiveAmbulanceRequestsList({
           ) : null}
           {booking.trip_status ? (
             <Text variant="body">Trip: {booking.trip_status}</Text>
+          ) : null}
+          {booking.trip_status === "completed" ? (
+            <Button
+              theme="patient"
+              label="View fare & payment"
+              variant="outline"
+              onPress={() =>
+                router.push({
+                  pathname: "/ambulance/payment/[id]",
+                  params: { id: booking.id },
+                })
+              }
+            />
           ) : null}
           {booking.id === activeBookingId && booking.status === "assigned" ? (
             trackingData ? (

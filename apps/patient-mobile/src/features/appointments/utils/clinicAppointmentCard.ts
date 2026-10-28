@@ -20,7 +20,7 @@ export function clinicAppointmentCard(item: ClinicAppointment): Appointment {
     date: formatDisplayDate(start),
     time: start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
     hospital: item.facility_name,
-    location: item.facility_name,
+    location: item.home_visit_details?.address ?? item.facility_name,
     experience: "",
     rating: "",
     fee: `${item.currency === "INR" ? "₹" : `${item.currency} `}${(Number(item.fee_minor) / 100).toFixed(2)}`,

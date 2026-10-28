@@ -1,5 +1,15 @@
 # Backend SQL tests
 
+`smoke/schedule-publication-performance.cli-smoke.sql` verifies repeated saves,
+quota-only saves with stable window IDs, fee/duration/eight-block rebuilds, booking
+preservation and invalid timezone rejection under an eight-second timeout. It uses
+an existing managed practice (preferring Doctor-02) and rolls back every write.
+Run only after `20261027143412_schedule_publication_performance.sql` is deployed:
+
+```powershell
+pnpm supabase db query --linked --file supabase/tests/smoke/schedule-publication-performance.cli-smoke.sql
+```
+
 `smoke/*.cli-smoke.sql` contains the existing transactional smoke fixtures moved
 from the database package. Their SQL bytes, fixture behavior and result-field names
 are unchanged. Each script begins a transaction and rolls back its fixtures.

@@ -81,6 +81,15 @@ export function usePatientProfile({ onBackPress }: ProfileScreenProps) {
   }, [currentView]);
 
   return {
+    refresh: () => [
+      detail.refetch({ throwOnError: true }),
+      family.refetch({ throwOnError: true }),
+      bookings.refetch({ throwOnError: true }),
+      notifications.refetch({ throwOnError: true }),
+      ...(detail.data?.profile_photo_path
+        ? [profilePhoto.refetch({ throwOnError: true })]
+        : []),
+    ],
     showToast,
     detail,
     profilePhoto,
